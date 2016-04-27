@@ -1,0 +1,52 @@
+[class^="TVContainer__right-comment-area___"]{ /* コメントエリアの一番外側要素 */
+    background: rgba(255, 255, 255, 0.2);/* 透明にする 透明度は右の数字を0-1の間で opacityで指定すると子要素まで透明になってコメントが見づらい*/
+}
+[class^="TVContainer__right-comment-area___"] div{ /* コメントエリア内のdiv要素 */
+    background: rgba(255, 255, 255, 0);/*完全透明*/
+}
+[class^="TVContainer__right-comment-area___"] > div >[class*="styles__comment-form___"] > form > div{ /* コメントフォーム */
+    background: rgba(255, 255, 255, 0.4);
+}
+[class*="styles__comment-form___"] textarea { /*テキストボックス*/
+    opacity: 0.5;
+}
+[class^="TVContainer__right-comment-area___"] [class^="styles__message___"] { /* コメント本文 */
+    color: white;/* コメントの文字色 */
+    font-weight: bold;
+    text-shadow: black 1px 1px 0px, black -1px 1px 0px, black 1px -1px 0px, black -1px -1px 0px; /*コメントの縁取り 4つのblackを好きな色にすると縁の色を変更できます。 */
+    opacity: 1;
+    float: left;
+}
+[class^="styles__time___"] { /* コメント時間 */
+    color: black;
+    float: right;
+}
+.movingComment {/* 横に流れるコメント */
+    color: white;
+    font-weight: bold;
+    font-size: xx-large;
+    white-space: nowrap;
+    text-shadow: black 1px 1px 0px, black -1px 1px 0px, black 1px -1px 0px, black -1px -1px 0px; 
+}
+[class^="TVContainer__footer___"] { /* 黒帯バー下 */
+    opacity: 0.5;
+}
+[class*="styles__header___"] { /* 黒帯バー上 */
+    opacity: 0.5;
+}
+[class*="TVContainer__balloon-"] { /* 緑色吹き出し非表示 */
+    display:none;
+}
+[class^="TVContainer__right-comment-area___"] [class*="styles__comment-list___"] { /* 古いコメントを非表示 onairpage.jsで設定
+    overflow: hidden!important;*/
+}
+[class^="TVContainer__right-comment-area___"] [class*="styles__comment-list___"] > div { /* コメント1行化用 */
+    clear: both;
+    padding: 3px 0px 3px 16px;
+}
+body{
+    overflow: hidden;/*コメント流したときにスクロールバーが出るのを防止*/
+}
+[class^="styles__continue-btn___"] { /* 新着コメのボタン */
+    display:none;
+}
