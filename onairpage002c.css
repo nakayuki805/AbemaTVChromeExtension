@@ -1,4 +1,4 @@
-[class^="TVContainer__right-comment-area___"]{ /* コメントエリアの一番外側要素 */
+﻿[class^="TVContainer__right-comment-area___"]{ /* コメントエリアの一番外側要素 */
     background: rgba(255, 255, 255, 0.2);/* 透明にする 透明度は右の数字を0-1の間で opacityで指定すると子要素まで透明になってコメントが見づらい*/
 }
 [class^="TVContainer__right-comment-area___"] div{ /* コメントエリア内のdiv要素 */
@@ -24,7 +24,7 @@
 .movingComment {/* 横に流れるコメント */
     color: white;
     font-weight: bold;
-    font-size: xx-large;
+    font-size: x-large;
     white-space: nowrap;
     text-shadow: black 1px 1px 0px, black -1px 1px 0px, black 1px -1px 0px, black -1px -1px 0px;
     opacity: 0.8;
@@ -47,7 +47,7 @@
     border-top-color:rgba(255,255,255,0.5);
 }
 body{
-    overflow: hidden;/*コメント流したときにスクロールバーが出るのを防止*/
+    overflow: hidden;//コメント流したときにスクロールバーが出るのを防止
 }
 [class^="styles__continue-btn___"] { /* 新着コメのボタン */
     display:none;

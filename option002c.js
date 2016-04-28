@@ -1,5 +1,5 @@
-$(function(){
-    chrome.storage.local.get(function (value) {
+﻿$(function(){
+    chrome.storage.local.get(["resizeScreen", "dblFullscreen", "enterSubmit", "hideOldComment", "CMBlack", "CMBkTrans", "CMsoundoff", "movingComment", "movingCommentSpeed", "movingCommentLimit", "hideCommentList", "customPostWin", "cancelWheel"], function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
         var isDblFullscreen = value.dblFullscreen || false;
