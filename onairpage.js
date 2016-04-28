@@ -351,4 +351,4 @@ setInterval(function () {
         currentLocation = window.location.href;
         $(".movingComment").remove();
     }
-}, 2000);   
+}, 2000);
