@@ -85,7 +85,20 @@ function moveComment(commentElement, commentLeftEnd){
     }
     
 }
+function comeNG(prengcome){
+    var ngedcome = prengcome;
+    ngedcome = ngedcome.replace(/[（\(][^）\)]*[∀дД＿\‿ω\﹃\_\ﾛ]?[^）\)]*[）\)]/g,"");
+    ngedcome = ngedcome.replace(/(#\w+[　 ]*)+$/g,"");
+    ngedcome = ngedcome.replace(/[ｗw]+/g,"ｗ");
+    ngedcome = ngedcome.replace(/[〜～ー－]+/g,"ー");
+    ngedcome = ngedcome.replace(/[・･…‥]+/g,"…");
+    ngedcome = ngedcome.replace(/[　 \n]+/g," ");
+    ngedcome = ngedcome.replace(/[？\?]+/g,"？");
+    ngedcome = ngedcome.replace(/[！\!]+/g,"！");
+    return ngedcome;
+}
 function putComment(commentText) {
+    commentText = comeNG(commentText);
     var commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
     i=0;
     var k=false;
