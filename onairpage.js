@@ -114,6 +114,40 @@ function putComment(commentText) {
     setTimeout(function (){moveComment(commentElement, commentLeftEnd);},Math.random()*1000);
     //moveComment(commentElement);
 }
+//ミュート(false)・ミュート解除(true)する関数
+function soundSet(isSound) {
+    var butvol=$('[class*="styles__volume___"] svg'); //音量ボタン
+    var valvol=$('[class^="styles__volume___"] [class^="styles__highlighter___"]'); //高さが音量のやつ
+    var evt=document.createEvent("MouseEvents");
+    evt.initEvent("click",true,true);
+    valvol=parseInt(valvol[0].style.height);
+    if (isSound) {
+        //ミュート解除
+        //音量0ならボタンを押す
+        if(valvol==0){
+            butvol[0].dispatchEvent(evt);
+        }
+    } else {
+        //ミュート
+        //音量0でないならボタンを押す
+        if(valvol!=0){
+            butvol[0].dispatchEvent(evt);
+        }
+    }
+}
+//画面を真っ暗、透過する関数 0:無 1:半分透過 2:すべて透過 3:真っ黒
+function screenBlackSet(type) {
+    var pwaku = $('[class^="style__overlap___"]'); //動画枠
+    if (type == 0) {
+        pwaku[0].removeAttribute("style");
+    } else if (type == 1) {
+        pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7);border-top-style:solid;border-top-color:black;border-top-width:"+Math.floor(window.innerHeight/2)+"px;");
+    } else if (type == 2) {
+        pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7)");
+    } else if (type == 3) {
+        pwaku[0].setAttribute("style","background-color:black;");
+    }
+}
 function delayset(){
     //シングルクリックで真っ黒を解除
     var pwaku=$('[class^="style__overlap___"]');
@@ -124,18 +158,18 @@ function delayset(){
                 if(isNaN(parseInt(come[1].innerHTML))){
                     //CM中は切り替えする
                     if(pwaku[0].hasAttribute("style")){
-                        pwaku[0].removeAttribute("style");
+                        screenBlackSet(0);
                     }else{
                         if(isCMBkTrans){
-                            pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7);border-top-style:solid;border-top-color:black;border-top-width:"+Math.floor(window.innerHeight/2)+"px;");
+                            screenBlackSet(1);
                         }else{
-                            pwaku[0].setAttribute("style","background-color:black;");
+                            screenBlackSet(3);
                         }
                     }
                 }else{
                     //本編中は切替しない(真っ黒になっちゃった時の解除用)
                     if(pwaku[0].hasAttribute("style")){
-                        pwaku[0].removeAttribute("style");
+                        screenBlackSet(0);
                     }else{
                         //if(isCMBkTrans){
                         //    pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7);border-top-style:solid;border-top-color:black;border-top-width:"+Math.floor(window.innerHeight/2)+"px;");
@@ -148,6 +182,7 @@ function delayset(){
         },false);
     }
 }
+
 $(window).on('load', function () {
     console.log("loaded");
     var csspath = chrome.extension.getURL("onairpage.css");
@@ -239,38 +274,28 @@ $(window).on('load', function () {
                 if(isNaN(parseInt(come[1].innerHTML))&&comeLatestCount>=0){
                     //今CMで直前が本編(=CM開始?)
                     if(isCMBkTrans){
-                            pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7);border-top-style:solid;border-top-color:black;border-top-width:"+Math.floor(window.innerHeight/2)+"px;");
+                            screenBlackSet(1);
                     }else{
-                        pwaku[0].setAttribute("style","background-color:black;");
+                        screenBlackSet(3);
                     }
                 }else if(!isNaN(parseInt(come[1].innerHTML))&&comeLatestCount<0){
                     //今本編で直前がCM(=CM終了?)
-                    pwaku[0].removeAttribute("style");
+                    screenBlackSet(0);
                 }
             }
         }
 
         //CM時音量ミュート
         if (isCMsoundoff){
-            var butvol=$('[class*="styles__volume___"] svg'); //音量ボタン
             var valvol=$('[class^="styles__volume___"] [class^="styles__highlighter___"]'); //高さが音量のやつ
-            var evt=document.createEvent("MouseEvents");
-            evt.initEvent("click",true,true);
             var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
             if (valvol[0]&&come[1]){
-                valvol=parseInt(valvol[0].style.height);
                 if(isNaN(parseInt(come[1].innerHTML))&&comeLatestCount>=0){
                     //今CMで直前が本編(=CM開始?)
-                    //音量0でないならボタンを押す
-                    if(valvol!=0){
-                        butvol[0].dispatchEvent(evt);
-                    }
+                    soundSet(false);
                 }else if(!isNaN(parseInt(come[1].innerHTML))&&comeLatestCount<0){
                     //今本編で直前がCM(=CM終了?)
-                    //音量0ならボタンを押す
-                    if(valvol==0){
-                        butvol[0].dispatchEvent(evt);
-                    }
+                    soundSet(true);
                 }
             }
         }
