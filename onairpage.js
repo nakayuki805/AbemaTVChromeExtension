@@ -35,7 +35,6 @@ chrome.storage.local.get(function (value) {
     isCancelWheel = value.cancelWheel || false;
 });
 
-
 console.log("script loaded");
 var currentLocation = window.location.href;
 // jqueryを開発者コンソールから使う
