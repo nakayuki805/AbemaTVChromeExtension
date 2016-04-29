@@ -87,7 +87,7 @@ function moveComment(commentElement, commentLeftEnd){
 }
 function comeNG(prengcome){
     var ngedcome = prengcome;
-    ngedcome = ngedcome.replace(/[Σ]?[ヾヽ]?[（\(][^）\)]*[∀дД▽△＿\‿ω\﹃\_\ﾛ]?[^）\)]*[）\)][ｼノ\/\ｼ\ﾉ]/g,"");
+    ngedcome = ngedcome.replace(/[Σ]?[ヾヽ]?[（\(][^）\)]*[∀дД▽△＿\‿ω\﹃\_\ﾛ]?[^）\)]*[）\)][ｼノ\/\ｼ\ﾉ]?/g,"");
     ngedcome = ngedcome.replace(/(#\w+[　 ]*)+$/g,"");
     ngedcome = ngedcome.replace(/[ｗw]+/g,"ｗ");
     ngedcome = ngedcome.replace(/[〜～ー－━─]+/g,"ー");
