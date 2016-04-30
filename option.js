@@ -11,6 +11,7 @@ $(function(){
         var isMovingComment = value.movingComment || false;
         var movingCommentSpeed = value.movingCommentSpeed || 15;
         var movingCommentLimit = value.movingCommentLimit || 30;
+        var isComeNg = value.comeNg || false;
         var isHideCommentList = value.hideCommentList || false;
         var isCustomPostWin = value.customPostWin || false;
         var isCancelWheel = value.cancelWheel || false;
@@ -24,6 +25,7 @@ $(function(){
         $("#isMovingComment").prop("checked", isMovingComment);
         $("#movingCommentSpeed").val(movingCommentSpeed);
         $("#movingCommentLimit").val(movingCommentLimit);
+        $("#isComeNg").prop("checked", isComeNg);
         $("#isHideCommentList").prop("checked", isHideCommentList);
         $("#isCustomPostWin").prop("checked", isCustomPostWin);
         $("#isCancelWheel").prop("checked", isCancelWheel);
@@ -40,6 +42,7 @@ $(function(){
         "movingComment": $("#isMovingComment").prop("checked"),
         "movingCommentSpeed": parseInt($("#movingCommentSpeed").val()),
         "movingCommentLimit": parseInt($("#movingCommentLimit").val()),
+        "comeNg": $("#isComeNg").prop("checked"),
         "hideCommentList": $("#isHideCommentList").prop("checked"),
         "customPostWin": $("#isCustomPostWin").prop("checked"),
         "cancelWheel": $("#isCancelWheel").prop("checked")

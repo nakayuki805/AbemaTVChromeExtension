@@ -15,6 +15,7 @@ var isCMsoundoff = false; //CM時ずっと音量ミュート
 var isMovingComment = false; //あの動画サイトのように画面上をコメントが流れる(コメント欄を表示しているときのみ機能)
 var movingCommentSpeed = 15;//2pxあたりの時間(ms)
 var movingCommentLimit = 30;//同時コメント最大数
+var isComeNg = false;//流れるコメントのうち特定の文字列を削除or置き換えする
 var isHideCommentList = false; //コメントリストを非表示、かつコメント入力欄を下の方へ。
 var isCustomPostWin = false; //コメント投稿ボタン等を非表示、かつコメント入力欄を1行化。
 var isCancelWheel = false; //マウスホイールによるページ遷移を抑止する
@@ -30,6 +31,7 @@ chrome.storage.local.get(function (value) {
     isMovingComment = value.movingComment || false;
     movingCommentSpeed = value.movingCommentSpeed || movingCommentSpeed;
     movingCommentLimit = value.movingCommentLimit || movingCommentLimit;
+    isComeNg = value.comeNg || false;
     isHideCommentList = value.hideCommentList || false;
     isCustomPostWin = value.customPostWin || false;
     isCancelWheel = value.cancelWheel || false;
@@ -99,7 +101,9 @@ function comeNG(prengcome){
     return ngedcome;
 }
 function putComment(commentText) {
-    commentText = comeNG(commentText);
+    if (isComeNg) {
+        commentText = comeNG(commentText);
+    }
     var commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
     i=0;
     var k=false;
