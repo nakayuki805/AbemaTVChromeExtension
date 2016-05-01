@@ -89,7 +89,7 @@ function moveComment(commentElement, commentLeftEnd){
 }
 function comeNG(prengcome){
     var ngedcome = prengcome;
-    ngedcome = ngedcome.replace(/[Σ\૮]?[┌└┐＼ヾヽつっ\\]*[（\(][^）\)]*[8oO∀дД□◯▽△＿\_ωワヮ－U◇。\｡\࿄\﹏\㉨\ㅂ\-\ᴗ\‿\˘\﹃\_\ﾛ][^）\)]*[）\)]?[┐┘┌／シノ\/\ｼ\ﾉ\۶つっo\ა]*(彡[°\ﾟ\+・\･])?/g,"");
+    ngedcome = ngedcome.replace(/[Σ\‹\૮\+\*＋＊]*[┌└┐＼ヾヽつっ\_\\\╭\╰\mｍ]*[（\(\《\〈\[]+.*[8oO∀дД□◯▽△＿\_\⌣\з\εω\௰\꒳\ｰワヮ－U◇。\｡\ш\࿄\﹏\㉨\ꇴ\ㅂ\-\ᴗ\‿\˘\﹃\_\ﾛ]+.*[）\)\》]*[┐┘┌／シノ\/\ｼ\ﾉ\۶つっo\ა\_\╮\╯\mｍ]*[彡°\ﾟ\+・\･\⚡\*＋＊]*/g,"");
     ngedcome = ngedcome.replace(/(\@\w+[　 ]*)+/g,""); //twitter-dest.
     ngedcome = ngedcome.replace(/(#[^　 ]+[　 ]*)+$/g,""); //twitter-tag
     ngedcome = ngedcome.replace(/[ｗw]{4,}/g,"ｗｗｗ");
