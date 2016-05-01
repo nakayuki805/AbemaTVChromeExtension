@@ -89,16 +89,19 @@ function moveComment(commentElement, commentLeftEnd){
 }
 function comeNG(prengcome){
     var ngedcome = prengcome;
-    ngedcome = ngedcome.replace(/[Σ]?[┌└＼ヾヽつっ]?[（\(][^）\)]*[8oO∀дД□◯▽△＿ωワヮ\‿\﹃\_\ﾛ][^）\)]*[）\)]?[┐┘／シノ\/\ｼ\ﾉつっo]?(彡[°\ﾟ])?/g,"");
-    ngedcome = ngedcome.replace(/(@\w+[　 ]*)+$/g,""); //twitter-dest.
+    ngedcome = ngedcome.replace(/[Σ\૮]?[┌└┐＼ヾヽつっ\\]*[（\(][^）\)]*[8oO∀дД□◯▽△＿\_ωワヮ－U◇。\｡\࿄\﹏\㉨\ㅂ\-\ᴗ\‿\˘\﹃\_\ﾛ][^）\)]*[）\)]?[┐┘┌／シノ\/\ｼ\ﾉ\۶つっo\ა]*(彡[°\ﾟ\+・\･])?/g,"");
+    ngedcome = ngedcome.replace(/(\@\w+[　 ]*)+/g,""); //twitter-dest.
     ngedcome = ngedcome.replace(/(#[^　 ]+[　 ]*)+$/g,""); //twitter-tag
     ngedcome = ngedcome.replace(/[ｗw]{4,}/g,"ｗｗｗ");
-    ngedcome = ngedcome.replace(/[〜～ー－━─]{4,}/g,"ー");
-    ngedcome = ngedcome.replace(/[・\･…‥]{4,}/g,"…");
+    ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g,"ー");
+    ngedcome = ngedcome.replace(/[・\･…‥。\｡．\.]{2,}/g,"‥");
     ngedcome = ngedcome.replace(/[　 \n]+/g," ");
     ngedcome = ngedcome.replace(/[？\?❔]+/g,"？");
     ngedcome = ngedcome.replace(/[！\!]+/g,"！");
     ngedcome = ngedcome.replace(/[○●]+/g,"○");
+    ngedcome = ngedcome.replace(/(.)\1{3,}/g,"$1$1$1");
+    ngedcome = ngedcome.replace(/(.{2,})\1{2,}/,"$1$1");
+    ngedcome = ngedcome.replace(/(.{2,})\1*(.{2,})(\1|\2){2,}/g,"$1$2");
     return ngedcome;
 }
 function putComment(commentText) {
