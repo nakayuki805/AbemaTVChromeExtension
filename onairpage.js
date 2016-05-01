@@ -89,11 +89,12 @@ function moveComment(commentElement, commentLeftEnd){
 }
 function comeNG(prengcome){
     var ngedcome = prengcome;
-    ngedcome = ngedcome.replace(/[Σ]?[┌ヾヽ]?[（\(][^）\)]*[oO∀дД▽△＿ω\‿\﹃\_\ﾛ]?[^）\)]*[）\)][┐シノ\/\ｼ\ﾉ]?/g,"");
-    ngedcome = ngedcome.replace(/(#\w+[　 ]*)+$/g,"");
-    ngedcome = ngedcome.replace(/[ｗw]+/g,"ｗ");
-    ngedcome = ngedcome.replace(/[〜～ー－━─]+/g,"ー");
-    ngedcome = ngedcome.replace(/[・…‥\･]+/g,"…");
+    ngedcome = ngedcome.replace(/[Σ]?[┌└＼ヾヽつっ]?[（\(][^）\)]*[8oO∀дД□◯▽△＿ωワヮ\‿\﹃\_\ﾛ][^）\)]*[）\)]?[┐┘／シノ\/\ｼ\ﾉつっo]?(彡[°\ﾟ])?/g,"");
+    ngedcome = ngedcome.replace(/(@\w+[　 ]*)+$/g,""); //twitter-dest.
+    ngedcome = ngedcome.replace(/(#[^　 ]+[　 ]*)+$/g,""); //twitter-tag
+    ngedcome = ngedcome.replace(/[ｗw]{4,}/g,"ｗｗｗ");
+    ngedcome = ngedcome.replace(/[〜～ー－━─]{4,}/g,"ー");
+    ngedcome = ngedcome.replace(/[・\･…‥]{4,}/g,"…");
     ngedcome = ngedcome.replace(/[　 \n]+/g," ");
     ngedcome = ngedcome.replace(/[？\?❔]+/g,"？");
     ngedcome = ngedcome.replace(/[！\!]+/g,"！");
@@ -199,6 +200,82 @@ function delayset(){
             }
         },false);
     }
+    //設定ウィンドウ・開くボタン設置
+    //中身は参照でなくここに直接記述した(ローカルのoption.htmlが参照できなかった)
+    var footcont = $('[class^="TVContainer__footer___"]');
+    if(footcont[0]){
+        var optionbutton = document.createElement("div");
+        optionbutton.id = "optionbutton";
+        optionbutton.setAttribute("style","width:20px;height:60px;background-color:gray;");
+        optionbutton.innerHTML = "&nbsp;";
+        var leftcont = $('[class^="TVContainer__footer___"] [class*="styles__left-container___"]');
+        if (leftcont[0]){ //左下に設定ウィンドウ開くボタン設置
+            leftcont[0].parentNode.insertBefore(optionbutton,leftcont[0]);
+        }
+        var settcont = document.createElement("div");
+        settcont.id = "settcont";
+        //設定ウィンドウの中身
+        //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
+        //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
+        settcont.innerHTML = "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ:<input type=checkbox id=isResizeScreen><br>ダブルクリックで全画面表示に切り替え:<input type=checkbox id=isDblFullscreen><br>エンターでコメント送信:<input type=checkbox id=isEnterSubmit><br>古いコメントを非表示(コメント欄のスクロールバーがなくなります。):<input type=checkbox id=isHideOldComment><br>CM時画面真っ黒:<input type=checkbox id=isCMBlack><br>↑を下半分だけ少し透かす:<input type=checkbox id=isCMBkTrans><br>CM時音量ミュート:<input type=checkbox id=isCMsoundoff><br>新着コメントをあの動画サイトのように横に流す:<input type=checkbox id=isMovingComment><br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br>流れるコメントの一部の文字を削除or置き換え(記号の全角半角の統一や顔文字の削除等):<input type=checkbox id=isComeNg><br>コメント一覧を非表示・入力欄を下へ:<input type=checkbox id=isHideCommentList><br>マウスホイールによる番組移動を禁止する<input type=checkbox id=isCancelWheel><br><input type=button id=saveBtn value=保存>";
+        settcont.style = "position:absolute;bottom:0;left:20px;background-color:white;opacity=1;padding:20px;display:none;";
+        footcont[0].appendChild(settcont); //設定ウィンドウ設置
+        $("#optionbutton").on("click",function(){
+            if($("#settcont").css("display")=="none"){
+                $("#settcont").css("display","block");
+                $("#isResizeScreen").prop("checked", isResizeScreen);
+                $("#isDblFullscreen").prop("checked", isDblFullscreen);
+                $("#isEnterSubmit").prop("checked", isEnterSubmit);
+                $("#isHideOldComment").prop("checked", isHideOldComment);
+                $("#isCMBlack").prop("checked", isCMBlack);
+                $("#isCMBkTrans").prop("checked", isCMBkTrans);
+                $("#isCMsoundoff").prop("checked", isCMsoundoff);
+                $("#isMovingComment").prop("checked", isMovingComment);
+                $("#movingCommentSpeed").val(movingCommentSpeed);
+                $("#movingCommentLimit").val(movingCommentLimit);
+                $("#isComeNg").prop("checked", isComeNg);
+                $("#isHideCommentList").prop("checked", isHideCommentList);
+                $("#isCancelWheel").prop("checked", isCancelWheel);
+            }else{
+                $("#settcont").css("display","none");
+            }
+        });
+        $("#saveBtn").on("click",function(){
+            isResizeScreen = $("#isResizeScreen").prop("checked");
+            isDblFullscreen = $("#isDblFullscreen").prop("checked");
+            isEnterSubmit = $("#isEnterSubmit").prop("checked");
+            isHideOldComment = $("#isHideOldComment").prop("checked");
+            isCMBlack = $("#isCMBlack").prop("checked");
+            isCMBkTrans = $("#isCMBkTrans").prop("checked");
+            isCMsoundoff = $("#isCMsoundoff").prop("checked");
+            isMovingComment = $("#isMovingComment").prop("checked");
+            movingCommentSpeed = parseInt($("#movingCommentSpeed").val());
+            movingCommentLimit = parseInt($("#movingCommentLimit").val());
+            isComeNg = $("#isComeNg").prop("checked");
+            isHideCommentList = $("#isHideCommentList").prop("checked");
+            isCancelWheel = $("#isCancelWheel").prop("checked");
+            var hideCommentParam = 142;
+            if (isCustomPostWin){
+                hideCommentParam=64;
+            }
+            if(isHideOldComment){
+                $('[class*="styles__comment-list___"]').css("overflow","hidden");
+            }else{
+                $('[class*="styles__comment-list___"]').css("overflow-y","scroll");
+            }
+            if(isHideCommentList){
+                $('[class*="styles__comment-list___"]').css("display","none");
+                $('[class^="TVContainer__right-comment-area___"]').css("height","auto");
+                $('[class^="TVContainer__right-comment-area___"]').css("position","absolute");
+                $('[class^="TVContainer__right-comment-area___"]').css("top",(window.innerHeight-hideCommentParam)+"px");
+            }else{
+                $('[class*="styles__comment-list___"]').css("display","block");
+                $('[class^="TVContainer__right-comment-area___"]').css("top",0);
+                $('[class*="styles__comment-list___"]').css("height",(window.innerHeight-hideCommentParam)+"px");
+            }
+            $("#settcont").css("display","none");
+        });
+    }
 }
 
 $(window).on('load', function () {
@@ -216,7 +293,9 @@ $(window).on('load', function () {
     setTimeout(onresize, 1000);
     if (isCancelWheel){
         window.addEventListener("mousewheel",function(e){
-            e.stopImmediatePropagation();
+            if (isCancelWheel){ //設定ウィンドウ反映用
+                e.stopImmediatePropagation();
+            }
         },true);
     }
 /*
