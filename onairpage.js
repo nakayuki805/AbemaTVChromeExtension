@@ -211,8 +211,8 @@ function screenBlackSet(type) {
 function delayset(){
     //シングルクリックで真っ黒を解除
     var pwaku=$('[class^="style__overlap___"]');
-    var footcont = $('[class^="TVContainer__footer___"]');
-    if(pwaku[0]&&footcont[0]){
+    var slidecont = $('[class^="TVContainer__side___"]');
+    if(pwaku[0]&&slidecont[0]){
         pwaku[0].addEventListener("click",function(){
             var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
             if(come[1]){
@@ -245,20 +245,19 @@ function delayset(){
         //中身は参照でなくここに直接記述した(ローカルのoption.htmlが参照できなかった)
         var optionbutton = document.createElement("div");
         optionbutton.id = "optionbutton";
-        optionbutton.setAttribute("style","width:20px;height:60px;background-color:gray;");
+        optionbutton.setAttribute("style","width:40px;height:60px;background-color:gray;");
         optionbutton.innerHTML = "&nbsp;";
-        var leftcont = $('[class^="TVContainer__footer___"] [class*="styles__left-container___"]');
-        if (leftcont[0]){ //左下に設定ウィンドウ開くボタン設置
-            leftcont[0].parentNode.insertBefore(optionbutton,leftcont[0]);
-        }
         var settcont = document.createElement("div");
         settcont.id = "settcont";
         //設定ウィンドウの中身
         //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
         //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
         settcont.innerHTML = "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ:<input type=checkbox id=isResizeScreen><br>ダブルクリックで全画面表示に切り替え:<input type=checkbox id=isDblFullscreen><br>エンターでコメント送信:<input type=checkbox id=isEnterSubmit><br>古いコメントを非表示(コメント欄のスクロールバーがなくなります。):<input type=checkbox id=isHideOldComment><br>CM時画面真っ黒:<input type=checkbox id=isCMBlack><br>↑を下半分だけ少し透かす:<input type=checkbox id=isCMBkTrans><br>CM時音量ミュート:<input type=checkbox id=isCMsoundoff><br>新着コメントをあの動画サイトのように横に流す:<input type=checkbox id=isMovingComment><br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br>流れるコメントの一部の文字を削除or置き換え(記号の全角半角の統一や顔文字の削除等):<input type=checkbox id=isComeNg><br>↑以下の部分文字列を含むコメントは流さない:<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br>コメント一覧を非表示・入力欄を下へ:<input type=checkbox id=isHideCommentList><br>マウスホイールによる番組移動を禁止する<input type=checkbox id=isCancelWheel><br><input type=button id=saveBtn value=保存>";
-        settcont.style = "position:absolute;bottom:0;left:20px;background-color:white;opacity=1;padding:20px;display:none;";
-        footcont[0].appendChild(settcont); //設定ウィンドウ設置
+        settcont.style = "width:600px;position:absolute;right:40px;bottom:0px;background-color:white;opacity=1;padding:20px;display:none;z-index:12;";
+        if (slidecont[0]){ //左下に設定ウィンドウ開くボタン設置
+            slidecont[0].appendChild(optionbutton);
+            slidecont[0].appendChild(settcont); //設定ウィンドウ設置
+        }
         $("#optionbutton").on("click",function(){
             if($("#settcont").css("display")=="none"){
                 $("#settcont").css("display","block");
