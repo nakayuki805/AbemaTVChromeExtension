@@ -241,7 +241,6 @@ function delayset(){
                 }
             }
         },false);
-    }
         //設定ウィンドウ・開くボタン設置
         //中身は参照でなくここに直接記述した(ローカルのoption.htmlが参照できなかった)
         var optionbutton = document.createElement("div");
