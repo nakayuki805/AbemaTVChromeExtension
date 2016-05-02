@@ -47,7 +47,7 @@
     border-top-color:rgba(255,255,255,0.5);
 }
 body{
-    overflow: hidden;/*コメント流したときにスクロールバーが出るのを防止*/
+    overflow-x: hidden;/*コメント流したときにスクロールバーが出るのを防止*/
 }
 [class^="styles__continue-btn___"] { /* 新着コメのボタン */
     display:none;
