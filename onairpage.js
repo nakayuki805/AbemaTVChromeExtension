@@ -16,6 +16,7 @@ var isMovingComment = false; //あの動画サイトのように画面上をコ�
 var movingCommentSpeed = 15;//2pxあたりの時間(ms)
 var movingCommentLimit = 30;//同時コメント最大数
 var isComeNg = false;//流れるコメントのうち特定の文字列を削除or置き換えする
+var fullNg = "";//流れるコメントのうち特定の文字列を含む場合は流さない
 var isHideCommentList = false; //コメントリストを非表示、かつコメント入力欄を下の方へ。
 var isCustomPostWin = false; //コメント投稿ボタン等を非表示、かつコメント入力欄を1行化。
 var isCancelWheel = false; //マウスホイールによるページ遷移を抑止する
@@ -32,6 +33,7 @@ chrome.storage.local.get(function (value) {
     movingCommentSpeed = value.movingCommentSpeed || movingCommentSpeed;
     movingCommentLimit = value.movingCommentLimit || movingCommentLimit;
     isComeNg = value.comeNg || false;
+    fullNg = value.fullNg || fullNg;
     isHideCommentList = value.hideCommentList || false;
     isCustomPostWin = value.customPostWin || false;
     isCancelWheel = value.cancelWheel || false;
@@ -54,6 +56,9 @@ for(var i=0;i<comeLatestLen;i++){
 }
 var playtick=0;
 var comeLatestCount=0;
+var arFullNg=[];
+var retrytick=[1000,3000,6000,12000];
+var retrycount=0;
 
 function onresize() {
     if (isResizeScreen) {
@@ -87,18 +92,54 @@ function moveComment(commentElement, commentLeftEnd){
     }
     
 }
+function arrayFullNgMaker(){
+    arFullNg=[];
+    var spfullng = fullNg.split(/\r|\n|\r\n/);
+    for(var ngi=0;ngi<spfullng.length;ngi++){
+        if(spfullng[ngi].length==0||spfullng[ngi].match(/^\/\//)){
+            continue;
+        }
+        var refullng = /^\/(.+)\/([igm]*)$/;
+        var rexefullng;
+        if((rexefullng=refullng.exec(spfullng[ngi]))!=null){
+            spfullng[ngi]=new RegExp(rexefullng[1],rexefullng[2]);
+        }else{
+            spfullng[ngi]=new RegExp("\\"+spfullng[ngi].split("").join("\\"));
+        }
+        console.log(spfullng[ngi]);
+        arFullNg.push(spfullng[ngi]);
+    }
+}
 function comeNG(prengcome){
+    //arFullNgがマッチしたコメントは流さない
+    for(var ngi=0;ngi<arFullNg.length;ngi++){
+        if(prengcome.match(arFullNg[ngi])){
+            return "";
+        }
+    }
     var ngedcome = prengcome;
-    ngedcome = ngedcome.replace(/[Σ]?[┌└＼ヾヽつっ]?[（\(][^）\)]*[8oO∀дД□◯▽△＿ωワヮ\‿\﹃\_\ﾛ][^）\)]*[）\)]?[┐┘／シノ\/\ｼ\ﾉつっo]?(彡[°\ﾟ])?/g,"");
-    ngedcome = ngedcome.replace(/(@\w+[　 ]*)+$/g,""); //twitter-dest.
+    var strface1 = "[　 ]*[Σ‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\']*[　 ]*[┌└┐⊂乁＼ヾヽつっdｄo_\\\╭╰m👆ฅｍ\╲]*[　 ]*[（\\(《〈\\[\\|｜]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ]+.*";
+    var strface2 = "[）\\)》〉\\]\\|｜]";
+    var strface3 = "[　 ]*[┐┘┌／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」]";
+    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡]*[　 ]*";
+    var reface1 = new RegExp(strface1+strface2+"+"+strface3+"*"+strface4,"g");
+    var reface2 = new RegExp(strface1+strface2+"*"+strface3+"+"+strface4,"g");
+    ngedcome = ngedcome.replace(reface1,"");
+    ngedcome = ngedcome.replace(reface2,"");
+    ngedcome = ngedcome.replace(/(\@\w+[　 ]*)+/g,""); //twitter-dest.
     ngedcome = ngedcome.replace(/(#[^　 ]+[　 ]*)+$/g,""); //twitter-tag
     ngedcome = ngedcome.replace(/[ｗw]{4,}/g,"ｗｗｗ");
-    ngedcome = ngedcome.replace(/[〜～ー－━─]{4,}/g,"ー");
-    ngedcome = ngedcome.replace(/[・\･…‥]{4,}/g,"…");
+    ngedcome = ngedcome.replace(/ʬ+/g,"ｗ");
+    ngedcome = ngedcome.replace(/ttps?:\/\/.*\..*/,"");
+    ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g,"ー");
+    ngedcome = ngedcome.replace(/[・\･…‥。\｡．\.]{2,}/g,"‥");
     ngedcome = ngedcome.replace(/[　 \n]+/g," ");
     ngedcome = ngedcome.replace(/[？\?❔]+/g,"？");
     ngedcome = ngedcome.replace(/[！\!]+/g,"！");
     ngedcome = ngedcome.replace(/[○●]+/g,"○");
+    ngedcome = ngedcome.replace(/(.)\1{3,}/g,"$1$1$1");
+    ngedcome = ngedcome.replace(/(...*?)\1{2,}/,"$1$1");
+    ngedcome = ngedcome.replace(/(...*?)\1*(...*?)(\1|\2){2,}/g,"$1$2");
     return ngedcome;
 }
 function putComment(commentText) {
@@ -170,7 +211,8 @@ function screenBlackSet(type) {
 function delayset(){
     //シングルクリックで真っ黒を解除
     var pwaku=$('[class^="style__overlap___"]');
-    if(pwaku[0]){
+    var footcont = $('[class^="TVContainer__footer___"]');
+    if(pwaku[0]&&footcont[0]){
         pwaku[0].addEventListener("click",function(){
             var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
             if(come[1]){
@@ -199,11 +241,8 @@ function delayset(){
                 }
             }
         },false);
-    }
-    //設定ウィンドウ・開くボタン設置
-    //中身は参照でなくここに直接記述した(ローカルのoption.htmlが参照できなかった)
-    var footcont = $('[class^="TVContainer__footer___"]');
-    if(footcont[0]){
+        //設定ウィンドウ・開くボタン設置
+        //中身は参照でなくここに直接記述した(ローカルのoption.htmlが参照できなかった)
         var optionbutton = document.createElement("div");
         optionbutton.id = "optionbutton";
         optionbutton.setAttribute("style","width:20px;height:60px;background-color:gray;");
@@ -217,7 +256,7 @@ function delayset(){
         //設定ウィンドウの中身
         //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
         //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
-        settcont.innerHTML = "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ:<input type=checkbox id=isResizeScreen><br>ダブルクリックで全画面表示に切り替え:<input type=checkbox id=isDblFullscreen><br>エンターでコメント送信:<input type=checkbox id=isEnterSubmit><br>古いコメントを非表示(コメント欄のスクロールバーがなくなります。):<input type=checkbox id=isHideOldComment><br>CM時画面真っ黒:<input type=checkbox id=isCMBlack><br>↑を下半分だけ少し透かす:<input type=checkbox id=isCMBkTrans><br>CM時音量ミュート:<input type=checkbox id=isCMsoundoff><br>新着コメントをあの動画サイトのように横に流す:<input type=checkbox id=isMovingComment><br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br>流れるコメントの一部の文字を削除or置き換え(記号の全角半角の統一や顔文字の削除等):<input type=checkbox id=isComeNg><br>コメント一覧を非表示・入力欄を下へ:<input type=checkbox id=isHideCommentList><br>マウスホイールによる番組移動を禁止する<input type=checkbox id=isCancelWheel><br><input type=button id=saveBtn value=保存>";
+        settcont.innerHTML = "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ:<input type=checkbox id=isResizeScreen><br>ダブルクリックで全画面表示に切り替え:<input type=checkbox id=isDblFullscreen><br>エンターでコメント送信:<input type=checkbox id=isEnterSubmit><br>古いコメントを非表示(コメント欄のスクロールバーがなくなります。):<input type=checkbox id=isHideOldComment><br>CM時画面真っ黒:<input type=checkbox id=isCMBlack><br>↑を下半分だけ少し透かす:<input type=checkbox id=isCMBkTrans><br>CM時音量ミュート:<input type=checkbox id=isCMsoundoff><br>新着コメントをあの動画サイトのように横に流す:<input type=checkbox id=isMovingComment><br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br>流れるコメントの一部の文字を削除or置き換え(記号の全角半角の統一や顔文字の削除等):<input type=checkbox id=isComeNg><br>↑以下の部分文字列を含むコメントは流さない:<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br>コメント一覧を非表示・入力欄を下へ:<input type=checkbox id=isHideCommentList><br>マウスホイールによる番組移動を禁止する<input type=checkbox id=isCancelWheel><br><input type=button id=saveBtn value=保存>";
         settcont.style = "position:absolute;bottom:0;left:20px;background-color:white;opacity=1;padding:20px;display:none;";
         footcont[0].appendChild(settcont); //設定ウィンドウ設置
         $("#optionbutton").on("click",function(){
@@ -234,6 +273,7 @@ function delayset(){
                 $("#movingCommentSpeed").val(movingCommentSpeed);
                 $("#movingCommentLimit").val(movingCommentLimit);
                 $("#isComeNg").prop("checked", isComeNg);
+                $("#elmFullNg").val(fullNg);
                 $("#isHideCommentList").prop("checked", isHideCommentList);
                 $("#isCancelWheel").prop("checked", isCancelWheel);
             }else{
@@ -252,6 +292,7 @@ function delayset(){
             movingCommentSpeed = parseInt($("#movingCommentSpeed").val());
             movingCommentLimit = parseInt($("#movingCommentLimit").val());
             isComeNg = $("#isComeNg").prop("checked");
+            fullNg = $("#elmFullNg").val();
             isHideCommentList = $("#isHideCommentList").prop("checked");
             isCancelWheel = $("#isCancelWheel").prop("checked");
             var hideCommentParam = 142;
@@ -274,7 +315,16 @@ function delayset(){
                 $('[class*="styles__comment-list___"]').css("height",(window.innerHeight-hideCommentParam)+"px");
             }
             $("#settcont").css("display","none");
+            arrayFullNgMaker();
         });
+        arrayFullNgMaker();
+        console.log("delayset ok");
+    }else{
+        retrycount+=1;
+        if(retrycount<4){
+            console.log("delayset failed#"+retrycount);
+            setTimeout(delayset,retrytick[retrycount]);
+        }
     }
 }
 
