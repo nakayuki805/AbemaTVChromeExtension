@@ -63,7 +63,8 @@ var comeLatestCount=0;
 var arFullNg=[];
 var retrytick=[1000,3000,6000,12000];
 var retrycount=0;
-var proEnd = new Date(Date.now()+60*60*1000); //現在時刻から1時間後を仮設定
+var proStart = new Date(); //番組開始時刻として現在時刻を仮設定
+var proEnd = new Date(Date.now()+60*60*1000); //番組終了として現在時刻から1時間後を仮設定
 
 function onresize() {
     if (isResizeScreen) {
@@ -104,6 +105,7 @@ function arrayFullNgMaker(){
         if(spfullng[ngi].length==0||spfullng[ngi].match(/^\/\//)){
             continue;
         }
+        spfullng[ngi]=spfullng[ngi].replace(/\/\/.*$/,""); //文中コメントを除去
         var refullng = /^\/(.+)\/([igm]*)$/;
         var rexefullng;
         if((rexefullng=refullng.exec(spfullng[ngi]))!=null){
@@ -121,10 +123,10 @@ function arrayFullNgMaker(){
 }
 function comeNG(prengcome){
     var ngedcome = prengcome;
-    var strface1 = "[　 ]*[Σ‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\']*[　 ]*[┌└┐⊂乁＼ヾヽつっdｄo_\\\╭╰m👆ฅｍ\╲]*[　 ]*[（\\(《〈\\[\\|｜]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ]+.*";
+    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\']*[　 ]*[┌└┐⊂乁＼ヾヽつっdｄo_\\\\╭╰m👆ฅｍ\╲]*[　 ]*[（\\(《〈\\[\\|｜]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ]+.*";
     var strface2 = "[）\\)》〉\\]\\|｜]";
     var strface3 = "[　 ]*[┐┘┌／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」]";
-    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡]*[　 ]*";
+    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞]*[　 ]*";
     var reface1 = new RegExp(strface1+strface2+"+"+strface3+"*"+strface4,"g");
     var reface2 = new RegExp(strface1+strface2+"*"+strface3+"+"+strface4,"g");
     ngedcome = ngedcome.replace(reface1,"");
@@ -133,7 +135,7 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/(#[^　 ]+[　 ]*)+$/g,""); //twitter-tag
     ngedcome = ngedcome.replace(/[ｗw]{4,}/g,"ｗｗｗ");
     ngedcome = ngedcome.replace(/ʬ+/g,"ｗ");
-    ngedcome = ngedcome.replace(/ttps?:\/\/.*\..*/,"");
+    ngedcome = ngedcome.replace(/h?ttps?:\/\/.*\..*/,"");
     ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g,"ー");
     ngedcome = ngedcome.replace(/[・\･…‥。\｡．\.]{2,}/g,"‥");
     ngedcome = ngedcome.replace(/[　 \n]+/g," ");
@@ -282,9 +284,9 @@ function delayset(){
         //設定ウィンドウの中身
         //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
         //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
-        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><input type=checkbox id=isCMBlack>:CM時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:CM時音量ミュート<br><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isHideCommentList>:コメント一覧を非表示・入力欄を下へ<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を禁止する<br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
+        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><input type=checkbox id=isCMBlack>:CM時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:CM時音量ミュート<br><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isHideCommentList>:コメント一覧を非表示・入力欄を下へ<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を禁止する<br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
         settcont.style = "width:600px;position:absolute;right:40px;bottom:-100px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
-        if (slidecont[0]){ //左下に設定ウィンドウ開くボタン設置
+        if (slidecont[0]){ //画面右に設定ウィンドウ開くボタン設置
             slidecont[0].appendChild(optionbutton);
             slidecont[0].appendChild(settcont); //設定ウィンドウ設置
         }
@@ -328,12 +330,14 @@ function delayset(){
                 $('[class^="TVContainer__right-comment-area___"]').css("height","auto");
                 $('[class^="TVContainer__right-comment-area___"]').css("position","absolute");
                 $('[class^="TVContainer__right-comment-area___"]').css("top",(window.innerHeight-hideCommentParam)+"px");
-                $("#forProEnd").css("bottom",0);
+                $("#forProEndBk").css("bottom",0);
+                $("#forProEndTxt").css("bottom",0);
             }else{
                 $('[class*="styles__comment-list___"]').css("display","block");
                 $('[class^="TVContainer__right-comment-area___"]').css("top",0);
                 $('[class*="styles__comment-list___"]').css("height",(window.innerHeight-hideCommentParam)+"px");
-                $("#forProEnd").css("bottom","");
+                $("#forProEndBk").css("bottom","");
+                $("#forProEndTxt").css("bottom","");
             }
             $("#settcont").css("display","none");
             arrayFullNgMaker();
@@ -517,42 +521,71 @@ $(window).on('load', function () {
         //残り時間表示
         if (isTimeVisible){
             var eProTime = $('[class^="TVContainer__right-slide___"] [class^="styles__time___"]');
-            var reProTime = /\~[　 ]*(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?/;
-            var arProEnd;
-            if(eProTime[0]&&(arProEnd=reProTime.exec(eProTime[0].textContent))!=null){
-                if(arProEnd[1]&&1<=parseInt(arProEnd[1])&&parseInt(arProEnd[1])<=12){
-                    proEnd.setMonth(parseInt(arProEnd[1])-1);
+            var reProTime = /(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?[　 ]*\~[　 ]*(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?/;
+            var arProTime;
+            if(eProTime[0]&&(arProTime=reProTime.exec(eProTime[0].textContent))!=null){
+                //番組開始時刻を設定
+                if(arProTime[1]&&1<=parseInt(arProTime[1])&&parseInt(arProTime[1])<=12){
+                    proStart.setMonth(parseInt(arProTime[1])-1);
                 }
-                if(arProEnd[2]&&1<=parseInt(arProEnd[2])&&parseInt(arProEnd[2])<=31){
-                    proEnd.setDate(parseInt(arProEnd[2]));
+                if(arProTime[2]&&1<=parseInt(arProTime[2])&&parseInt(arProTime[2])<=31){
+                    proStart.setDate(parseInt(arProTime[2]));
                 }
-                if(arProEnd[3]&&0<=parseInt(arProEnd[3])&&parseInt(arProEnd[3])<=47){
-                    if(parseInt(arProEnd[3])<24){
-                        proEnd.setHours(parseInt(arProEnd[3]));
+                if(arProTime[3]&&0<=parseInt(arProTime[3])&&parseInt(arProTime[3])<=47){
+                    if(parseInt(arProTime[3])<24){
+                        proStart.setHours(parseInt(arProTime[3]));
                     }else{
-                        proEnd.setHours(parseInt(arProEnd[3])-24);
+                        proStart.setHours(parseInt(arProTime[3])-24);
+                        proStart = new Date(proStart.getTime()+24*60*60*1000);
+                    }
+                }
+                if(arProTime[4]&&0<=parseInt(arProTime[4])&&parseInt(arProTime[4])<=59){
+                    proStart.setMinutes(parseInt(arProTime[4]));
+                }
+                proStart.setSeconds(0);
+                //番組終了時刻を設定
+                if(arProTime[5]&&1<=parseInt(arProTime[5])&&parseInt(arProTime[5])<=12){
+                    proEnd.setMonth(parseInt(arProTime[5])-1);
+                }
+                if(arProTime[6]&&1<=parseInt(arProTime[6])&&parseInt(arProTime[6])<=31){
+                    proEnd.setDate(parseInt(arProTime[6]));
+                }
+                if(arProTime[7]&&0<=parseInt(arProTime[7])&&parseInt(arProTime[7])<=47){
+                    if(parseInt(arProTime[7])<24){
+                        proEnd.setHours(parseInt(arProTime[7]));
+                    }else{
+                        proEnd.setHours(parseInt(arProTime[7])-24);
                         proEnd = new Date(proEnd.getTime()+24*60*60*1000);
                     }
                 }
-                if(arProEnd[4]&&0<=parseInt(arProEnd[4])&&parseInt(arProEnd[4])<=59){
-                    proEnd.setMinutes(parseInt(arProEnd[4]));
+                if(arProTime[8]&&0<=parseInt(arProTime[8])&&parseInt(arProTime[8])<=59){
+                    proEnd.setMinutes(parseInt(arProTime[8]));
                 }
                 proEnd.setSeconds(0);
             }
-            var forProEnd = proEnd.getTime() - Date.now();
-            if($("#forProEnd").length==0){
+            var forProEnd = proEnd.getTime() - Date.now(); //番組の残り時間
+            var proLength = proEnd.getTime() - proStart.getTime(); //番組の全体長さ
+            var strProEnd = (("0"+Math.floor(forProEnd/3600000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%3600000)/60000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%60000)/1000)).slice(-2)).replace(/^00?( : )?0?0?( : )?0?/,"");
+            if($("#forProEndBk").length==0){
                 var rightCommentArea = $('[class^="TVContainer__right-comment-area___"]');
                 if(rightCommentArea[0]){
-                    var eForProEnd = document.createElement("span");
-                    eForProEnd.id="forProEnd";
-                    eForProEnd.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;background-color:white;opacity:0.4;z-index:11;");
+                    var eForProEndBk = document.createElement("span");
+                    eForProEndBk.id="forProEndBk";
+                    eForProEndBk.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;background-color:rgba(255,255,255,0.2);z-index:13;");
+                    eForProEndBk.innerHTML="&nbsp;";
+                    rightCommentArea[0].insertBefore(eForProEndBk,rightCommentArea[0].firstChild);
+                    var eForProEndTxt = document.createElement("span");
+                    eForProEndTxt.id="forProEndTxt";
+                    eForProEndTxt.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:11;");
+                    eForProEndTxt.innerHTML=strProEnd;
+                    rightCommentArea[0].insertBefore(eForProEndTxt,rightCommentArea[0].firstChild);
                     if (isHideCommentList) {
-                        eForProEnd.css("bottom",0);
+                        $("#forProEndBk").css("bottom",0);
+                        $("#forProEndTxt").css("bottom",0);
                     }
-                    eForProEnd.innerHTML=("0"+Math.floor(forProEnd/3600000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%3600000)/60000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%60000)/1000)).slice(-2);
-                    rightCommentArea[0].insertBefore(eForProEnd,rightCommentArea[0].firstChild);
+                    $("#forProEndBk").css("width",Math.floor(100*forProEnd/proLength)+"%");
                     //残り時間クリックで設定ウィンドウ開閉
-                    $("#forProEnd").on("click",function(){
+                    $("#forProEndBk").on("click",function(){
                         if($("#settcont").css("display")=="none"){
                             $("#settcont").css("display","block");
                             settingApply();
@@ -562,11 +595,15 @@ $(window).on('load', function () {
                     });
                 }
             }else{
-                $("#forProEnd").html(("0"+Math.floor(forProEnd/3600000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%3600000)/60000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%60000)/1000)).slice(-2));
+                $("#forProEndTxt").html(strProEnd);
+                $("#forProEndBk").css("width",Math.floor(100*forProEnd/proLength)+"%");
             }
         }else{
-            while($("#forProEnd").length>0){
-                $("#forProEnd").remove();
+            while($("#forProEndTxt").length>0){
+                $("#forProEndTxt").remove();
+            }
+            while($("#forProEndBk").length>0){
+                $("#forProEndBk").remove();
             }
         }
 
