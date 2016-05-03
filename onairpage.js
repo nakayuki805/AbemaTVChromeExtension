@@ -328,12 +328,12 @@ function delayset(){
                 $('[class^="TVContainer__right-comment-area___"]').css("height","auto");
                 $('[class^="TVContainer__right-comment-area___"]').css("position","absolute");
                 $('[class^="TVContainer__right-comment-area___"]').css("top",(window.innerHeight-hideCommentParam)+"px");
-                $("#forProEnd").css("bottom","");
+                $("#forProEnd").css("bottom",0);
             }else{
                 $('[class*="styles__comment-list___"]').css("display","block");
                 $('[class^="TVContainer__right-comment-area___"]').css("top",0);
                 $('[class*="styles__comment-list___"]').css("height",(window.innerHeight-hideCommentParam)+"px");
-                $("#forProEnd").css("bottom",0);
+                $("#forProEnd").css("bottom","");
             }
             $("#settcont").css("display","none");
             arrayFullNgMaker();
