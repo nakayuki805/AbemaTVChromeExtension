@@ -52,6 +52,6 @@ body{
 [class^="styles__continue-btn___"] { /* 新着コメのボタン */
     display:none;
 }
-[class^="TVContainer__side___"] { /* 画面右の番組表ボタンと番組移動ボタン */
+[class^="TVContainer__side___"] button{ /* 画面右の番組表ボタンと番組移動ボタン */
     opacity:0.5;
 }
