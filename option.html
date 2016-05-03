@@ -11,29 +11,30 @@
     <hr>
     <h2>チェックすると有効になります</h2><br>
     <p>すでに開いているAbemaTVのウィンドウには反映されません。更新もしくは新しく開いたウィンドウに反映されます。</p><br>
-    ウィンドウサイズに合わせて映像の端が切れないようにリサイズ:
+    <br>
     <input type="checkbox" id="isResizeScreen">
+    :ウィンドウサイズに合わせて映像の端が切れないようにリサイズ
     <br>
-    ダブルクリックで全画面表示に切り替え:
     <input type="checkbox" id="isDblFullscreen">
+    :ダブルクリックで全画面表示に切り替え
     <br>
-    エンターでコメント送信:
     <input type="checkbox" id="isEnterSubmit">
+    :エンターでコメント送信
     <br>
-    古いコメントを非表示(コメント欄のスクロールバーがなくなります。):
     <input type="checkbox" id="isHideOldComment">
+    :古いコメントを非表示(コメント欄のスクロールバーがなくなります。)
     <br>
-    CM時画面真っ黒:
     <input type="checkbox" id="isCMBlack">
+    :CM時画面真っ黒
     <br>
-    ↑を下半分だけ少し透かす:
     <input type="checkbox" id="isCMBkTrans">
+    :↑を下半分だけ少し透かす
     <br>
-    CM時音量ミュート:
     <input type="checkbox" id="isCMsoundoff">
+    :CM時音量ミュート
     <br>
-    新着コメントをあの動画サイトのように横に流す:
     <input type="checkbox" id="isMovingComment">
+    :新着コメントをあの動画サイトのように横に流す
     <br>
     ↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):
     <input type="number" id="movingCommentSpeed">
@@ -41,21 +42,25 @@
     ↑のコメントの同時表示上限:
     <input type="number" id="movingCommentLimit">
     <br>
-    流れるコメントの一部の文字を削除or置き換え(記号の全角半角の統一や顔文字の削除等):
     <input type="checkbox" id="isComeNg">
+    :流れるコメントから規定の単語を除去(顔文字,連続する単語など)
     <br>
-    ↑以下の部分文字列、正規表現を含むコメントは流さない:
+    <input type="checkbox" id="isComeDel">
+    :以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/、//コメント)
     <br>
     <textarea id="elmFullNg" rows=3 cols=40 wrap=off></textarea>
     <br>
-    コメント一覧を非表示・入力欄を下へ:
     <input type="checkbox" id="isHideCommentList">
+    :コメント一覧を非表示・入力欄を下へ
     <br>
-    投稿ボタン削除・入力欄1行化:
     <input type="checkbox" id="isCustomPostWin">
+    :投稿ボタン削除・入力欄1行化
     <br>
-    マウスホイールによる番組移動を禁止する
     <input type="checkbox" id="isCancelWheel">
+    :マウスホイールによる番組移動を禁止する
+    <br>
+    <input type="checkbox" id="isTimeVisible">
+    :コメント入力欄の近くに番組残り時間を表示
     <br>
     <input type="button" id="saveBtn" value="保存"><br>
     <span id="info"></span>
