@@ -193,7 +193,7 @@ function putComment(commentText) {
 //    var commentLeftEnd = -1*commentWidth;
 //    setTimeout(function (){moveComment(commentElement, commentLeftEnd);},Math.random()*1000);
 //    moveComment(commentElement);
-    comeLatestPosi.push([commentTop,comeTTL]);
+//    comeLatestPosi.push([commentTop,comeTTL]);
     var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(window.innerWidth-$("#moveContainer").offset().left+Math.floor(Math.random()*200))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
     //コメント設置位置の保持
     comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+200)*movingCommentSpeed/2000+2)))]);
