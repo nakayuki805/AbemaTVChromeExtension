@@ -50,13 +50,14 @@ var jquerypath = chrome.extension.getURL("jquery-2.2.3.min.js");
 $("<script src='"+jquerypath+"'></script>").appendTo("head");
 var commentNum = 0;
 var comeLatestPosi=[];
-var comeTTL=4;
+var comeTTLmin=3;
+var comeTTLmax=13;
 var comeLatestLen=10;
 comeLatestPosi.length=comeLatestLen;
 for(var i=0;i<comeLatestLen;i++){
     comeLatestPosi[i]=[]
     comeLatestPosi[i][0]=0;
-    comeLatestPosi[i][1]=comeTTL;
+    comeLatestPosi[i][1]=comeTTLmin;
 }
 var playtick=0;
 var comeLatestCount=0;
@@ -88,17 +89,24 @@ function onresize() {
         //console.log(newwd,newhg);
     }
 }
-function moveComment(commentElement, commentLeftEnd){
-    var commentLeft = commentElement.offset().left - 2;
-    commentElement.css("left", commentLeft+"px");
-    if (commentLeft > commentLeftEnd) {
-        setTimeout(function (){moveComment(commentElement,commentLeftEnd);},movingCommentSpeed);
+//function moveComment(commentElement, commentLeftEnd){
+//    var commentLeft = commentElement.offset().left - 2;
+//    commentElement.css("left", commentLeft+"px");
+//    if (commentLeft > commentLeftEnd) {
+//        setTimeout(function (){moveComment(commentElement,commentLeftEnd);},movingCommentSpeed);
+function moveComment(){
+    //コメントコンテナを動かす
+    //削除は1秒おきのイベントで行う
+    if($('#moveContainer').children().length>0){
+        $('#moveContainer').css("left",($('#moveContainer').offset().left-2)+"px");
     }else{
-        commentElement.remove();
+//        commentElement.remove();
+        $('#moveContainer').css("left","0px"); //コメントが無い場合はleftを0に戻す
     }
-    
+    setTimeout(moveComment,movingCommentSpeed);
 }
 function arrayFullNgMaker(){
+    //自由入力欄からNG正規表現を生成
     arFullNg=[];
     var spfullng = fullNg.split(/\r|\n|\r\n/);
     for(var ngi=0;ngi<spfullng.length;ngi++){
@@ -122,11 +130,12 @@ function arrayFullNgMaker(){
     }
 }
 function comeNG(prengcome){
+    //規定のNG処理
     var ngedcome = prengcome;
-    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\']*[　 ]*[┌└┐⊂乁＼ヾヽつっdｄo_\\\\╭╰m👆ฅｍ\╲]*[　 ]*[（\\(《〈\\[\\|｜]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ]+.*";
+    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\'☆〜～ｗﾍ√ﾚｖꉂ]*[　 ]*[┌└┐⊂二乁＼ヾヽつっdｄo_ƪ\\\\╭╰m👆ฅｍ\╲٩Ｏ]*[　 ]*[（\\(《〈\\[\\|｜f]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ罒ᗜ◒◊vਊ⍛ー3xエェｪｴ]+.*";
     var strface2 = "[）\\)》〉\\]\\|｜]";
-    var strface3 = "[　 ]*[┐┘┌／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」]";
-    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞]*[　 ]*";
+    var strface3 = "[　 ]*[┐┘┌┸┓／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」Ｏσ二⊃ゝʃ]";
+    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞ｗﾍ√ﾚｖ]*[　 ]*";
     var reface1 = new RegExp(strface1+strface2+"+"+strface3+"*"+strface4,"g");
     var reface2 = new RegExp(strface1+strface2+"*"+strface3+"+"+strface4,"g");
     ngedcome = ngedcome.replace(reface1,"");
@@ -137,13 +146,13 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/ʬ+/g,"ｗ");
     ngedcome = ngedcome.replace(/h?ttps?:\/\/.*\..*/,"");
     ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g,"ー");
-    ngedcome = ngedcome.replace(/[・\･…‥。\｡．\.]{2,}/g,"‥");
+    ngedcome = ngedcome.replace(/[・\･…‥、\､。\｡．\.]{2,}/g,"‥");
     ngedcome = ngedcome.replace(/[　 \n]+/g," ");
     ngedcome = ngedcome.replace(/[？\?❔]+/g,"？");
     ngedcome = ngedcome.replace(/[！\!]+/g,"！");
     ngedcome = ngedcome.replace(/[○●]+/g,"○");
     ngedcome = ngedcome.replace(/(.)\1{3,}/g,"$1$1$1");
-    ngedcome = ngedcome.replace(/(...*?)\1{2,}/,"$1$1");
+    ngedcome = ngedcome.replace(/(...*?)\1{3,}/,"$1$1$1");
     ngedcome = ngedcome.replace(/(...*?)\1*(...*?)(\1|\2){2,}/g,"$1$2");
     return ngedcome;
 }
@@ -176,16 +185,19 @@ function putComment(commentText) {
         }
         i+=1;
     }
-    if(i>=20){
-        commentTop=50;
-    }
-    comeLatestPosi.push([commentTop,comeTTL]);
+//    if(i>=20){
+//        commentTop=50;
+//    }
+//    var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+window.innerWidth+"px;'>" + commentText + "</div>").appendTo("body");
+//    var commentWidth = commentElement.width();
+//    var commentLeftEnd = -1*commentWidth;
+//    setTimeout(function (){moveComment(commentElement, commentLeftEnd);},Math.random()*1000);
+//    moveComment(commentElement);
+//    comeLatestPosi.push([commentTop,comeTTL]);
+    var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(window.innerWidth-$("#moveContainer").offset().left+Math.floor(Math.random()*200))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+    //コメント設置位置の保持
+    comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+200)*movingCommentSpeed/2000+2)))]);
     comeLatestPosi.shift();
-    var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+window.innerWidth+"px;'>" + commentText + "</div>").appendTo("body");
-    var commentWidth = commentElement.width();
-    var commentLeftEnd = -1*commentWidth;
-    setTimeout(function (){moveComment(commentElement, commentLeftEnd);},Math.random()*1000);
-    //moveComment(commentElement);
 }
 //ミュート(false)・ミュート解除(true)する関数
 function soundSet(isSound) {
@@ -222,6 +234,7 @@ function screenBlackSet(type) {
     }
 }
 function settingApply(){
+    //設定ウィンドウにロード
     $("#isResizeScreen").prop("checked", isResizeScreen);
     $("#isDblFullscreen").prop("checked", isDblFullscreen);
     $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -343,6 +356,11 @@ function delayset(){
             arrayFullNgMaker();
         });
         arrayFullNgMaker();
+        var eMoveContainer=document.createElement('div');
+        eMoveContainer.id="moveContainer";
+        eMoveContainer.setAttribute("style","position:absolute;top:50px;left:-200px;z-index:11;");
+        $("body").append(eMoveContainer);
+        moveComment();
         console.log("delayset ok");
     }else{
         retrycount+=1;
@@ -424,7 +442,7 @@ $(window).on('load', function () {
         }
         //コメント取得
         var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
-        var newCommnetNum = comments.length - commentNum;
+        var newCommentNum = comments.length - commentNum;
         if (commentNum != 0){
             if (isMovingComment) {
                 for (var i = commentNum;i < comments.length; i += 1){
@@ -432,8 +450,35 @@ $(window).on('load', function () {
                 }
             }
         }
-
         commentNum = comments.length;
+        //流れるコメントのうち画面外に出たものを削除
+        var arMovingComment = $('[class="movingComment"]');
+        if(arMovingComment.length>0){
+            var bLeftClip=false;
+            if(parseInt(arMovingComment[0].style.left)>6000){ //外枠が左に沢山行ったら少し右に戻す
+                bLeftClip=true;
+            }
+            for (var j = arMovingComment.length-1;j>=0;j--){
+                if(arMovingComment[j].getBoundingClientRect().left + arMovingComment[j].offsetWidth<0){
+                    arMovingComment[j].remove();
+                }else if(bLeftClip){
+                    arMovingComment[j].style.left = (parseInt(arMovingComment[j].style.left) - 5000)+"px";
+                }
+            }
+            if(bLeftClip){
+                $('#moveContainer').css("left",($('#moveContainer').offset().left+5000)+"px");
+            }
+        }
+        //流れるコメント過多の場合は消していく
+        if (isMovingComment){
+            var comments = $(".movingComment");
+            if (comments.length > movingCommentLimit){
+                for (var j=0;j < comments.length-movingCommentLimit; j+=1){
+                    comments[j].remove();
+                }
+            }
+        }
+
         var countElements = $('[class^="TVContainer__footer___"] [class*="styles__count___"]')
         //var viewCount = countElements[0].innerHTML
         //var commentCount = countElements[1].innerHTML
@@ -481,16 +526,6 @@ $(window).on('load', function () {
             }
         }else{
             comeLatestCount=-1;
-        }
-
-        //流れるコメント過多の場合は消していく
-        if (isMovingComment){
-            var comments = $(".movingComment");
-            if (comments.length > movingCommentLimit){
-                for (var j=0;j < comments.length-movingCommentLimit; j+=1){
-                    comments[j].remove();
-                }
-            }
         }
 
         //投稿ボタン削除・入力欄1行化(初回クリック時と4行以上入力時に大きくなるのを防ぐ)
