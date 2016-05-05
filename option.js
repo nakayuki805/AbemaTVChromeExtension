@@ -14,10 +14,11 @@ $(function(){
         var isComeNg = value.comeNg || false;
         var isComeDel = value.comeDel || false;
         var valFullNg = value.fullNg || "";
-        var isHideCommentList = value.hideCommentList || false;
+        var isInpWinBottom = value.inpWinBottom || false;
         var isCustomPostWin = value.customPostWin || false;
         var isCancelWheel = value.cancelWheel || false;
         var isTimeVisible = value.timeVisible || false;
+        var isSureReadComment = value.sureReadComment || false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -31,10 +32,11 @@ $(function(){
         $("#isComeNg").prop("checked", isComeNg);
         $("#isComeDel").prop("checked", isComeDel);
         $("#elmFullNg").val(valFullNg);
-        $("#isHideCommentList").prop("checked", isHideCommentList);
+        $("#isInpWinBottom").prop("checked", isInpWinBottom);
         $("#isCustomPostWin").prop("checked", isCustomPostWin);
         $("#isCancelWheel").prop("checked", isCancelWheel);
         $("#isTimeVisible").prop("checked", isTimeVisible);
+        $("#isSureReadComment").prop("checked", isSureReadComment);
     });
     $("#saveBtn").click(function () {
     chrome.storage.local.set({
@@ -51,10 +53,11 @@ $(function(){
         "comeNg": $("#isComeNg").prop("checked"),
         "comeDel": $("#isComeDel").prop("checked"),
         "fullNg": $("#elmFullNg").val(),
-        "hideCommentList": $("#isHideCommentList").prop("checked"),
+        "inpWinBottom": $("#isInpWinBottom").prop("checked"),
         "customPostWin": $("#isCustomPostWin").prop("checked"),
         "cancelWheel": $("#isCancelWheel").prop("checked"),
-        "timeVisible": $("#isTimeVisible").prop("checked")
+        "timeVisible": $("#isTimeVisible").prop("checked"),
+        "sureReadComment": $("#isSureReadComment").prop("checked")
     }, function () {
         $("#info").show().text("設定保存しました").fadeOut(4000);
     });
