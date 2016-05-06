@@ -595,11 +595,7 @@ function popElement(){
     $('[class^="TVContainer__right-list-slide___"]').css("z-index",11);
     var contHeader = $('[class^="AppContainer__header-container___"]');
     var comeList = $('[class*="styles__comment-list___"]');
-    if(contHeader.css("visibility")!="visible"){
-        if(isInpWinBottom){
-            comeList[0].scrollTop = comeList[0].scrollHeight;
-        }
-    }
+    var oldcontVisible = contHeader.css("visibility");
     contHeader.css("visibility","visible");
     contHeader.css("opacity",1);
     var contFooter = $('[class^="TVContainer__footer-container___"]');
@@ -630,6 +626,11 @@ function popElement(){
             comeList.css("position","absolute");
             comeList.css("width","100%");
             comeList.css("height",(window.innerHeight-hideCommentParam-44-61)+"px");
+        }
+    }
+    if(oldcontVisible !="visible"){
+        if(isInpWinBottom){
+            comeList[0].scrollTop = comeList[0].scrollHeight;
         }
     }
 }
@@ -707,7 +708,7 @@ $(window).on('load', function () {
             if(comeListLen>commentNum){ //コメ増加あり
                 //入力欄が下にあるときはソート
                 if(isInpWinBottom){
-                    if(EXcomelist.lastChild.offsetTop-EXcomelist.scrollTop<window.innerHeight+150||commentNum<=1){
+                    if(EXcomelist.lastChild.offsetTop-EXcomelist.scrollTop<window.innerHeight-50||commentNum<=1){
                         EXcomelist.scrollTop = EXcomelist.scrollHeight;
                     }
                     for(var i=commentNum;i<comeListLen;i++){
