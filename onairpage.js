@@ -707,10 +707,10 @@ $(window).on('load', function () {
             var comeListLen = EXcomelist.childElementCount;
             if(comeListLen>commentNum){ //コメ増加あり
                 //入力欄が下にあるときはソート
-                if(isInpWinBottom){
-                    if(EXcomelist.lastChild.offsetTop-EXcomelist.scrollTop<window.innerHeight-50||commentNum<=1){
+                if(isInpWinBottom){//コメントが付いたら下スクロール
+                    //if(EXcomelist.lastChild.offsetTop-EXcomelist.scrollTop<window.innerHeight-50||commentNum<=1){
                         EXcomelist.scrollTop = EXcomelist.scrollHeight;
-                    }
+                    //}
                     for(var i=commentNum;i<comeListLen;i++){
                         EXcomelist.insertBefore(EXcomelist.children[i],EXcomelist.firstChild);
                     }
