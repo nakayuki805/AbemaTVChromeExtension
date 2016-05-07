@@ -23,29 +23,32 @@ var isCustomPostWin = false; //コメント投稿ボタン等を非表示、か�
 var isCancelWheel = false; //マウスホイールによるページ遷移を抑止する
 var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false;
-//設定のロード
-chrome.storage.local.get(function (value) {
-    isResizeScreen = value.resizeScreen || false;
-    isDblFullscreen = value.dblFullscreen || false;
-    isEnterSubmit = value.enterSubmit || false;
-    isHideOldComment = value.hideOldComment || false;
-    isCMBlack = value.CMBlack || false;
-    isCMBkTrans = value.CMBkTrans || false;
-    isCMsoundoff = value.CMsoundoff || false;
-    isMovingComment = value.movingComment || false;
-    movingCommentSpeed = value.movingCommentSpeed || movingCommentSpeed;
-    movingCommentLimit = value.movingCommentLimit || movingCommentLimit;
-    isComeNg = value.comeNg || false;
-    isComeDel = value.comeDel || false;
-    fullNg = value.fullNg || fullNg;
-    isInpWinBottom = value.inpWinBottom || false;
-    isCustomPostWin = value.customPostWin || false;
-    isCancelWheel = value.cancelWheel || false;
-    isTimeVisible = value.timeVisible || false;
-    isSureReadComment = value.sureReadComment || false;
-});
-
 console.log("script loaded");
+//window.addEventListener(function () {console.log})
+//設定のロード
+if (chrome.storage) {
+    chrome.storage.local.get(function (value) {
+        isResizeScreen = value.resizeScreen || false;
+        isDblFullscreen = value.dblFullscreen || false;
+        isEnterSubmit = value.enterSubmit || false;
+        isHideOldComment = value.hideOldComment || false;
+        isCMBlack = value.CMBlack || false;
+        isCMBkTrans = value.CMBkTrans || false;
+        isCMsoundoff = value.CMsoundoff || false;
+        isMovingComment = value.movingComment || false;
+        movingCommentSpeed = value.movingCommentSpeed || movingCommentSpeed;
+        movingCommentLimit = value.movingCommentLimit || movingCommentLimit;
+        isComeNg = value.comeNg || false;
+        isComeDel = value.comeDel || false;
+        fullNg = value.fullNg || fullNg;
+        isInpWinBottom = value.inpWinBottom || false;
+        isCustomPostWin = value.customPostWin || false;
+        isCancelWheel = value.cancelWheel || false;
+        isTimeVisible = value.timeVisible || false;
+        isSureReadComment = value.sureReadComment || false;
+    });
+}
+
 var currentLocation = window.location.href;
 // jqueryを開発者コンソールから使う
 var jquerypath = chrome.extension.getURL("jquery-2.2.3.min.js");

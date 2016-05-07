@@ -1,0 +1,24 @@
+{
+  "title": "AbemaTVExtension",
+  "name": "abematvextension",
+  "version": "0.0.5",
+  "description": "an extension to watch abematv comfortably",
+  "main": "index.js",
+  "preferences": [
+	  {
+	  "name": "isResize",
+	  "title": "映像のリサイズ",
+	  "description": "映像を端が切れることなくウィンドウに収まるようにリサイズ",
+	  "type": "bool"
+	  }
+  ],
+  "author": "",
+  "engines": {
+    "firefox": ">=38.0a1",
+    "fennec": ">=38.0a1"
+  },
+  "license": "MIT",
+  "keywords": [
+    "jetpack"
+  ]
+}
