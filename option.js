@@ -1,4 +1,5 @@
 $(function(){
+    $("#CommentMukouSettings").hide();
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -41,28 +42,37 @@ $(function(){
         $("#isSureReadComment").prop("checked", isSureReadComment);
     });
     $("#saveBtn").click(function () {
-    chrome.storage.local.set({
-        "resizeScreen": $("#isResizeScreen").prop("checked"), 
-        "dblFullscreen": $("#isDblFullscreen").prop("checked"),
-        "enterSubmit": $("#isEnterSubmit").prop("checked"),
-        "hideOldComment": $("#isHideOldComment").prop("checked"),
-        "CMBlack": $("#isCMBlack").prop("checked"),
-        "CMBkTrans": $("#isCMBkTrans").prop("checked"),
-        "CMsoundoff": $("#isCMsoundoff").prop("checked"),
-        "movingComment": $("#isMovingComment").prop("checked"),
-        "movingCommentSpeed": parseInt($("#movingCommentSpeed").val()),
-        "movingCommentLimit": parseInt($("#movingCommentLimit").val()),
-        "moveByCSS": $("#isMoveByCSS").prop("checked"),
-        "comeNg": $("#isComeNg").prop("checked"),
-        "comeDel": $("#isComeDel").prop("checked"),
-        "fullNg": $("#elmFullNg").val(),
-        "inpWinBottom": $("#isInpWinBottom").prop("checked"),
-        "customPostWin": $("#isCustomPostWin").prop("checked"),
-        "cancelWheel": $("#isCancelWheel").prop("checked"),
-        "timeVisible": $("#isTimeVisible").prop("checked"),
-        "sureReadComment": $("#isSureReadComment").prop("checked")
-    }, function () {
-        $("#info").show().text("設定保存しました").fadeOut(4000);
+        chrome.storage.local.set({
+            "resizeScreen": $("#isResizeScreen").prop("checked"), 
+            "dblFullscreen": $("#isDblFullscreen").prop("checked"),
+            "enterSubmit": $("#isEnterSubmit").prop("checked"),
+            "hideOldComment": $("#isHideOldComment").prop("checked"),
+            "CMBlack": $("#isCMBlack").prop("checked"),
+            "CMBkTrans": $("#isCMBkTrans").prop("checked"),
+            "CMsoundoff": $("#isCMsoundoff").prop("checked"),
+            "movingComment": $("#isMovingComment").prop("checked"),
+            "movingCommentSpeed": parseInt($("#movingCommentSpeed").val()),
+            "movingCommentLimit": parseInt($("#movingCommentLimit").val()),
+            "moveByCSS": $("#isMoveByCSS").prop("checked"),
+            "comeNg": $("#isComeNg").prop("checked"),
+            "comeDel": $("#isComeDel").prop("checked"),
+            "fullNg": $("#elmFullNg").val(),
+            "inpWinBottom": $("#isInpWinBottom").prop("checked"),
+            "customPostWin": $("#isCustomPostWin").prop("checked"),
+            "cancelWheel": $("#isCancelWheel").prop("checked"),
+            "timeVisible": $("#isTimeVisible").prop("checked"),
+            "sureReadComment": $("#isSureReadComment").prop("checked")
+        }, function () {
+            $("#info").show().text("設定保存しました").fadeOut(4000);
+        });
     });
 });
+var keyinput = [];
+var keyCodes = "38,38,40,40,37,39,37,39,66,65";
+$(window).keyup(function(e){
+    keyinput.push(e.keyCode);
+    if (keyinput.toString().indexOf(keyCodes) >= 0) {
+        $("#CommentMukouSettings").show();
+        keyinput = [];
+    }
 });
