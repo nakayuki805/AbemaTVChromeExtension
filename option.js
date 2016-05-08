@@ -11,6 +11,7 @@ $(function(){
         var isMovingComment = value.movingComment || false;
         var movingCommentSpeed = value.movingCommentSpeed || 15;
         var movingCommentLimit = value.movingCommentLimit || 30;
+        var isMoveByCSS =　value.moveByCSS || false;
         var isComeNg = value.comeNg || false;
         var isComeDel = value.comeDel || false;
         var valFullNg = value.fullNg || "";
@@ -29,6 +30,7 @@ $(function(){
         $("#isMovingComment").prop("checked", isMovingComment);
         $("#movingCommentSpeed").val(movingCommentSpeed);
         $("#movingCommentLimit").val(movingCommentLimit);
+        $("#isMoveByCSS").prop("checked", isMoveByCSS);
         $("#isComeNg").prop("checked", isComeNg);
         $("#isComeDel").prop("checked", isComeDel);
         $("#elmFullNg").val(valFullNg);
@@ -50,6 +52,7 @@ $(function(){
         "movingComment": $("#isMovingComment").prop("checked"),
         "movingCommentSpeed": parseInt($("#movingCommentSpeed").val()),
         "movingCommentLimit": parseInt($("#movingCommentLimit").val()),
+        "moveByCSS": $("#isMoveByCSS").prop("checked"),
         "comeNg": $("#isComeNg").prop("checked"),
         "comeDel": $("#isComeDel").prop("checked"),
         "fullNg": $("#elmFullNg").val(),

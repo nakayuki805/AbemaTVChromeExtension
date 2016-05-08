@@ -15,6 +15,7 @@ var isCMsoundoff = false; //CM時ずっと音量ミュート
 var isMovingComment = false; //あの動画サイトのように画面上をコメントが流れる(コメント欄を表示しているときのみ機能)
 var movingCommentSpeed = 15;//2pxあたりの時間(ms)
 var movingCommentLimit = 30;//同時コメント最大数
+var isMoveByCSS = false;//CSSのanimationでコメントを動かす
 var isComeNg = false;//流れるコメントのうち特定の文字列を削除or置き換えする
 var isComeDel = false;//流れるコメントのうちユーザー指定の文字列を含むものを流さない(この処理は↑の除去前に実行される)
 var fullNg = "";//流れるコメントのうち特定の文字列を含む場合は流さない
@@ -38,6 +39,7 @@ if (chrome.storage) {
         isMovingComment = value.movingComment || false;
         movingCommentSpeed = value.movingCommentSpeed || movingCommentSpeed;
         movingCommentLimit = value.movingCommentLimit || movingCommentLimit;
+        isMoveByCSS =　value.moveByCSS || false;
         isComeNg = value.comeNg || false;
         isComeDel = value.comeDel || false;
         fullNg = value.fullNg || fullNg;
@@ -107,7 +109,7 @@ function onresize() {
 //    }else{
 //        commentElement.remove();
 //        $('#moveContainer').css("left","0px"); //コメントが無い場合はleftを0に戻す
-//    }
+//    }s
 //    setTimeout(moveComment,movingCommentSpeed);
 //}
 function arrayFullNgMaker(){
@@ -199,11 +201,15 @@ function putComment(commentText) {
 //    setTimeout(function (){moveComment(commentElement, commentLeftEnd);},Math.random()*1000);
 //    moveComment(commentElement);
 //    comeLatestPosi.push([commentTop,comeTTL]);
+    if (isMoveByCSS) {
+    var commentElement = $("<span class='movingComment movingCommentCSS' style='position:absolute;top:"+commentTop+"px;left:"+(window.innerWidth+Math.floor(Math.random()*200))+"px;width:"+window.innerWidth+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+    } else {
     var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(Math.floor(window.innerWidth-$("#moveContainer").offset().left+Math.random()*200))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+    }
     //コメント設置位置の保持
     comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+200)*movingCommentSpeed/2000+2)))]);
     comeLatestPosi.shift();
-    if(parseInt($("#moveContainer").css("left"))>=1){ //初期位置にいたら動かす
+    if(parseInt($("#moveContainer").css("left"))>=1 && !isMoveByCSS){ //初期位置にいたら動かす
         StartMoveComment();
     }
 }
@@ -999,6 +1005,7 @@ $(window).on('load', function () {
 
     }, 1000);
     setTimeout(delayset,1000);
+    setTimeout(onresize,5000);
 });
 $(window).on("resize", onresize);
 

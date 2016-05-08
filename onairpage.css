@@ -29,6 +29,36 @@
     text-shadow: black 1px 1px 0px, black -1px 1px 0px, black 1px -1px 0px, black -1px -1px 0px;
     opacity: 0.8;
 }
+.movingCommentCSS {/* CSSで横に動かす */
+    animation-name:movingComment;
+    animation-timing-function:linear;
+    animation-duration:16s;
+    animation-iteration-count:1;
+    -webkit-animation-name:movingComment;
+    -webkit-animation-timing-function:linear;
+    -webkit-animation-duration:16s;
+    -webkit-animation-iteration-count:1;
+    -moz-animation-name:movingComment;
+    -moz-animation-timing-function:linear;
+    -moz-animation-duration:16s;
+    -moz-animation-iteration-count:1;
+    -o-animation-name:movingComment;
+    -o-animation-timing-function:linear;
+    -o-animation-duration:16s;
+    -o-animation-iteration-count:1;
+}
+@keyframes movingComment {
+    from {transform:translate(0);} to {transform:translate(-200%);}
+}
+@-webkit-keyframes movingComment {
+    from {-webkit-transform:translate(0);} to {-webkit-transform:translate(-200%);}
+}
+@-moz-keyframes movingComment {
+    from {-moz-transform:translate(0);} to {-moz-transform:translate(-200%);}
+}
+@-o-keyframes movingComment {
+    from {-o-transform:translate(0);} to {-o-transform:translate(-200%);}
+}
 [class^="TVContainer__footer___"] { /* 黒帯バー下 */
     opacity: 0.5;
 }
