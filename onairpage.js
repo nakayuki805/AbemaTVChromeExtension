@@ -50,9 +50,6 @@ if (chrome.storage) {
 }
 
 var currentLocation = window.location.href;
-// jqueryを開発者コンソールから使う
-var jquerypath = chrome.extension.getURL("jquery-2.2.3.min.js");
-$("<script src='"+jquerypath+"'></script>").appendTo("head");
 var commentNum = 0;
 var comeLatestPosi=[];
 var comeTTLmin=3;
@@ -94,7 +91,7 @@ function onresize() {
         obj.css("height", newhg + "px");
         obj.css("left", ((wd-newwd)/2)+"px");
         obj.css("top", ((hg-newhg)/2)+"px");
-        //console.log(newwd,newhg);
+        console.log("screen resized");
     }
 }
 //function moveComment(commentElement, commentLeftEnd){
@@ -545,7 +542,8 @@ function delayset(){
         });
         EXcomelist = $('[class*="styles__comment-list___"]')[0];
         EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
-
+        //映像のリサイズ
+        onresize();
         console.log("delayset ok");
     }else{
         retrycount+=1;
@@ -646,6 +644,9 @@ $(window).on('load', function () {
     console.log("loaded");
     var csspath = chrome.extension.getURL("onairpage.css");
     $("<link rel='stylesheet' href='" + csspath + "'>").appendTo("head");
+    // jqueryを開発者コンソールから使う
+    var jquerypath = chrome.extension.getURL("jquery-2.2.3.min.js");
+    $("<script src='"+jquerypath+"'></script>").appendTo("head");
     //ダブルクリックでフルスクリーン
     $(window).on("dblclick",function(){
         console.log("dblclick");
@@ -701,7 +702,7 @@ $(window).on('load', function () {
             btn.trigger("click");// 1秒毎にコメントの読み込みボタンを自動クリック
         }
         //コメント取得
-//        var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
+        var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
 //        var newCommentNum = comments.length - commentNum;
 //        if (commentNum != 0){
 //            if (isMovingComment) {
@@ -720,6 +721,7 @@ $(window).on('load', function () {
                     for(var i=commentNum;i<comeListLen;i++){
                         EXcomelist.insertBefore(EXcomelist.children[i],EXcomelist.firstChild);
                     }
+                    comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');//ソートの反映
                     //ソートした後でコメントを流す 最初は流さない
                     if(isMovingComment&&commentNum>1){
                         for(var i=Math.max(comeListLen-movingCommentLimit,commentNum);i<comeListLen;i++){
@@ -729,7 +731,7 @@ $(window).on('load', function () {
                     EXcomelist.scrollTop = EXcomelist.scrollHeight;
                 }else if(isMovingComment){
                     for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
-                        putComment(EXcomelist.children[i].firstChild.innerHTML);
+                        putComment(comments[i].innerHTML);
                     }
                 }
                 commentNum=comeListLen;
@@ -996,7 +998,6 @@ $(window).on('load', function () {
         }
 
     }, 1000);
-    setTimeout(onresize, 1000);
     setTimeout(delayset,1000);
 });
 $(window).on("resize", onresize);
