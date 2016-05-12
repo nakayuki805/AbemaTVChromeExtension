@@ -81,10 +81,12 @@ function onresize() {
             hg = window.innerHeight,
             wdbyhg = hg*16/9,
             newwd,
-            newhg;
+            newhg,
+            newtop = 0;
         if (wd > wdbyhg) {
             newwd = wdbyhg;
             newhg = hg;
+            newtop = (hg-newhg)/2;
         } else {
             newwd = wd;
             newhg = wd*9/16;
@@ -92,7 +94,7 @@ function onresize() {
         obj.css("width", newwd + "px");
         obj.css("height", newhg + "px");
         obj.css("left", ((wd-newwd)/2)+"px");
-        obj.css("top", ((hg-newhg)/2)+"px");
+        obj.css("top", newtop+"px");
         console.log("screen resized");
     }
 }
@@ -825,7 +827,7 @@ $(window).on('load', function () {
 
         //コメント入力欄に改行が含まれていたら送信
         if (isEnterSubmit){
-            var butsend = $('[class*="styles__post-wrapper___"] button');
+            var butsend = $('button[class*="styles__post-button___"]');
             var inpcome = $('[class*="styles__comment-form___"] textarea').val();
             if(inpcome&&inpcome.match(/[\n\r]/g)&&inpcome.replace(/[\n\r]/g,"").length>0&&!butsend[0].hasAttribute('disabled')){
                 //送信前に改行は除去

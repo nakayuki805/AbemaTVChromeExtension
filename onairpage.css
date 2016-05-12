@@ -1,10 +1,10 @@
 [class^="TVContainer__right-comment-area___"]{ /* コメントエリアの一番外側要素 */
     background: rgba(255, 255, 255, 0.2);/* 透明にする 透明度は右の数字を0-1の間で opacityで指定すると子要素まで透明になってコメントが見づらい*/
 }
-[class^="TVContainer__right-comment-area___"] div{ /* コメントエリア内のdiv要素 */
+[class^="TVContainer__right-comment-area___"] div,[class^="TVContainer__right-comment-area___"] form { /* コメントエリア内のdiv,form要素 */
     background: rgba(255, 255, 255, 0);/*完全透明*/
 }
-[class^="TVContainer__right-comment-area___"] > div >[class*="styles__comment-form___"] > form > div{ /* コメントフォーム */
+[class^="TVContainer__right-comment-area___"] > div > form[class*="styles__comment-form___"] > div{ /* コメントフォーム */
     background: rgba(255, 255, 255, 0.4);
 }
 [class*="styles__comment-form___"] textarea { /*テキストボックス*/
