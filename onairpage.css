@@ -72,10 +72,10 @@
 [class*="TVContainer__balloon-"] { /* 緑色吹き出し非表示 */
     display:none;
 }
-[class^="TVContainer__right-comment-area___"] [class*="styles__comment-list___"] { /* 古いコメントを非表示 onairpage.jsで設定
+[class^="TVContainer__right-comment-area___"] [class*="styles__comment-list-wrapper___"]>* { /* 古いコメントを非表示 onairpage.jsで設定
     overflow: hidden!important;*/
 }
-[class^="TVContainer__right-comment-area___"] [class*="styles__comment-list___"] > div { /* コメント1行化用 */
+[class^="TVContainer__right-comment-area___"] [class*="styles__comment-list-wrapper___"]>*>div { /* コメント1行化用 */
     clear: both;
     padding: 1px 0px 1px 16px;
     border-top-color:rgba(255,255,255,0.5);
