@@ -550,7 +550,7 @@ function delayset(){
                 e.stopPropagation();
             }
         });
-        EXcomelist = $('[class*="styles__comment-list___"]')[0];
+        EXcomelist = $('[class*="styles__comment-list-wrapper___"] > div')[0];
         EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
         //映像のリサイズ
         onresize();
