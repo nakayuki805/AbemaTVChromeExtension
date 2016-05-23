@@ -696,7 +696,7 @@ function popElement(){
     }
 }
 function waitforRightShown(retrycount){
-  var ss=4;
+  var ss=1;
 //  var ww=16*Math.floor(($(window).width()-(($(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]').length>0)?310:0))/16);
   var ww=$(window).width();
   var wm=0;
