@@ -22,6 +22,7 @@ $(function(){
         var isTimeVisible = value.timeVisible || false;
         var isSureReadComment = value.sureReadComment || false;
         var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
+        var isMovieResize = value.movieResize || false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -42,6 +43,7 @@ $(function(){
         $("#isTimeVisible").prop("checked", isTimeVisible);
         $("#isSureReadComment").prop("checked", isSureReadComment);
         $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
+        $("#isMovieResize").prop("checked", isMovieResize);
     });
     $("#saveBtn").click(function () {
         chrome.storage.local.set({
@@ -64,7 +66,8 @@ $(function(){
             "cancelWheel": $("#isCancelWheel").prop("checked"),
             "timeVisible": $("#isTimeVisible").prop("checked"),
             "sureReadComment": $("#isSureReadComment").prop("checked"),
-            "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked")
+            "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked"),
+            "movieResize": $("#isMovieResize").prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
