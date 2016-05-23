@@ -174,6 +174,7 @@ function putComment(commentText) {
         //arFullNgがマッチしたコメントは流さない
         for(var ngi=0;ngi<arFullNg.length;ngi++){
             if(commentText.match(arFullNg[ngi])){
+                console.log("userNG matched text:" + commentText  + "ngword:" + arFullNg[ngi].toString())
                 return "";
             }
         }

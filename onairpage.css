@@ -22,6 +22,9 @@
     color: black;
     float: right;
 }
+[class*="styles__comment-list-wrapper___"] > div {
+    overflow: auto;
+}
 .movingComment {/* 横に流れるコメント */
     color: white;
     font-weight: bold;
