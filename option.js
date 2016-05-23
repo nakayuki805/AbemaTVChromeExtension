@@ -21,6 +21,7 @@ $(function(){
         var isCancelWheel = value.cancelWheel || false;
         var isTimeVisible = value.timeVisible || false;
         var isSureReadComment = value.sureReadComment || false;
+        var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -40,6 +41,7 @@ $(function(){
         $("#isCancelWheel").prop("checked", isCancelWheel);
         $("#isTimeVisible").prop("checked", isTimeVisible);
         $("#isSureReadComment").prop("checked", isSureReadComment);
+        $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
     });
     $("#saveBtn").click(function () {
         chrome.storage.local.set({
@@ -61,7 +63,8 @@ $(function(){
             "customPostWin": $("#isCustomPostWin").prop("checked"),
             "cancelWheel": $("#isCancelWheel").prop("checked"),
             "timeVisible": $("#isTimeVisible").prop("checked"),
-            "sureReadComment": $("#isSureReadComment").prop("checked")
+            "sureReadComment": $("#isSureReadComment").prop("checked"),
+            "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

@@ -25,12 +25,13 @@ var isCustomPostWin = false; //コメント投稿ボタン等を非表示、か�
 var isCancelWheel = false; //マウスホイールによるページ遷移を抑止する
 var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false;
+settings.isAlwaysShowPanel = false;
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
 //設定のロード
 if (chrome.storage) {
     chrome.storage.local.get(function (value) {
-        prefs = value;
+        settings = value;
         settings.isResizeScreen = value.resizeScreen || false;
         settings.isDblFullscreen = value.dblFullscreen || false;
         isEnterSubmit = value.enterSubmit || false;
@@ -50,6 +51,7 @@ if (chrome.storage) {
         isCancelWheel = value.cancelWheel || false;
         isTimeVisible = value.timeVisible || false;
         isSureReadComment = value.sureReadComment || false;
+        settings.isAlwaysShowPanel = value.isAlwaysShowPanel || false;
     });
 }
 
@@ -253,6 +255,12 @@ function screenBlackSet(type) {
     } else if (type == 3) {
         pwaku[0].setAttribute("style","background-color:black;");
     }
+}
+//マウスを動かすイベント
+function triggerMouseMoving(){
+    var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("mousemove", true, true, window, 0, 0, 0, Math.random()*100, Math.random()*100);
+    return document.dispatchEvent(evt);
 }
 function openOption(){
     $("#settcont").css("display","block");
@@ -615,7 +623,7 @@ function popElement(){
     $('[class^="TVContainer__side___"]').css("transform","translate(0,-50%)");
     $('[class^="TVContainer__right-list-slide___"]').css("z-index",11);
     var contHeader = $('[class^="AppContainer__header-container___"]');
-    var comeList = $('[class*="styles__comment-list-wrapper___"] > div');
+    var comeList = $(commentListParentSelector);
     var oldcontVisible = contHeader.css("visibility");
     contHeader.css("visibility","visible");
     contHeader.css("opacity",1);
@@ -715,6 +723,10 @@ $(window).on('load', function () {
         if (btn.length>0) {
             //var newCommentNum = parseInt(btn.text().match("^[0-9]+"));
             btn.trigger("click");// 1秒毎にコメントの読み込みボタンを自動クリック
+        }
+        //黒帯パネル表示のためマウスを動かすイベント発火
+        if (settings.isAlwaysShowPanel) {
+            triggerMouseMoving();
         }
         //コメント取得
         var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
