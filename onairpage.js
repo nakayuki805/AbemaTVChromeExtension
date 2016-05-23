@@ -24,7 +24,10 @@ var isInpWinBottom = false; //コメントリストを非表示、かつコメ�
 var isCustomPostWin = false; //コメント投稿ボタン等を非表示、かつコメント入力欄を1行化。
 var isCancelWheel = false; //マウスホイールによるページ遷移を抑止する
 var isTimeVisible = false; //残り時間を表示
-var isSureReadComment = false;
+var isSureReadComment = false; //コメント欄を開きっ放しにする
+//var isAlwaysShowPanel = false;
+var isMovieResize = false; //映像を枠に合わせて縮小
+
 settings.isAlwaysShowPanel = false;
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -51,6 +54,7 @@ if (chrome.storage) {
         isCancelWheel = value.cancelWheel || false;
         isTimeVisible = value.timeVisible || false;
         isSureReadComment = value.sureReadComment || false;
+        isMovieResize = value.movieResize || false;
         settings.isAlwaysShowPanel = value.isAlwaysShowPanel || false;
     });
 }
@@ -73,13 +77,37 @@ var arFullNg=[];
 var retrytick=[1000,3000,6000,12000];
 var retrycount=0;
 var proStart = new Date(); //番組開始時刻として現在時刻を仮設定
-var proEnd = new Date(Date.now()+60*60*1000); //番組終了として現在時刻から1時間後を仮設定
+//var proEnd = new Date(Date.now()+60*60*1000); //番組終了として現在時刻から1時間後を仮設定
+var proEnd = new Date(); //↑で23時～24時の間に実行すると終了時刻が1日ずれるので現時刻にした
 var forElementClose = 5;
 var EXcomelist;
 var EXcomments;
 
 var commentsSelector = '[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]';
 var commentListParentSelector = '[class*="styles__comment-list-wrapper___"] > div';
+
+var EXmain;
+var EXhead;
+var EXfoot;
+var EXfootcome;
+var EXfootcount;
+var EXfootcountview;
+var EXfootcountcome;
+var EXside;
+var EXchli;
+var EXinfo;
+var EXcome;
+var EXcomesend;
+var EXcomesendinp;
+var EXcomesendbut;
+var EXcomecont;
+var EXcomelist0;
+var EXobli;
+var EXwatchingnum;
+var EXwatchingstr;
+var EXvolume;
+var comeclickcd=5;
+
 function onresize() {
     if (settings.isResizeScreen) {
         var obj = $("object").parent(),
@@ -283,6 +311,8 @@ function openOption(){
     $("#isCancelWheel").prop("checked", isCancelWheel);
     $("#isTimeVisible").prop("checked", isTimeVisible);
     $("#isSureReadComment").prop("checked", isSureReadComment);
+    $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
+    $("#isMovieResize").prop("checked", isMovieResize);
 }
 function closeOption(){
     $("#settcont").css("display","none");
@@ -331,7 +361,7 @@ function delayset(){
         //設定ウィンドウの中身
         //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
         //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
-        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を禁止する<br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
+        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を禁止する<br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
         settcont.style = "width:600px;position:absolute;right:40px;bottom:-100px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
         if (slidecont[0]){ //画面右に設定ウィンドウ開くボタン設置
             slidecont[0].appendChild(optionbutton);
@@ -364,6 +394,7 @@ function delayset(){
             isCancelWheel = $("#isCancelWheel").prop("checked");
             isTimeVisible = $("#isTimeVisible").prop("checked");
             //isSureReadComment = $("#isSureReadComment").prop("checked");
+            isMovieResize = $("#isMovieResize").prop("checked");
             var hideCommentParam = 142;
             if (isCustomPostWin){
                 hideCommentParam=64;
@@ -551,7 +582,7 @@ function delayset(){
         });
         $('[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]').on("click",function(e){
             //コメント一覧の表示切替 ボタンならそのまま
-            if(e.target.tagName.toLowerCase()=='div'){
+            if(e.target.tagName.toLowerCase()=='form'){
                 toggleCommentList();
             }
         });
@@ -563,6 +594,7 @@ function delayset(){
         });
         EXcomelist = $(commentListParentSelector)[0];
         EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
+        setEXs(30);
         //映像のリサイズ
         onresize();
         console.log("delayset ok");
@@ -618,7 +650,7 @@ function StartMoveComment(){
 }
 function popElement(){
     //マウスオーバーで各要素表示
-    console.log("popElement()")
+//    console.log("popElement()")
     $('[class^="TVContainer__right-slide___"]').css("z-index",11);
     $('[class^="TVContainer__side___"]').css("transform","translate(0,-50%)");
     $('[class^="TVContainer__right-list-slide___"]').css("z-index",11);
@@ -663,6 +695,104 @@ function popElement(){
         }
     }
 }
+function waitforRightShown(retrycount){
+  var ss=4;
+//  var ww=16*Math.floor(($(window).width()-(($(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]').length>0)?310:0))/16);
+  var ww=$(window).width();
+  var wm=0;
+  var jo=$(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]');
+  if(jo.length>0){
+    for(var i=0;i<jo.length;i++){
+      if(wm<jo.eq(i).width()){
+        wm=jo.eq(i).width();
+      }
+    }
+  }
+  ww=16*Math.floor((ww-wm)/16);
+  var wh=Math.floor(ww*9/16);
+  var pt=44;
+  var pb=$(window).height()-wh-pt;
+  var ph=0;
+  if(isNaN(parseInt(EXfootcountcome.innerHTML))==true){
+    ww=16*Math.floor(ww/(16*ss));
+    wh=Math.floor(ww*9/16);
+    pt=44+(ss-1)*Math.floor(wh/2);
+    pb=$(window).height()-wh-pt;
+    ph=(ss-1)*Math.floor(ww/2);
+  }
+  EXwatchingstr=$(EXchli).children('[class*="styles__watch___"]:first').contents().find('img').prop("alt");
+  EXwatchingnum=$(EXobli).contents().find('img[alt='+EXwatchingstr+']').parents().index();
+  $(EXobli).children().css("width",ww+"px");
+  $(EXobli).children().css("height",wh+"px");
+  $(EXobli).css("padding",pt+"px 0px "+pb+"px "+ph+"px");
+  $(EXobli).parent().scrollTop(wh*EXwatchingnum);
+  $(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__watch___"]:first').index()*85-$(EXside).position().top);
+  if(retrycount>0){
+    setTimeout(waitforRightShown,50,retrycount-1);
+  }
+}
+function setEXs(retrycount){
+  var b=true;
+  if((EXmain=$('#main')[0])==null){b=false;}
+  else if((EXhead=$('[class^="AppContainer__header-container___"]:first')[0])==null){b=false;}
+  else if((EXfoot=$('[class^="TVContainer__footer-container___"]:first')[0])==null){b=false;console.log("foot");}
+  else if((EXfootcome=$(EXfoot).contents().find('[class*="styles__right-container"]:first')[0])==null){b=false;console.log("footcome");}
+  else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
+  else if((EXfootcountview=EXfootcount[0])==null){b=false;console.log("footcountview");}
+  else if((EXfootcountcome=EXfootcount[1])==null){b=false;console.log("footcountcome");}
+  else if((EXside=$('[class^="TVContainer__side___"]:first')[0])==null){b=false;console.log("side");}
+  else if((EXchli=$('[class*="TVContainer__right-v-channel-list___"]:first')[0])==null){b=false;console.log("chli");}
+  else if((EXinfo=$('[class^="TVContainer__right-slide___"]:first')[0])==null){b=false;console.log("info");}
+  else if((EXcome=$('[class^="TVContainer__right-comment-area___"]:first')[0])==null){b=false;console.log("come");}
+  else if((EXcomesend=$(EXcome).contents().find('[class*="styles__comment-form___"]:first')[0])==null){b=false;console.log("comesend");}
+  else if((EXcomesendinp=$(EXcomesend).contents().find('textarea:first')[0])==null){b=false;console.log("comesendinp");}
+  else if((EXcomelist0=$($(EXcome).contents().find('[class^="styles__no-contents-text___"]:first')[0]).parent()[0])==null){b=false;console.log("comelist");}
+  else if((EXvolume=$('[class^="styles__volume___"]:first')[0])==null){b=false;console.log("vol");}
+  else{
+    if($('img[class^="styles__channel-icon___"]').length>0){
+      var i=$('img[class^="styles__channel-icon___"]');
+      b=false;
+      for(var j=i.length-1;j>=0;j--){
+        k=i.eq(j).parent().parent();
+        if(k[0].childElementCount>EXchli.childElementCount-3&&k.height()>100*k[0].childElementCount){
+            EXobli=k[0];
+            b=true;
+            break;
+        }
+      }
+    }else{b=false;console.log("obli");}
+  }
+  if(b==true){
+    console.log("setEXs");
+  }else if(retrycount>0){
+    setTimeout(setEXs,1000,retrycount-1);
+  }
+}
+function isComeOpen(){
+  return ($(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length==1)?true:false;
+}
+function getComeId(inp){
+  return parseInt(/.*\$(\d+)$/.exec(EXcomelist.children[inp].getAttribute("data-reactid"))[1]);
+}
+function comesort(){
+//  if(isComeOpen()&&(isInpWinBottom&&getComeId(EXcomelist.childElementCount-1)!=0)){
+  if(isComeOpen()&&isInpWinBottom){
+    console.log("dec sort");
+    for(var i=0;i<EXcomelist.childElementCount-1;i++){
+      if(getComeId(i)<getComeId(i+1)){
+        EXcomelist.insertBefore(EXcomelist.children[i+1],EXcomelist.firstChild);
+      }
+    }
+//  }else if((isComeOpen()&&(!isInpWinBottom&&getComeId(EXcomelist.childElementCount-1)==0))||(!isComeOpen()&&getComeId(EXcomelist.childElementCount-1)==0)){
+  }else if(!isInpWinBottom||!isComeOpen()){
+    console.log("inc sort");
+    for(var i=EXcomelist.childElementCount-1;i>=1;i--){
+      if(getComeId(i-1)>getComeId(i)){
+        EXcomelist.insertBefore(EXcomelist.children[i-1],null);
+      }
+    }
+  }
+}
 $(window).on('load', function () {
     console.log("loaded");
     var csspath = chrome.extension.getURL("onairpage.css");
@@ -676,6 +806,15 @@ $(window).on('load', function () {
         if (settings.isDblFullscreen) {
                     $('[class*="styles__full-screen___"],[class*="styles__exit-fullscreen___"]').trigger("click");
         }
+    });
+    $(window).on("click",function(){
+      if(isSureReadComment){
+        comeclickcd=2;
+        setTimeout(comesort,500);
+      }
+      if(isMovieResize){
+        waitforRightShown(1);
+      }
     });
     //ウィンドウをリサイズ
     setTimeout(onresize, 1000);
@@ -740,14 +879,15 @@ $(window).on('load', function () {
 //        }
 //        commentNum = comments.length;
 //        EXcomelist = $(commentListParentSelector)[0];
-        if(EXcomelist){
+        if(EXcomelist&&isComeOpen()){
             var comeListLen = EXcomelist.childElementCount;
             if(comeListLen>commentNum){ //コメ増加あり
                 //入力欄が下にあるときはソート
                 if(isInpWinBottom){
-                    for(var i=commentNum;i<comeListLen;i++){
-                        EXcomelist.insertBefore(EXcomelist.children[i],EXcomelist.firstChild);
-                    }
+                    comesort();
+//                    for(var i=commentNum;i<comeListLen;i++){
+//                        EXcomelist.insertBefore(EXcomelist.children[i],EXcomelist.firstChild);
+//                    }
                     comments = $(commentsSelector);//ソートの反映
                     //ソートした後でコメントを流す 最初は流さない
                     if(isMovingComment&&commentNum>1){
@@ -961,7 +1101,12 @@ $(window).on('load', function () {
                 if($('[class^="TVContainer__right-slide___"][class*="TVContainer__right-slide--shown___"]').length==0){ //番組情報が表示状態でないとき
                     if($('[class^="TVContainer__right-list-slide___"][class*="TVContainer__right-slide--shown___"]').length==0){ //放送中一覧が表示状態でないとき
                         if($('[class^="TVContainer__footer___"] [class*="styles__right-container___"][class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
-                            $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').trigger("click");
+                            if(comeclickcd>0){
+                                comeclickcd-=1;
+                                if(comeclickcd<=0){
+                                    $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').trigger("click");
+                                }
+                            }
                         }
                     }
                 }
