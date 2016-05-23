@@ -1,3 +1,4 @@
+var settings = {};
 /*設定
 拡張機能のオプション画面から設定できます。
 以下の変数のコメントにある機能を利用する場合はtrue、利用しない場合はfalseを代入してください。
@@ -5,8 +6,8 @@
 var isHoge = true; //利用したい機能
 var isFuga = false; //利用したくない機能
 */
-var isResizeScreen = false; //ウィンドウが横長でも映像の端が切れることないようウィンドウに収まるようリサイズ 不具合報告があったのでデフォルトでfalse
-var isDblFullscreen = false; //ダブルクリックで全画面表示に切り替え(全画面表示のときは機能しません。通常→全画面のみ)
+settings.isResizeScreen = false; //ウィンドウが横長でも映像の端が切れることないようウィンドウに収まるようリサイズ 不具合報告があったのでデフォルトでfalse
+settings.isDblFullscreen = false; //ダブルクリックで全画面表示に切り替え(全画面表示のときは機能しません。通常→全画面のみ)
 var isEnterSubmit = false; //エンターでコメント送信(無効にしていてもShift+エンターで送信できます。)
 var isHideOldComment = false; //古いコメントを非表示
 var isCMBlack = false; //コメント数無効(CommentMukou)の時ずっと画面真っ黒
@@ -29,8 +30,9 @@ console.log("script loaded");
 //設定のロード
 if (chrome.storage) {
     chrome.storage.local.get(function (value) {
-        isResizeScreen = value.resizeScreen || false;
-        isDblFullscreen = value.dblFullscreen || false;
+        prefs = value;
+        settings.isResizeScreen = value.resizeScreen || false;
+        settings.isDblFullscreen = value.dblFullscreen || false;
         isEnterSubmit = value.enterSubmit || false;
         isHideOldComment = value.hideOldComment || false;
         isCMBlack = value.CMBlack || false;
@@ -75,7 +77,7 @@ var EXcomelist;
 var EXcomments;
 
 function onresize() {
-    if (isResizeScreen) {
+    if (settings.isResizeScreen) {
         var obj = $("object").parent(),
             wd = window.innerWidth,
             hg = window.innerHeight,
@@ -86,7 +88,7 @@ function onresize() {
         if (wd > wdbyhg) {
             newwd = wdbyhg;
             newhg = hg;
-            newtop = (hg-newhg)/2;
+            //newtop = (hg-newhg)/2;
         } else {
             newwd = wd;
             newhg = wd*9/16;
@@ -252,8 +254,8 @@ function screenBlackSet(type) {
 function openOption(){
     $("#settcont").css("display","block");
     //設定ウィンドウにロード
-    $("#isResizeScreen").prop("checked", isResizeScreen);
-    $("#isDblFullscreen").prop("checked", isDblFullscreen);
+    $("#isResizeScreen").prop("checked", settings.isResizeScreen);
+    $("#isDblFullscreen").prop("checked", settings.isDblFullscreen);
     $("#isEnterSubmit").prop("checked", isEnterSubmit);
     $("#isHideOldComment").prop("checked", isHideOldComment);
     $("#isCMBlack").prop("checked", isCMBlack);
@@ -332,8 +334,8 @@ function delayset(){
             }
         });
         $("#saveBtn").on("click",function(){
-            isResizeScreen = $("#isResizeScreen").prop("checked");
-            isDblFullscreen = $("#isDblFullscreen").prop("checked");
+            settings.isResizeScreen = $("#isResizeScreen").prop("checked");
+            settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
             isEnterSubmit = $("#isEnterSubmit").prop("checked");
             isHideOldComment = $("#isHideOldComment").prop("checked");
             isCMBlack = $("#isCMBlack").prop("checked");
@@ -658,7 +660,7 @@ $(window).on('load', function () {
     //ダブルクリックでフルスクリーン
     $(window).on("dblclick",function(){
         console.log("dblclick");
-        if (isDblFullscreen) {
+        if (settings.isDblFullscreen) {
                     $('[class*="styles__full-screen___"],[class*="styles__exit-fullscreen___"]').trigger("click");
         }
     });
