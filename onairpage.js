@@ -793,6 +793,12 @@ function comesort(){
     }
   }
 }
+function otosageru(){
+    var teka=document.createEvent("MouseEvents");
+    var teki=$('[class^="styles__slider-container___"]').children();
+    teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teki.offset().top+106-92*0.3);
+    return teki[0].dispatchEvent(teka);
+}
 $(window).on('load', function () {
     console.log("loaded");
     var csspath = chrome.extension.getURL("onairpage.css");
@@ -866,6 +872,10 @@ $(window).on('load', function () {
         //黒帯パネル表示のためマウスを動かすイベント発火
         if (settings.isAlwaysShowPanel) {
             triggerMouseMoving();
+        }
+        //音量が最大なら30%に下げる
+        if($('[class^="styles__highlighter___"]').css("height")=="92px"){
+          otosageru();
         }
         //コメント取得
         var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
