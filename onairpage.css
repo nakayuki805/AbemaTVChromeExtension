@@ -6,6 +6,7 @@
 }
 [class^="TVContainer__right-comment-area___"] > div > form[class*="styles__comment-form___"] > div{ /* コメントフォーム */
     background: rgba(255, 255, 255, 0.4);
+    z-index: 20;
 }
 [class*="styles__comment-form___"] textarea { /*テキストボックス*/
     opacity: 0.5;
@@ -84,4 +85,8 @@ body{
 }
 [class^="TVContainer__side___"] button{ /* 画面右の番組表ボタンと番組移動ボタン */
     opacity:0.5;
+    z-index:20;
+}
+[class^="TVContainer__side___"] { /* 画面右の番組表ボタンと番組移動ボタンをコメント欄の上からクリックできるように */
+    z-index:20;
 }

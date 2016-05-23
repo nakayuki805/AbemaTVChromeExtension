@@ -76,6 +76,8 @@ var forElementClose = 5;
 var EXcomelist;
 var EXcomments;
 
+var commentsSelector = '[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]';
+var commentListParentSelector = '[class*="styles__comment-list-wrapper___"] > div';
 function onresize() {
     if (settings.isResizeScreen) {
         var obj = $("object").parent(),
@@ -357,7 +359,7 @@ function delayset(){
             if (isCustomPostWin){
                 hideCommentParam=64;
             }
-            var comeList = $('[class*="styles__comment-list___"]');
+            var comeList = $(commentListParentSelector);
             var comeForm = $('[class*="styles__comment-form___"]');
             if(isHideOldComment){
                 comeList.css("overflow","hidden");
@@ -454,7 +456,7 @@ function delayset(){
             popElement();
             var contCome = $('[class^="TVContainer__right-comment-area___"]');
             var comeForm = $('[class*="styles__comment-form___"]');
-            var comeList = $('[class*="styles__comment-list___"]');
+            var comeList = $(commentListParentSelector);
             var hideCommentParam = 142;
             if (isCustomPostWin){
                 hideCommentParam=64;
@@ -550,7 +552,7 @@ function delayset(){
                 e.stopPropagation();
             }
         });
-        EXcomelist = $('[class*="styles__comment-list-wrapper___"] > div')[0];
+        EXcomelist = $(commentListParentSelector)[0];
         EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
         //映像のリサイズ
         onresize();
@@ -564,8 +566,9 @@ function delayset(){
     }
 }
 function toggleCommentList(){
+    console.log("toggleCommentList()")
     var contCome = $('[class^="TVContainer__right-comment-area___"]');
-    var comeList = $('[class*="styles__comment-list___"]');
+    var comeList = $(commentListParentSelector);
     var hideCommentParam = 142;
     if (isCustomPostWin){
         hideCommentParam=64;
@@ -606,11 +609,12 @@ function StartMoveComment(){
 }
 function popElement(){
     //マウスオーバーで各要素表示
+    console.log("popElement()")
     $('[class^="TVContainer__right-slide___"]').css("z-index",11);
     $('[class^="TVContainer__side___"]').css("transform","translate(0,-50%)");
     $('[class^="TVContainer__right-list-slide___"]').css("z-index",11);
     var contHeader = $('[class^="AppContainer__header-container___"]');
-    var comeList = $('[class*="styles__comment-list___"]');
+    var comeList = $('[class*="styles__comment-list-wrapper___"] > div');
     var oldcontVisible = contHeader.css("visibility");
     contHeader.css("visibility","visible");
     contHeader.css("opacity",1);
@@ -686,7 +690,7 @@ $(window).on('load', function () {
 
     //古いコメントを非表示
     if (isHideOldComment) {
-        var hideOldCommentCSS = '[class*="styles__comment-list___"]{overflow: hidden;}';
+        var hideOldCommentCSS = commentListParentSelector + '{overflow: hidden;}';
         $("<link rel='stylesheet' href='data:text/css," + encodeURI(hideOldCommentCSS) + "'>").appendTo("head");
     }
 
@@ -722,7 +726,7 @@ $(window).on('load', function () {
 //            }
 //        }
 //        commentNum = comments.length;
-//        EXcomelist = $('[class*="styles__comment-list___"]')[0];
+//        EXcomelist = $(commentListParentSelector)[0];
         if(EXcomelist){
             var comeListLen = EXcomelist.childElementCount;
             if(comeListLen>commentNum){ //コメ増加あり
@@ -731,7 +735,7 @@ $(window).on('load', function () {
                     for(var i=commentNum;i<comeListLen;i++){
                         EXcomelist.insertBefore(EXcomelist.children[i],EXcomelist.firstChild);
                     }
-                    comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');//ソートの反映
+                    comments = $(commentsSelector);//ソートの反映
                     //ソートした後でコメントを流す 最初は流さない
                     if(isMovingComment&&commentNum>1){
                         for(var i=Math.max(comeListLen-movingCommentLimit,commentNum);i<comeListLen;i++){
@@ -961,7 +965,7 @@ $(window).on('load', function () {
                     var contFooter = $('[class^="TVContainer__footer-container___"]');
                     contFooter.css("visibility","");
                     contFooter.css("opacity","");
-                    var comeList = $('[class*="styles__comment-list___"]');
+                    var comeList = $(commentListParentSelector);
                     var contCome = $('[class^="TVContainer__right-comment-area___"]');
                     contCome.css("position","absolute");
                     var hideCommentParam = 142;
