@@ -823,6 +823,22 @@ function otomouseup(){
     teka.initMouseEvent("mouseup",true,true,window,0,0,0,teki.offset().left+15,teku-teke);
     return teki[0].dispatchEvent(teka);
 }
+function faintcheck2(retrycount,fcd){
+  var pwaku = $('[class^="style__overlap___"]'); //動画枠
+  var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
+  if(pwaku[0]&&come[1]){
+    if(isNaN(parseInt(come[1].innerHTML))){
+      cmblockcd=fcd;
+      return;
+    }
+  }
+  if(retrycount>0){
+    setTimeout(faintcheck2,150,retrycount-1,fcd);
+  }
+}
+function faintcheck(fcd){
+  faintcheck2(5,Math.max(1,fcd));
+}
 $(window).on('load', function () {
     console.log("loaded");
     var csspath = chrome.extension.getURL("onairpage.css");
@@ -965,6 +981,7 @@ $(window).on('load', function () {
         //var viewCount = countElements[0].innerHTML
         //var commentCount = countElements[1].innerHTML
         //コメント数無効の時画面真っ黒
+        var faintchecked=false;
         if (isCMBlack) {
             var pwaku = $('[class^="style__overlap___"]'); //動画枠
             var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
@@ -981,6 +998,10 @@ $(window).on('load', function () {
                 }else if(!isNaN(parseInt(come[1].innerHTML))&&comeLatestCount<0){
                     //今コメント数有効で直前がコメント数無効(=コメント数無効終了?)
 //                    screenBlackSet(0);
+                    if(!faintchecked){
+                      faintchecked=true;
+                      faintcheck(cmblockcd);
+                    }
                     cmblockcd=cmblockib;
                 }
             }
@@ -998,6 +1019,10 @@ $(window).on('load', function () {
                 }else if(!isNaN(parseInt(come[1].innerHTML))&&comeLatestCount<0){
                     //今コメント数有効で直前がコメント数無効(=コメント数無効終了?)
 //                    soundSet(true);
+                    if(!faintchecked){
+                      faintchecked=true;
+                      faintcheck(cmblockcd);
+                    }
                     cmblockcd=cmblockib;
                 }
             }
@@ -1007,6 +1032,7 @@ $(window).on('load', function () {
             cmblockcd-=1;
             $(EXcomesendinp).parent().css("background","rgba(0,0,0,0.4)");
             if(cmblockcd<=0){
+              cmblockcd=0;
               if(isCMBlack){
                 if(isCMBkTrans){
                   screenBlackSet(1);
@@ -1019,6 +1045,7 @@ $(window).on('load', function () {
           }else{
             cmblockcd+=1;
             if(cmblockcd>=0){
+              cmblockcd=0;
               $(EXcomesendinp).parent().css("background","");
               if(isCMBlack){screenBlackSet(0);}
               if(isCMsoundoff){soundSet(true);}
