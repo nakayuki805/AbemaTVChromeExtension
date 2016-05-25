@@ -106,7 +106,10 @@ var EXobli;
 var EXwatchingnum;
 var EXwatchingstr;
 var EXvolume;
-var comeclickcd=5;
+var comeclickcd=2; //コメント欄を早く開きすぎないためのウェイト
+var cmblockia=7; //コメント欄が無効になってからCM処理までのウェイト(+1以上)
+var cmblockib=-1; //有効になってから解除までのウェイト(-1以下)
+var cmblockcd=0; //カウント用
 
 function onresize() {
     if (settings.isResizeScreen) {
@@ -187,7 +190,7 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/(#[^　 ]+[　 ]*)+$/g,""); //twitter-tag
     ngedcome = ngedcome.replace(/[ｗw]{4,}/g,"ｗｗｗ");
     ngedcome = ngedcome.replace(/ʬ+/g,"ｗ");
-    ngedcome = ngedcome.replace(/h?ttps?:\/\/.*\..*/,"");
+    ngedcome = ngedcome.replace(/h?ttps?\:\/\/.*\..*/,"");
     ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g,"ー");
     ngedcome = ngedcome.replace(/[・\･…‥、\､。\｡．\.]{2,}/g,"‥");
     ngedcome = ngedcome.replace(/[　 \n]+/g," ");
@@ -361,7 +364,7 @@ function delayset(){
         //設定ウィンドウの中身
         //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
         //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
-        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を禁止する<br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
+        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールの番組移動機能を音量操作に変更する<br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
         settcont.style = "width:600px;position:absolute;right:40px;bottom:-100px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
         if (slidecont[0]){ //画面右に設定ウィンドウ開くボタン設置
             slidecont[0].appendChild(optionbutton);
@@ -572,6 +575,7 @@ function delayset(){
                 }
             },true);
         }
+        setEXs(30);
         //右下にコメント一覧表示切替を設置
         $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').on("click",function(){
             if(isSureReadComment){
@@ -580,13 +584,15 @@ function delayset(){
                 }
             }
         });
-        $('[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]').on("click",function(e){
+//        $('[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]').on("click",function(e){
+        $(EXcomesend).on("click",function(e){
             //コメント一覧の表示切替 ボタンならそのまま
             if(e.target.tagName.toLowerCase()=='form'){
                 toggleCommentList();
             }
         });
-        $('[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]>form').on("click",function(e){
+//        $('[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]>form').on("click",function(e){
+        $(EXcomesendinp).parent().on("click",function(e){
             //枠から↑へのバブルを止める
             if(e.target.tagName.toLowerCase()=='div'){
                 e.stopPropagation();
@@ -594,7 +600,6 @@ function delayset(){
         });
         EXcomelist = $(commentListParentSelector)[0];
         EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
-        setEXs(30);
         //映像のリサイズ
         onresize();
         console.log("delayset ok");
@@ -777,7 +782,7 @@ function getComeId(inp){
 function comesort(){
 //  if(isComeOpen()&&(isInpWinBottom&&getComeId(EXcomelist.childElementCount-1)!=0)){
   if(isComeOpen()&&isInpWinBottom){
-    console.log("dec sort");
+//  console.log("dec sort");
     for(var i=0;i<EXcomelist.childElementCount-1;i++){
       if(getComeId(i)<getComeId(i+1)){
         EXcomelist.insertBefore(EXcomelist.children[i+1],EXcomelist.firstChild);
@@ -785,7 +790,7 @@ function comesort(){
     }
 //  }else if((isComeOpen()&&(!isInpWinBottom&&getComeId(EXcomelist.childElementCount-1)==0))||(!isComeOpen()&&getComeId(EXcomelist.childElementCount-1)==0)){
   }else if(!isInpWinBottom||!isComeOpen()){
-    console.log("inc sort");
+//  console.log("inc sort");
     for(var i=EXcomelist.childElementCount-1;i>=1;i--){
       if(getComeId(i-1)>getComeId(i)){
         EXcomelist.insertBefore(EXcomelist.children[i-1],null);
@@ -797,7 +802,42 @@ function otosageru(){
     var teka=document.createEvent("MouseEvents");
     var teki=$('[class^="styles__slider-container___"]').children();
     teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teki.offset().top+106-92*0.3);
+    setTimeout(otomouseup,100);
     return teki[0].dispatchEvent(teka);
+}
+function moVol(d){
+    var teka=document.createEvent("MouseEvents");
+    var teki=$(EXvolume).contents().find('[class^="styles__slider-container___"]:first').children();
+    var teku=teki.offset().top+106;
+    var teke=parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]:first').css("height"));
+    teke=(teke+d>92)?92:(teke+d<0)?0:(teke+d);
+    teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teku-teke);
+    setTimeout(otomouseup,100);
+    return teki[0].dispatchEvent(teka);
+}
+function otomouseup(){
+    var teka=document.createEvent("MouseEvents");
+    var teki=$(EXvolume).contents().find('[class^="styles__slider-container___"]:first').children();
+    var teku=teki.offset().top+106;
+    var teke=parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]:first').css("height"));
+    teka.initMouseEvent("mouseup",true,true,window,0,0,0,teki.offset().left+15,teku-teke);
+    return teki[0].dispatchEvent(teka);
+}
+function faintcheck2(retrycount,fcd){
+  var pwaku = $('[class^="style__overlap___"]'); //動画枠
+  var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
+  if(pwaku[0]&&come[1]){
+    if(isNaN(parseInt(come[1].innerHTML))){
+      cmblockcd=fcd;
+      return;
+    }
+  }
+  if(retrycount>0){
+    setTimeout(faintcheck2,150,retrycount-1,fcd);
+  }
+}
+function faintcheck(fcd){
+  faintcheck2(5,Math.max(1,fcd));
 }
 $(window).on('load', function () {
     console.log("loaded");
@@ -827,6 +867,7 @@ $(window).on('load', function () {
     //マウスホイール無効
     if (isCancelWheel){
         window.addEventListener("mousewheel",function(e){
+            moVol(e.wheelDelta<0?-5:5);
             if (isCancelWheel){ //設定ウィンドウ反映用
                 e.stopImmediatePropagation();
             }
@@ -940,6 +981,7 @@ $(window).on('load', function () {
         //var viewCount = countElements[0].innerHTML
         //var commentCount = countElements[1].innerHTML
         //コメント数無効の時画面真っ黒
+        var faintchecked=false;
         if (isCMBlack) {
             var pwaku = $('[class^="style__overlap___"]'); //動画枠
             var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
@@ -947,14 +989,20 @@ $(window).on('load', function () {
                 //切替時のみ動作
                 if(isNaN(parseInt(come[1].innerHTML))&&comeLatestCount>=0){
                     //今コメント数無効で直前がコメント数有効(=コメント数無効開始?)
-                    if(isCMBkTrans){
-                            screenBlackSet(1);
-                    }else{
-                        screenBlackSet(3);
-                    }
+//                    if(isCMBkTrans){
+//                            screenBlackSet(1);
+//                    }else{
+//                        screenBlackSet(3);
+//                    }
+                    cmblockcd=cmblockia;
                 }else if(!isNaN(parseInt(come[1].innerHTML))&&comeLatestCount<0){
                     //今コメント数有効で直前がコメント数無効(=コメント数無効終了?)
-                    screenBlackSet(0);
+//                    screenBlackSet(0);
+                    if(!faintchecked){
+                      faintchecked=true;
+                      faintcheck(cmblockcd);
+                    }
+                    cmblockcd=cmblockib;
                 }
             }
         }
@@ -966,12 +1014,43 @@ $(window).on('load', function () {
             if (valvol[0]&&come[1]){
                 if(isNaN(parseInt(come[1].innerHTML))&&comeLatestCount>=0){
                     //今コメント数無効で直前がコメント数有効(=コメント数無効開始?)
-                    soundSet(false);
+//                    soundSet(false);
+                    cmblockcd=cmblockia;
                 }else if(!isNaN(parseInt(come[1].innerHTML))&&comeLatestCount<0){
                     //今コメント数有効で直前がコメント数無効(=コメント数無効終了?)
-                    soundSet(true);
+//                    soundSet(true);
+                    if(!faintchecked){
+                      faintchecked=true;
+                      faintcheck(cmblockcd);
+                    }
+                    cmblockcd=cmblockib;
                 }
             }
+        }
+        if(cmblockcd!=0){
+          if(cmblockcd>0){
+            cmblockcd-=1;
+            $(EXcomesendinp).parent().css("background","rgba(0,0,0,0.4)");
+            if(cmblockcd<=0){
+              cmblockcd=0;
+              if(isCMBlack){
+                if(isCMBkTrans){
+                  screenBlackSet(1);
+                }else{
+                  screenBlackSet(3);
+                }
+              }
+              if(isCMsoundoff){soundSet(false);}
+            }
+          }else{
+            cmblockcd+=1;
+            if(cmblockcd>=0){
+              cmblockcd=0;
+              $(EXcomesendinp).parent().css("background","");
+              if(isCMBlack){screenBlackSet(0);}
+              if(isCMsoundoff){soundSet(true);}
+            }
+          }
         }
 
         var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
