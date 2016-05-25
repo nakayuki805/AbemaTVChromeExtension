@@ -294,7 +294,12 @@ function triggerMouseMoving(){
     return document.dispatchEvent(evt);
 }
 function openOption(){
-    $("#settcont").css("display","block");
+    var settcontjq = $("#settcont");
+    settcontjq.css("display","block");
+    var settconttop = settcontjq.offset().top;
+    if (settconttop < 0){//設定ウィンドウが画面からはみ出したときにスクロールできるように
+        settcontjq.height(settcontjq.height() + settcontjq.offset().top).css("overflow-y", "scroll");
+    }
     //設定ウィンドウにロード
     $("#isResizeScreen").prop("checked", settings.isResizeScreen);
     $("#isDblFullscreen").prop("checked", settings.isDblFullscreen);
