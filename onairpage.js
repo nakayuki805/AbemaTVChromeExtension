@@ -763,7 +763,7 @@ function setEXs(retrycount){
       var i=$('img[class^="styles__channel-icon___"]');
       b=false;
       for(var j=i.length-1;j>=0;j--){
-        k=i.eq(j).parent().parent();
+        var k=i.eq(j).parent().parent();
         if(k[0].childElementCount>EXchli.childElementCount-3&&k.height()>100*k[0].childElementCount){
             EXobli=k[0];
             b=true;
@@ -872,7 +872,9 @@ $(window).on('load', function () {
     //マウスホイール無効
     if (isCancelWheel){
         window.addEventListener("mousewheel",function(e){
-            moVol(e.wheelDelta<0?-5:5);
+            if (e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+                moVol(e.wheelDelta<0?-5:5);
+            }
             if (isCancelWheel){ //設定ウィンドウ反映用
                 e.stopImmediatePropagation();
             }
