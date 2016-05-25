@@ -19,6 +19,8 @@ $(function(){
         var isInpWinBottom = value.inpWinBottom || false;
         var isCustomPostWin = value.customPostWin || false;
         var isCancelWheel = value.cancelWheel || false;
+        var isVolumeWheel = value.volumeWheel || false;
+        var changeMaxVolume = Math.min(100,Math.max(0,(value.changeMaxVolume || 100)));
         var isTimeVisible = value.timeVisible || false;
         var isSureReadComment = value.sureReadComment || false;
         var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
@@ -40,6 +42,8 @@ $(function(){
         $("#isInpWinBottom").prop("checked", isInpWinBottom);
         $("#isCustomPostWin").prop("checked", isCustomPostWin);
         $("#isCancelWheel").prop("checked", isCancelWheel);
+        $("#isVolumeWheel").prop("checked", isVolumeWheel);
+        $("#changeMaxVolume").val(changeMaxVolume);
         $("#isTimeVisible").prop("checked", isTimeVisible);
         $("#isSureReadComment").prop("checked", isSureReadComment);
         $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
@@ -64,6 +68,8 @@ $(function(){
             "inpWinBottom": $("#isInpWinBottom").prop("checked"),
             "customPostWin": $("#isCustomPostWin").prop("checked"),
             "cancelWheel": $("#isCancelWheel").prop("checked"),
+            "volumeWheel": $("#isVolumeWheel").prop("checked"),
+            "changeMaxVolume": Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val()))),
             "timeVisible": $("#isTimeVisible").prop("checked"),
             "sureReadComment": $("#isSureReadComment").prop("checked"),
             "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked"),
