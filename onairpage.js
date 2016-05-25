@@ -23,6 +23,8 @@ var fullNg = "";//流れるコメントのうち特定の文字列を含む場�
 var isInpWinBottom = false; //コメントリストを非表示、かつコメント入力欄を下の方へ。
 var isCustomPostWin = false; //コメント投稿ボタン等を非表示、かつコメント入力欄を1行化。
 var isCancelWheel = false; //マウスホイールによるページ遷移を抑止する
+var isVolumeWheel = false; //マウスホイールで音量を操作する
+var changeMaxVolume = 100; //最大音量(100)をこの値へ自動変更
 var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false; //コメント欄を開きっ放しにする
 //var isAlwaysShowPanel = false;
@@ -52,6 +54,8 @@ if (chrome.storage) {
         isInpWinBottom = value.inpWinBottom || false;
         isCustomPostWin = value.customPostWin || false;
         isCancelWheel = value.cancelWheel || false;
+        isVolumeWheel = value.volumeWheel || false;
+        changeMaxVolume = Math.min(100,Math.max(0,(value.changeMaxVolume || changeMaxVolume)));
         isTimeVisible = value.timeVisible || false;
         isSureReadComment = value.sureReadComment || false;
         isMovieResize = value.movieResize || false;
@@ -317,6 +321,8 @@ function openOption(){
     $("#isInpWinBottom").prop("checked", isInpWinBottom);
     $("#isCustomPostWin").prop("checked", isCustomPostWin);
     $("#isCancelWheel").prop("checked", isCancelWheel);
+    $("#isVolumeWheel").prop("checked", isVolumeWheel);
+    $("#changeMaxVolume").val(changeMaxVolume);
     $("#isTimeVisible").prop("checked", isTimeVisible);
     $("#isSureReadComment").prop("checked", isSureReadComment);
     $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
@@ -400,6 +406,8 @@ function delayset(){
             isInpWinBottom = $("#isInpWinBottom").prop("checked");
             //isCustomPostWin = $("#isCustomPostWin").prop("checked");
             isCancelWheel = $("#isCancelWheel").prop("checked");
+            isVolumeWheel = $("#isVolumeWheel").prop("checked");
+            changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
             isTimeVisible = $("#isTimeVisible").prop("checked");
             //isSureReadComment = $("#isSureReadComment").prop("checked");
             isMovieResize = $("#isMovieResize").prop("checked");
@@ -806,7 +814,8 @@ function comesort(){
 function otosageru(){
     var teka=document.createEvent("MouseEvents");
     var teki=$('[class^="styles__slider-container___"]').children();
-    teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teki.offset().top+106-92*0.3);
+    var teku=teki.offset().top+106-Math.min(92,Math.max(0,Math.floor(92*changeMaxVolume/100)));
+    teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teku);
     setTimeout(otomouseup,100);
     return teki[0].dispatchEvent(teka);
 }
@@ -815,7 +824,8 @@ function moVol(d){
     var teki=$(EXvolume).contents().find('[class^="styles__slider-container___"]:first').children();
     var teku=teki.offset().top+106;
     var teke=parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]:first').css("height"));
-    teke=(teke+d>92)?92:(teke+d<0)?0:(teke+d);
+//    teke=(teke+d>92)?92:(teke+d<0)?0:(teke+d);
+    teke=(teke+d>91)?91:(teke+d<0)?0:(teke+d);
     teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teku-teke);
     setTimeout(otomouseup,100);
     return teki[0].dispatchEvent(teka);
@@ -827,6 +837,28 @@ function otomouseup(){
     var teke=parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]:first').css("height"));
     teka.initMouseEvent("mouseup",true,true,window,0,0,0,teki.offset().left+15,teku-teke);
     return teki[0].dispatchEvent(teka);
+}
+function otoColor(){
+  var jo=$(EXvolume).contents().find('svg:first');
+  if(jo.length>0){
+    if(jo.css("fill")=="rgb(255, 255, 255)"){
+      jo.css("fill","red");
+      setTimeout(otoColor,800);
+    }else{
+      jo.css("fill","");
+    }
+  }
+}
+function otoSize(ts){
+  var jo=$(EXvolume).contents().find('svg:first');
+  if(jo.length>0){
+    if(jo.css("zoom")=="1"){
+      jo.css("zoom",ts);
+      setTimeout(otoSize,400);
+    }else{
+      jo.css("zoom","");
+    }
+  }
 }
 function faintcheck2(retrycount,fcd){
   var pwaku = $('[class^="style__overlap___"]'); //動画枠
@@ -869,10 +901,13 @@ $(window).on('load', function () {
     });
     //ウィンドウをリサイズ
     setTimeout(onresize, 1000);
-    //マウスホイール無効
-    if (isCancelWheel){
+    //マウスホイール無効か音量操作
+    if (isCancelWheel||isVolumeWheel){
         window.addEventListener("mousewheel",function(e){
-            if (e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+            if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+                if($(EXvolume).contents().find('svg:first').css("zoom")=="1"){
+                  otoSize(e.wheelDelta<0?0.8:1.2);
+                }
                 moVol(e.wheelDelta<0?-5:5);
             }
             if (isCancelWheel){ //設定ウィンドウ反映用
@@ -921,8 +956,11 @@ $(window).on('load', function () {
         if (settings.isAlwaysShowPanel) {
             triggerMouseMoving();
         }
-        //音量が最大なら30%に下げる
-        if($('[class^="styles__highlighter___"]').css("height")=="92px"){
+        //音量が最大なら設定値へ自動変更
+        if(changeMaxVolume<100&&$('[class^="styles__highlighter___"]').css("height")=="92px"){
+          if($(EXvolume).contents().find('svg:first').css("fill")=="rgb(255, 255, 255)"){
+            otoColor();
+          }
           otosageru();
         }
         //コメント取得
@@ -1001,7 +1039,9 @@ $(window).on('load', function () {
 //                    }else{
 //                        screenBlackSet(3);
 //                    }
-                    cmblockcd=cmblockia;
+                    if(cmblockcd<=0){
+                      cmblockcd=cmblockia;
+                    }
                 }else if(!isNaN(parseInt(come[1].innerHTML))&&comeLatestCount<0){
                     //今コメント数有効で直前がコメント数無効(=コメント数無効終了?)
 //                    screenBlackSet(0);
@@ -1022,7 +1062,9 @@ $(window).on('load', function () {
                 if(isNaN(parseInt(come[1].innerHTML))&&comeLatestCount>=0){
                     //今コメント数無効で直前がコメント数有効(=コメント数無効開始?)
 //                    soundSet(false);
-                    cmblockcd=cmblockia;
+                    if(cmblockcd<=0){
+                      cmblockcd=cmblockia;
+                    }
                 }else if(!isNaN(parseInt(come[1].innerHTML))&&comeLatestCount<0){
                     //今コメント数有効で直前がコメント数無効(=コメント数無効終了?)
 //                    soundSet(true);
