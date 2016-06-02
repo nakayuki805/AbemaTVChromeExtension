@@ -138,6 +138,22 @@ function onresize() {
         console.log("screen resized");
     }
 }
+function toggleFullscreen() {
+    var fullscElem = document.fullscreenElement || document.webkitFullscreenElement|| document.mozFullscreenElement|| document.msFullscreenElement;
+    if (fullscElem) {
+        document.exitFullscreen && document.exitFullscreen();
+        document.webkitCancelFullScreen && document.webkitCancelFullScreen();
+        document.mozCancelFullScreen && document.mozCancelFullScreen();
+        document.msExitFullscreen && document.msExitFullscreen();
+        document.cancelFullScreen && document.cancelFullScreen();
+    } else {
+        var fullscTarget = document.body;
+        fullscTarget.requestFullscreen && fullscTarget.requestFullscreen();
+        fullscTarget.webkitRequestFullscreen && fullscTarget.webkitRequestFullscreen();
+        fullscTarget.mozRequestFullScreen && fullscTarget.mozRequestFullScreen();
+        fullscTarget.msRequestFullscreen && fullscTarget.msRequestFullscreen();
+    }
+}
 //function moveComment(commentElement, commentLeftEnd){
 //    var commentLeft = commentElement.offset().left - 2;
 //    commentElement.css("left", commentLeft+"px");
@@ -384,7 +400,7 @@ function delayset(){
         //設定ウィンドウの中身
         //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
         //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
-        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を止める<br><input type=checkbox id=isVolumeWheel>:マウスホイールによる番組移動を音量操作へ変更する<br>音量が最大(100)の場合は以下へ自動変更する:<input type=number id=changeMaxVolume><br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
+        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を止める<br><input type=checkbox id=isVolumeWheel>:マウスホイールによる番組移動を音量操作へ変更する<br>音量が最大(100)の場合は以下へ自動変更する:<input type=number id=changeMaxVolume><br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
         settcont.style = "width:600px;position:absolute;right:40px;bottom:-100px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
         if (slidecont[0]){ //画面右に設定ウィンドウ開くボタン設置
             slidecont[0].appendChild(optionbutton);
@@ -906,7 +922,14 @@ $(window).on('load', function () {
     $(window).on("dblclick",function(){
         console.log("dblclick");
         if (settings.isDblFullscreen) {
-                    $('[class*="styles__full-screen___"],[class*="styles__exit-fullscreen___"]').trigger("click");
+                    //$('[class*="styles__full-screen___"],[class*="styles__exit-fullscreen___"]').trigger("click");
+            toggleFullscreen();
+        }
+    });
+    $('button[class*="styles__full-screen___"]')[0].addEventListener("click", function(e){
+        if (settings.isDblFullscreen) {
+            toggleFullscreen();
+            e.stopImmediatePropagation();
         }
     });
     $(window).on("click",function(){
