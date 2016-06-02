@@ -291,15 +291,20 @@ function screenBlackSet(type) {
     }
 }
 //マウスを動かすイベント
+var movecnt = 0;
+function triggerMousemoveEvt(x, y){
+    var evt = document.createEvent("MouseEvents");
+    evt.initMouseEvent("mousemove", true, false, window, 0, 0, 0, x, y);
+    return document.dispatchEvent(evt);
+}
 function triggerMouseMoving(){
     //console.log('triggerMM')
-    /*var overlap = $('[class^="style__overlap___"]');
+    var overlap = $('[class^="AppContainer__background-black___"]');
     overlap.trigger('mouseover').trigger('mousemove');
-    $('body').trigger('mouseover').trigger('mousemove');*/
-    var evt = document.createEvent("MouseEvents");
+    $('body').trigger('mouseover').trigger('mousemove');
     var xy = Math.random()*100+300;
-    evt.initMouseEvent("mousemove", true, false, window, 0, 0, 0, xy, xy);
-    return document.dispatchEvent(evt);
+    triggerMousemoveEvt(xy,xy);
+    
 }
 function openOption(){
     var settcontjq = $("#settcont");
@@ -672,6 +677,14 @@ function StartMoveComment(){
         $('#moveContainer').css("left","1px");
     }
 }
+function popHeader(){
+    var contHeader = $('[class^="AppContainer__header-container___"]');
+    contHeader.css("visibility","visible");
+    contHeader.css("opacity",1);
+    var contFooter = $('[class^="TVContainer__footer-container___"]');
+    contFooter.css("visibility","visible");
+    contFooter.css("opacity",1);
+}
 function popElement(){
     //マウスオーバーで各要素表示
 //    console.log("popElement()")
@@ -961,6 +974,9 @@ $(window).on('load', function () {
         //黒帯パネル表示のためマウスを動かすイベント発火
         if (settings.isAlwaysShowPanel) {
             triggerMouseMoving();
+            if(!isSureReadComment){
+                popHeader();
+            }
         }
         //音量が最大なら設定値へ自動変更
         if(changeMaxVolume<100&&$('[class^="styles__highlighter___"]').css("height")=="92px"){
