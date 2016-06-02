@@ -27,10 +27,9 @@ var isVolumeWheel = false; //マウスホイールで音量を操作する
 var changeMaxVolume = 100; //最大音量(100)をこの値へ自動変更
 var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false; //コメント欄を開きっ放しにする
-//var isAlwaysShowPanel = false;
+settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
 var isMovieResize = false; //映像を枠に合わせて縮小
 
-settings.isAlwaysShowPanel = false;
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
 //設定のロード
@@ -293,9 +292,12 @@ function screenBlackSet(type) {
 }
 //マウスを動かすイベント
 function triggerMouseMoving(){
-    var evt = document.createEvent("MouseEvents");
+    var overlap = $('[class^="style__overlap___"]');
+    overlap.trigger('mouseover');
+    overlap.trigger('mousemove');
+   /* var evt = document.createEvent("MouseEvents");
     evt.initMouseEvent("mousemove", true, true, window, 0, 0, 0, Math.random()*100, Math.random()*100);
-    return document.dispatchEvent(evt);
+    return document.dispatchEvent(evt);*/
 }
 function openOption(){
     var settcontjq = $("#settcont");
