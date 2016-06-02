@@ -640,6 +640,18 @@ function delayset(){
         EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
         //映像のリサイズ
         onresize();
+        //フルスクリーンボタンの割り当て変更
+        $('button[class*="styles__full-screen___"]')[0].addEventListener("click", function(e){
+            if (settings.isDblFullscreen) {
+                toggleFullscreen();
+                e.stopImmediatePropagation();
+            }
+        });
+        //拡張機能の設定をその他メニューに追加
+        var hoverContents = $('[class*="styles__hover-contents___"]');
+        var hoverLinkClass = hoverContents.children()[0].className;
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="#">拡張設定</a>');
+        $("#extSettingLink").click(openOption);
         //ユーザースクリプトのngconfigのz-index変更
         $("#NGConfig").css("z-index", 20);
         console.log("delayset ok");
@@ -924,12 +936,6 @@ $(window).on('load', function () {
         if (settings.isDblFullscreen) {
                     //$('[class*="styles__full-screen___"],[class*="styles__exit-fullscreen___"]').trigger("click");
             toggleFullscreen();
-        }
-    });
-    $('button[class*="styles__full-screen___"]')[0].addEventListener("click", function(e){
-        if (settings.isDblFullscreen) {
-            toggleFullscreen();
-            e.stopImmediatePropagation();
         }
     });
     $(window).on("click",function(){
