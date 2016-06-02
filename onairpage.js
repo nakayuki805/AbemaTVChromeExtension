@@ -110,7 +110,7 @@ var EXwatchingnum;
 var EXwatchingstr;
 var EXvolume;
 var comeclickcd=2; //コメント欄を早く開きすぎないためのウェイト
-var cmblockia=7; //コメント欄が無効になってからCM処理までのウェイト(+1以上)
+var cmblockia=1; //コメント欄が無効になってからCM処理までのウェイト(+1以上)
 var cmblockib=-1; //有効になってから解除までのウェイト(-1以下)
 var cmblockcd=0; //カウント用
 
