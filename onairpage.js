@@ -292,12 +292,14 @@ function screenBlackSet(type) {
 }
 //マウスを動かすイベント
 function triggerMouseMoving(){
-    var overlap = $('[class^="style__overlap___"]');
-    overlap.trigger('mouseover');
-    overlap.trigger('mousemove');
-   /* var evt = document.createEvent("MouseEvents");
-    evt.initMouseEvent("mousemove", true, true, window, 0, 0, 0, Math.random()*100, Math.random()*100);
-    return document.dispatchEvent(evt);*/
+    //console.log('triggerMM')
+    /*var overlap = $('[class^="style__overlap___"]');
+    overlap.trigger('mouseover').trigger('mousemove');
+    $('body').trigger('mouseover').trigger('mousemove');*/
+    var evt = document.createEvent("MouseEvents");
+    var xy = Math.random()*100+300;
+    evt.initMouseEvent("mousemove", true, false, window, 0, 0, 0, xy, xy);
+    return document.dispatchEvent(evt);
 }
 function openOption(){
     var settcontjq = $("#settcont");
@@ -617,6 +619,8 @@ function delayset(){
         EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
         //映像のリサイズ
         onresize();
+        //ユーザースクリプトのngconfigのz-index変更
+        $("#NGConfig").css("z-index", 20);
         console.log("delayset ok");
     }else{
         retrycount+=1;
