@@ -1,4 +1,5 @@
 $(function(){
+    $("#settingsArea").html(generateOptionHTML(true));
     $("#CommentMukouSettings").hide();
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;

@@ -17,7 +17,7 @@
   "content_scripts": [
     {
       "matches": ["https://abema.tv/*"],
-      "js": ["jquery-2.2.3.min.js", "onairpage.js"],
+      "js": ["jquery-2.2.3.min.js", "settings.js", "onairpage.js"],
 		"run_at": "document_start"
     }
   ],

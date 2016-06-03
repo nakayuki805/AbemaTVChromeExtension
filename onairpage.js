@@ -261,9 +261,9 @@ function putComment(commentText) {
 //    moveComment(commentElement);
 //    comeLatestPosi.push([commentTop,comeTTL]);
     if (isMoveByCSS) {
-    var commentElement = $("<span class='movingComment movingCommentCSS' style='position:absolute;top:"+commentTop+"px;left:"+(window.innerWidth+Math.floor(Math.random()*200))+"px;width:"+window.innerWidth+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+        var commentElement = $("<span class='movingComment movingCommentCSS' style='position:absolute;top:"+commentTop+"px;left:"+(window.innerWidth+Math.floor(Math.random()*200))+"px;width:"+window.innerWidth+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
     } else {
-    var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(Math.floor(window.innerWidth-$("#moveContainer").offset().left+Math.random()*200))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(Math.floor(window.innerWidth-$("#moveContainer").offset().left+Math.random()*200))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
     }
     //コメント設置位置の保持
     comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+200)*movingCommentSpeed/2000+2)))]);
@@ -400,12 +400,14 @@ function delayset(){
         //設定ウィンドウの中身
         //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
         //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
-        settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を止める<br><input type=checkbox id=isVolumeWheel>:マウスホイールによる番組移動を音量操作へ変更する<br>音量が最大(100)の場合は以下へ自動変更する:<input type=number id=changeMaxVolume><br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
+        //settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を止める<br><input type=checkbox id=isVolumeWheel>:マウスホイールによる番組移動を音量操作へ変更する<br>音量が最大(100)の場合は以下へ自動変更する:<input type=number id=changeMaxVolume><br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
+        settcont.innerHTML = generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button id=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
         settcont.style = "width:600px;position:absolute;right:40px;bottom:-100px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
         if (slidecont[0]){ //画面右に設定ウィンドウ開くボタン設置
             slidecont[0].appendChild(optionbutton);
             slidecont[0].appendChild(settcont); //設定ウィンドウ設置
         }
+        $("#CommentMukouSettings").hide();
         $("#optionbutton").on("click",function(){
             if($("#settcont").css("display")=="none"){
                 openOption();
@@ -413,6 +415,7 @@ function delayset(){
                 closeOption();
             }
         });
+        $("#closeBtn").on("click", closeOption);
         $("#saveBtn").on("click",function(){
             settings.isResizeScreen = $("#isResizeScreen").prop("checked");
             settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
@@ -712,6 +715,28 @@ function popHeader(){
     var contFooter = $('[class^="TVContainer__footer-container___"]');
     contFooter.css("visibility","visible");
     contFooter.css("opacity",1);
+    var contCome = $('[class^="TVContainer__right-comment-area___"]');
+    var comeList = $(commentListParentSelector);
+    var oldcontVisible = contHeader.css("visibility");
+    var hideCommentParam = 142;
+    if (isCustomPostWin){
+        hideCommentParam=64;
+    }
+    if(isInpWinBottom){
+        if(comeList.css("display")=="none"){
+            contCome.css("top",(window.innerHeight-hideCommentParam-61)+"px");
+            contCome.css("height",hideCommentParam+"px");
+        }else{
+            contCome.css("top","44px");
+            contCome.css("height",(window.innerHeight-44-61)+"px");
+            comeList.css("height",(window.innerHeight-hideCommentParam-44-61)+"px");
+        }
+    }
+    if(oldcontVisible !="visible"){
+        if(isInpWinBottom){
+            comeList[0].scrollTop = comeList[0].scrollHeight;
+        }
+    }
 }
 function popElement(){
     //マウスオーバーで各要素表示
