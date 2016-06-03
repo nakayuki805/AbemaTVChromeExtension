@@ -11,7 +11,7 @@ $(function(){
         var isCMBkTrans = value.CMBkTrans || false;
         var isCMsoundoff = value.CMsoundoff || false;
         var isMovingComment = value.movingComment || false;
-        var movingCommentSpeed = value.movingCommentSpeed || 15;
+        var movingCommentSecond = value.movingCommentSecond || 10;
         var movingCommentLimit = value.movingCommentLimit || 30;
         var isMoveByCSS =　value.moveByCSS || false;
         var isComeNg = value.comeNg || false;
@@ -34,7 +34,7 @@ $(function(){
         $("#isCMBkTrans").prop("checked", isCMBkTrans);
         $("#isCMsoundoff").prop("checked", isCMsoundoff);
         $("#isMovingComment").prop("checked", isMovingComment);
-        $("#movingCommentSpeed").val(movingCommentSpeed);
+        $("#movingCommentSecond").val(movingCommentSecond);
         $("#movingCommentLimit").val(movingCommentLimit);
         $("#isMoveByCSS").prop("checked", isMoveByCSS);
         $("#isComeNg").prop("checked", isComeNg);
@@ -60,7 +60,7 @@ $(function(){
             "CMBkTrans": $("#isCMBkTrans").prop("checked"),
             "CMsoundoff": $("#isCMsoundoff").prop("checked"),
             "movingComment": $("#isMovingComment").prop("checked"),
-            "movingCommentSpeed": parseInt($("#movingCommentSpeed").val()),
+            "movingCommentSecond": parseInt($("#movingCommentSecond").val()),
             "movingCommentLimit": parseInt($("#movingCommentLimit").val()),
             "moveByCSS": $("#isMoveByCSS").prop("checked"),
             "comeNg": $("#isComeNg").prop("checked"),

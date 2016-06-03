@@ -31,8 +31,8 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
-        "name": "movingCommentSpeed",
-        "description": "↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い)",
+        "name": "movingCommentSecond",
+        "description": "↑のコメントの速さ(コメントが画面を流れる秒数)",
         "type": "number",
         "isInstantChangable": true
     },
@@ -44,7 +44,7 @@ var settingsList = [
     },
     {
         "name": "isMoveByCSS",
-        "description": "コメントをCSSのanimationで流す(速度は変更できません。コメント流しが重い場合、これで軽減するかもしれません。)",
+        "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)",
         "type": "boolean",
         "isInstantChangable": false
     },

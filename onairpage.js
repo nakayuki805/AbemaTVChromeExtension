@@ -14,7 +14,7 @@ var isCMBlack = false; //コメント数無効(CommentMukou)の時ずっと画�
 var isCMBkTrans = false; //コメント数無効の時ずっと画面真っ黒を少し透かす
 var isCMsoundoff = false; //コメント数無効の時ずっと音量ミュート
 var isMovingComment = false; //あの動画サイトのように画面上をコメントが流れる(コメント欄を表示しているときのみ機能)
-var movingCommentSpeed = 15;//2pxあたりの時間(ms)
+settings.movingCommentSecond = 10;//コメントが画面を流れる秒数
 var movingCommentLimit = 30;//同時コメント最大数
 var isMoveByCSS = false;//CSSのanimationでコメントを動かす
 var isComeNg = false;//流れるコメントのうち特定の文字列を削除or置き換えする
@@ -35,7 +35,7 @@ console.log("script loaded");
 //設定のロード
 if (chrome.storage) {
     chrome.storage.local.get(function (value) {
-        settings = value;
+        $.extend(settings, value);
         settings.isResizeScreen = value.resizeScreen || false;
         settings.isDblFullscreen = value.dblFullscreen || false;
         isEnterSubmit = value.enterSubmit || false;
@@ -44,7 +44,7 @@ if (chrome.storage) {
         isCMBkTrans = value.CMBkTrans || false;
         isCMsoundoff = value.CMsoundoff || false;
         isMovingComment = value.movingComment || false;
-        movingCommentSpeed = value.movingCommentSpeed || movingCommentSpeed;
+        settings.movingCommentSecond = value.movingCommentSecond || settings.movingCommentSecond;
         movingCommentLimit = value.movingCommentLimit || movingCommentLimit;
         isMoveByCSS =　value.moveByCSS || false;
         isComeNg = value.comeNg || false;
@@ -260,13 +260,20 @@ function putComment(commentText) {
 //    setTimeout(function (){moveComment(commentElement, commentLeftEnd);},Math.random()*1000);
 //    moveComment(commentElement);
 //    comeLatestPosi.push([commentTop,comeTTL]);
+    var maxLeftOffset = window.innerWidth*5 / settings.movingCommentSecond;
+    
     if (isMoveByCSS) {
-        var commentElement = $("<span class='movingComment movingCommentCSS' style='position:absolute;top:"+commentTop+"px;left:"+(window.innerWidth+Math.floor(Math.random()*200))+"px;width:"+window.innerWidth+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+        var leftOffset = maxLeftOffset - Math.floor(Math.random()*maxLeftOffset);
+        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(window.innerWidth+leftOffset)+"px;twidth:"+window.innerWidth+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+        setTimeout(function(){
+            commentElement.css("transition", "left "+settings.movingCommentSecond*(1+maxLeftOffset/window.innerWidth)+"s linear");
+            commentElement.css("left", -(commentElement.width()+maxLeftOffset-leftOffset) + "px");
+        },0);
     } else {
-        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(Math.floor(window.innerWidth-$("#moveContainer").offset().left+Math.random()*200))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(Math.floor(window.innerWidth-$("#moveContainer").offset().left+Math.random()*maxLeftOffset))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
     }
     //コメント設置位置の保持
-    comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+200)*movingCommentSpeed/2000+2)))]);
+    comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+maxLeftOffset)*settings.movingCommentSecond/window.innerWidth+2)))]);
     comeLatestPosi.shift();
     if(parseInt($("#moveContainer").css("left"))>=1 && !isMoveByCSS){ //初期位置にいたら動かす
         StartMoveComment();
@@ -338,7 +345,7 @@ function openOption(){
     $("#isCMBkTrans").prop("checked", isCMBkTrans);
     $("#isCMsoundoff").prop("checked", isCMsoundoff);
     $("#isMovingComment").prop("checked", isMovingComment);
-    $("#movingCommentSpeed").val(movingCommentSpeed);
+    $("#movingCommentSecond").val(settings.movingCommentSecond);
     $("#movingCommentLimit").val(movingCommentLimit);
     $("#isComeNg").prop("checked", isComeNg);
     $("#isComeDel").prop("checked", isComeDel);
@@ -400,7 +407,7 @@ function delayset(){
         //設定ウィンドウの中身
         //ただちに反映できなかった入力欄一行化は省いたけど、やる気になれば多分反映できる（これを書いた人にその気が無かった）
         //ただちには反映できなかったけどやる気になったコメ欄非表示切替は反映できた
-        //settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSpeed><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を止める<br><input type=checkbox id=isVolumeWheel>:マウスホイールによる番組移動を音量操作へ変更する<br>音量が最大(100)の場合は以下へ自動変更する:<input type=number id=changeMaxVolume><br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
+        //settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSecond><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を止める<br><input type=checkbox id=isVolumeWheel>:マウスホイールによる番組移動を音量操作へ変更する<br>音量が最大(100)の場合は以下へ自動変更する:<input type=number id=changeMaxVolume><br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
         settcont.innerHTML = generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button id=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
         settcont.style = "width:600px;position:absolute;right:40px;bottom:-100px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
         if (slidecont[0]){ //画面右に設定ウィンドウ開くボタン設置
@@ -425,7 +432,7 @@ function delayset(){
             isCMBkTrans = $("#isCMBkTrans").prop("checked");
             isCMsoundoff = $("#isCMsoundoff").prop("checked");
             isMovingComment = $("#isMovingComment").prop("checked");
-            movingCommentSpeed = parseInt($("#movingCommentSpeed").val());
+            settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
             movingCommentLimit = parseInt($("#movingCommentLimit").val());
             isComeNg = $("#isComeNg").prop("checked");
             isComeDel = $("#isComeDel").prop("checked");
@@ -703,7 +710,7 @@ function toggleCommentList(){
 }
 function StartMoveComment(){
     if($('#moveContainer').children().length>0){
-        $('#moveContainer').animate({"left":"-="+Math.floor(2000/movingCommentSpeed)+"px"},{duration:1000,easing:"linear",complete:StartMoveComment});
+        $('#moveContainer').animate({"left":"-="+Math.floor(window.innerWidth/settings.movingCommentSecond)+"px"},{duration:1000,easing:"linear",complete:StartMoveComment});
     }else{
         $('#moveContainer').css("left","1px");
     }
