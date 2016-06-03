@@ -39,7 +39,7 @@ $(function(){
         $("#isMoveByCSS").prop("checked", isMoveByCSS);
         $("#isComeNg").prop("checked", isComeNg);
         $("#isComeDel").prop("checked", isComeDel);
-        $("#elmFullNg").val(valFullNg);
+        $("#fullNg").val(valFullNg);
         $("#isInpWinBottom").prop("checked", isInpWinBottom);
         $("#isCustomPostWin").prop("checked", isCustomPostWin);
         $("#isCancelWheel").prop("checked", isCancelWheel);
@@ -65,7 +65,7 @@ $(function(){
             "moveByCSS": $("#isMoveByCSS").prop("checked"),
             "comeNg": $("#isComeNg").prop("checked"),
             "comeDel": $("#isComeDel").prop("checked"),
-            "fullNg": $("#elmFullNg").val(),
+            "fullNg": $("#fullNg").val(),
             "inpWinBottom": $("#isInpWinBottom").prop("checked"),
             "customPostWin": $("#isCustomPostWin").prop("checked"),
             "cancelWheel": $("#isCancelWheel").prop("checked"),

@@ -342,7 +342,7 @@ function openOption(){
     $("#movingCommentLimit").val(movingCommentLimit);
     $("#isComeNg").prop("checked", isComeNg);
     $("#isComeDel").prop("checked", isComeDel);
-    $("#elmFullNg").val(fullNg);
+    $("#fullNg").val(fullNg);
     $("#isInpWinBottom").prop("checked", isInpWinBottom);
     $("#isCustomPostWin").prop("checked", isCustomPostWin);
     $("#isCancelWheel").prop("checked", isCancelWheel);
@@ -429,7 +429,7 @@ function delayset(){
             movingCommentLimit = parseInt($("#movingCommentLimit").val());
             isComeNg = $("#isComeNg").prop("checked");
             isComeDel = $("#isComeDel").prop("checked");
-            fullNg = $("#elmFullNg").val();
+            fullNg = $("#fullNg").val();
             var beforeInpWinBottom=isInpWinBottom;
             isInpWinBottom = $("#isInpWinBottom").prop("checked");
             //isCustomPostWin = $("#isCustomPostWin").prop("checked");

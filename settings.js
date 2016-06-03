@@ -61,7 +61,7 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
-        "name": "valFullNg",
+        "name": "fullNg",
         "description": "",
         "type": "textarea",
         "isInstantChangable": true
