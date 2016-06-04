@@ -10,6 +10,7 @@ $(function(){
         var isCMBlack = value.CMBlack || false;
         var isCMBkTrans = value.CMBkTrans || false;
         var isCMsoundoff = value.CMsoundoff || false;
+        var CMsmall = Math.max(1,(value.CMsmall || 1));
         var isMovingComment = value.movingComment || false;
         var movingCommentSecond = value.movingCommentSecond || 10;
         var movingCommentLimit = value.movingCommentLimit || 30;
@@ -24,6 +25,7 @@ $(function(){
         var changeMaxVolume = Math.min(100,Math.max(0,(value.changeMaxVolume || 100)));
         var isTimeVisible = value.timeVisible || false;
         var isSureReadComment = value.sureReadComment || false;
+        var sureReadRefresh = Math.max(101,(value.sureReadRefresh || 200));
         var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
         var isMovieResize = value.movieResize || false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
@@ -33,6 +35,7 @@ $(function(){
         $("#isCMBlack").prop("checked", isCMBlack);
         $("#isCMBkTrans").prop("checked", isCMBkTrans);
         $("#isCMsoundoff").prop("checked", isCMsoundoff);
+        $("#CMsmall").val(CMsmall);
         $("#isMovingComment").prop("checked", isMovingComment);
         $("#movingCommentSecond").val(movingCommentSecond);
         $("#movingCommentLimit").val(movingCommentLimit);
@@ -47,6 +50,7 @@ $(function(){
         $("#changeMaxVolume").val(changeMaxVolume);
         $("#isTimeVisible").prop("checked", isTimeVisible);
         $("#isSureReadComment").prop("checked", isSureReadComment);
+        $("#sureReadRefresh").val(sureReadRefresh);
         $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
         $("#isMovieResize").prop("checked", isMovieResize);
     });
@@ -59,6 +63,7 @@ $(function(){
             "CMBlack": $("#isCMBlack").prop("checked"),
             "CMBkTrans": $("#isCMBkTrans").prop("checked"),
             "CMsoundoff": $("#isCMsoundoff").prop("checked"),
+            "CMsmall": Math.max(1,parseInt($("#CMsmall").val())),
             "movingComment": $("#isMovingComment").prop("checked"),
             "movingCommentSecond": parseInt($("#movingCommentSecond").val()),
             "movingCommentLimit": parseInt($("#movingCommentLimit").val()),
@@ -73,6 +78,7 @@ $(function(){
             "changeMaxVolume": Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val()))),
             "timeVisible": $("#isTimeVisible").prop("checked"),
             "sureReadComment": $("#isSureReadComment").prop("checked"),
+            "sureReadRefresh": Math.max(101,parseInt($("#sureReadRefresh").val())),
             "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked"),
             "movieResize": $("#isMovieResize").prop("checked")
         }, function () {
