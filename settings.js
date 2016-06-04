@@ -20,7 +20,7 @@ var settingsList = [
     },
     {
         "name": "isHideOldComment",
-        "description": "古いコメントを非表示(コメント欄のスクロールバーがなくなります。)",
+        "description": "コメント欄のスクロールバーを非表示にする",
         "type": "boolean",
         "isInstantChangable": true
     },
@@ -46,7 +46,8 @@ var settingsList = [
         "name": "isMoveByCSS",
         "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)",
         "type": "boolean",
-        "isInstantChangable": false
+//        "isInstantChangable": false
+        "isInstantChangable": true
     },
     {
         "name": "isComeNg",
@@ -68,7 +69,8 @@ var settingsList = [
     },
     {
         "name": "isInpWinBottom",
-        "description": "コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール(コメ欄を常に表示しているときのみ)",
+//        "description": "コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール(コメ欄を常に表示しているときのみ)",
+        "description": "コメント入力欄の位置を下へ(コメント一覧の逆順・スクロール機能は一時廃止)",
         "type": "boolean",
         "isInstantChangable": true
     },
@@ -76,7 +78,8 @@ var settingsList = [
         "name": "isCustomPostWin",
         "description": "投稿ボタン削除・入力欄1行化",
         "type": "boolean",
-        "isInstantChangable": false
+//        "isInstantChangable": false
+        "isInstantChangable": true
     },
     {
         "name": "isCancelWheel",
@@ -106,13 +109,21 @@ var settingsList = [
         "name": "isSureReadComment",
         "description": "常にコメント欄を表示する",
         "type": "boolean",
-        "isInstantChangable": false
+//        "isInstantChangable": false
+        "isInstantChangable": true
+    },
+    {
+        "name": "sureReadRefresh",
+        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+        "type": "number",
+        "isInstantChangable": true
     },
     {
         "name": "isAlwaysShowPanel",
         "description": "常に黒帯パネルを表示する",
         "type": "boolean",
-        "isInstantChangable": false
+//        "isInstantChangable": false
+        "isInstantChangable": true
     },
     {
         "name": "isMovieResize",
@@ -138,6 +149,12 @@ var CMSettingList = [
             "name": "isCMsoundoff",
             "description": "コメント数が表示されないとき音量ミュート",
             "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "CMsmall",
+            "description": "コメント数が表示されないとき映像部分を1/xに縮小する",
+            "type": "number",
             "isInstantChangable": true
         }
     ];
