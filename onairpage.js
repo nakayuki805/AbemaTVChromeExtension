@@ -356,6 +356,7 @@ function openOption(){
     $("#isMovingComment").prop("checked", isMovingComment);
     $("#movingCommentSecond").val(settings.movingCommentSecond);
     $("#movingCommentLimit").val(movingCommentLimit);
+    $("#isMoveByCSS").prop("checked", isMoveByCSS);
     $("#isComeNg").prop("checked", isComeNg);
     $("#isComeDel").prop("checked", isComeDel);
     $("#fullNg").val(fullNg);
@@ -457,6 +458,7 @@ function delayset(){
             isMovingComment = $("#isMovingComment").prop("checked");
             settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
             movingCommentLimit = parseInt($("#movingCommentLimit").val());
+            isMoveByCSS = $("#isMoveByCSS").prop("checked");
             isComeNg = $("#isComeNg").prop("checked");
             isComeDel = $("#isComeDel").prop("checked");
             fullNg = $("#fullNg").val();
