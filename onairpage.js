@@ -706,16 +706,16 @@ function delayset(){
 //              console.log("delayset>addEvent(mousemove)");
 //                if (isSureReadComment){ //設定ウィンドウ反映用
 //                  console.log("delayset>addEvent(mousemove)>(isSureReadComment=true)");
-                if(settings.isAlwaysShowPanel){
 //                  console.log("delayset>addEvent(mousemove)>(isAlwaysShowPanel=true)");
-                    if(forElementClose<5){
+//                if(settings.isAlwaysShowPanel){
+                    if(forElementClose<=5){
                         forElementClose=5;
                         popElement(); //各要素を表示
-                    }
-                }else{
+//                    }
+//                }else{
 //                  console.log("delayset>addEvent(mousemove)>(isSureReadComment=false)");
 //                  console.log("delayset>addEvent(mousemove)>(isAlwaysShowPanel=false)");
-                  unpopElement(false);
+//                  unpopElement(false);
                 }
             },true);
         }else{
@@ -878,12 +878,15 @@ function comevisiset(sw){
   var comeForm = $(EXcomesend);
   var comeshown = $(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length>0?true:false;
   var hideCommentParam = isCustomPostWin?64:142;
-  var clipSlideBarTop = settings.isAlwaysShowPanel?44:0;
-  var clipSlideBarBot = settings.isAlwaysShowPanel?61:0;
+//  var clipSlideBarTop = settings.isAlwaysShowPanel?44:0;
+//  var clipSlideBarBot = settings.isAlwaysShowPanel?61:0;
+  var clipSlideBarTop = $(EXhead).css("visibility")?44:0;
+  var clipSlideBarBot = $(EXfoot).css("visibility")?61:0;
 //  var butscr = $('[class^="styles__full-screen___"]button');
   var butscr = $(EXfoot).contents().find('button[class^="styles__full-screen___"]:first');
   var butvol = $(EXvolume);
   var comepro=$("#forProEndTxt,#forProEndBk");
+  contCome.css("transform",isSureReadComment?"translateX(0px)":"");
   if(isInpWinBottom){
     var b=80+((isSureReadComment||comeshown)?hideCommentParam:0);
     butscr.css("bottom",b+"px");
@@ -1078,6 +1081,7 @@ function waitforRightShown(retrycount){
     pb=$(window).height()-wh-pt;
     ph=(ss-1)*Math.floor(ww/2);
   }
+
   $(EXobli).children().css("width",ww+"px");
   $(EXobli).children().css("height",wh+"px");
   $(EXobli).css("padding",pt+"px 0px "+pb+"px "+ph+"px");
@@ -1388,7 +1392,7 @@ $(window).on('load', function () {
             }
         }else{
 //          console.log("1>(alwaysshowpanel=false)");
-          unpopHeader();
+//          unpopHeader();
         }
         //音量が最大なら設定値へ自動変更
         if(changeMaxVolume<100&&$('[class^="styles__highlighter___"]').css("height")=="92px"){
@@ -1759,6 +1763,7 @@ console.log("comeRefresh now:"+commentNum+">set:"+sureReadRefresh);
 //                    }
 //                }
 //            }
+        }
             //各要素を隠すまでのカウントダウン
             if(forElementClose>0){
                 forElementClose-=1;
@@ -1826,7 +1831,7 @@ console.log("comeRefresh now:"+commentNum+">set:"+sureReadRefresh);
 //                    }
                 }
             }
-        }
+//        }
         copyCome();
 
         //コメント位置のTTLを減らす
