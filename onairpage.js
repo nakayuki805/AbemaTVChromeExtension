@@ -587,12 +587,38 @@ function delayset(){
         eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
         $("body").append(eMoveContainer);
 
+        var comepro=$("#forProEndTxt,#forProEndBk");
         if(isInpWinBottom){
-            $("#forProEndBk").css("bottom",0);
-            $("#forProEndTxt").css("bottom",0);
+            comepro.css("top","")
+              .css("bottom",0)
+            ;
+//            $("#forProEndTxt").css("bottom",0);
         }else{
-            $("#forProEndBk").css("bottom","");
-            $("#forProEndTxt").css("bottom","");
+            comepro.css("bottom","")
+              .css("top",0)
+            ;
+//            $("#forProEndBk").css("bottom","");
+//            $("#forProEndTxt").css("bottom","");
+        }
+        var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
+        var parexfootcount=$(EXfootcount).parent();
+        if(isTimeVisible){
+          if(isInpWinBottom){
+            prehoverContents.css("padding-top","")
+              .prev().css("padding-top","")
+            ;
+            parexfootcount.css("padding-bottom","14px");
+          }else{
+            prehoverContents.css("padding-top","9px")
+              .prev().css("padding-top","9px")
+            ;
+            parexfootcount.css("padding-bottom","");
+          }
+        }else{
+          prehoverContents.css("padding-top","")
+            .prev().css("padding-top","")
+          ;
+          parexfootcount.css("padding-bottom","");
         }
 //console.log("delayset");
         comevisiset(false);
@@ -857,12 +883,14 @@ function comevisiset(sw){
 //  var butscr = $('[class^="styles__full-screen___"]button');
   var butscr = $(EXfoot).contents().find('button[class^="styles__full-screen___"]:first');
   var butvol = $(EXvolume);
-  var comepro=$(EXcome).children("#forProEndTxt,#forProEndBk");
+  var comepro=$("#forProEndTxt,#forProEndBk");
   if(isInpWinBottom){
     var b=80+((isSureReadComment||comeshown)?hideCommentParam:0);
     butscr.css("bottom",b+"px");
     butvol.css("bottom",b+"px");
-    comepro.css("bottom",0);
+    comepro.css("top","")
+      .css("bottom",0)
+    ;
     if(comeList.css("display")=="none"){
       contCome.css("position","absolute");
       contCome.css("top",(window.innerHeight-hideCommentParam-clipSlideBarBot)+"px");
@@ -890,7 +918,9 @@ function comevisiset(sw){
   }else{
     butscr.css("bottom","");
     butvol.css("bottom","");
-    comepro.css("bottom","");
+    comepro.css("bottom","")
+      .css("top",0)
+    ;
     if(comeList.css("display")=="none"){
       contCome.css("position","absolute");
       contCome.css("top",clipSlideBarTop+"px");
@@ -915,6 +945,26 @@ function comevisiset(sw){
       comeList.css("height",(window.innerHeight-hideCommentParam-clipSlideBarTop-clipSlideBarBot)+"px");
       comeList.css("width","100%");
     }
+  }
+  var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
+  var parexfootcount=$(EXfootcount).parent();
+  if(isTimeVisible){
+    if(isInpWinBottom){
+      prehoverContents.css("padding-top","")
+        .prev().css("padding-top","")
+      ;
+      parexfootcount.css("padding-bottom","14px");
+    }else{
+      prehoverContents.css("padding-top","9px")
+        .prev().css("padding-top","9px")
+      ;
+      parexfootcount.css("padding-bottom","");
+    }
+  }else{
+    prehoverContents.css("padding-top","")
+      .prev().css("padding-top","")
+    ;
+    parexfootcount.css("padding-bottom","");
   }
 }
 function unpopElement(sw){
@@ -1619,22 +1669,49 @@ console.log("comeRefresh now:"+commentNum+">set:"+sureReadRefresh);
 //                if(rightCommentArea[0]){
                     var eForProEndBk = document.createElement("span");
                     eForProEndBk.id="forProEndBk";
-                    eForProEndBk.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;background-color:rgba(255,255,255,0.2);z-index:13;width:"+Math.floor(100*forProEnd/proLength)+"%;");
+                    eForProEndBk.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;background-color:rgba(255,255,255,0.2);z-index:18;width:"+Math.floor(310*forProEnd/proLength)+"px;top:0px;");
                     eForProEndBk.innerHTML="&nbsp;";
 //                    rightCommentArea[0].insertBefore(eForProEndBk,rightCommentArea[0].firstChild);
                     EXcome.insertBefore(eForProEndBk,EXcome.firstChild);
                     var eForProEndTxt = document.createElement("span");
                     eForProEndTxt.id="forProEndTxt";
-                    eForProEndTxt.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:11;");
+                    eForProEndTxt.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:16;width:310px;background:rgba(255,255,255,0.2);border-left-style:solid;border-left-width:1px;border-left-color:rgba(255,255,255,0.4);top:0px;");
                     eForProEndTxt.innerHTML=strProEnd;
 //                    rightCommentArea[0].insertBefore(eForProEndTxt,EXcome.firstChild);
                     EXcome.insertBefore(eForProEndTxt,EXcome.firstChild);
                     if (isInpWinBottom) {
 //                        $("#forProEndBk").css("bottom",0);
 //                        $("#forProEndTxt").css("bottom",0);
-                      $(EXcome).children("#forProEndTxt,#forProEndBk").css("bottom",0);
+                      $("#forProEndTxt,#forProEndBk").css("top","")
+                        .css("bottom",0)
+                      ;
+                    }else{
+                      $("#forProEndTxt,#forProEndBk").css("bottom","")
+                        .css("top",0)
+                      ;
                     }
+        var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
+        var parexfootcount=$(EXfootcount).parent();
+        if(isTimeVisible){
+          if(isInpWinBottom){
+            prehoverContents.css("padding-top","")
+              .prev().css("padding-top","")
+            ;
+            parexfootcount.css("padding-bottom","14px");
+          }else{
+            prehoverContents.css("padding-top","9px")
+              .prev().css("padding-top","9px")
+            ;
+            parexfootcount.css("padding-bottom","");
+          }
+        }else{
+          prehoverContents.css("padding-top","")
+            .prev().css("padding-top","")
+          ;
+          parexfootcount.css("padding-bottom","");
+        }
 //                    $("#forProEndBk").css("width",Math.floor(100*forProEnd/proLength)+"%");
+                    $("#forProEndBk,#forProEndTxt").prependTo('body');
                     //残り時間クリックで設定ウィンドウ開閉
                     $("#forProEndBk").on("click",function(){
                         if($("#settcont").css("display")=="none"){
@@ -1646,7 +1723,7 @@ console.log("comeRefresh now:"+commentNum+">set:"+sureReadRefresh);
 //                }
             }else{
                 $("#forProEndTxt").html(strProEnd);
-                $(EXcome).children("#forProEndBk").css("width",((forProEnd>0)?Math.floor(100*forProEnd/proLength):100)+"%");
+                $("#forProEndBk").css("width",((forProEnd>0)?Math.floor(310*forProEnd/proLength):100)+"px");
 //                if(forProEnd>0){
 //                    $("#forProEndBk").css("width",Math.floor(100*forProEnd/proLength)+"%");
 //                }else{
@@ -1660,7 +1737,7 @@ console.log("comeRefresh now:"+commentNum+">set:"+sureReadRefresh);
 //            while($("#forProEndBk").length>0){
 //                $("#forProEndBk").remove();
 //            }
-          $(EXcome).children("#forProEndTxt,#forProEndBk").remove();
+          $("#forProEndTxt,#forProEndBk").remove();
         }
         //コメント欄を常時表示
         if(isSureReadComment){
