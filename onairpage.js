@@ -689,12 +689,12 @@ function delayset(){
                 }else{
 //                  console.log("delayset>addEvent(mousemove)>(isSureReadComment=false)");
 //                  console.log("delayset>addEvent(mousemove)>(isAlwaysShowPanel=false)");
-                  unpopElement();
+                  unpopElement(false);
                 }
             },true);
         }else{
 //          console.log("delayset>(isSureReadComment=false)");
-          unpopElement();
+          unpopElement(false);
         }
         //右下にコメント一覧表示切替を設置
 //        $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').on("click",function(){
@@ -917,17 +917,19 @@ function comevisiset(sw){
     }
   }
 }
-function unpopElement(){
+function unpopElement(sw){
 //console.log("unpopElement");
     $(EXinfo).css("z-index","");
     $(EXside).css("transform","");
     $(EXchli).parent().css("z-index","");
+  if(!sw){
     $(EXhead).css("visibility","")
       .css("opacity","")
     ;
     $(EXfoot).css("visibility","")
       .css("opacity","")
     ;
+  }
     if(!isSureReadComment){
       $(EXcome).css("transform","")
         .css("position","")
@@ -1328,7 +1330,7 @@ $(window).on('load', function () {
             triggerMouseMoving();
             if(!isSureReadComment){
 //                console.log("1>(alwaysshowpanel=true)>(surereadcome=false)");
-                unpopElement();
+                unpopElement(true);
                 popHeader();
             }else{
 //                console.log("1>(alwaysshowpanel=true)>(surereadcome=true)");
@@ -1390,7 +1392,7 @@ $(window).on('load', function () {
               }
                 commentNum=comeListLen;
               if(commentNum>sureReadRefresh&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
-console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
+console.log("comeRefresh now:"+commentNum+">set:"+sureReadRefresh);
                 comeRefreshing=true;
                 commentNum=0;
                 $(EXcome).css("border-left-color","gray")
