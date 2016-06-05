@@ -761,8 +761,8 @@ function delayset(){
         //拡張機能の設定をその他メニューに追加
         var hoverContents = $('[class*="styles__hover-contents___"]');
         var hoverLinkClass = hoverContents.children()[0].className;
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="#">拡張設定</a>');
-        $("#extSettingLink").click(openOption);
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
+        //$("#extSettingLink").click(openOption);
         //ユーザースクリプトのngconfigのz-index変更
         $("#NGConfig").css("z-index", 20);
 
