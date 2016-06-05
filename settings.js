@@ -70,7 +70,8 @@ var settingsList = [
     {
         "name": "isInpWinBottom",
 //        "description": "コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール(コメ欄を常に表示しているときのみ)",
-        "description": "コメント入力欄の位置を下へ(コメント一覧の逆順・スクロール機能は一時廃止)",
+//        "description": "コメント入力欄の位置を下へ(コメント一覧の逆順・スクロール機能は一時廃止)",
+        "description": "コメント入力欄と番組残り時間を下へ(コメント一覧は逆順・下スクロール)",
         "type": "boolean",
         "isInstantChangable": true
     },
@@ -101,7 +102,8 @@ var settingsList = [
     },
     {
         "name": "isTimeVisible",
-        "description": "コメント入力欄の近くに番組残り時間を表示",
+//        "description": "コメント入力欄の近くに番組残り時間を表示",
+        "description": "画面右上に番組残り時間を表示",
         "type": "boolean",
         "isInstantChangable": true
     },
