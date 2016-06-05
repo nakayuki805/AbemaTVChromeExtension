@@ -991,7 +991,7 @@ function popElement(){
 //    }
 }
 function waitforRightShown(retrycount){
-  if(!EXobli){return;}
+  if(!EXwatchingnum){return;}
   var ss=($('body>#cmcm').length==0)?1:CMsmall;
   $(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__watch___"]:first').index()*85-$(EXside).position().top);
 //  var ww=16*Math.floor(($(window).width()-(($(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]').length>0)?310:0))/16);
@@ -1015,7 +1015,8 @@ function waitforRightShown(retrycount){
   var pb=$(window).height()-wh-pt;
   var ph=0;
   if(ss>1){
-    ww=isMovieResize?Math.floor(ww/ss):$(window).width();
+//    ww=isMovieResize?Math.floor(ww/ss):$(window).width();
+    ww=Math.floor(ww/ss);
     wh=Math.floor(ww*9/16);
 //    if(isMovieResize){
 //      wh=16*Math.floor(wh/16);
@@ -1189,37 +1190,40 @@ function copyCome(){
     var dc=cf.prop("class");
     var mc=cf.children('p[class^="styles__message___"]:first').prop("class");
     var tc=cf.children('p[class^="styles__time___"]:first').prop("class");
-    var mh="&nbsp;";
-    var th="&nbsp;";
+    var mh=";";
+    var th=";";
     var lh=$(window).height();
     var jcopycome=$(EXcomelist).siblings('#copycome');
     if(jcopycome.length==0){
       $('<div id="copycome"></div>').insertAfter($(EXcomelist));
       jcopycome=$(EXcomelist).siblings('#copycome');
-//console.log("start while1");
       do{
-        $('<div class="'+dc+'"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
+        $('<div class="'+dc+'" style="visibility:hidden;"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
       }while(jcopycome[0].scrollHeight<lh);
-//console.log("finish while1:"+jcopycome[0].scrollHeight+"<lh:"+lh);
     }
-//console.log("start while2:");
     while(jcopycome[0].scrollHeight<lh){
-      $('<div class="'+dc+'"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
+      $('<div class="'+dc+'" style="visibility:hidden;"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
     }
-//console.log("finish while2:"+jcopycome[0].scrollHeight+"<lh:"+lh);
-//console.log("start while3");
     while(jcopycome[0].scrollHeight>=lh){
       jcopycome.children(':first').remove();
     }
-//console.log("finish while3:"+jcopycome[0].scrollHeight+">=lh:"+lh);
 //comeupdate
     var copycomelist=jcopycome.children();
     var origcomelist=$(EXcomelist).children();
     var j;
     for(var i=copycomelist.length-1;i>=0;i--){
       j=copycomelist.length-1-i;
-      copycomelist.eq(i).children('[class^="styles__message___"]:first').text((j>=origcomelist.length-1)?"&nbsp;":origcomelist.eq(j).children('[class^="styles__message___"]:first').text());
-      copycomelist.eq(i).children('[class^="styles__time___"]:first').text((j>=origcomelist.length-1)?"&nbsp;":origcomelist.eq(j).children('[class^="styles__time___"]:first').text());
+      if(j>=origcomelist.length-1){
+        mh=";";
+        th=";";
+        copycomelist.eq(i).css("visibility","hidden");
+      }else{
+        mh=origcomelist.eq(j).children('[class^="styles__message___"]:first').text();
+        th=origcomelist.eq(j).children('[class^="styles__time___"]:first').text();
+        copycomelist.eq(i).css("visibility","");
+      }
+      copycomelist.eq(i).children('[class^="styles__message___"]:first').text(mh);
+      copycomelist.eq(i).children('[class^="styles__time___"]:first').text(th);
     }
 //comeupdate
     jcopycome.scrollTop(jcopycome[0].scrollHeight);
@@ -1492,6 +1496,7 @@ console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
                 }
               }
               if(isCMsoundoff){soundSet(false);}
+              waitforRightShown(0);
             }
           }else{
             cmblockcd+=1;
@@ -1501,6 +1506,7 @@ console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
               $(EXcomesendinp).parent().css("background","");
               if(isCMBlack){screenBlackSet(0);}
               if(isCMsoundoff){soundSet(true);}
+              waitforRightShown(0);
             }
           }
         }
