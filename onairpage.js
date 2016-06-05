@@ -286,8 +286,13 @@ function putComment(commentText) {
 }
 //ミュート(false)・ミュート解除(true)する関数
 function soundSet(isSound) {
-    var butvol=$('[class*="styles__volume___"] svg'); //音量ボタン
-    var valvol=$('[class^="styles__volume___"] [class^="styles__highlighter___"]'); //高さが音量のやつ
+//    var butvol=$('[class*="styles__volume___"] svg'); //音量ボタン
+//    var valvol=$('[class^="styles__volume___"] [class^="styles__highlighter___"]'); //高さが音量のやつ
+    if(!EXvolume){
+      return;
+    }
+    var butvol=$(EXvolume).contents().find('svg:first');
+    var valvol=$(EXvolume).contents().find('[class^="styles__highlighter___"]:first');
     var evt=document.createEvent("MouseEvents");
     evt.initEvent("click",true,true);
     valvol=parseInt(valvol[0].style.height);
@@ -481,10 +486,17 @@ function delayset(){
 //            var comeForm = $(EXcomesend);
             var comeList = $(commentListParentSelector);
             if(isHideOldComment){
-                comeList.css("overflow","hidden");
+                comeList.css("overflow-x","")
+                  .css("overflow-y","")
+                  .css("overflow","hidden")
+                ;
             }else{
-                comeList.css("overflow-y","scroll");
+                comeList.css("overflow","")
+                  .css("overflow-x","hidden")
+                  .css("overflow-y","scroll")
+                ;
             }
+            copyCome();
 //            var contCome = $('[class^="TVContainer__right-comment-area___"]');
 //            var contCome = $(EXcome);
 //            if(beforeInpWinBottom!=isInpWinBottom){ //ソート
@@ -496,7 +508,7 @@ function delayset(){
             comevisiset(false);
 //            var butscr = $('[class^="styles__full-screen___"]button');
 //            var butvol = $(EXvolume);
-            if(isInpWinBottom){
+//            if(isInpWinBottom){
 //                contCome.css("position","absolute");
 //                comeForm.css("position","absolute");
 //                comeForm.css("top","");
@@ -513,8 +525,8 @@ function delayset(){
 //                    comeList.css("width","100%");
 //                    comeList.css("height",(window.innerHeight-hideCommentParam-44-61)+"px");
 //                }
-                $("#forProEndBk").css("bottom",0);
-                $("#forProEndTxt").css("bottom",0);
+//                $("#forProEndBk").css("bottom",0);
+//                $("#forProEndTxt").css("bottom",0);
 //                if(isSureReadComment){
 //                    $('[class^="styles__full-screen___"]button').css("bottom",(80+hideCommentParam)+"px");
 //                    $('[class^="styles__volume___"]div').css("bottom",(80+hideCommentParam)+"px");
@@ -533,7 +545,7 @@ function delayset(){
 //                        comeList.css("height",(window.innerHeight-hideCommentParam)+"px");
 //                    }
 //                }
-            }else{
+//            }else{
 //                $('[class^="styles__full-screen___"]button').css("bottom","");
 //                $('[class^="styles__volume___"]div').css("bottom","");
 //                butscr.css("bottom","");
@@ -553,8 +565,8 @@ function delayset(){
 //                    comeList.css("width","100%");
 //                    comeList.css("height",(window.innerHeight-hideCommentParam-44-61)+"px");
 //                }
-                $("#forProEndBk").css("bottom","");
-                $("#forProEndTxt").css("bottom","");
+//                $("#forProEndBk").css("bottom","");
+//                $("#forProEndTxt").css("bottom","");
 //                if(!isSureReadComment){
 //                    contCome.css("top",0);
 //                    if(comeList.css("display")=="none"){
@@ -563,7 +575,7 @@ function delayset(){
 //                        comeList.css("height",(window.innerHeight-hideCommentParam)+"px");
 //                    }
 //                }
-            }
+//            }
 //            $("#settcont").css("display","none");
 //            closeOption();
           waitforRightShown(0);
@@ -687,12 +699,12 @@ function delayset(){
         //右下にコメント一覧表示切替を設置
 //        $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').on("click",function(){
         $(EXfootcome).on("click",function(){
-            if(isSureReadComment){
+//            if(isSureReadComment){
 //                if($('[class^="TVContainer__right-comment-area___"][class*="TVContainer__right-slide--shown___"]').length>0){ //コメント一覧が表示状態のとき
                 if($(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length>0){
                     toggleCommentList();
                 }
-            }
+//            }
         });
 //        $('[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]').on("click",function(e){
         $(EXcomesend).on("click",function(e){
@@ -709,7 +721,8 @@ function delayset(){
             }
         });
         EXcomelist = $(commentListParentSelector)[0];
-        EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
+//        EXcomments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
+        EXcomments = $(EXcomelist).contents().find('[class^="styles__message___"]');
         //映像のリサイズ
         onresize();
         //フルスクリーンボタンの割り当て変更
@@ -727,6 +740,8 @@ function delayset(){
         //ユーザースクリプトのngconfigのz-index変更
         $("#NGConfig").css("z-index", 20);
 
+        copyCome();
+
         console.log("delayset ok");
     }else{
         retrycount+=1;
@@ -738,7 +753,7 @@ function delayset(){
 }
 function toggleCommentList(){
 //    console.log("toggleCommentList()")
-    //var contCome = $('[class^="TVContainer__right-comment-area___"]');
+//    var contCome = $('[class^="TVContainer__right-comment-area___"]');
 //    var contCome = $(EXcome);
 //    var comeList = $(commentListParentSelector);
 //    var comeForm = $(EXcomesend);
@@ -839,11 +854,15 @@ function comevisiset(sw){
   var hideCommentParam = isCustomPostWin?64:142;
   var clipSlideBarTop = settings.isAlwaysShowPanel?44:0;
   var clipSlideBarBot = settings.isAlwaysShowPanel?61:0;
-  var butscr = $('[class^="styles__full-screen___"]button');
+//  var butscr = $('[class^="styles__full-screen___"]button');
+  var butscr = $(EXfoot).contents().find('button[class^="styles__full-screen___"]:first');
   var butvol = $(EXvolume);
+  var comepro=$(EXcome).children("#forProEndTxt,#forProEndBk");
   if(isInpWinBottom){
-    butscr.css("bottom",(80+((isSureReadComment||comeshown)?hideCommentParam:0))+"px");
-    butvol.css("bottom",(80+((isSureReadComment||comeshown)?hideCommentParam:0))+"px");
+    var b=80+((isSureReadComment||comeshown)?hideCommentParam:0);
+    butscr.css("bottom",b+"px");
+    butvol.css("bottom",b+"px");
+    comepro.css("bottom",0);
     if(comeList.css("display")=="none"){
       contCome.css("position","absolute");
       contCome.css("top",(window.innerHeight-hideCommentParam-clipSlideBarBot)+"px");
@@ -871,6 +890,7 @@ function comevisiset(sw){
   }else{
     butscr.css("bottom","");
     butvol.css("bottom","");
+    comepro.css("bottom","");
     if(comeList.css("display")=="none"){
       contCome.css("position","absolute");
       contCome.css("top",clipSlideBarTop+"px");
@@ -908,9 +928,11 @@ function unpopElement(){
     $(EXfoot).css("visibility","")
       .css("opacity","")
     ;
-    $(EXcome).css("transform","")
-      .css("position","")
-    ;
+    if(!isSureReadComment){
+      $(EXcome).css("transform","")
+        .css("position","")
+      ;
+    }
     comevisiset(false);
 }
 function popElement(){
@@ -1154,6 +1176,71 @@ function faintcheck2(retrycount,fcd){
 function faintcheck(fcd){
   faintcheck2(5,Math.max(1,fcd));
 }
+function copyCome(){
+//console.log("copycome");
+  if(isInpWinBottom){
+    if(!EXcomelist||$(EXcomelist).css("display")=="none"||$(EXcome).contents().find('[class^="styles__no-contents-text___"]:first').length>0||$(EXcomelist.firstChild).children('p[class^="styles__message___"]:first').length==0){
+      return;
+    }
+    $(EXcomelist).css("visibility","hidden")
+      .css("opacity",1)
+    ;
+    var cf=$(EXcomelist.firstChild);
+    var dc=cf.prop("class");
+    var mc=cf.children('p[class^="styles__message___"]:first').prop("class");
+    var tc=cf.children('p[class^="styles__time___"]:first').prop("class");
+    var mh="&nbsp;";
+    var th="&nbsp;";
+    var lh=$(window).height();
+    var jcopycome=$(EXcomelist).siblings('#copycome');
+    if(jcopycome.length==0){
+      $('<div id="copycome"></div>').insertAfter($(EXcomelist));
+      jcopycome=$(EXcomelist).siblings('#copycome');
+//console.log("start while1");
+      do{
+        $('<div class="'+dc+'"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
+      }while(jcopycome[0].scrollHeight<lh);
+//console.log("finish while1:"+jcopycome[0].scrollHeight+"<lh:"+lh);
+    }
+//console.log("start while2:");
+    while(jcopycome[0].scrollHeight<lh){
+      $('<div class="'+dc+'"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
+    }
+//console.log("finish while2:"+jcopycome[0].scrollHeight+"<lh:"+lh);
+//console.log("start while3");
+    while(jcopycome[0].scrollHeight>=lh){
+      jcopycome.children(':first').remove();
+    }
+//console.log("finish while3:"+jcopycome[0].scrollHeight+">=lh:"+lh);
+//comeupdate
+    var copycomelist=jcopycome.children();
+    var origcomelist=$(EXcomelist).children();
+    var j;
+    for(var i=copycomelist.length-1;i>=0;i--){
+      j=copycomelist.length-1-i;
+      copycomelist.eq(i).children('[class^="styles__message___"]:first').text((j>=origcomelist.length-1)?"&nbsp;":origcomelist.eq(j).children('[class^="styles__message___"]:first').text());
+      copycomelist.eq(i).children('[class^="styles__time___"]:first').text((j>=origcomelist.length-1)?"&nbsp;":origcomelist.eq(j).children('[class^="styles__time___"]:first').text());
+    }
+//comeupdate
+    jcopycome.scrollTop(jcopycome[0].scrollHeight);
+    if(isHideOldComment){
+      jcopycome.css("overflow-x","")
+        .css("overflow-y","")
+        .css("overflow","hidden")
+      ;
+    }else{
+      jcopycome.css("overflow","")
+        .css("overflow-x","hidden")
+        .css("overflow-y","scroll")
+      ;
+    }
+  }else{
+    $(EXcomelist).css("visibility","")
+      .css("opacity","")
+    ;
+    $(EXcomelist).siblings('#copycome').remove();
+  }
+}
 $(window).on('load', function () {
     console.log("loaded");
     var csspath = chrome.extension.getURL("onairpage.css");
@@ -1285,7 +1372,7 @@ $(window).on('load', function () {
 //                    }
 //                    EXcomelist.scrollTop = EXcomelist.scrollHeight;
 //                }else if(isMovingComment){
-                if(isMovingComment){
+                if(isMovingComment&&commentNum>0){
                     for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
                         putComment(comments[i].innerHTML);
                     }
@@ -1301,6 +1388,7 @@ $(window).on('load', function () {
               if(commentNum>sureReadRefresh&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
 console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
                 comeRefreshing=true;
+                commentNum=0;
                 $(EXcome).css("border-left-color","gray")
                   .css("border-left-style","solid")
                   .css("border-left-width","3px")
@@ -1417,39 +1505,52 @@ console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
           }
         }
 
-        var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
-        if(come[1]){
-            if(isNaN(parseInt(come[1].innerHTML))){
-                comeLatestCount=-1;
-            }else{
-                comeLatestCount=parseInt(come[1].innerHTML);
-            }
+//        var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
+//        if(come[1]){
+//            if(isNaN(parseInt(come[1].innerHTML))){
+//                comeLatestCount=-1;
+//            }else{
+//                comeLatestCount=parseInt(come[1].innerHTML);
+//            }
+//        }else{
+//            comeLatestCount=-1;
+//        }
+        if(isNaN(parseInt($(EXfootcountcome).text()))){
+          comeLatestCount=-1;
         }else{
-            comeLatestCount=-1;
+          comeLatestCount=parseInt($(EXfootcountcome).text());
         }
 
         //投稿ボタン削除・入力欄1行化(初回クリック時と4行以上入力時に大きくなるのを防ぐ)
         if (isCustomPostWin){
-            var postwin = $('[class^="styles__opened-textarea-wrapper___"]');
-            if (postwin[0]&&postwin[0].hasChildNodes()&&postwin[0].children[1]){
-                postwin[0].children[0].style.height="18px";
-                postwin[0].children[1].style.height="18px";
-            }
+          $(EXcomesendinp).parent().children().css("height","18px");
+//            var postwin = $('[class^="styles__opened-textarea-wrapper___"]');
+//            if (postwin[0]&&postwin[0].hasChildNodes()&&postwin[0].children[1]){
+//                postwin[0].children[0].style.height="18px";
+//                postwin[0].children[1].style.height="18px";
+//            }
         }
 
+        if((EXcomesendbut=$(EXcomesend).contents().find('button:contains("投稿する"):first')[0])==null){};
         //コメント入力欄に改行が含まれていたら送信
         if (isEnterSubmit){
-            var butsend = $('button[class*="styles__post-button___"]');
-            var inpcome = $('[class*="styles__comment-form___"] textarea').val();
-            if(inpcome&&inpcome.match(/[\n\r]/g)&&inpcome.replace(/[\n\r]/g,"").length>0&&!butsend[0].hasAttribute('disabled')){
+//            var butsend = $('button[class*="styles__post-button___"]');
+//            var inpcome = $('[class*="styles__comment-form___"] textarea').val();
+//            if(inpcome&&inpcome.match(/[\n\r]/g)&&inpcome.replace(/[\n\r]/g,"").length>0&&!butsend[0].hasAttribute('disabled')){
+            var inpcome=$(EXcomesendinp).val();
+            if(inpcome&&inpcome.match(/[\n\r]/g)&&inpcome.replace(/[\n\r]/g,"").length>0&&!$(EXcomesendbut).prop("disabled")){
                 //送信前に改行は除去
                 console.log("post");
-                $('[class*="styles__comment-form___"] textarea').val(inpcome.replace(/[\n\r]/g,""));
-                $('[class*="styles__post-button"]').trigger("click");
-                $('[class*="styles__comment-form___"] textarea').val("");
+//                $('[class*="styles__comment-form___"] textarea').val(inpcome.replace(/[\n\r]/g,""));
+//                $('[class*="styles__post-button"]').trigger("click");
+//                $('[class*="styles__comment-form___"] textarea').val("");
+                $(EXcomesendinp).val(inpcome.replace(/[\n\r]/g,""));
+                $(EXcomesendbut).trigger("click");
+                $(EXcomesendinp).val("");
             }else if(inpcome){
                 //エンター送信なら改行は除去
-                $('[class*="styles__comment-form___"] textarea').val(inpcome.replace(/[\n\r]/g,""));
+//                $('[class*="styles__comment-form___"] textarea').val(inpcome.replace(/[\n\r]/g,""));
+              $(EXcomesendinp).val(inpcome.replace(/[\n\r]/g,""));
             }
         }
 
@@ -1504,24 +1605,28 @@ console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
             if(forProEnd>0){
                 strProEnd = (("0"+Math.floor(forProEnd/3600000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%3600000)/60000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%60000)/1000)).slice(-2)).replace(/^00?( : )?0?0?( : )?0?/,"");
             }
-            if($("#forProEndBk").length==0){
-                var rightCommentArea = $('[class^="TVContainer__right-comment-area___"]');
-                if(rightCommentArea[0]){
+//            if($("#forProEndBk").length==0){
+            if($("#forProEndBk").length==0&&EXcome){
+//                var rightCommentArea = $('[class^="TVContainer__right-comment-area___"]');
+//                if(rightCommentArea[0]){
                     var eForProEndBk = document.createElement("span");
                     eForProEndBk.id="forProEndBk";
-                    eForProEndBk.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;background-color:rgba(255,255,255,0.2);z-index:13;");
+                    eForProEndBk.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;background-color:rgba(255,255,255,0.2);z-index:13;width:"+Math.floor(100*forProEnd/proLength)+"%;");
                     eForProEndBk.innerHTML="&nbsp;";
-                    rightCommentArea[0].insertBefore(eForProEndBk,rightCommentArea[0].firstChild);
+//                    rightCommentArea[0].insertBefore(eForProEndBk,rightCommentArea[0].firstChild);
+                    EXcome.insertBefore(eForProEndBk,EXcome.firstChild);
                     var eForProEndTxt = document.createElement("span");
                     eForProEndTxt.id="forProEndTxt";
                     eForProEndTxt.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:11;");
                     eForProEndTxt.innerHTML=strProEnd;
-                    rightCommentArea[0].insertBefore(eForProEndTxt,rightCommentArea[0].firstChild);
+//                    rightCommentArea[0].insertBefore(eForProEndTxt,EXcome.firstChild);
+                    EXcome.insertBefore(eForProEndTxt,EXcome.firstChild);
                     if (isInpWinBottom) {
-                        $("#forProEndBk").css("bottom",0);
-                        $("#forProEndTxt").css("bottom",0);
+//                        $("#forProEndBk").css("bottom",0);
+//                        $("#forProEndTxt").css("bottom",0);
+                      $(EXcome).children("#forProEndTxt,#forProEndBk").css("bottom",0);
                     }
-                    $("#forProEndBk").css("width",Math.floor(100*forProEnd/proLength)+"%");
+//                    $("#forProEndBk").css("width",Math.floor(100*forProEnd/proLength)+"%");
                     //残り時間クリックで設定ウィンドウ開閉
                     $("#forProEndBk").on("click",function(){
                         if($("#settcont").css("display")=="none"){
@@ -1530,22 +1635,24 @@ console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
                             closeOption();
                         }
                     });
-                }
+//                }
             }else{
                 $("#forProEndTxt").html(strProEnd);
-                if(forProEnd>0){
-                    $("#forProEndBk").css("width",Math.floor(100*forProEnd/proLength)+"%");
-                }else{
-                    $("#forProEndBk").css("width","100%");
-                }
+                $(EXcome).children("#forProEndBk").css("width",((forProEnd>0)?Math.floor(100*forProEnd/proLength):100)+"%");
+//                if(forProEnd>0){
+//                    $("#forProEndBk").css("width",Math.floor(100*forProEnd/proLength)+"%");
+//                }else{
+//                    $("#forProEndBk").css("width","100%");
+//                }
             }
         }else{
-            while($("#forProEndTxt").length>0){
-                $("#forProEndTxt").remove();
-            }
-            while($("#forProEndBk").length>0){
-                $("#forProEndBk").remove();
-            }
+//            while($("#forProEndTxt").length>0){
+//                $("#forProEndTxt").remove();
+//            }
+//            while($("#forProEndBk").length>0){
+//                $("#forProEndBk").remove();
+//            }
+          $(EXcome).children("#forProEndTxt,#forProEndBk").remove();
         }
         //コメント欄を常時表示
         if(isSureReadComment){
@@ -1558,7 +1665,8 @@ console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
                             if(comeclickcd>0){
                                 comeclickcd-=1;
                                 if(comeclickcd<=0){
-                                    $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').trigger("click");
+//                                    $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').trigger("click");
+                                  $(EXfootcome).trigger("click");
                                 }
                             }
             }
@@ -1571,53 +1679,70 @@ console.log("comeRefresh now:"+commentNum+">set:sureReadRefresh");
                 forElementClose-=1;
                 if(forElementClose<=0){
                     //各要素を隠す
-                    $('[class^="TVContainer__side___"]').css("transform","");
+//                    $('[class^="TVContainer__side___"]').css("transform","");
+                    $(EXside).css("transform","");
 //                    var contHeader = $('[class^="AppContainer__header-container___"]');
-                    var contHeader = $(EXhead);
-                    contHeader.css("visibility","")
+//                    var contHeader = $(EXhead);
+//                    contHeader.css("visibility","")
+                    $(EXhead).css("visibility","")
                       .css("opacity","")
                     ;
 //                    var contFooter = $('[class^="TVContainer__footer-container___"]');
-                    var contFooter = $(EXfoot);
-                    contFooter.css("visibility","")
+//                    var contFooter = $(EXfoot);
+//                    contFooter.css("visibility","")
+                    $(EXfoot).css("visibility","")
                       .css("opacity","")
                     ;
                     var comeList = $(commentListParentSelector);
 //                    var contCome = $('[class^="TVContainer__right-comment-area___"]');
                     var contCome = $(EXcome);
                     contCome.css("position","absolute");
-                    var hideCommentParam = 142;
-                    if (isCustomPostWin){
-                        hideCommentParam=64;
-                    }
-                    if(isInpWinBottom){
-                        if(comeList.css("display")=="none"){
-                            contCome.css("position","absolute");
-                            contCome.css("top",(window.innerHeight-hideCommentParam)+"px");
-                            contCome.css("height",hideCommentParam+"px");
-                        }else{
-                            contCome.css("position","absolute");
-                            contCome.css("top",0);
-                            contCome.css("height",window.innerHeight+"px");
-                            comeList.css("position","absolute");
-                            comeList.css("height",(window.innerHeight-hideCommentParam)+"px");
-                        }
+//                    var hideCommentParam = 142;
+//                    if (isCustomPostWin){
+//                        hideCommentParam=64;
+//                    }
+                    var hideCommentParam = isCustomPostWin?64:142;
+                    if(comeList.css("display")=="none"){
+                      contCome.css("height",hideCommentParam+"px")
+                        .css("top",isInpWinBottom?(window.innerHeight-hideCommentParam)+"px":0)
+                      ;
                     }else{
-                        if(comeList.css("display")=="none"){
-                            contCome.css("position","absolute");
-                            contCome.css("top",0);
-                            contCome.css("height",hideCommentParam+"px");
-                        }else{
-                            contCome.css("position","absolute");
-                            contCome.css("top",0);
-                            contCome.css("height",window.innerHeight+"px");
-                            comeList.css("position","absolute");
-                            comeList.css("height",(window.innerHeight-hideCommentParam)+"px");
-                        }
+                      contCome.css("top",0)
+                        .css("height",window.innerHeight+"px")
+                      ;
+                      comeList.css("position","absolute")
+                        .css("height",(window.innerHeight-hideCommentParam)+"px")
+                      ;
                     }
+//                    if(isInpWinBottom){
+//                        if(comeList.css("display")=="none"){
+//                            contCome.css("position","absolute");
+//                            contCome.css("top",(window.innerHeight-hideCommentParam)+"px");
+//                            contCome.css("height",hideCommentParam+"px");
+//                        }else{
+//                            contCome.css("position","absolute");
+//                            contCome.css("top",0);
+//                            contCome.css("height",window.innerHeight+"px");
+//                            comeList.css("position","absolute");
+//                            comeList.css("height",(window.innerHeight-hideCommentParam)+"px");
+//                        }
+//                    }else{
+//                        if(comeList.css("display")=="none"){
+//                            contCome.css("position","absolute");
+//                            contCome.css("top",0);
+//                            contCome.css("height",hideCommentParam+"px");
+//                        }else{
+//                            contCome.css("position","absolute");
+//                            contCome.css("top",0);
+//                            contCome.css("height",window.innerHeight+"px");
+//                            comeList.css("position","absolute");
+//                            comeList.css("height",(window.innerHeight-hideCommentParam)+"px");
+//                        }
+//                    }
                 }
             }
         }
+        copyCome();
 
         //コメント位置のTTLを減らす
         for(var i=0;i<comeLatestLen;i++){
