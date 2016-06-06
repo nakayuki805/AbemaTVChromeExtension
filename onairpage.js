@@ -381,7 +381,7 @@ if(sw==1){ //サイドバーボタン
     $("#changeMaxVolume").val(changeMaxVolume);
     $("#isTimeVisible").prop("checked", isTimeVisible);
     $("#isSureReadComment").prop("checked", isSureReadComment);
-    $("#sureReadRefresh").val(sureReadRefreshx);
+    $("#sureReadRefreshx").val(sureReadRefreshx);
     $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
     $("#isMovieResize").prop("checked", isMovieResize);
 }
@@ -487,7 +487,7 @@ function delayset(){
             changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
             isTimeVisible = $("#isTimeVisible").prop("checked");
             isSureReadComment = $("#isSureReadComment").prop("checked");
-            sureReadRefreshx = Math.max(101,$("#sureReadRefresh").val());
+            sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
             isMovieResize = $("#isMovieResize").prop("checked");
             settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
 //            var hideCommentParam = 142;
