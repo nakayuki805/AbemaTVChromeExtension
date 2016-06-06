@@ -10,7 +10,7 @@ $(function(){
         var isCMBlack = value.CMBlack || false;
         var isCMBkTrans = value.CMBkTrans || false;
         var isCMsoundoff = value.CMsoundoff || false;
-        var CMsmall = Math.max(1,(value.CMsmall || 1));
+        var CMsmall = Math.min(100,Math.max(5,(value.CMsmall || 100)));
         var isMovingComment = value.movingComment || false;
         var movingCommentSecond = value.movingCommentSecond || 10;
         var movingCommentLimit = value.movingCommentLimit || 30;
@@ -63,7 +63,7 @@ $(function(){
             "CMBlack": $("#isCMBlack").prop("checked"),
             "CMBkTrans": $("#isCMBkTrans").prop("checked"),
             "CMsoundoff": $("#isCMsoundoff").prop("checked"),
-            "CMsmall": Math.max(1,parseInt($("#CMsmall").val())),
+            "CMsmall": Math.min(100,Math.max(5,parseInt($("#CMsmall").val()))),
             "movingComment": $("#isMovingComment").prop("checked"),
             "movingCommentSecond": parseInt($("#movingCommentSecond").val()),
             "movingCommentLimit": parseInt($("#movingCommentLimit").val()),
