@@ -25,7 +25,7 @@ $(function(){
         var changeMaxVolume = Math.min(100,Math.max(0,(value.changeMaxVolume || 100)));
         var isTimeVisible = value.timeVisible || false;
         var isSureReadComment = value.sureReadComment || false;
-        var sureReadRefresh = Math.max(101,(value.sureReadRefresh || 200));
+        var sureReadRefreshx = Math.max(101,(value.sureReadRefreshx || 2000000));
         var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
         var isMovieResize = value.movieResize || false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
@@ -50,7 +50,7 @@ $(function(){
         $("#changeMaxVolume").val(changeMaxVolume);
         $("#isTimeVisible").prop("checked", isTimeVisible);
         $("#isSureReadComment").prop("checked", isSureReadComment);
-        $("#sureReadRefresh").val(sureReadRefresh);
+        $("#sureReadRefreshx").val(sureReadRefreshx);
         $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
         $("#isMovieResize").prop("checked", isMovieResize);
     });
@@ -78,7 +78,7 @@ $(function(){
             "changeMaxVolume": Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val()))),
             "timeVisible": $("#isTimeVisible").prop("checked"),
             "sureReadComment": $("#isSureReadComment").prop("checked"),
-            "sureReadRefresh": Math.max(101,parseInt($("#sureReadRefresh").val())),
+            "sureReadRefreshx": Math.max(101,parseInt($("#sureReadRefreshx").val())),
             "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked"),
             "movieResize": $("#isMovieResize").prop("checked")
         }, function () {
