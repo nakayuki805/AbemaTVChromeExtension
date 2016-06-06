@@ -155,7 +155,8 @@ var CMSettingList = [
         },
         {
             "name": "CMsmall",
-            "description": "コメント数が表示されないとき映像部分を1/xに縮小する",
+//            "description": "コメント数が表示されないとき映像部分を1/xに縮小する",
+            "description": "コメント数が表示されないとき映像部分を100%(縮小なし)～5%に縮小する",
             "type": "number",
             "isInstantChangable": true
         }
