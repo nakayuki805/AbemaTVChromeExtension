@@ -28,7 +28,7 @@ var isVolumeWheel = false; //マウスホイールで音量を操作する
 var changeMaxVolume = 100; //最大音量(100)をこの値へ自動変更
 var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false; //コメント欄を開きっ放しにする
-var sureReadRefresh=200; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
+var sureReadRefreshx=2000000; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
 settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
 var isMovieResize = false; //映像を枠に合わせて縮小
 
@@ -60,7 +60,7 @@ if (chrome.storage) {
         changeMaxVolume = Math.min(100,Math.max(0,(value.changeMaxVolume || changeMaxVolume)));
         isTimeVisible = value.timeVisible || false;
         isSureReadComment = value.sureReadComment || false;
-        sureReadRefresh = Math.max(101,(value.sureReadRefresh || sureReadRefresh));
+        sureReadRefreshx = Math.max(101,(value.sureReadRefreshx || sureReadRefreshx));
         isMovieResize = value.movieResize || false;
         settings.isAlwaysShowPanel = value.isAlwaysShowPanel || false;
     });
@@ -381,7 +381,7 @@ if(sw==1){ //サイドバーボタン
     $("#changeMaxVolume").val(changeMaxVolume);
     $("#isTimeVisible").prop("checked", isTimeVisible);
     $("#isSureReadComment").prop("checked", isSureReadComment);
-    $("#sureReadRefresh").val(sureReadRefresh);
+    $("#sureReadRefreshx").val(sureReadRefreshx);
     $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
     $("#isMovieResize").prop("checked", isMovieResize);
 }
@@ -487,7 +487,7 @@ function delayset(){
             changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
             isTimeVisible = $("#isTimeVisible").prop("checked");
             isSureReadComment = $("#isSureReadComment").prop("checked");
-            sureReadRefresh = Math.max(101,$("#sureReadRefresh").val());
+            sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
             isMovieResize = $("#isMovieResize").prop("checked");
             settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
 //            var hideCommentParam = 142;
@@ -1461,7 +1461,7 @@ $(window).on('load', function () {
             var comeListLen = EXcomelist.childElementCount;
             if(comeListLen>commentNum){ //コメ増加あり
 //                //入力欄が下にあるときはソート
-              if(!comeRefreshing){
+              if(!comeRefreshing||!isSureReadComment){
 //                if(isInpWinBottom){
 //                    comesort();
 //                    for(var i=commentNum;i<comeListLen;i++){
@@ -1483,7 +1483,7 @@ $(window).on('load', function () {
                 }
                 copyCome();
               }else{
-console.log("comeRefreshed over"+sureReadRefresh+"->"+comeListLen);
+console.log("comeRefreshed over"+sureReadRefreshx+"->"+comeListLen);
                 comeRefreshing=false;
                 $(EXcome).css("border-left-color","")
                   .css("border-left-style","")
@@ -1491,7 +1491,7 @@ console.log("comeRefreshed over"+sureReadRefresh+"->"+comeListLen);
                 ;
               }
                 commentNum=comeListLen;
-              if(commentNum>sureReadRefresh&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
+              if(isSureReadComment&&commentNum>sureReadRefreshx&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
                 comeRefreshing=true;
 //                commentNum=0;
                 $(EXcome).css("border-left-color","gray")

@@ -115,8 +115,9 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
-        "name": "sureReadRefresh",
-        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+        "name": "sureReadRefreshx",
+//        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
         "type": "number",
         "isInstantChangable": true
     },
