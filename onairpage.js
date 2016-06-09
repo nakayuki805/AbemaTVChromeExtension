@@ -118,6 +118,7 @@ var cmblockia=1; //コメント欄が無効になってからCM処理までの�
 var cmblockib=-1; //有効になってから解除までのウェイト(-1以下)
 var cmblockcd=0; //カウント用
 var comeRefreshing=false; //コメ欄自動開閉中はソートを実行したいのでコメント更新しない用
+var newtop = 0;//映像リサイズのtop
 
 function onresize() {
     if (settings.isResizeScreen) {
@@ -126,8 +127,8 @@ function onresize() {
             hg = window.innerHeight,
             wdbyhg = hg*16/9,
             newwd,
-            newhg,
-            newtop = 0;
+            newhg;
+        newtop = 0;
         if (wd > wdbyhg) {
             newwd = wdbyhg;
             newhg = hg;
@@ -138,8 +139,9 @@ function onresize() {
         }
         obj.css("width", newwd + "px");
         obj.css("height", newhg + "px");
-        obj.css("left", ((wd-newwd)/2)+"px");
-        obj.css("top", newtop+"px");
+        //obj.css("left", ((wd-newwd)/2)+"px");
+        //obj.css("top", newtop+"px");
+        obj.offset({"top": newtop, "left": ((wd-newwd)/2)})
         console.log("screen resized");
     }
 }
@@ -152,7 +154,9 @@ function toggleFullscreen() {
         document.msExitFullscreen && document.msExitFullscreen();
         document.cancelFullScreen && document.cancelFullScreen();
     } else {
-        var fullscTarget = document.body;
+        //setTimeout()
+        //$(".style__screen___3qOxD").css({"position": "absolute", "left": "0px", "top": "0px"});//フルスクリーンにするとこの要素が迷子になってしまうので位置指定
+        var fullscTarget = $(".style__home___1-shO")[0];
         fullscTarget.requestFullscreen && fullscTarget.requestFullscreen();
         fullscTarget.webkitRequestFullscreen && fullscTarget.webkitRequestFullscreen();
         fullscTarget.mozRequestFullScreen && fullscTarget.mozRequestFullScreen();
@@ -1426,6 +1430,10 @@ $(window).on('load', function () {
         if (btn.length>0) {
             //var newCommentNum = parseInt(btn.text().match("^[0-9]+"));
             btn.trigger("click");// 1秒毎にコメントの読み込みボタンを自動クリック
+        }
+        //映像のtopが変更したらonresize()実行
+        if($("object").parent().offset().top !== newtop && settings.isResizeScreen) {
+            onresize();
         }
         //黒帯パネル表示のためマウスを動かすイベント発火
         if (settings.isAlwaysShowPanel) {
