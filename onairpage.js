@@ -1155,6 +1155,7 @@ function setEXs(retrycount){
             b=true;
             break;
         }
+          if(j==0&!EXobli){console.warn("obli");EXobli=$('[class*="TVContainer__tv-container___"]')[0];}// EXobliという変数がなにを意味しているのかわからないのでとりあえず適当に代入
       }
     }else{b=false;console.log("obli");}
   }
