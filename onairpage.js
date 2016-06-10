@@ -1610,6 +1610,7 @@ function movieWidthUnMaximize(){
 }
 function movieWidthMaximize(repeatcount){
 //console.log("movieWidthMaximize");
+  if(!chkurl()){return;}
   if(!isMovieMaximize){
     movieWidthUnMaximize();
     return;
@@ -2183,12 +2184,15 @@ $(window).on("resize", onresize);
     setTimeout(onresize, 1000);
 });*/
 //↑なぜかpopstateイベントが発火しないので代わりに↓
-setInterval(function () {
+setInterval(chkurl,2000);
+function chkurl() {
     if (currentLocation != window.location.href) {
         //console.log("url changed");
         setTimeout(onresize, 1000);
         commentNum = 0;
         currentLocation = window.location.href;
         $(".movingComment").remove();
-    }
-}, 2000);
+        setEX2(30);
+        return true;
+    }else{return false;}
+}
