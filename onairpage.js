@@ -8,12 +8,12 @@ var isFuga = false; //利用したくない機能
 */
 settings.isResizeScreen = false; //ウィンドウが横長でも映像の端が切れることないようウィンドウに収まるようリサイズ 不具合報告があったのでデフォルトでfalse
 settings.isDblFullscreen = false; //ダブルクリックで全画面表示に切り替え(全画面表示のときは機能しません。通常→全画面のみ)
-var isEnterSubmit = false; //エンターでコメント送信(無効にしていてもShift+エンターで送信できます。)
+//var isEnterSubmit = false; //エンターでコメント送信(無効にしていてもShift+エンターで送信できます。)
 var isHideOldComment = false; //古いコメントを非表示
 var isCMBlack = false; //コメント数無効(CommentMukou)の時ずっと画面真っ黒
 var isCMBkTrans = false; //コメント数無効の時ずっと画面真っ黒を少し透かす
 var isCMsoundoff = false; //コメント数無効の時ずっと音量ミュート
-var CMsmall=1; //コメント数無効の時ずっと映像縮小
+var CMsmall=100; //コメント数無効の時ずっと映像縮小
 var isMovingComment = false; //あの動画サイトのように画面上をコメントが流れる(コメント欄を表示しているときのみ機能)
 settings.movingCommentSecond = 10;//コメントが画面を流れる秒数
 var movingCommentLimit = 30;//同時コメント最大数
@@ -30,7 +30,14 @@ var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false; //コメント欄を開きっ放しにする
 var sureReadRefreshx=2000000; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
 settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
-var isMovieResize = false; //映像を枠に合わせて縮小
+//var isMovieResize = false; //映像を枠に合わせて縮小
+var isMovieMaximize = false;
+var commentBackColor = 255;
+var commentBackTrans = 255;
+var commentTextColor = 0;
+var commentTextTrans = 255;
+var isCommentPadZero=false;
+var isCommentTBorder=false;
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -40,7 +47,7 @@ if (chrome.storage) {
         $.extend(settings, value);
         settings.isResizeScreen = value.resizeScreen || false;
         settings.isDblFullscreen = value.dblFullscreen || false;
-        isEnterSubmit = value.enterSubmit || false;
+//        isEnterSubmit = value.enterSubmit || false;
         isHideOldComment = value.hideOldComment || false;
         isCMBlack = value.CMBlack || false;
         isCMBkTrans = value.CMBkTrans || false;
@@ -61,8 +68,15 @@ if (chrome.storage) {
         isTimeVisible = value.timeVisible || false;
         isSureReadComment = value.sureReadComment || false;
         sureReadRefreshx = Math.max(101,(value.sureReadRefreshx || sureReadRefreshx));
-        isMovieResize = value.movieResize || false;
+//        isMovieResize = value.movieResize || false;
+        isMovieMaximize = value.movieMaximize || false;
         settings.isAlwaysShowPanel = value.isAlwaysShowPanel || false;
+        commentBackColor = value.commentBackColor || commentBackColor;
+        commentBackTrans = value.commentBackTrans || commentBackTrans;
+        commentTextColor = value.commentTextColor || commentTextColor;
+        commentTextTrans = value.commentTextTrans || commentTextTrans;
+        isCommentPadZero = value.commentPadZero || false;
+        isCommentTBorder = value.commentTBorder || false;
     });
 }
 
@@ -106,7 +120,7 @@ var EXinfo;
 var EXcome;
 var EXcomesend;
 var EXcomesendinp;
-var EXcomesendbut;
+//var EXcomesendbut;
 var EXcomecont;
 var EXcomelist0;
 var EXobli;
@@ -119,6 +133,7 @@ var cmblockib=-1; //有効になってから解除までのウェイト(-1以下
 var cmblockcd=0; //カウント用
 var comeRefreshing=false; //コメ欄自動開閉中はソートを実行したいのでコメント更新しない用
 var newtop = 0;//映像リサイズのtop
+var comeHealth=100; //コメント欄を開く時の初期読込時に読み込まれたコメント数（公式NGがあると100未満になる）
 
 function onresize() {
     if (settings.isResizeScreen) {
@@ -320,10 +335,14 @@ function screenBlackSet(type) {
     if (type == 0) {
         pwaku[0].removeAttribute("style");
     } else if (type == 1) {
-        var w=(EXobli&&EXwatchingnum)?$(EXobli.children[EXwatchingnum]).height():window.innerHeight;
-        w=w/2;
-        var p=(EXobli)?parseInt($(EXobli).css("padding-top")):0;
-        pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7);border-top-style:solid;border-top-color:black;border-top-width:"+(w+p)+"px;");
+        var w=$(window).height();
+        var p=0;
+        if(EXwatchingnum){
+          var jo=$(EXobli.children[EXwatchingnum]);
+          w=parseInt(jo.css("height"));
+          p=jo.offset().top;
+        }
+        pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7);border-top-style:solid;border-top-color:black;border-top-width:"+Math.floor(p+w/2)+"px;");
     } else if (type == 2) {
         pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7)");
     } else if (type == 3) {
@@ -365,7 +384,7 @@ if(sw==1){ //サイドバーボタン
     //設定ウィンドウにロード
     $("#isResizeScreen").prop("checked", settings.isResizeScreen);
     $("#isDblFullscreen").prop("checked", settings.isDblFullscreen);
-    $("#isEnterSubmit").prop("checked", isEnterSubmit);
+//    $("#isEnterSubmit").prop("checked", isEnterSubmit);
     $("#isHideOldComment").prop("checked", isHideOldComment);
     $("#isCMBlack").prop("checked", isCMBlack);
     $("#isCMBkTrans").prop("checked", isCMBkTrans);
@@ -387,10 +406,51 @@ if(sw==1){ //サイドバーボタン
     $("#isSureReadComment").prop("checked", isSureReadComment);
     $("#sureReadRefreshx").val(sureReadRefreshx);
     $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
-    $("#isMovieResize").prop("checked", isMovieResize);
+//    $("#isMovieResize").prop("checked", isMovieResize);
+    $("#isMovieMaximize").prop("checked", isMovieMaximize);
+    $("#commentBackColor").val(commentBackColor);
+    $("#commentBackTrans").val(commentBackTrans);
+    $("#commentTextColor").val(commentTextColor);
+    $("#commentTextTrans").val(commentTextTrans);
+    var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
+    var tc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(commentTextTrans/255)+")";
+    var cl=$(EXcomelist);
+    if(cl.siblings('#copycome').length>0){
+      cl=cl.siblings('#copycome');
+    }
+    cl.children('div').css("background-color",bc)
+      .css("color",tc)
+      .children('p[class^="styles__message___"]').css("color",tc)
+    ;
+    $("#commentBackColor").val(commentBackColor)
+      .prev('span.prop').text(commentBackColor+" ("+Math.round(commentBackColor*100/255)+"%)")
+    ;
+    $("#commentBackTrans").val(commentBackTrans)
+      .prev('span.prop').text(commentBackTrans+" ("+Math.round(commentBackTrans*100/255)+"%)")
+    ;
+    $("#commentTextColor").val(commentTextColor)
+      .prev('span.prop').text(commentTextColor+" ("+Math.round(commentTextColor*100/255)+"%)")
+    ;
+    $("#commentTextTrans").val(commentTextTrans)
+      .prev('span.prop').text(commentTextTrans+" ("+Math.round(commentTextTrans*100/255)+"%)")
+    ;
+    $("#isCommentPadZero").prop("checked", isCommentPadZero);
+    $("#isCommentTBorder").prop("checked", isCommentTBorder);
 }
 function closeOption(){
-    $("#settcont").css("display","none");
+    $("#settcont").css("display","none")
+      .css("right","40px")
+    ;
+    $("#settcont .rightshift").css("display","none");
+    $("#settcont .leftshift").css("display","");
+    var cl=$(EXcomelist);
+    if(cl.siblings('#copycome').length>0){
+      cl=cl.siblings('#copycome');
+    }
+    cl.children('div').css("background-color","")
+      .css("color","")
+      .children('p[class^="styles__message___"]').css("color","")
+    ;
 }
 function delayset(){
     //シングルクリックで真っ黒を解除
@@ -407,12 +467,14 @@ function delayset(){
                     //コメント数無効の時は切り替えする
                     if(pwaku[0].hasAttribute("style")){
                         screenBlackSet(0);
+                        movieZoomOut(0);
                     }else{
                         if(isCMBkTrans){
                             screenBlackSet(1);
                         }else{
                             screenBlackSet(3);
                         }
+                        if(CMsmall<100){movieZoomOut(1);}
                     }
                 }else{
                     //コメント数有効の時は切替しない(真っ黒になっちゃった時の解除用)
@@ -444,7 +506,7 @@ function delayset(){
         //settcont.innerHTML = "<input type=checkbox id=isResizeScreen>:ウィンドウサイズに合わせて映像の端が切れないようにリサイズ<br><input type=checkbox id=isDblFullscreen>:ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません<br><input type=checkbox id=isEnterSubmit>:エンターでコメント送信<br><input type=checkbox id=isHideOldComment>:古いコメントを非表示(コメント欄のスクロールバーがなくなります。)<br><!--<input type=checkbox id=isCMBlack>:コメント数無効の時画面真っ黒<br><input type=checkbox id=isCMBkTrans>:↑を下半分だけ少し透かす<br><input type=checkbox id=isCMsoundoff>:コメント数無効の時音量ミュート<br>--><input type=checkbox id=isMovingComment>:新着コメントをあの動画サイトのように横に流す<br>↑のコメントの速さ(2pxあたりのミリ秒を入力、少ないほど速い):<input type=number id=movingCommentSecond><br>↑のコメントの同時表示上限:<input type=number id=movingCommentLimit><br><input type=checkbox id=isComeNg>:流れるコメントから規定の単語を除去(顔文字,連続する単語など)<br><input type=checkbox id=isComeDel>:以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/i可、//コメント)<br><textarea id=elmFullNg rows=3 cols=40 wrap=off></textarea><br><input type=checkbox id=isInpWinBottom>:コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール<br><input type=checkbox id=isCustomPostWin disabled>:投稿ボタン削除・入力欄1行化　※この設定はここで変更不可<br><input type=checkbox id=isCancelWheel>:マウスホイールによる番組移動を止める<br><input type=checkbox id=isVolumeWheel>:マウスホイールによる番組移動を音量操作へ変更する<br>音量が最大(100)の場合は以下へ自動変更する:<input type=number id=changeMaxVolume><br><input type=checkbox id=isTimeVisible>:コメント入力欄の近くに番組残り時間を表示<br><input type=checkbox id=isSureReadComment disabled>:常にコメント欄を表示する　※この設定はここで変更不可<br><input type=checkbox id=isAlwaysShowPanel disabled>:常に黒帯パネルを表示する　※この設定はここで変更不可<br><input type=checkbox id=isMovieResize>:映像を枠に合わせて縮小する<br><br><input type=button id=saveBtn value=一時保存><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
 //        settcont.innerHTML = generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button id=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<br>";
         settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
-        settcont.style = "width:600px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
+        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
 //        if (slidecont[0]){ //画面右に設定ウィンドウ開くボタン設置
 //            slidecont[0].appendChild(optionbutton);
 //            slidecont[0].appendChild(settcont); //設定ウィンドウ設置
@@ -458,6 +520,25 @@ function delayset(){
 //          ;
 //        }
         $("#CommentMukouSettings").hide();
+        $("#CommentColorSettings").css("width","600px")
+          .css("padding","8px")
+          .children('div').css("clear","both")
+          .children('span.desc').css("padding","0px 4px")
+          .next('span.prop').css("padding","0px 4px")
+          .next('input[type="range"]').css("float","right")
+        ;
+        $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;">').appendTo('#CommentColorSettings');
+        $('<input type="button" class="rightshift" value="この画面を右へ→" style="float:right;margin-top:10px;display:none;">').appendTo('#CommentColorSettings');
+        $("#settcont .leftshift").on("click",function(){
+          $("#settcont").css("right","320px");
+          $("#settcont .leftshift").css("display","none");
+          $("#settcont .rightshift").css("display","");
+        });
+        $("#settcont .rightshift").on("click",function(){
+          $("#settcont").css("right","40px");
+          $("#settcont .rightshift").css("display","none");
+          $("#settcont .leftshift").css("display","");
+        });
         $("#optionbutton").on("click",function(){
             if($("#settcont").css("display")=="none"){
                 openOption(1);
@@ -474,7 +555,7 @@ function delayset(){
         $("#saveBtn").on("click",function(){
             settings.isResizeScreen = $("#isResizeScreen").prop("checked");
             settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
-            isEnterSubmit = $("#isEnterSubmit").prop("checked");
+//            isEnterSubmit = $("#isEnterSubmit").prop("checked");
             isHideOldComment = $("#isHideOldComment").prop("checked");
             isCMBlack = $("#isCMBlack").prop("checked");
             isCMBkTrans = $("#isCMBkTrans").prop("checked");
@@ -496,8 +577,42 @@ function delayset(){
             isTimeVisible = $("#isTimeVisible").prop("checked");
             isSureReadComment = $("#isSureReadComment").prop("checked");
             sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
-            isMovieResize = $("#isMovieResize").prop("checked");
+//            isMovieResize = $("#isMovieResize").prop("checked");
+            isMovieMaximize = $("#isMovieMaximize").prop("checked");
             settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
+            commentBackColor = parseInt($("#commentBackColor").val());
+            commentBackTrans = parseInt($("#commentBackTrans").val());
+            commentTextColor = parseInt($("#commentTextColor").val());
+            commentTextTrans = parseInt($("#commentTextTrans").val());
+            isCommentPadZero = $("#isCommentPadZero").prop("checked");
+            isCommentTBorder = $("#isCommentTBorder").prop("checked");
+
+            $('head:first>link[title="umadecome"]').remove();
+            var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
+            var cc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(0.2)+")";
+            var tc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(commentTextTrans/255)+")";
+            var uc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(0.2)+")";
+            var vc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(0.3)+")";
+            var tcss = '[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:'+bc+';color:'+tc+';';
+            if(isCommentPadZero){
+              tcss+='padding:0px 15px;';
+            }else{
+              tcss+='padding:7px 15px 8px;';
+            }
+            if(isCommentTBorder){
+              tcss+='border-top:'+vc+' solid 1px;';
+            }
+            tcss+='}';
+            tcss+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
+            $("<link title='umadecome' rel='stylesheet' href='data:text/css," + encodeURI(tcss) + "'>").appendTo("head");
+            $(EXcomesend).css("background-color",bc);
+            $(EXcomesendinp).parent().css("background-color",uc);
+            $(EXcomesendinp).css("background-color",cc)
+              .css("color",tc)
+              .next().css("background-color",cc)
+              .css("color",tc)
+            ;
+
 //            var hideCommentParam = 142;
 //            if (isCustomPostWin){
 //                hideCommentParam=64;
@@ -533,6 +648,7 @@ function delayset(){
               $(EXfootcome).next('#timerthird').remove();
             }
             copyCome();
+            movieWidthMaximize(1);
             arrayFullNgMaker();
 //            var contCome = $('[class^="TVContainer__right-comment-area___"]');
 //            var contCome = $(EXcome);
@@ -615,7 +731,24 @@ function delayset(){
 //            }
 //            $("#settcont").css("display","none");
 //            closeOption();
-          waitforRightShown(0);
+//          waitforRightShown(0);
+        });
+        $('#CommentColorSettings').change(function(){
+          var p=[];
+          $('#CommentColorSettings>div>input[type="range"]').each(function(i,jo){
+            $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
+            p[i]=$(jo).val();
+          });
+          var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
+          var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
+          var cl=$(EXcomelist);
+          if(cl.siblings('#copycome').length>0){
+            cl=cl.siblings('#copycome');
+          }
+          cl.children('div').css("background-color",bc)
+            .css("color",tc)
+            .children('p[class^="styles__message___"]').css("color",tc)
+          ;
         });
         arrayFullNgMaker();
 
@@ -805,6 +938,34 @@ function delayset(){
 
         copyCome();
 
+        $(EXcome).css("background-color","transparent")
+          .children().css("background-color","transparent")
+        ;
+
+        $('head:first>link[title="umadecome"]').remove();
+        var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
+        var cc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(0.2)+")";
+        var tc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(commentTextTrans/255)+")";
+        var uc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(0.2)+")";
+        var vc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(0.3)+")";
+        var tcss = '[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:'+bc+';color:'+tc+';';
+        if(isCommentPadZero){
+          tcss+='padding:0px 15px;';
+        }
+        if(isCommentTBorder){
+          tcss+='border-top:'+vc+' solid 1px;';
+        }
+        tcss+='}';
+        tcss+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
+        $("<link title='umadecome' rel='stylesheet' href='data:text/css," + encodeURI(tcss) + "'>").appendTo("head");
+        $(EXcomesend).css("background-color",bc);
+        $(EXcomesendinp).parent().css("background-color",uc);
+        $(EXcomesendinp).css("background-color",cc)
+          .css("color",tc)
+          .next().css("background-color",cc)
+          .css("color",tc)
+        ;
+
         console.log("delayset ok");
     }else{
         retrycount+=1;
@@ -914,7 +1075,8 @@ function comevisiset(sw){
   var contCome = $(EXcome);
   var comeForm = $(EXcomesend);
   var comeshown = $(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length>0?true:false;
-  var hideCommentParam = isCustomPostWin?64:142;
+//  var hideCommentParam = isCustomPostWin?64:142;
+  var hideCommentParam = isCustomPostWin?64:108;
 //  var clipSlideBarTop = settings.isAlwaysShowPanel?44:0;
 //  var clipSlideBarBot = settings.isAlwaysShowPanel?61:0;
   var clipSlideBarTop = $(EXhead).css("visibility")?44:0;
@@ -1086,55 +1248,55 @@ function popElement(){
 //        }
 //    }
 }
-function waitforRightShown(retrycount){
-  if(!EXwatchingnum){return;}
-  var ss=($('body>#cmcm').length==0)?100:Math.min(100,Math.max(5,CMsmall));
-  $(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__watch___"]:first').index()*85-$(EXside).position().top);
-  var mw=$(window).width();
-  var mh=Math.floor(mw*9/16);
-  var nw=0;
-  var nh=0;
-  var pr=0;
-  var pl=0;
-  if(isMovieResize){
-    pr=isSureReadComment?310:0;
-    var jo=$(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]');
-    if(jo.length>0){
-      for(var i=0;i<jo.length;i++){
-        if(pr<jo.eq(i).width()){
-          pr=jo.eq(i).width();
-        }
-      }
-    }
-    mw-=pr;
-    mh=Math.floor(mw*9/16);
-    var nh=16*Math.round(mh/16);
-    if(Math.abs(mh-nh)<4){
-      mh=nh;
-      mw=Math.ceil(mh*16/9);
-      pr=$(window).width()-mw;
-    }
-  }
-  var pt=44;
-  var pb=Math.max(0,$(window).height()-mh-pt);
-  if(ss<100){
-    nw=Math.floor(mw*ss/100);
-    nh=Math.floor(nw*9/16);
-    pr+=(mw-nw)/2;
-    mw=nw;
-    pl=$(window).width()-mw-pr;
-    pt+=(mh-nh)/2;
-    mh=nh;
-    pb=$(window).height()-mh-pt;
-  }
-  $(EXobli).children().css("width",mw+"px");
-  $(EXobli).children().css("height",mh+"px");
-  $(EXobli).css("padding",pt+"px "+pr+"px "+pb+"px "+pl+"px");
-  $(EXobli).parent().scrollTop(mh*EXwatchingnum);
-  if(retrycount>0){
-    setTimeout(waitforRightShown,50,retrycount-1);
-  }
-}
+//function waitforRightShown(retrycount){
+//  if(!EXwatchingnum){return;}
+//  var ss=($('body>#cmcm').length==0)?100:Math.min(100,Math.max(5,CMsmall));
+//  $(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__watch___"]:first').index()*85-$(EXside).position().top);
+//  var mw=$(window).width();
+//  var mh=Math.floor(mw*9/16);
+//  var nw=0;
+//  var nh=0;
+//  var pr=0;
+//  var pl=0;
+//  if(isMovieResize){
+//    pr=isSureReadComment?310:0;
+//    var jo=$(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]');
+//    if(jo.length>0){
+//      for(var i=0;i<jo.length;i++){
+//        if(pr<jo.eq(i).width()){
+//          pr=jo.eq(i).width();
+//        }
+//      }
+//    }
+//    mw-=pr;
+//    mh=Math.floor(mw*9/16);
+//    var nh=16*Math.round(mh/16);
+//    if(Math.abs(mh-nh)<4){
+//      mh=nh;
+//      mw=Math.ceil(mh*16/9);
+//      pr=$(window).width()-mw;
+//    }
+//  }
+//  var pt=44;
+//  var pb=Math.max(0,$(window).height()-mh-pt);
+//  if(ss<100){
+//    nw=Math.floor(mw*ss/100);
+//    nh=Math.floor(nw*9/16);
+//    pr+=(mw-nw)/2;
+//    mw=nw;
+//    pl=$(window).width()-mw-pr;
+//    pt+=(mh-nh)/2;
+//    mh=nh;
+//    pb=$(window).height()-mh-pt;
+//  }
+//  $(EXobli).children().css("width",mw+"px");
+//  $(EXobli).children().css("height",mh+"px");
+//  $(EXobli).css("padding",pt+"px "+pr+"px "+pb+"px "+pl+"px");
+//  $(EXobli).parent().scrollTop(mh*EXwatchingnum);
+//  if(retrycount>0){
+//    setTimeout(waitforRightShown,50,retrycount-1);
+//  }
+//}
 function setEXs(retrycount){
   var b=true;
   if((EXmain=$('#main')[0])==null){b=false;}
@@ -1152,21 +1314,22 @@ function setEXs(retrycount){
   else if((EXcomesendinp=$(EXcomesend).contents().find('textarea:first')[0])==null){b=false;console.log("comesendinp");}
   else if((EXcomelist0=$($(EXcome).contents().find('[class^="styles__no-contents-text___"]:first')[0]).parent()[0])==null){b=false;console.log("comelist");}
   else if((EXvolume=$('[class^="styles__volume___"]:first')[0])==null){b=false;console.log("vol");}
-  else{
-    if($('img[class^="styles__channel-icon___"]').length>0){
-      var i=$('img[class^="styles__channel-icon___"]');
-      b=false;
-      for(var j=i.length-1;j>=0;j--){
-        var k=i.eq(j).parent().parent();
-        if(k[0].childElementCount>EXchli.childElementCount-3&&k.height()>100*k[0].childElementCount){
-            EXobli=k[0];
-            b=true;
-            break;
-        }
-          if(j==0&!EXobli){console.warn("obli");EXobli=$('[class*="TVContainer__tv-container___"]')[0];}// EXobliという変数がなにを意味しているのかわからないのでとりあえずそれっぽいのを代入
-      }
-    }else{b=false;console.log("obli");}
-  }
+  else if((EXobli=$('[class*="TVContainer__tv-container___"]:first')[0])==null){b=false;console.log("obli");}
+//  else{
+//    if($('img[class^="styles__channel-icon___"]').length>0){
+//      var i=$('img[class^="styles__channel-icon___"]');
+//      b=false;
+//      for(var j=i.length-1;j>=0;j--){
+//        var k=i.eq(j).parent().parent();
+//        if(k[0].childElementCount>EXchli.childElementCount-3&&k.height()>100*k[0].childElementCount){
+//            EXobli=k[0];
+//            b=true;
+//            break;
+//        }
+//          if(j==0&!EXobli){console.warn("obli");EXobli=$('[class*="TVContainer__tv-container___"]')[0];}// EXobliという変数がなにを意味しているのかわからないのでとりあえずそれっぽいのを代入
+//      }
+//    }else{b=false;console.log("obli");}
+//  }
   if(b==true){
     console.log("setEXs");
     setTimeout(setEX2,1000,30);
@@ -1184,7 +1347,7 @@ function setEX2(retrycount){
   }
   if(b==true){
     console.log("setEX2");
-    waitforRightShown(0);
+//    waitforRightShown(0);
   }else if(retrycount>0){
     setTimeout(setEX2,1000,retrycount-1);
   }
@@ -1295,18 +1458,22 @@ function copyCome(){
     var mh=";";
     var th=";";
     var lh=$(window).height();
+    var lc=100;
     var jcopycome=$(EXcomelist).siblings('#copycome');
     if(jcopycome.length==0){
       $('<div id="copycome"></div>').insertAfter($(EXcomelist));
       jcopycome=$(EXcomelist).siblings('#copycome');
       do{
         $('<div class="'+dc+'" style="visibility:hidden;"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
-      }while(jcopycome[0].scrollHeight<lh);
+//      }while(jcopycome[0].scrollHeight<lh);
+      }while((isHideOldComment?(jcopycome[0].scrollHeight<lh):(jcopycome.children().length<lc)));
     }
-    while(jcopycome[0].scrollHeight<lh){
+//    while(jcopycome[0].scrollHeight<lh){
+    while((isHideOldComment?(jcopycome[0].scrollHeight<lh):(jcopycome.children().length<lc))){
       $('<div class="'+dc+'" style="visibility:hidden;"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
     }
-    while(jcopycome[0].scrollHeight>=lh){
+//    while(jcopycome[0].scrollHeight>=lh){
+    while((isHideOldComment?(jcopycome[0].scrollHeight>=lh):(jcopycome.children().length>=lc))){
       jcopycome.children(':first').remove();
     }
 //comeupdate
@@ -1331,10 +1498,13 @@ function copyCome(){
 //comeupdate
     jcopycome.css("position","absolute")
       .css("width","100%")
-      .css("top",ocomelist.css("top"))
-      .css("bottom",ocomelist.css("bottom"))
       .css("height",ocomelist.css("height"))
     ;
+    if(isInpWinBottom){
+      jcopycome.css("top",ocomelist.css("top"));
+    }else{
+      jcopycome.css("bottom",ocomelist.css("bottom"));
+    }
     jcopycome.scrollTop(jcopycome[0].scrollHeight);
     if(isHideOldComment){
       jcopycome.css("overflow-x","")
@@ -1352,6 +1522,137 @@ function copyCome(){
       .css("opacity","")
     ;
     $(EXcomelist).siblings('#copycome').remove();
+  }
+}
+function comeColor(inp){
+//console.log("comeColor:"+inp);
+  if(EXfootcountcome){
+//console.log($(EXfootcountcome).css("color"));
+    if(inp==-1){
+      $(EXfootcountcome).css("color","");
+      $(EXfootcountcome).prev('svg').css("fill","");
+    }else{
+      var lim=[90,60,30];
+      if(inp>lim[0]){
+        $(EXfootcountcome).css("color","");
+      }else if(inp>lim[1]){
+        $(EXfootcountcome).css("color","rgb(255, 255, "+Math.round(255*(inp-lim[1])/(lim[0]-lim[1]))+")");
+      }else if(inp>lim[2]){
+        $(EXfootcountcome).css("color","rgb(255, "+Math.round(255*(inp-lim[2])/(lim[2]-lim[1]))+", 0)");
+      }else{
+        $(EXfootcountcome).css("color","rgb(255, 0, 0)");
+      }
+      $(EXfootcountcome).prev('svg').css("fill","black");
+      setTimeout(comeColor,800,-1);
+    }
+  }
+}
+function chkcomelist(retrycount){
+  var comeListLen = EXcomelist.childElementCount;
+//console.log("chkcomelist#"+retrycount+",comelistlen="+comeListLen);
+  if(comeListLen<=100){
+//console.log("comeRefreshed "+commentNum+"->"+comeListLen);
+    comeRefreshing=false;
+    commentNum=comeListLen;
+    comeHealth=Math.min(100,Math.max(0,commentNum));
+    comeColor(comeHealth);
+  }else if(retrycount>0){
+    setTimeout(chkcomelist,10,retrycount-1);
+  }
+}
+function waitforOpenCome(retrycount){
+  if(isComeOpen()){
+    chkcomelist(50);
+  }else if(retrycount>0){
+    setTimeout(waitforOpenCome,10,retrycount-1);
+  }
+}
+function waitforOpenableCome(retrycount){
+  if($(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
+    $(EXfootcome).trigger("click");
+//console.log("comeopen waitforopenable");
+    movieWidthMaximize(1);
+    waitforOpenCome(50);
+  }else if(retrycount>0){
+    setTimeout(waitforOpenableCome,10,retrycount-1);
+  }
+}
+function waitforCloseCome(retrycount){
+  if(!isComeOpen()){
+    waitforOpenableCome(50);
+  }else if(retrycount>0){
+    setTimeout(waitforCloseCome,10,retrycount-1);
+  }
+}
+function fastRefreshing(){
+  waitforCloseCome(100);
+}
+function movieWidthUnMaximize(){
+//console.log("movieWidthUnMaximize");
+  if(EXwatchingnum){
+    $(EXobli).css("top","");
+    var mw=$(window).width();
+    var pr=isSureReadComment?310:0;
+    var jo=$(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]');
+    if(jo.length>0){
+      for(var i=0;i<jo.length;i++){
+        if(pr<jo.eq(i).width()){
+          pr=jo.eq(i).width();
+        }
+      }
+    }
+    mw-=pr;
+    $(EXobli).children().css("width",mw+"px")
+      .css("height","0px")
+    ;
+    $(EXobli.children[EXwatchingnum]).css("height",Math.floor(mw*9/16)+"px");
+  }
+}
+function movieWidthMaximize(repeatcount){
+//console.log("movieWidthMaximize");
+  if(!isMovieMaximize){
+    movieWidthUnMaximize();
+    return;
+  }
+  if(EXwatchingnum){
+    var mw=$(window).width();
+    $(EXobli).children().css("width",mw+"px")
+      .css("height","0px")
+    ;
+    $(EXobli.children[EXwatchingnum]).css("height",Math.floor(mw*9/16)+"px");
+  }
+  if(repeatcount>0){
+    setTimeout(movieWidthMaximize,10,repeatcount-1);
+  }else{
+    moviePositionFix(0)
+  }
+}
+function moviePositionFix(countup){
+//console.log("moviePositionFix");
+  if(EXobli){
+    $(EXobli).css("top","");
+    var whei=$(window).height();
+    var ptop=$(EXobli).position().top;
+    var phei=$(EXobli).height();
+    var mintop=0;
+    if($(EXhead).css("visibility")=="visible"){
+      mintop=44;
+    }
+    if(mintop>ptop){
+      $(EXobli).css("top","calc(50% + "+(mintop-ptop)+"px)");
+    }
+    if(countup<4){
+      setTimeout(moviePositionFix,10+countup*100,countup+1);
+    }
+  }
+}
+function movieZoomOut(sw){
+  if(EXobli){
+    if(sw==1&&CMsmall<100){
+      $(EXobli).css("transform","translateY(-50%) scale("+CMsmall/100+")");
+    }else{
+      $(EXobli).css("transform","");
+    }
   }
 }
 $(window).on('load', function () {
@@ -1374,9 +1675,10 @@ $(window).on('load', function () {
         comeclickcd=2;
 //        setTimeout(comesort,500);
       }
-      if(isMovieResize){
-        waitforRightShown(1);
-      }
+//      if(isMovieResize){
+        movieWidthMaximize(1);
+//        waitforRightShown(1);
+//      }
     });
     //ウィンドウをリサイズ
     setTimeout(onresize, 1000);
@@ -1418,9 +1720,9 @@ $(window).on('load', function () {
 
     //投稿ボタン削除・入力欄1行化
     if (isCustomPostWin){
-        var CustomPostWinCSS1 = '[class^="styles__opened-textarea-wrapper___"] * {height:18px;}';
+//        var CustomPostWinCSS1 = '[class^="styles__opened-textarea-wrapper___"] * {height:18px;}';
         var CustomPostWinCSS2 = '[class^="styles__opened-textarea-wrapper___"] + div {display:none;}';
-        $("<link rel='stylesheet' href='data:text/css," + encodeURI(CustomPostWinCSS1) + "'>").appendTo("head");
+//        $("<link rel='stylesheet' href='data:text/css," + encodeURI(CustomPostWinCSS1) + "'>").appendTo("head");
         $("<link rel='stylesheet' href='data:text/css," + encodeURI(CustomPostWinCSS2) + "'>").appendTo("head");
     }
 
@@ -1432,7 +1734,7 @@ $(window).on('load', function () {
             btn.trigger("click");// 1秒毎にコメントの読み込みボタンを自動クリック
         }
         //映像のtopが変更したらonresize()実行
-        if($("object").parent().offset().top !== newtop && settings.isResizeScreen) {
+        if(settings.isResizeScreen && $("object").parent().offset().top !== newtop) {
             onresize();
         }
         //黒帯パネル表示のためマウスを動かすイベント発火
@@ -1460,35 +1762,11 @@ $(window).on('load', function () {
         }
         //コメント取得
         var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
-//        var newCommentNum = comments.length - commentNum;
-//        if (commentNum != 0){
-//            if (isMovingComment) {
-//                for (var i = commentNum;i < comments.length; i += 1){
-//                    putComment(comments[comments.length-i-1].innerHTML);
-//                }
-//            }
-//        }
-//        commentNum = comments.length;
-//        EXcomelist = $(commentListParentSelector)[0];
         if(EXcomelist&&isComeOpen()){
             var comeListLen = EXcomelist.childElementCount;
             if(comeListLen>commentNum){ //コメ増加あり
-//                //入力欄が下にあるときはソート
-              if(!comeRefreshing||!isSureReadComment){
-//                if(isInpWinBottom){
-//                    comesort();
-//                    for(var i=commentNum;i<comeListLen;i++){
-//                        EXcomelist.insertBefore(EXcomelist.children[i],EXcomelist.firstChild);
-//                    }
-//                    comments = $(commentsSelector);//ソートの反映
-//                    //ソートした後でコメントを流す 最初は流さない
-//                    if(isMovingComment&&commentNum>1){
-//                        for(var i=Math.max(comeListLen-movingCommentLimit,commentNum);i<comeListLen;i++){
-//                            putComment(EXcomelist.children[i].firstChild.innerHTML);
-//                        }
-//                    }
-//                    EXcomelist.scrollTop = EXcomelist.scrollHeight;
-//                }else if(isMovingComment){
+//              if(!comeRefreshing||!isSureReadComment){
+              if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
                 if(isMovingComment&&commentNum>0){
                     for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
                         putComment(comments[i].innerHTML);
@@ -1496,25 +1774,22 @@ $(window).on('load', function () {
                 }
                 copyCome();
               }else{
-console.log("comeRefreshed over"+sureReadRefreshx+"->"+comeListLen);
                 comeRefreshing=false;
-                $(EXcome).css("border-left-color","")
-                  .css("border-left-style","")
-                  .css("border-left-width","")
-                ;
               }
-                commentNum=comeListLen;
-              if(isSureReadComment&&commentNum>sureReadRefreshx&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
+              if(commentNum==0){
+                comeHealth=Math.min(100,Math.max(0,comeListLen));
+                comeColor(comeHealth);
+              }
+              commentNum=comeListLen;
+              if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
                 comeRefreshing=true;
 //                commentNum=0;
-                $(EXcome).css("border-left-color","gray")
-                  .css("border-left-style","solid")
-                  .css("border-left-width","3px")
-                ;
                 $('[class^="style__overlap___"]:first').trigger("click");
+                fastRefreshing();
               }
             }else if(comeListLen<commentNum){
                 commentNum=0;
+                comeHealth=100;
             }
         }
             
@@ -1594,7 +1869,7 @@ console.log("comeRefreshed over"+sureReadRefreshx+"->"+comeListLen);
         if(cmblockcd!=0){
           if(cmblockcd>0){
             cmblockcd-=1;
-            $(EXcomesendinp).parent().css("background","rgba(0,0,0,0.4)");
+//            $(EXcomesendinp).parent().css("background","rgba(0,0,0,0.4)");
             if(cmblockcd<=0){
               cmblockcd=0;
               if($('body>#cmcm').length==0){
@@ -1610,17 +1885,19 @@ console.log("comeRefreshed over"+sureReadRefreshx+"->"+comeListLen);
                 }
               }
               if(isCMsoundoff){soundSet(false);}
-              waitforRightShown(0);
+//              waitforRightShown(0);
+              if(CMsmall<100){movieZoomOut(1);}
             }
           }else{
             cmblockcd+=1;
             if(cmblockcd>=0){
               cmblockcd=0;
               $('body>#cmcm').remove();
-              $(EXcomesendinp).parent().css("background","");
+//              $(EXcomesendinp).parent().css("background","");
               if(isCMBlack){screenBlackSet(0);}
               if(isCMsoundoff){soundSet(true);}
-              waitforRightShown(0);
+//              waitforRightShown(0);
+              movieZoomOut(0);
             }
           }
         }
@@ -1651,28 +1928,28 @@ console.log("comeRefreshed over"+sureReadRefreshx+"->"+comeListLen);
 //            }
         }
 
-        if((EXcomesendbut=$(EXcomesend).contents().find('button:contains("投稿する"):first')[0])==null){};
-        //コメント入力欄に改行が含まれていたら送信
-        if (isEnterSubmit){
+//        if((EXcomesendbut=$(EXcomesend).contents().find('button:contains("投稿する"):first')[0])==null){};
+//        //コメント入力欄に改行が含まれていたら送信
+//        if (isEnterSubmit){
 //            var butsend = $('button[class*="styles__post-button___"]');
 //            var inpcome = $('[class*="styles__comment-form___"] textarea').val();
 //            if(inpcome&&inpcome.match(/[\n\r]/g)&&inpcome.replace(/[\n\r]/g,"").length>0&&!butsend[0].hasAttribute('disabled')){
-            var inpcome=$(EXcomesendinp).val();
-            if(inpcome&&inpcome.match(/[\n\r]/g)&&inpcome.replace(/[\n\r]/g,"").length>0&&!$(EXcomesendbut).prop("disabled")){
-                //送信前に改行は除去
-                console.log("post");
-//                $('[class*="styles__comment-form___"] textarea').val(inpcome.replace(/[\n\r]/g,""));
-//                $('[class*="styles__post-button"]').trigger("click");
-//                $('[class*="styles__comment-form___"] textarea').val("");
-                $(EXcomesendinp).val(inpcome.replace(/[\n\r]/g,""));
-                $(EXcomesendbut).trigger("click");
-                $(EXcomesendinp).val("");
-            }else if(inpcome){
-                //エンター送信なら改行は除去
-//                $('[class*="styles__comment-form___"] textarea').val(inpcome.replace(/[\n\r]/g,""));
-              $(EXcomesendinp).val(inpcome.replace(/[\n\r]/g,""));
-            }
-        }
+//            var inpcome=$(EXcomesendinp).val();
+//            if(inpcome&&inpcome.match(/[\n\r]/g)&&inpcome.replace(/[\n\r]/g,"").length>0&&!$(EXcomesendbut).prop("disabled")){
+//                //送信前に改行は除去
+//                console.log("post");
+////                $('[class*="styles__comment-form___"] textarea').val(inpcome.replace(/[\n\r]/g,""));
+////                $('[class*="styles__post-button"]').trigger("click");
+////                $('[class*="styles__comment-form___"] textarea').val("");
+//                $(EXcomesendinp).val(inpcome.replace(/[\n\r]/g,""));
+//                $(EXcomesendbut).trigger("click");
+//                $(EXcomesendinp).val("");
+//            }else if(inpcome){
+//                //エンター送信なら改行は除去
+////                $('[class*="styles__comment-form___"] textarea').val(inpcome.replace(/[\n\r]/g,""));
+//              $(EXcomesendinp).val(inpcome.replace(/[\n\r]/g,""));
+//            }
+//        }
 
         //残り時間表示
         if (isTimeVisible){
@@ -1753,7 +2030,9 @@ console.log("comeRefreshed over"+sureReadRefreshx+"->"+comeListLen);
                         .prev().css("padding-top","")
                       ;
                       parexfootcount.css("padding-bottom","14px");
-                      $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;border-right-width:1px;border-right-style:solid;border-right-color:#444;"></div>').insertAfter(EXfootcome);
+                      if($(EXfootcome).next('#timerthird').length==0){
+                        $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;border-right-width:1px;border-right-style:solid;border-right-color:#444;"></div>').insertAfter(EXfootcome);
+                      }
                     }else{
                       $("#forProEndTxt,#forProEndBk").css("bottom","")
                         .css("top",0)
@@ -1804,6 +2083,8 @@ console.log("comeRefreshed over"+sureReadRefreshx+"->"+comeListLen);
                                 if(comeclickcd<=0){
 //                                    $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').trigger("click");
                                   $(EXfootcome).trigger("click");
+//console.log("comeOpen1");
+                                  movieWidthMaximize(1);
                                 }
                             }
             }
