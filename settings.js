@@ -12,12 +12,12 @@ var settingsList = [
         "type": "boolean",
         "isInstantChangable": true
     },
-    {
-        "name": "isEnterSubmit",
-        "description": "エンターでコメント送信",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
+//    {
+//        "name": "isEnterSubmit",
+//        "description": "エンターでコメント送信",
+//        "type": "boolean",
+//        "isInstantChangable": true
+//    },
     {
         "name": "isHideOldComment",
         "description": "コメント欄のスクロールバーを非表示にする",
@@ -77,7 +77,8 @@ var settingsList = [
     },
     {
         "name": "isCustomPostWin",
-        "description": "投稿ボタン削除・入力欄1行化",
+//        "description": "投稿ボタン削除・入力欄1行化",
+        "description": "投稿ボタン等を非表示",
         "type": "boolean",
 //        "isInstantChangable": false
         "isInstantChangable": true
@@ -117,7 +118,8 @@ var settingsList = [
     {
         "name": "sureReadRefreshx",
 //        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
-        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+//        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、100以前の古いコメントが破棄されることで動作が軽くなります)",
         "type": "number",
         "isInstantChangable": true
     },
@@ -129,9 +131,49 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
-        "name": "isMovieResize",
-        "description": "映像を枠に合わせて縮小する",
+//        "name": "isMovieResize",
+        "name": "isMovieMaximize",
+//        "description": "映像を枠に合わせて縮小する",
+        "description": "映像の横長さを最大に固定する",
         "type": "boolean",
+        "isInstantChangable": true
+    },
+    {
+        "name": "isCommentPadZero",
+        "description": "コメントの縦の隙間を詰める",
+        "type": "boolean",
+        "isInstantChangable": true
+    },
+    {
+        "name": "isCommentTBorder",
+        "description": "コメントの区切り線を付ける",
+        "type": "boolean",
+        "isInstantChangable": true
+    }
+    ];
+var ComeColorSettingList = [
+    {
+        "name": "commentBackColor",
+        "description": "コメント一覧の背景色(黒0～灰～255白)",
+        "type": "range",
+        "isInstantChangable": true
+    },
+    {
+        "name": "commentBackTrans",
+        "description": "コメント一覧の背景の透明度(完全透明0～255不透明)",
+        "type": "range",
+        "isInstantChangable": true
+    },
+    {
+        "name": "commentTextColor",
+        "description": "コメントの文字色(黒0～灰～255白)",
+        "type": "range",
+        "isInstantChangable": true
+    },
+    {
+        "name": "commentTextTrans",
+        "description": "コメントの文字の透明度(完全透明0～255不透明)",
+        "type": "range",
         "isInstantChangable": true
     }
     ];
@@ -172,30 +214,39 @@ function generateOptionInput(settingsArr, isPermanent) {
     var disabled;
     var description;
     var isNotChangable;
+    var NCTEXT="　※この設定はここで変更不可";
     for (i = 0; i < settingsArr.length; i += 1) {
         description = (!isPermanent && settingsArr[i].instantDescription) ? settingsArr[i].instantDescription : settingsArr[i].description;
         isNotChangable = !isPermanent && !settingsArr[i].isInstantChangable;
         disabled = isNotChangable ? " disabled" : "";
         if (settingsArr[i].type === "boolean") {
             inputHTML += '<input type="checkbox" id="' + settingsArr[i].name + '" ' + disabled + '>:' + description;
-            inputHTML += isNotChangable ? "　※この設定はここで変更不可" : "";
+            inputHTML += isNotChangable ? NCTEXT : "";
+            inputHTML += "<br/>"
         } else {
-            inputHTML += description;
-            inputHTML += isNotChangable ? "　※この設定はここで変更不可" : "" + ":";
             if (settingsArr[i].type === "number") {
+                inputHTML += description;
+                inputHTML += isNotChangable ? NCTEXT : "" + ":";
                 inputHTML += '<input type="number" id="' + settingsArr[i].name + '" ' + disabled + '>';
+                inputHTML += "<br/>"
             } else if (settingsArr[i].type === "textarea") {
+                inputHTML += description;
+                inputHTML += isNotChangable ? NCTEXT : "" + ":";
                 inputHTML += '<textarea id="' + settingsArr[i].name + '" rows=3 cols=40 wrap=off ' + disabled + '></textarea>';
+                inputHTML += "<br/>"
+            } else if (settingsArr[i].type === "range") {
+                inputHTML += '<div><span class="desc">'+description;
+                inputHTML += isNotChangable ? NCTEXT : "" + "</span>:";
+                inputHTML += '<span class="prop">-</span>';
+                inputHTML += '<input type="range" id="' + settingsArr[i].name + '" max=255 ' + disabled + '></div>';
             }
         }
-        inputHTML += "<br/>"
     }
     return inputHTML;
 }
 function generateOptionHTML(isPermanent) {
     var htmlstr = generateOptionInput(settingsList, isPermanent);
-    htmlstr += '<div id="CommentMukouSettings">';
-    htmlstr += generateOptionInput(CMSettingList, isPermanent);
-    htmlstr += '</div>';
+    htmlstr += '<div id="CommentColorSettings">' + generateOptionInput(ComeColorSettingList, isPermanent) + '</div>';
+    htmlstr += '<div id="CommentMukouSettings">' + generateOptionInput(CMSettingList, isPermanent) + '</div>';
     return htmlstr;
 }
