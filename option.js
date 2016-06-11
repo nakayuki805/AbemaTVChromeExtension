@@ -39,7 +39,7 @@ $(function(){
 //        var isMovieResize = value.movieResize || false;
         var isMovieMaximize = value.movieMaximize || false;
         var commentBackColor = value.commentBackColor || 255;
-        var commentBackTrans = value.commentBackTrans || 255;
+        var commentBackTrans = value.commentBackTrans || 127;
         var commentTextColor = value.commentTextColor || 0;
         var commentTextTrans = value.commentTextTrans || 255;
         var isCommentPadZero = value.commentPadZero || false;
