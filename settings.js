@@ -1,7 +1,7 @@
 var settingsList = [
     {
         "name": "isResizeScreen",
-        "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ",
+        "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
         "type": "boolean",
         "isInstantChangable": true
     },
