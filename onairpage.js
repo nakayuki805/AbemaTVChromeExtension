@@ -81,7 +81,7 @@ if (chrome.storage) {
 }
 
 var currentLocation = window.location.href;
-var urlchangedtick=Date.now();
+//var urlchangedtick=Date.now();
 var commentNum = 0;
 var comeLatestPosi=[];
 var comeTTLmin=3;
@@ -604,6 +604,9 @@ function delayset(){
               tcss+='border-top:'+vc+' solid 1px;';
             }
             tcss+='}';
+            if(isMovieMaximize){
+              tcss+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{width:100%!important;height:100%!important;}';
+            }
             tcss+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
             $("<link title='umadecome' rel='stylesheet' href='data:text/css," + encodeURI(tcss) + "'>").appendTo("head");
             $(EXcomesend).css("background-color",bc);
@@ -613,6 +616,11 @@ function delayset(){
               .next().css("background-color",cc)
               .css("color",tc)
             ;
+
+        var maxprop=isMovieMaximize?"100%":"";
+        $('[class*="TVContainer__tv-container___"]:first').css("width",maxprop)
+          .css("height",maxprop)
+        ;
 
 //            var hideCommentParam = 142;
 //            if (isCustomPostWin){
@@ -649,7 +657,7 @@ function delayset(){
               $(EXfootcome).next('#timerthird').remove();
             }
             copyCome();
-            movieWidthMaximize(1);
+//            movieWidthMaximize(1);
             arrayFullNgMaker();
 //            var contCome = $('[class^="TVContainer__right-comment-area___"]');
 //            var contCome = $(EXcome);
@@ -957,6 +965,9 @@ function delayset(){
           tcss+='border-top:'+vc+' solid 1px;';
         }
         tcss+='}';
+        if(isMovieMaximize){
+          tcss+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{width:100%!important;height:100%!important;}';
+        }
         tcss+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
         $("<link title='umadecome' rel='stylesheet' href='data:text/css," + encodeURI(tcss) + "'>").appendTo("head");
         $(EXcomesend).css("background-color",bc);
@@ -965,6 +976,11 @@ function delayset(){
           .css("color",tc)
           .next().css("background-color",cc)
           .css("color",tc)
+        ;
+
+        var maxprop=isMovieMaximize?"100%":"";
+        $('[class*="TVContainer__tv-container___"]:first').css("width",maxprop)
+          .css("height",maxprop)
         ;
 
         console.log("delayset ok");
@@ -1572,7 +1588,7 @@ function waitforOpenableCome(retrycount){
   if($(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
     $(EXfootcome).trigger("click");
 //console.log("comeopen waitforopenable");
-    movieWidthMaximize(1);
+//    movieWidthMaximize(1);
     waitforOpenCome(50);
   }else if(retrycount>0){
     setTimeout(waitforOpenableCome,10,retrycount-1);
@@ -1588,66 +1604,66 @@ function waitforCloseCome(retrycount){
 function fastRefreshing(){
   waitforCloseCome(100);
 }
-function movieWidthUnMaximize(){
-//console.log("movieWidthUnMaximize");
-  if(EXwatchingnum){
-    $(EXobli).css("top","");
-    var mw=$(window).width();
-    var pr=isSureReadComment?310:0;
-    var jo=$(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]');
-    if(jo.length>0){
-      for(var i=0;i<jo.length;i++){
-        if(pr<jo.eq(i).width()){
-          pr=jo.eq(i).width();
-        }
-      }
-    }
-    mw-=pr;
-    $(EXobli).children().css("width",mw+"px")
-      .css("height","0px")
-    ;
-    $(EXobli.children[EXwatchingnum]).css("height",Math.floor(mw*9/16)+"px");
-  }
-}
-function movieWidthMaximize(repeatcount){
-//console.log("movieWidthMaximize");
-  if(!chkurl()||Date.now()>urlchangedtick+1500){return;}
-  if(!isMovieMaximize){
-    movieWidthUnMaximize();
-    return;
-  }
-  if(EXwatchingnum){
-    var mw=$(window).width();
-    $(EXobli).children().css("width",mw+"px")
-      .css("height","0px")
-    ;
-    $(EXobli.children[EXwatchingnum]).css("height",Math.floor(mw*9/16)+"px");
-  }
-  if(repeatcount>0){
-    setTimeout(movieWidthMaximize,10,repeatcount-1);
-  }else{
-    moviePositionFix(0)
-  }
-}
-function moviePositionFix(countup){
-console.log("moviePositionFix");
-  if(EXobli){
-    $(EXobli).css("top","");
-    var whei=$(window).height();
-    var ptop=$(EXobli).position().top;
-    var phei=$(EXobli).height();
-    var mintop=0;
-    if($(EXhead).css("visibility")=="visible"){
-      mintop=44;
-    }
-    if(mintop>ptop){
-      $(EXobli).css("top","calc(50% + "+(mintop-ptop)+"px)");
-    }
-    if(countup<4){
-      setTimeout(moviePositionFix,10+countup*100,countup+1);
-    }
-  }
-}
+//function movieWidthUnMaximize(){
+////console.log("movieWidthUnMaximize");
+//  if(EXwatchingnum){
+//    $(EXobli).css("top","");
+//    var mw=$(window).width();
+//    var pr=isSureReadComment?310:0;
+//    var jo=$(EXobli).siblings('[class*="TVContainer__right-slide--shown___"]');
+//    if(jo.length>0){
+//      for(var i=0;i<jo.length;i++){
+//        if(pr<jo.eq(i).width()){
+//          pr=jo.eq(i).width();
+//        }
+//      }
+//    }
+//    mw-=pr;
+//    $(EXobli).children().css("width",mw+"px")
+//      .css("height","0px")
+//    ;
+//    $(EXobli.children[EXwatchingnum]).css("height",Math.floor(mw*9/16)+"px");
+//  }
+//}
+//function movieWidthMaximize(repeatcount){
+////console.log("movieWidthMaximize");
+//  if(!chkurl()||Date.now()>urlchangedtick+1500){return;}
+//  if(!isMovieMaximize){
+//    movieWidthUnMaximize();
+//    return;
+//  }
+//  if(EXwatchingnum){
+//    var mw=$(window).width();
+//    $(EXobli).children().css("width",mw+"px")
+//      .css("height","0px")
+//    ;
+//    $(EXobli.children[EXwatchingnum]).css("height",Math.floor(mw*9/16)+"px");
+//  }
+//  if(repeatcount>0){
+//    setTimeout(movieWidthMaximize,10,repeatcount-1);
+//  }else{
+//    moviePositionFix(0)
+//  }
+//}
+//function moviePositionFix(countup){
+//console.log("moviePositionFix");
+//  if(EXobli){
+//    $(EXobli).css("top","");
+//    var whei=$(window).height();
+//    var ptop=$(EXobli).position().top;
+//    var phei=$(EXobli).height();
+//    var mintop=0;
+//    if($(EXhead).css("visibility")=="visible"){
+//      mintop=44;
+//    }
+//    if(mintop>ptop){
+//      $(EXobli).css("top","calc(50% + "+(mintop-ptop)+"px)");
+//    }
+//    if(countup<4){
+//      setTimeout(moviePositionFix,10+countup*100,countup+1);
+//    }
+//  }
+//}
 function movieZoomOut(sw){
   if(EXobli){
     if(sw==1&&CMsmall<100){
@@ -1678,8 +1694,9 @@ $(window).on('load', function () {
 //        setTimeout(comesort,500);
       }
 //      if(isMovieResize){
-        movieWidthMaximize(1);
 //        waitforRightShown(1);
+//      if(isMovieMaximize){
+//        movieWidthMaximize(1);
 //      }
     });
     //ウィンドウをリサイズ
@@ -2086,7 +2103,7 @@ $(window).on('load', function () {
 //                                    $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').trigger("click");
                                   $(EXfootcome).trigger("click");
 //console.log("comeOpen1");
-                                  movieWidthMaximize(1);
+//                                  movieWidthMaximize(1);
                                 }
                             }
             }
@@ -2192,7 +2209,7 @@ function chkurl() {
         setTimeout(onresize, 1000);
         commentNum = 0;
         currentLocation = window.location.href;
-        urlchangedtick=Date.now();
+//        urlchangedtick=Date.now();
         $(".movingComment").remove();
         setEX2(30);
         return true;
