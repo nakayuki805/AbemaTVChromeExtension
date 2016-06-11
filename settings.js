@@ -134,7 +134,8 @@ var settingsList = [
 //        "name": "isMovieResize",
         "name": "isMovieMaximize",
 //        "description": "映像を枠に合わせて縮小する",
-        "description": "映像の横長さを最大に固定する",
+//        "description": "映像の横長さを最大に固定する",
+        "description": "映像の縦横長さを最大で固定する",
         "type": "boolean",
         "isInstantChangable": true
     },
