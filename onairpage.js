@@ -81,6 +81,7 @@ if (chrome.storage) {
 }
 
 var currentLocation = window.location.href;
+var urlchangedtick=Date.now();
 var commentNum = 0;
 var comeLatestPosi=[];
 var comeTTLmin=3;
@@ -1610,6 +1611,7 @@ function movieWidthUnMaximize(){
 }
 function movieWidthMaximize(repeatcount){
 //console.log("movieWidthMaximize");
+  if(!chkurl()||Date.now()>urlchangedtick+1500){return;}
   if(!isMovieMaximize){
     movieWidthUnMaximize();
     return;
@@ -1628,7 +1630,7 @@ function movieWidthMaximize(repeatcount){
   }
 }
 function moviePositionFix(countup){
-//console.log("moviePositionFix");
+console.log("moviePositionFix");
   if(EXobli){
     $(EXobli).css("top","");
     var whei=$(window).height();
@@ -2183,12 +2185,16 @@ $(window).on("resize", onresize);
     setTimeout(onresize, 1000);
 });*/
 //↑なぜかpopstateイベントが発火しないので代わりに↓
-setInterval(function () {
+setInterval(chkurl,2000);
+function chkurl() {
     if (currentLocation != window.location.href) {
         //console.log("url changed");
         setTimeout(onresize, 1000);
         commentNum = 0;
         currentLocation = window.location.href;
+        urlchangedtick=Date.now();
         $(".movingComment").remove();
-    }
-}, 2000);
+        setEX2(30);
+        return true;
+    }else{return false;}
+}
