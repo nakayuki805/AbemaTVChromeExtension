@@ -50,7 +50,7 @@ $(function(){
         var commentTextTrans = (value.commentTextTrans!==undefined)?value.commentTextTrans : 255;
         var isCommentPadZero = value.commentPadZero || false;
         var isCommentTBorder = value.commentTBorder || false;
-        var timePosition = value.timePosition || "windowbottom";
+        var timePosition = value.timePosition || "windowtop";
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
