@@ -39,7 +39,7 @@ $(function(){
 //        var isMovieResize = value.movieResize || false;
         var isMovieMaximize = value.movieMaximize || false;
         var commentBackColor = (value.commentBackColor!==undefined)?value.commentBackColor : 255;
-        var commentBackTrans = (value.commentBackTrans!==undefined)?value.commentBackTrans : 255;
+        var commentBackTrans = (value.commentBackTrans!==undefined)?value.commentBackTrans : 127;
         var commentTextColor = (value.commentTextColor!==undefined)?value.commentTextColor : 0;
         var commentTextTrans = (value.commentTextTrans!==undefined)?value.commentTextTrans : 255;
         var isCommentPadZero = value.commentPadZero || false;
