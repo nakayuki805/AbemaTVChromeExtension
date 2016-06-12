@@ -456,7 +456,7 @@ function closeOption(){
       .css("color","")
       .children('p[class^="styles__message___"]').css("color","")
     ;
-    if($("#isTimeVisible").prop("checked")){
+    if(isTimeVisible){
       createTime(0);
     }else{
       createTime(1);
