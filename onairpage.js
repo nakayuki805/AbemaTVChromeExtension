@@ -416,9 +416,9 @@ if(sw==1){ //サイドバーボタン
     var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
     var tc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(commentTextTrans/255)+")";
     var cl=$(EXcomelist);
-    if(cl.siblings('#copycome').length>0){
-      cl=cl.siblings('#copycome');
-    }
+//    if(cl.siblings('#copycome').length>0){
+//      cl=cl.siblings('#copycome');
+//    }
     cl.children('div').css("background-color",bc)
       .css("color",tc)
       .children('p[class^="styles__message___"]').css("color",tc)
@@ -445,9 +445,9 @@ function closeOption(){
     $("#settcont .rightshift").css("display","none");
     $("#settcont .leftshift").css("display","");
     var cl=$(EXcomelist);
-    if(cl.siblings('#copycome').length>0){
-      cl=cl.siblings('#copycome');
-    }
+//    if(cl.siblings('#copycome').length>0){
+//      cl=cl.siblings('#copycome');
+//    }
     cl.children('div').css("background-color","")
       .css("color","")
       .children('p[class^="styles__message___"]').css("color","")
@@ -604,8 +604,14 @@ function delayset(){
               tcss+='border-top:'+vc+' solid 1px;';
             }
             tcss+='}';
-            if(isMovieMaximize){
-              tcss+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{width:100%!important;height:100%!important;}';
+            if(isMovieMaximize||isSureReadComment){
+              tcss+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{';
+              if(isMovieMaximize){
+                tcss+='width:100%!important;height:100%!important;';
+              }else if(isSureReadComment){
+                tcss+='max-width:calc(100% - 310px);';
+              }
+              tcss+='}';
             }
             tcss+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
             $("<link title='umadecome' rel='stylesheet' href='data:text/css," + encodeURI(tcss) + "'>").appendTo("head");
@@ -617,10 +623,28 @@ function delayset(){
               .css("color",tc)
             ;
 
-        var maxprop=isMovieMaximize?"100%":"";
-        $('[class*="TVContainer__tv-container___"]:first').css("width",maxprop)
-          .css("height",maxprop)
-        ;
+        if(isMovieMaximize){
+          $(EXobli).css("width","100%")
+            .css("height","100%")
+          ;
+        }else if(isSureReadComment){
+          $(EXobli).css("width","100%")
+            .css("height","")
+          ;
+        }else{
+          $(EXobli).css("width","")
+            .css("height","")
+          ;
+        }
+        if(isInpWinBottom){
+          $(EXcomelist).css("display","flex")
+            .css("flex-direction","column-reverse")
+          ;
+        }else{
+          $(EXcomelist).css("display","")
+            .css("flex-direction","")
+          ;
+        }
 
 //            var hideCommentParam = 142;
 //            if (isCustomPostWin){
@@ -656,7 +680,7 @@ function delayset(){
               $(EXfootcount).parent().css("padding-bottom","");
               $(EXfootcome).next('#timerthird').remove();
             }
-            copyCome();
+//            copyCome();
 //            movieWidthMaximize(1);
             arrayFullNgMaker();
 //            var contCome = $('[class^="TVContainer__right-comment-area___"]');
@@ -751,9 +775,9 @@ function delayset(){
           var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
           var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
           var cl=$(EXcomelist);
-          if(cl.siblings('#copycome').length>0){
-            cl=cl.siblings('#copycome');
-          }
+//          if(cl.siblings('#copycome').length>0){
+//            cl=cl.siblings('#copycome');
+//          }
           cl.children('div').css("background-color",bc)
             .css("color",tc)
             .children('p[class^="styles__message___"]').css("color",tc)
@@ -945,7 +969,7 @@ function delayset(){
         //ユーザースクリプトのngconfigのz-index変更
         $("#NGConfig").css("z-index", 20);
 
-        copyCome();
+//        copyCome();
 
         $(EXcome).css("background-color","transparent")
           .children().css("background-color","transparent")
@@ -965,8 +989,14 @@ function delayset(){
           tcss+='border-top:'+vc+' solid 1px;';
         }
         tcss+='}';
-        if(isMovieMaximize){
-          tcss+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{width:100%!important;height:100%!important;}';
+        if(isMovieMaximize||isSureReadComment){
+          tcss+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{';
+          if(isMovieMaximize){
+            tcss+='width:100%!important;height:100%!important;';
+          }else if(isSureReadComment){
+            tcss+='max-width:calc(100% - 310px);';
+          }
+          tcss+='}';
         }
         tcss+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
         $("<link title='umadecome' rel='stylesheet' href='data:text/css," + encodeURI(tcss) + "'>").appendTo("head");
@@ -978,10 +1008,28 @@ function delayset(){
           .css("color",tc)
         ;
 
-        var maxprop=isMovieMaximize?"100%":"";
-        $('[class*="TVContainer__tv-container___"]:first').css("width",maxprop)
-          .css("height",maxprop)
-        ;
+        if(isMovieMaximize){
+          $(EXobli).css("width","100%")
+            .css("height","100%")
+          ;
+        }else if(isSureReadComment){
+          $(EXobli).css("width","100%")
+            .css("height","")
+          ;
+        }else{
+          $(EXobli).css("width","")
+            .css("height","")
+          ;
+        }
+        if(isInpWinBottom){
+          $(EXcomelist).css("display","flex")
+            .css("flex-direction","column-reverse")
+          ;
+        }else{
+          $(EXcomelist).css("display","")
+            .css("flex-direction","")
+          ;
+        }
 
         console.log("delayset ok");
     }else{
@@ -1459,88 +1507,88 @@ function faintcheck2(retrycount,fcd){
 function faintcheck(fcd){
   faintcheck2(5,Math.max(1,fcd));
 }
-function copyCome(){
-//console.log("copycome");
-  if(isInpWinBottom){
-    if(!EXcomelist||$(EXcomelist).css("display")=="none"||$(EXcome).contents().find('[class^="styles__no-contents-text___"]:first').length>0||$(EXcomelist.firstChild).children('p[class^="styles__message___"]:first').length==0){
-      return;
-    }
-    $(EXcomelist).css("visibility","hidden")
-      .css("opacity",1)
-    ;
-    var cf=$(EXcomelist.firstChild);
-    var dc=cf.prop("class");
-    var mc=cf.children('p[class^="styles__message___"]:first').prop("class");
-    var tc=cf.children('p[class^="styles__time___"]:first').prop("class");
-    var mh=";";
-    var th=";";
-    var lh=$(window).height();
-    var lc=100;
-    var jcopycome=$(EXcomelist).siblings('#copycome');
-    if(jcopycome.length==0){
-      $('<div id="copycome"></div>').insertAfter($(EXcomelist));
-      jcopycome=$(EXcomelist).siblings('#copycome');
-      do{
-        $('<div class="'+dc+'" style="visibility:hidden;"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
-//      }while(jcopycome[0].scrollHeight<lh);
-      }while((isHideOldComment?(jcopycome[0].scrollHeight<lh):(jcopycome.children().length<lc)));
-    }
-//    while(jcopycome[0].scrollHeight<lh){
-    while((isHideOldComment?(jcopycome[0].scrollHeight<lh):(jcopycome.children().length<lc))){
-      $('<div class="'+dc+'" style="visibility:hidden;"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
-    }
-//    while(jcopycome[0].scrollHeight>=lh){
-    while((isHideOldComment?(jcopycome[0].scrollHeight>=lh):(jcopycome.children().length>=lc))){
-      jcopycome.children(':first').remove();
-    }
-//comeupdate
-    var ocomelist=$(EXcomelist);
-    var copycomelist=jcopycome.children();
-    var origcomelist=ocomelist.children();
-    var j;
-    for(var i=copycomelist.length-1;i>=0;i--){
-      j=copycomelist.length-1-i;
-      if(j>=origcomelist.length-1){
-        mh=";";
-        th=";";
-        copycomelist.eq(i).css("visibility","hidden");
-      }else{
-        mh=origcomelist.eq(j).children('[class^="styles__message___"]:first').text();
-        th=origcomelist.eq(j).children('[class^="styles__time___"]:first').text();
-        copycomelist.eq(i).css("visibility","");
-      }
-      copycomelist.eq(i).children('[class^="styles__message___"]:first').text(mh);
-      copycomelist.eq(i).children('[class^="styles__time___"]:first').text(th);
-    }
-//comeupdate
-    jcopycome.css("position","absolute")
-      .css("width","100%")
-      .css("height",ocomelist.css("height"))
-    ;
-    if(isInpWinBottom){
-      jcopycome.css("top",ocomelist.css("top"));
-    }else{
-      jcopycome.css("bottom",ocomelist.css("bottom"));
-    }
-    jcopycome.scrollTop(jcopycome[0].scrollHeight);
-    if(isHideOldComment){
-      jcopycome.css("overflow-x","")
-        .css("overflow-y","")
-        .css("overflow","hidden")
-      ;
-    }else{
-      jcopycome.css("overflow","")
-        .css("overflow-x","hidden")
-        .css("overflow-y","scroll")
-      ;
-    }
-  }else{
-    $(EXcomelist).css("visibility","")
-      .css("opacity","")
-    ;
-    $(EXcomelist).siblings('#copycome').remove();
-  }
-}
+//function copyCome(){
+////console.log("copycome");
+//  if(isInpWinBottom){
+//    if(!EXcomelist||$(EXcomelist).css("display")=="none"||$(EXcome).contents().find('[class^="styles__no-contents-text___"]:first').length>0||$(EXcomelist.firstChild).children('p[class^="styles__message___"]:first').length==0){
+//      return;
+//    }
+//    $(EXcomelist).css("visibility","hidden")
+//      .css("opacity",1)
+//    ;
+//    var cf=$(EXcomelist.firstChild);
+//    var dc=cf.prop("class");
+//    var mc=cf.children('p[class^="styles__message___"]:first').prop("class");
+//    var tc=cf.children('p[class^="styles__time___"]:first').prop("class");
+//    var mh=";";
+//    var th=";";
+//    var lh=$(window).height();
+//    var lc=100;
+//    var jcopycome=$(EXcomelist).siblings('#copycome');
+//    if(jcopycome.length==0){
+//      $('<div id="copycome"></div>').insertAfter($(EXcomelist));
+//      jcopycome=$(EXcomelist).siblings('#copycome');
+//      do{
+//        $('<div class="'+dc+'" style="visibility:hidden;"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
+////      }while(jcopycome[0].scrollHeight<lh);
+//      }while((isHideOldComment?(jcopycome[0].scrollHeight<lh):(jcopycome.children().length<lc)));
+//    }
+////    while(jcopycome[0].scrollHeight<lh){
+//    while((isHideOldComment?(jcopycome[0].scrollHeight<lh):(jcopycome.children().length<lc))){
+//      $('<div class="'+dc+'" style="visibility:hidden;"><p class="'+mc+'">'+mh+'</p><p class="'+tc+'">'+th+'</p></div>').appendTo(jcopycome);
+//    }
+////    while(jcopycome[0].scrollHeight>=lh){
+//    while((isHideOldComment?(jcopycome[0].scrollHeight>=lh):(jcopycome.children().length>=lc))){
+//      jcopycome.children(':first').remove();
+//    }
+////comeupdate
+//    var ocomelist=$(EXcomelist);
+//    var copycomelist=jcopycome.children();
+//    var origcomelist=ocomelist.children();
+//    var j;
+//    for(var i=copycomelist.length-1;i>=0;i--){
+//      j=copycomelist.length-1-i;
+//      if(j>=origcomelist.length-1){
+//        mh=";";
+//        th=";";
+//        copycomelist.eq(i).css("visibility","hidden");
+//      }else{
+//        mh=origcomelist.eq(j).children('[class^="styles__message___"]:first').text();
+//        th=origcomelist.eq(j).children('[class^="styles__time___"]:first').text();
+//        copycomelist.eq(i).css("visibility","");
+//      }
+//      copycomelist.eq(i).children('[class^="styles__message___"]:first').text(mh);
+//      copycomelist.eq(i).children('[class^="styles__time___"]:first').text(th);
+//    }
+////comeupdate
+//    jcopycome.css("position","absolute")
+//      .css("width","100%")
+//      .css("height",ocomelist.css("height"))
+//    ;
+//    if(isInpWinBottom){
+//      jcopycome.css("top",ocomelist.css("top"));
+//    }else{
+//      jcopycome.css("bottom",ocomelist.css("bottom"));
+//    }
+//    jcopycome.scrollTop(jcopycome[0].scrollHeight);
+//    if(isHideOldComment){
+//      jcopycome.css("overflow-x","")
+//        .css("overflow-y","")
+//        .css("overflow","hidden")
+//      ;
+//    }else{
+//      jcopycome.css("overflow","")
+//        .css("overflow-x","hidden")
+//        .css("overflow-y","scroll")
+//      ;
+//    }
+//  }else{
+//    $(EXcomelist).css("visibility","")
+//      .css("opacity","")
+//    ;
+//    $(EXcomelist).siblings('#copycome').remove();
+//  }
+//}
 function comeColor(inp){
 //console.log("comeColor:"+inp);
   if(EXfootcountcome){
@@ -1791,7 +1839,7 @@ $(window).on('load', function () {
                         putComment(comments[i].innerHTML);
                     }
                 }
-                copyCome();
+//                copyCome();
               }else{
                 comeRefreshing=false;
               }
