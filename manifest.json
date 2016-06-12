@@ -12,7 +12,10 @@
 	  }
   },
   "permissions": [
-	  "storage"
+	  "storage",
+	  "alarms",
+	  "notifications",
+	  "tabs"
   ],
   "content_scripts": [
     {
@@ -27,5 +30,9 @@
     "jquery-2.2.3.min.js",
 	"option.html"
   ],
-  "options_page": "option.html"
+  "options_page": "option.html",
+  "background": {
+	  "scripts": ["event.js"],
+	  "persistent": false
+  }
 } 
