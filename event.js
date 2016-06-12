@@ -51,20 +51,26 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if ((new Date()) > notifyTime) {
             sendResponse({result: "pastTimeError"});
         } else {
-            chrome.alarms.create(progNotifyName, {
-                when: notifyTime
-            });
-            var storeObj = {};
-            storeObj[progNotifyName] = {
-                channel: channel,
-                channelName: channelName,
-                programID: programID,
-                programTitle: programTitle,
-                programTime: programTime,
-                notifyTime: notifyTime
-            };
-            chrome.storage.local.set(storeObj, function() {
-                sendResponse({result: "added"});
+            chrome.notifications.getPermissionLevel(function(ret){
+                if (ret === "granted") {
+                    chrome.alarms.create(progNotifyName, {
+                        when: notifyTime
+                    });
+                    var storeObj = {};
+                    storeObj[progNotifyName] = {
+                        channel: channel,
+                        channelName: channelName,
+                        programID: programID,
+                        programTitle: programTitle,
+                        programTime: programTime,
+                        notifyTime: notifyTime
+                    };
+                    chrome.storage.local.set(storeObj, function() {
+                        sendResponse({result: "added"});
+                    });
+                } else {
+                    sendResponse({result: "notificationDined"});
+                }
             });
         }
     } else {

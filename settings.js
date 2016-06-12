@@ -220,9 +220,15 @@ var CMSettingList = [
             "isInstantChangable": true
         }
     ];
+
+/*var channelList = {
+    "abema-news": "AbemaNews",
+    "abema-special": "Abema SPECIAL",
+    "special-plus": "SPECIAL PLUS",
+    "drama": "ドラマ"
+}*/
 function getSettings(callback) {
     var res = {};
-    
 }
 function generateOptionInput(settingsArr, isPermanent) {
     var inputHTML = "";
@@ -262,9 +268,9 @@ function generateOptionInput(settingsArr, isPermanent) {
 }
 function generateRadioInput(settingsArr){
     var inputHTML="";
-    for(i=0;i<settingsArr.length;i++){
+    for(var i=0;i<settingsArr.length;i++){
         inputHTML+='<div id="i'+settingsArr[i].name+'">';
-        for(j=0;j<settingsArr[i].list.length;j++){
+        for(var j=0;j<settingsArr[i].list.length;j++){
             inputHTML+='<div>';
             inputHTML+='<input type="radio" name="'+settingsArr[i].name+'" value="'+settingsArr[i].list[j][0]+'">';
             inputHTML+=settingsArr[i].list[j][1];
