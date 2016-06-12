@@ -2,7 +2,7 @@
 {
   "manifest_version": 2,
   "name": "abematv ext",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "abematvを視聴しやすくする非公式の拡張機能",
   "icons": {"128": "abemaexticon.png"},
   "applications": {
