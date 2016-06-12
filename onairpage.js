@@ -458,10 +458,10 @@ function closeOption(){
     ;
     if(isTimeVisible){
       createTime(0);
+      setTimePosition();
     }else{
       createTime(1);
     }
-    setTimePosition();
 }
 function delayset(){
     //シングルクリックで真っ黒を解除
