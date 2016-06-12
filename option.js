@@ -10,6 +10,12 @@ $(function(){
       .css("padding","0px 4px")
       .next('input[type="range"]').css("float","right")
     ;
+    $("#itimePosition").insertBefore("#isTimeVisible+*")
+      .css("border","black solid 1px")
+      .css("margin-left","16px")
+      .css("display","flex")
+      .css("flex-direction","column")
+    ;
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -19,10 +25,10 @@ $(function(){
         var isCMBlack = value.CMBlack || false;
         var isCMBkTrans = value.CMBkTrans || false;
         var isCMsoundoff = value.CMsoundoff || false;
-        var CMsmall = Math.min(100,Math.max(5,(value.CMsmall || 100)));
+        var CMsmall = Math.min(100,Math.max(5,((value.CMsmall!==undefined)?value.CMsmall : 100)));
         var isMovingComment = value.movingComment || false;
-        var movingCommentSecond = value.movingCommentSecond || 10;
-        var movingCommentLimit = value.movingCommentLimit || 30;
+        var movingCommentSecond = (value.movingCommentSecond!==undefined)?value.movingCommentSecond : 10;
+        var movingCommentLimit = (value.movingCommentLimit!==undefined)?value.movingCommentLimit : 30;
         var isMoveByCSS =　value.moveByCSS || false;
         var isComeNg = value.comeNg || false;
         var isComeDel = value.comeDel || false;
@@ -31,19 +37,20 @@ $(function(){
         var isCustomPostWin = value.customPostWin || false;
         var isCancelWheel = value.cancelWheel || false;
         var isVolumeWheel = value.volumeWheel || false;
-        var changeMaxVolume = Math.min(100,Math.max(0,(value.changeMaxVolume || 100)));
+        var changeMaxVolume = Math.min(100,Math.max(0,((value.changeMaxVolume!==undefined)?value.changeMaxVolume : 100)));
         var isTimeVisible = value.timeVisible || false;
         var isSureReadComment = value.sureReadComment || false;
-        var sureReadRefreshx = Math.max(101,(value.sureReadRefreshx || 2000000));
+        var sureReadRefreshx = Math.max(101,((value.sureReadRefreshx!==undefined)?value.sureReadRefreshx : 2000000));
         var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
 //        var isMovieResize = value.movieResize || false;
         var isMovieMaximize = value.movieMaximize || false;
-        var commentBackColor = value.commentBackColor || 255;
-        var commentBackTrans = value.commentBackTrans || 127;
-        var commentTextColor = value.commentTextColor || 0;
-        var commentTextTrans = value.commentTextTrans || 255;
+        var commentBackColor = (value.commentBackColor!==undefined)?value.commentBackColor : 255;
+        var commentBackTrans = (value.commentBackTrans!==undefined)?value.commentBackTrans : 127;
+        var commentTextColor = (value.commentTextColor!==undefined)?value.commentTextColor : 0;
+        var commentTextTrans = (value.commentTextTrans!==undefined)?value.commentTextTrans : 255;
         var isCommentPadZero = value.commentPadZero || false;
         var isCommentTBorder = value.commentTBorder || false;
+        var timePosition = value.timePosition || "windowtop";
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -89,6 +96,7 @@ $(function(){
         ;
         $("#isCommentPadZero").prop("checked", isCommentPadZero);
         $("#isCommentTBorder").prop("checked", isCommentTBorder);
+        $('#itimePosition [type="radio"][name="timePosition"]').val([timePosition]);
     });
     $("#saveBtn").click(function () {
         chrome.storage.local.set({
@@ -123,7 +131,8 @@ $(function(){
             "commentTextColor": parseInt($("#commentTextColor").val()),
             "commentTextTrans": parseInt($("#commentTextTrans").val()),
             "commentPadZero": $("#isCommentPadZero").prop("checked"),
-            "commentTBorder": $("#isCommentTBorder").prop("checked")
+            "commentTBorder": $("#isCommentTBorder").prop("checked"),
+            "timePosition": $('#itimePosition [name="timePosition"]:checked').val()
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

@@ -71,7 +71,8 @@ var settingsList = [
         "name": "isInpWinBottom",
 //        "description": "コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール(コメ欄を常に表示しているときのみ)",
 //        "description": "コメント入力欄の位置を下へ(コメント一覧の逆順・スクロール機能は一時廃止)",
-        "description": "コメント入力欄と番組残り時間を下へ(コメント一覧は逆順・下スクロール)",
+//        "description": "コメント入力欄と番組残り時間を下へ(コメント一覧は逆順・下スクロール)",
+        "description": "コメント入力欄を下へ(コメント一覧は逆順・下スクロール)",
         "type": "boolean",
         "isInstantChangable": true
     },
@@ -104,7 +105,8 @@ var settingsList = [
     {
         "name": "isTimeVisible",
 //        "description": "コメント入力欄の近くに番組残り時間を表示",
-        "description": "画面右上に番組残り時間を表示",
+//        "description": "画面右上に番組残り時間を表示",
+        "description": "番組残り時間を表示",
         "type": "boolean",
         "isInstantChangable": true
     },
@@ -178,6 +180,19 @@ var ComeColorSettingList = [
         "isInstantChangable": true
     }
     ];
+var RadioSettingList = [
+    {
+        "name": "timePosition",
+        "list":[
+            ["windowtop","ウィンドウの右上（常時表示）"],
+            ["windowbottom","ウィンドウの右下（常時表示）"],
+            ["commentinputtop","コメント入力の右上"],
+            ["commentinputbottom","コメント入力の右下"],
+            ["header","右上のメニューの上"],
+            ["footer","右下のコメント数の下"]
+        ]
+    }
+    ];
 var CMSettingList = [
         {
             "name": "isCMBlack",
@@ -245,9 +260,24 @@ function generateOptionInput(settingsArr, isPermanent) {
     }
     return inputHTML;
 }
+function generateRadioInput(settingsArr){
+    var inputHTML="";
+    for(i=0;i<settingsArr.length;i++){
+        inputHTML+='<div id="i'+settingsArr[i].name+'">';
+        for(j=0;j<settingsArr[i].list.length;j++){
+            inputHTML+='<div>';
+            inputHTML+='<input type="radio" name="'+settingsArr[i].name+'" value="'+settingsArr[i].list[j][0]+'">';
+            inputHTML+=settingsArr[i].list[j][1];
+            inputHTML+='</div>';
+        }
+        inputHTML+='</div>';
+    }
+    return inputHTML;
+}
 function generateOptionHTML(isPermanent) {
     var htmlstr = generateOptionInput(settingsList, isPermanent);
     htmlstr += '<div id="CommentColorSettings">' + generateOptionInput(ComeColorSettingList, isPermanent) + '</div>';
     htmlstr += '<div id="CommentMukouSettings">' + generateOptionInput(CMSettingList, isPermanent) + '</div>';
+    htmlstr += generateRadioInput(RadioSettingList);
     return htmlstr;
 }
