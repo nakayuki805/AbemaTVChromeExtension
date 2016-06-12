@@ -440,6 +440,7 @@ if(sw==1){ //サイドバーボタン
     $("#isCommentPadZero").prop("checked", isCommentPadZero);
     $("#isCommentTBorder").prop("checked", isCommentTBorder);
     $('#itimePosition [type="radio"][name="timePosition"]').val([timePosition]);
+    $('#itimePosition').css("display",isTimeVisible?"block":"none");
 }
 function closeOption(){
     $("#settcont").css("display","none")
@@ -455,6 +456,11 @@ function closeOption(){
       .css("color","")
       .children('p[class^="styles__message___"]').css("color","")
     ;
+    if($("#isTimeVisible").prop("checked")){
+      createTime(0);
+    }else{
+      createTime(1);
+    }
     setTimePosition();
 }
 function delayset(){
@@ -785,7 +791,13 @@ function delayset(){
         });
         $('#itimePosition,#isTimeVisible').change(function(){
           if($("#isTimeVisible").prop("checked")){
+            $('#itimePosition').css("display","block");
+            createTime(0);
             setTimePosition($('#itimePosition [name="timePosition"]:checked').val());
+          }else{
+            $('#itimePosition').css("display","none");
+            createTime(1);
+            $('#forProEndTxt,#forProEndBk').css("display","none");
           }
         });
         arrayFullNgMaker();
@@ -1771,6 +1783,14 @@ function createTime(sw){
     }
     setTimePosition();
   }else if(sw==1){
+    var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
+    var parexfootcount=$(EXfootcount).parent();
+    var forpros=$("#forProEndTxt,#forProEndBk");
+    prehoverContents.css("padding-top","")
+      .prev().css("padding-top","")
+    ;
+    parexfootcount.css("padding-bottom","");
+    $(EXfootcome).next('#timerthird').remove();
     $("#forProEndBk,#forProEndTxt").remove();
   }
 }
