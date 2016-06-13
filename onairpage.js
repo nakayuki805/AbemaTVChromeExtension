@@ -466,7 +466,7 @@ function closeOption(){
     }
 }
 function toast(message) {
-    $("<div class='toast'><p>" + message + "</p></div>").appendTo("body").fadeOut(5000);
+    $("<div class='toast'><p>" + message + "</p></div>").appendTo("body").fadeOut(8000);
 }
 function delayset(){
     //シングルクリックで真っ黒を解除

@@ -52,6 +52,7 @@ $(function(){
         var isCommentTBorder = value.commentTBorder || false;
         var timePosition = value.timePosition || "windowtop";
         var notifyMinutes = (value.notifyMinutes!==undefined)?value.notifyMinutes : 1;
+        var isNotifyAndOpen = value.isNotifyAndOpen || false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -99,6 +100,7 @@ $(function(){
         $("#isCommentTBorder").prop("checked", isCommentTBorder);
         $('#itimePosition [type="radio"][name="timePosition"]').val([timePosition]);
         $("#notifyMinutes").val(notifyMinutes);
+        $("#isNotifyAndOpen").prop("checked", isNotifyAndOpen);
     });
     $("#saveBtn").click(function () {
         chrome.storage.local.set({
@@ -135,7 +137,8 @@ $(function(){
             "commentPadZero": $("#isCommentPadZero").prop("checked"),
             "commentTBorder": $("#isCommentTBorder").prop("checked"),
             "timePosition": $('#itimePosition [name="timePosition"]:checked').val(),
-            "notifyMinutes": parseInt($("#notifyMinutes").val())
+            "notifyMinutes": parseInt($("#notifyMinutes").val()),
+            "isNotifyAndOpen": $("#isNotifyAndOpen").prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

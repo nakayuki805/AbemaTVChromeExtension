@@ -12,7 +12,7 @@ chrome.runtime.sendMessage(req, function(response) {console.log(response);})
 //通知
 chrome.alarms.onAlarm.addListener(function(alarm) {
     if (alarm.name.indexOf("progNotify_") === 0){
-        chrome.storage.local.get(alarm.name, function(storeObj) {
+        chrome.storage.local.get([alarm.name, "isNotifyAndOpen"], function(storeObj) {
             console.log("show notification", storeObj);
             var programData = storeObj[alarm.name];
             var progStartMinStr = ((programData.programTime-programData.notifyTime)/60000).toFixed(1).replace(".0","");
@@ -26,7 +26,11 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
                 message: "AbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」が" + progStartMinStr + "分後の" + programTimeStr + "に始まります。"
             }, function(notificationID)  {
                 chrome.storage.local.remove(alarm.name);
-                sessionStorage.setItem(notificationID, channelUrl)
+                if (storeObj.isNotifyAndOpen === true) {
+                    chrome.tabs.create({'url': channelUrl});
+                } else {
+                    sessionStorage.setItem(notificationID, channelUrl);
+                }
             });
         });
     }
@@ -34,7 +38,10 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
 
 //通知をクリックした時
 chrome.notifications.onClicked.addListener(function(notificationID) {
-    chrome.tabs.create({'url': sessionStorage.getItem(notificationID)});
+    var url = sessionStorage.getItem(notificationID);
+    if (url){
+        chrome.tabs.create({'url': sessionStorage.getItem(notificationID)});
+    }
     chrome.notifications.clear(notificationID);
 });
 //messageが来た時

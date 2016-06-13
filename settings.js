@@ -155,9 +155,15 @@ var settingsList = [
     },
     {
         "name": "notifyMinutes",
-        "description": "番組通知を番組開始の何分前にするか",
+        "description": "番組通知を番組開始の何分前にするか(番組表の番組ページから番組開始前の通知を設定できます。)",
         "type": "number",
         "isInstantChangable": true
+    },
+    {
+        "name": "isNotifyAndOpen",
+        "description": "番組通知時に自動で放送画面を開く",
+        "type": "boolean",
+        "isInstantChangable": false
     }
     ];
 var ComeColorSettingList = [
