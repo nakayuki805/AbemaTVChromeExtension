@@ -152,6 +152,12 @@ var settingsList = [
         "description": "コメントの区切り線を付ける",
         "type": "boolean",
         "isInstantChangable": true
+    },
+    {
+        "name": "notifyMinutes",
+        "description": "番組通知を番組開始の何分前にするか",
+        "type": "number",
+        "isInstantChangable": true
     }
     ];
 var ComeColorSettingList = [

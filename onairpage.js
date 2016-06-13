@@ -39,6 +39,7 @@ var commentTextTrans = 255;
 var isCommentPadZero=false;
 var isCommentTBorder=false;
 var timePosition="windowtop";
+var notifyMinutes=1;//何分前に番組通知するか
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -79,6 +80,7 @@ if (chrome.storage) {
         isCommentPadZero = value.commentPadZero || false;
         isCommentTBorder = value.commentTBorder || false;
         timePosition = value.timePosition || timePosition;
+        notifyMinutes = (value.notifyMinutes!==undefined)?value.notifyMinutes : notifyMinutes
     });
 }
 
@@ -2333,7 +2335,6 @@ function putNotifyButton(url){
     var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（.+）(\d+):(\d+)/);
     var programTime = new Date();
     var now = new Date();
-    var notifyMinutes = 1;//何分前に通知するか ToDo:設定できるように
     programTime.setMonth(parseInt(programTimeArray[1])-1);
     programTime.setDate(parseInt(programTimeArray[2]));
     programTime.setHours(parseInt(programTimeArray[3]));
@@ -2347,7 +2348,7 @@ function putNotifyButton(url){
         var notifyButton = $('<input type="button" id="addNotify">');
         notifyButton.appendTo('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__checkbox-button-area___"]');
         chrome.storage.local.get(progNotifyName, function(notifyData) {
-            console.log(notifyData,progNotifyName)
+            //console.log(notifyData,progNotifyName)
            if(!notifyData[progNotifyName]){
                //未登録
                notifyButton.val("通知登録").click(function() {
@@ -2363,13 +2364,6 @@ function putNotifyButton(url){
                    chrome.runtime.sendMessage(request, function(response) {
                        if(response.result==="added"){
                            toast("通知登録しました<br>番組開始" + notifyMinutes + "分前に通知します。通知設定やChromeが立ち上がってないなどにより通知されない場合があります。");
-                           /*notifyButton.val("通知登録解除").click(function(){
-                               chrome.runtime.sendMessage({type: "removeProgramNotifyAlarm", progNotifyName: progNotifyName}, function(response) {
-                                   if(response.result==="removed"){
-                                       toast("通知解除しました");
-                                   }
-                               });
-                           });*/
                            notifyButton.remove();
                            putNotifyButton(url);
                        }else if(response.result==="notificationDined"){

@@ -39,7 +39,7 @@ chrome.notifications.onClicked.addListener(function(notificationID) {
 });
 //messageが来た時
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    console.log("message", request,sender)
+    //console.log("message", request,sender)
     if (request.type === "addProgramNotifyAlarm"){
         var programID = request.programID;
         var channel = request.channel;
@@ -77,7 +77,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         var progNotifyName = request.progNotifyName;
         chrome.alarms.clear(progNotifyName, function(wasCleared) {
             chrome.storage.local.remove(progNotifyName, function(){
-                console.log("alarm " + progNotifyName + " cleared>"+wasCleared);
+                //console.log("alarm " + progNotifyName + " cleared>"+wasCleared);
                 sendResponse({result: "removed"});
             });
         });
