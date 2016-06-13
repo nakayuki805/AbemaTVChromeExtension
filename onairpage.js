@@ -463,6 +463,9 @@ function closeOption(){
       createTime(1);
     }
 }
+function toast(message) {
+    $("<div class='toast'><p>" + message + "</p></div>").appendTo("body").fadeOut(5000);
+}
 function delayset(){
     //シングルクリックで真っ黒を解除
     var pwaku=$('[class^="style__overlap___"]');
@@ -1887,6 +1890,9 @@ $(window).on('load', function () {
             toggleFullscreen();
         }
     });
+    //URLパターンチェック
+    checkUrlPattern(location.href);
+    
     $(window).on("click",function(){
       if(isSureReadComment){
         comeclickcd=2;
@@ -2294,13 +2300,97 @@ $(window).on("resize", onresize);
 setInterval(chkurl,2000);
 function chkurl() {
     if (currentLocation != window.location.href) {
-        //console.log("url changed");
+        console.log("url changed");
         setTimeout(onresize, 1000);
         commentNum = 0;
         currentLocation = window.location.href;
 //        urlchangedtick=Date.now();
         $(".movingComment").remove();
         setEX2(30);
+        checkUrlPattern(currentLocation);
         return true;
     }else{return false;}
+}
+//onloadからも呼ばれる
+function checkUrlPattern(url){
+    console.log("cup", url)
+    if (url.match(/https:\/\/abema.tv\/channels\/[-a-z0-9]+\/slots\/[a-zA-Z]+/)) {
+        //番組個別ページ
+        putNotifyButton(url);
+    }
+}
+
+//通知機能
+function putNotifyButton(url){
+    if($('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__time___"]').text()==""){setTimeout(function(){putNotifyButton(url)},1000);console.log("putNotifyButton wait");return;}
+    var urlarray = url.substring(17).split("/");
+    var channel = urlarray[1];
+    var channelName = channel;//目標はチャンネル名取得
+    var programID = urlarray[3];
+    var programTitle = $('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__heading___"]').text();
+    var programTimeStr = $('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__time___"]').text();
+    console.log(programTimeStr, urlarray)
+    var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（.+）(\d+):(\d+)/);
+    var programTime = new Date();
+    var now = new Date();
+    var notifyMinutes = 1;//何分前に通知するか ToDo:設定できるように
+    programTime.setMonth(parseInt(programTimeArray[1])-1);
+    programTime.setDate(parseInt(programTimeArray[2]));
+    programTime.setHours(parseInt(programTimeArray[3]));
+    programTime.setMinutes(parseInt(programTimeArray[4]));
+    programTime.setSeconds(0);
+    if (now.getMonth === 11 && programTime.getMonth === 0) {programTime.setFullYear(now.getFullYear+1);} //現在12月なら1月は来年とする
+    //console.log(programTime)
+    var notifyTime = programTime - notifyMinutes*60000;
+    if (notifyTime > now){
+        var progNotifyName = "progNotify_"+channel+"_"+programID;
+        var notifyButton = $('<input type="button" id="addNotify">');
+        notifyButton.appendTo('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__checkbox-button-area___"]');
+        chrome.storage.local.get(progNotifyName, function(notifyData) {
+            console.log(notifyData,progNotifyName)
+           if(!notifyData[progNotifyName]){
+               //未登録
+               notifyButton.val("通知登録").click(function() {
+                   var request = {
+                       type:"addProgramNotifyAlarm",
+                       channel: channel,
+                       channelName: channelName,
+                       programID: programID,
+                       programTitle: programTitle,
+                       programTime: programTime-0,//dateを数字に
+                       notifyTime: notifyTime
+                   };
+                   chrome.runtime.sendMessage(request, function(response) {
+                       if(response.result==="added"){
+                           toast("通知登録しました<br>番組開始" + notifyMinutes + "分前に通知します。通知設定やChromeが立ち上がってないなどにより通知されない場合があります。");
+                           /*notifyButton.val("通知登録解除").click(function(){
+                               chrome.runtime.sendMessage({type: "removeProgramNotifyAlarm", progNotifyName: progNotifyName}, function(response) {
+                                   if(response.result==="removed"){
+                                       toast("通知解除しました");
+                                   }
+                               });
+                           });*/
+                           notifyButton.remove();
+                           putNotifyButton(url);
+                       }else if(response.result==="notificationDined"){
+                           toast("拡張機能からの通知が拒否されているので通知できません")
+                       }else if(response.result==="pastTimeError"){
+                           toast("既に開始されている番組です")
+                       }
+                   })
+               });
+           } else {
+               //登録済み
+               notifyButton.val("通知登録解除").click(function(){
+                   chrome.runtime.sendMessage({type: "removeProgramNotifyAlarm", progNotifyName: progNotifyName}, function(response) {
+                       if(response.result==="removed"){
+                           toast("通知解除しました");
+                           notifyButton.remove();
+                           putNotifyButton(url);
+                       }
+                   });
+               });
+           }
+        });
+    }
 }

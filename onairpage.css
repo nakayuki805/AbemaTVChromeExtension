@@ -94,3 +94,18 @@ body{
     z-index: 20;
     opacity: 0.7;
 }
+.toast {
+    z-index: 100;
+    background-color: black;
+    color: white;
+    opacity: 0.8;
+    border-radius: 20px;
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    margin-left: -200px;
+    width: 400px;
+}
+.toast p{
+    margin: 10px;
+}

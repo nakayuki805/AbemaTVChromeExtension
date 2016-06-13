@@ -1,7 +1,7 @@
 // event page script
 /*
 onairpage.js等から以下のようにして通知登録
-var req = {channel:"abema-news", channelName:"AbemaNews", programID: "P2Z4XVYyzAo", programTitle: "AbemaNews夜①／芸能もういっちょ", programTime: 番組開始時間(Date), notifyTime: 通知時間(Date)};
+var req = {type:"addProgramNotifyAlarm",channel:"abema-news", channelName:"AbemaNews", programID: "P2Z4XVYyzAo", programTitle: "AbemaNews夜①／芸能もういっちょ", programTime: 番組開始時間(number), notifyTime: 通知時間(number)};
 chrome.runtime.sendMessage(req, function(response) {
   //response.resultが"added"なら通知設定完了、"pastTimeError"なら過去の時間を指定している
 });
@@ -39,6 +39,7 @@ chrome.notifications.onClicked.addListener(function(notificationID) {
 });
 //messageが来た時
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    console.log("message", request,sender)
     if (request.type === "addProgramNotifyAlarm"){
         var programID = request.programID;
         var channel = request.channel;
@@ -47,7 +48,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         var notifyTime = request.notifyTime;
         var programTitle = request.programTitle;
         var progNotifyName = "progNotify_"+channel+"_"+programID;
-        console.log("message", request,sender)
         if ((new Date()) > notifyTime) {
             sendResponse({result: "pastTimeError"});
         } else {
@@ -73,6 +73,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 }
             });
         }
+    } else if (request.type === "removeProgramNotifyAlarm") {
+        var progNotifyName = request.progNotifyName;
+        chrome.alarms.clear(progNotifyName, function(wasCleared) {
+            chrome.storage.local.remove(progNotifyName, function(){
+                console.log("alarm " + progNotifyName + " cleared>"+wasCleared);
+                sendResponse({result: "removed"});
+            });
+        });
     } else {
         console.warn("message type not match", request.type);
     }
