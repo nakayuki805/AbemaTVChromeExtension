@@ -93,3 +93,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
     return true;
 });
+chrome.runtime.onMessageExternal.addListener(function(r){
+ if(r.name!="bgsend"){return;}
+ chrome.tabs.sendMessage(r.tab,{name:r.name,type:r.type,value:r.value});
+});
