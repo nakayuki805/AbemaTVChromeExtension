@@ -154,14 +154,20 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
-        "name": "notifyMinutes",
-        "description": "番組通知を番組開始の何分前にするか(番組表の番組ページから番組開始前の通知を設定できます。)",
+        "name": "notifySeconds",
+        "description": "番組通知を番組開始の何秒前にするか(番組表の番組ページから番組開始前の通知を設定できます。)",
         "type": "number",
         "isInstantChangable": true
     },
     {
         "name": "isNotifyAndOpen",
-        "description": "番組通知時に自動で放送画面を開く",
+        "description": "番組通知時に自動で新しいタブで放送画面を開く",
+        "type": "boolean",
+        "isInstantChangable": false
+    },
+    {
+        "name": "isNaOinActive",
+        "description": "↑既に開いている放送画面があれば新しいタブを開かずそのタブを切り替える(アクティブなタブ優先)",
         "type": "boolean",
         "isInstantChangable": false
     }

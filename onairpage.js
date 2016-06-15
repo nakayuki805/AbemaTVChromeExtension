@@ -39,7 +39,7 @@ var commentTextTrans = 255;
 var isCommentPadZero=false;
 var isCommentTBorder=false;
 var timePosition="windowtop";
-var notifyMinutes=1;//何分前に番組通知するか
+var notifySeconds=60;//何秒前に番組通知するか
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -80,7 +80,7 @@ if (chrome.storage) {
         isCommentPadZero = value.commentPadZero || false;
         isCommentTBorder = value.commentTBorder || false;
         timePosition = value.timePosition || timePosition;
-        notifyMinutes = (value.notifyMinutes!==undefined)?value.notifyMinutes : notifyMinutes
+        notifySeconds = (value.notifySeconds!==undefined)?value.notifySeconds : notifySeconds
     });
 }
 
@@ -449,7 +449,10 @@ function closeOption(){
     setOptionElement();
 }
 function toast(message) {
-    $("<div class='toast'><p>" + message + "</p></div>").appendTo("body").fadeOut(8000);
+    var toastElem$("<div class='toast'><p>" + message + "</p></div>").appendTo("body");
+    setTimeout(function(){
+        toastElem.fadeOut(3000);
+    },4000);
 }
 function delayset(){
     var hoverContents = $('[class*="styles__hover-contents___"]');
@@ -1604,7 +1607,7 @@ function putNotifyButton(url){
     programTime.setSeconds(0);
     if (now.getMonth === 11 && programTime.getMonth === 0) {programTime.setFullYear(now.getFullYear+1);} //現在12月なら1月は来年とする
     //console.log(programTime)
-    var notifyTime = programTime - notifyMinutes*60000;
+    var notifyTime = programTime - notifySeconds*1000;
     if (notifyTime > now){
         var progNotifyName = "progNotify_"+channel+"_"+programID;
         var notifyButton = $('<input type="button" id="addNotify">');
@@ -1613,7 +1616,7 @@ function putNotifyButton(url){
             //console.log(notifyData,progNotifyName)
            if(!notifyData[progNotifyName]){
                //未登録
-               notifyButton.val("通知登録").click(function() {
+               notifyButton.val("拡張機能の通知登録").click(function() {
                    var request = {
                        type:"addProgramNotifyAlarm",
                        channel: channel,
@@ -1625,19 +1628,19 @@ function putNotifyButton(url){
                    };
                    chrome.runtime.sendMessage(request, function(response) {
                        if(response.result==="added"){
-                           toast("通知登録しました<br>番組開始" + notifyMinutes + "分前に通知します。通知設定やChromeが立ち上がってないなどにより通知されない場合があります。");
+                           toast("通知登録しました<br>番組開始" + notifySeconds + "秒前にポップアップで通知します。設定されていた場合は自動で放送画面を開きます。通知設定やChromeが立ち上がってないなどにより通知されない場合があります。Chromeが起動していればAbemaTVを開いてなくても通知されます。");
                            notifyButton.remove();
                            putNotifyButton(url);
                        }else if(response.result==="notificationDined"){
                            toast("拡張機能からの通知が拒否されているので通知できません")
                        }else if(response.result==="pastTimeError"){
-                           toast("既に開始されている番組です")
+                           toast("既に開始された番組です")
                        }
                    })
                });
            } else {
                //登録済み
-               notifyButton.val("通知登録解除").click(function(){
+               notifyButton.val("拡張機能の通知登録解除").click(function(){
                    chrome.runtime.sendMessage({type: "removeProgramNotifyAlarm", progNotifyName: progNotifyName}, function(response) {
                        if(response.result==="removed"){
                            toast("通知解除しました");
