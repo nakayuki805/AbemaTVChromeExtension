@@ -139,7 +139,8 @@ var cmblockcd=0; //カウント用
 var comeRefreshing=false; //コメ欄自動開閉中はソートを実行したいのでコメント更新しない用
 var newtop = 0;//映像リサイズのtop
 var comeHealth=100; //コメント欄を開く時の初期読込時に読み込まれたコメント数（公式NGがあると100未満になる）
-var bginfo=[0,[],-1];
+var bginfo=[0,[],-1,-1];
+var eventAdded=false; //各イベントを1回だけ作成する用
 
 function onresize() {
     if (settings.isResizeScreen) {
@@ -311,11 +312,7 @@ function putComment(commentText) {
 }
 //ミュート(false)・ミュート解除(true)する関数
 function soundSet(isSound) {
-//    var butvol=$('[class*="styles__volume___"] svg'); //音量ボタン
-//    var valvol=$('[class^="styles__volume___"] [class^="styles__highlighter___"]'); //高さが音量のやつ
-    if(!EXvolume){
-      return;
-    }
+    if(!EXvolume){return;}
     var butvol=$(EXvolume).contents().find('svg:first');
     var valvol=$(EXvolume).contents().find('[class^="styles__highlighter___"]:first');
     var evt=document.createEvent("MouseEvents");
@@ -344,9 +341,9 @@ function screenBlackSet(type) {
         var w=$(window).height();
         var p=0;
         if(EXwatchingnum){
-          var jo=$(EXobli.children[EXwatchingnum]);
-          w=parseInt(jo.css("height"));
-          p=jo.offset().top;
+            var jo=$(EXobli.children[EXwatchingnum]);
+            w=parseInt(jo.css("height"));
+            p=jo.offset().top;
         }
         pwaku[0].setAttribute("style","background-color:rgba(0,0,0,0.7);border-top-style:solid;border-top-color:black;border-top-width:"+Math.floor(p+w/2)+"px;");
     } else if (type == 2) {
@@ -363,7 +360,7 @@ function triggerMousemoveEvt(x, y){
     return document.dispatchEvent(evt);
 }
 function triggerMouseMoving(){
-    //console.log('triggerMM')
+//console.log('triggerMM')
     var overlap = $('[class^="AppContainer__background-black___"]');
     overlap.trigger('mouseover').trigger('mousemove');
     $('body').trigger('mouseover').trigger('mousemove');
@@ -374,19 +371,17 @@ function triggerMouseMoving(){
 function openOption(sw){
     var settcontjq = $("#settcont");
     settcontjq.css("display","block");
-//    var settconttop = settcontjq.offset().top;
     var settcontheight=settcontjq[0].scrollHeight;
     var settcontpadv=parseInt(settcontjq.css("padding-top"))+parseInt(settcontjq.css("padding-bottom"));
 //    if (settconttop < 0){//設定ウィンドウが画面からはみ出したときにスクロールできるように
     if(settcontheight>$(window).height()-105-settcontpadv){
         settcontjq.height($(window).height()-105-settcontpadv).css("overflow-y", "scroll");
     }
-sw=sw.data||sw;
-if(sw==1){ //サイドバーボタン
-}else if(sw==2){ //残り時間上
-}else if(sw==3){ //残り時間下
-}
-    
+    sw=sw.data||sw;
+    if(sw==1){ //サイドバーボタン
+    }else if(sw==2){ //残り時間上
+    }else if(sw==3){ //残り時間下
+    }
     //設定ウィンドウにロード
     $("#isResizeScreen").prop("checked", settings.isResizeScreen);
     $("#isDblFullscreen").prop("checked", settings.isDblFullscreen);
@@ -420,25 +415,21 @@ if(sw==1){ //サイドバーボタン
     $("#commentTextTrans").val(commentTextTrans);
     var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
     var tc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(commentTextTrans/255)+")";
-    var cl=$(EXcomelist);
-//    if(cl.siblings('#copycome').length>0){
-//      cl=cl.siblings('#copycome');
-//    }
-    cl.children('div').css("background-color",bc)
-      .css("color",tc)
-      .children('p[class^="styles__message___"]').css("color",tc)
+    $(EXcomelist).children('div').css("background-color",bc)
+        .css("color",tc)
+        .children('p[class^="styles__message___"]').css("color",tc)
     ;
     $("#commentBackColor").val(commentBackColor)
-      .prev('span.prop').text(commentBackColor+" ("+Math.round(commentBackColor*100/255)+"%)")
+        .prev('span.prop').text(commentBackColor+" ("+Math.round(commentBackColor*100/255)+"%)")
     ;
     $("#commentBackTrans").val(commentBackTrans)
-      .prev('span.prop').text(commentBackTrans+" ("+Math.round(commentBackTrans*100/255)+"%)")
+        .prev('span.prop').text(commentBackTrans+" ("+Math.round(commentBackTrans*100/255)+"%)")
     ;
     $("#commentTextColor").val(commentTextColor)
-      .prev('span.prop').text(commentTextColor+" ("+Math.round(commentTextColor*100/255)+"%)")
+        .prev('span.prop').text(commentTextColor+" ("+Math.round(commentTextColor*100/255)+"%)")
     ;
     $("#commentTextTrans").val(commentTextTrans)
-      .prev('span.prop').text(commentTextTrans+" ("+Math.round(commentTextTrans*100/255)+"%)")
+        .prev('span.prop').text(commentTextTrans+" ("+Math.round(commentTextTrans*100/255)+"%)")
     ;
     $("#isCommentPadZero").prop("checked", isCommentPadZero);
     $("#isCommentTBorder").prop("checked", isCommentTBorder);
@@ -447,189 +438,177 @@ if(sw==1){ //サイドバーボタン
 }
 function closeOption(){
     $("#settcont").css("display","none")
-      .css("right","40px")
+        .css("right","40px")
     ;
     $("#settcont .rightshift").css("display","none");
     $("#settcont .leftshift").css("display","");
-    var cl=$(EXcomelist);
-//    if(cl.siblings('#copycome').length>0){
-//      cl=cl.siblings('#copycome');
-//    }
-    cl.children('div').css("background-color","")
-      .css("color","")
-      .children('p[class^="styles__message___"]').css("color","")
+    $(EXcomelist).children('div').css("background-color","")
+        .css("color","")
+        .children('p[class^="styles__message___"]').css("color","")
     ;
-    if(isTimeVisible){
-      createTime(0);
-      setTimePosition();
-    }else{
-      createTime(1);
-    }
+    setOptionElement();
 }
 function toast(message) {
     $("<div class='toast'><p>" + message + "</p></div>").appendTo("body").fadeOut(8000);
 }
 function delayset(){
-    setEXs(30);
-    if(EXwatchingnum){
-        var slidecont = EXside
-        //設定ウィンドウ・開くボタン設置
-        //中身は参照でなくここに直接記述した(ローカルのoption.htmlが参照できなかった)
-        var optionbutton = document.createElement("div");
-        optionbutton.id = "optionbutton";
-        optionbutton.setAttribute("style","width:40px;height:60px;background-color:gray;opacity:0.5;");
-        optionbutton.innerHTML = "&nbsp;";
-        var settcont = document.createElement("div");
-        settcont.id = "settcont";
-        //設定ウィンドウの中身
-        settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
-        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
-        slidecont.appendChild(optionbutton);
-        $(settcont).prependTo('body');
-        $("#CommentMukouSettings").hide();
-        $("#CommentColorSettings").css("width","600px")
-          .css("padding","8px")
-          .children('div').css("clear","both")
-          .children('span.desc').css("padding","0px 4px")
-          .next('span.prop').css("padding","0px 4px")
-          .next('input[type="range"]').css("float","right")
-        ;
-        $("#itimePosition").insertBefore("#isTimeVisible+*")
-          .css("border","black solid 1px")
-          .css("margin-left","16px")
-          .css("display","flex")
-          .css("flex-direction","column")
-        ;
-        $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;">').appendTo('#CommentColorSettings');
-        $('<input type="button" class="rightshift" value="この画面を右へ→" style="float:right;margin-top:10px;display:none;">').appendTo('#CommentColorSettings');
-        $("#settcont .leftshift").on("click",function(){
-          $("#settcont").css("right","320px");
-          $("#settcont .leftshift").css("display","none");
-          $("#settcont .rightshift").css("display","");
-        });
-        $("#settcont .rightshift").on("click",function(){
-          $("#settcont").css("right","40px");
-          $("#settcont .rightshift").css("display","none");
-          $("#settcont .leftshift").css("display","");
-        });
-        $("#optionbutton").on("click",function(){
-            if($("#settcont").css("display")=="none"){
-                openOption(1);
-            }else{
-                closeOption();
-            }
-        });
-        $("#settcont .closeBtn").on("click", closeOption);
-        $("#clearLocalStorage").on("click", function () {
-            window.localStorage.clear();
-            console.info("cleared localStorage");
-        });
-        $("#saveBtn").on("click",function(){
-            settings.isResizeScreen = $("#isResizeScreen").prop("checked");
-            settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
-//            isEnterSubmit = $("#isEnterSubmit").prop("checked");
-            isHideOldComment = $("#isHideOldComment").prop("checked");
-            isCMBlack = $("#isCMBlack").prop("checked");
-            isCMBkTrans = $("#isCMBkTrans").prop("checked");
-            isCMsoundoff = $("#isCMsoundoff").prop("checked");
-            CMsmall = Math.min(100,Math.max(5,$("#CMsmall").val()));
-            isMovingComment = $("#isMovingComment").prop("checked");
-            settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
-            movingCommentLimit = parseInt($("#movingCommentLimit").val());
-            isMoveByCSS = $("#isMoveByCSS").prop("checked");
-            isComeNg = $("#isComeNg").prop("checked");
-            isComeDel = $("#isComeDel").prop("checked");
-            fullNg = $("#fullNg").val();
-            var beforeInpWinBottom=isInpWinBottom;
-            isInpWinBottom = $("#isInpWinBottom").prop("checked");
-            isCustomPostWin = $("#isCustomPostWin").prop("checked");
-            isCancelWheel = $("#isCancelWheel").prop("checked");
-            isVolumeWheel = $("#isVolumeWheel").prop("checked");
-            changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
-            isTimeVisible = $("#isTimeVisible").prop("checked");
-            isSureReadComment = $("#isSureReadComment").prop("checked");
-            sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
-//            isMovieResize = $("#isMovieResize").prop("checked");
-            isMovieMaximize = $("#isMovieMaximize").prop("checked");
-            settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
-            commentBackColor = parseInt($("#commentBackColor").val());
-            commentBackTrans = parseInt($("#commentBackTrans").val());
-            commentTextColor = parseInt($("#commentTextColor").val());
-            commentTextTrans = parseInt($("#commentTextTrans").val());
-            isCommentPadZero = $("#isCommentPadZero").prop("checked");
-            isCommentTBorder = $("#isCommentTBorder").prop("checked");
-            timePosition = $('#itimePosition [name="timePosition"]:checked').val();
+    var hoverContents = $('[class*="styles__hover-contents___"]');
+    if(hoverContents.length==0){
+console.log("delayset retry");
+        setTimeout(delayset,1000);
+        return;
+    }
+    //拡張機能の設定をその他メニューに追加
+    var hoverLinkClass = hoverContents.children()[0].className;
+    hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
+    createSettingWindow();
+    arrayFullNgMaker();
+    var eMoveContainer=document.createElement('div');
+    eMoveContainer.id="moveContainer";
+    eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
+    $("body").append(eMoveContainer);
+//console.log("comevisiset delayset");
+    comevisiset(false);
+    if(isSureReadComment){
+//console.log("popElement delayset");
+        popElement();
+    }else{
+        unpopElement();
+    }
+    EXcomelist = $(commentListParentSelector)[0];
+    EXcomments = $(EXcomelist).contents().find('[class^="styles__message___"]');
+    //映像のリサイズ
+    onresize();
+console.log("delayset ok");
+}
+function createSettingWindow(){
+    if(!EXside){
+console.log("createSettingWindow retry");
+        setTimeout(createSettingWindow,1000);
+        return;
+    }
+    var slidecont = EXside
+    //設定ウィンドウ・開くボタン設置
+    var optionbutton = document.createElement("div");
+    optionbutton.id = "optionbutton";
+    optionbutton.setAttribute("style","width:40px;height:60px;background-color:gray;opacity:0.5;");
+    optionbutton.innerHTML = "&nbsp;";
+    var settcont = document.createElement("div");
+    settcont.id = "settcont";
+    //設定ウィンドウの中身
+    settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
+    settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
+    slidecont.appendChild(optionbutton);
+    $(settcont).prependTo('body');
+    $("#CommentMukouSettings").hide();
+    $("#CommentColorSettings").css("width","600px")
+        .css("padding","8px")
+        .children('div').css("clear","both")
+        .children('span.desc').css("padding","0px 4px")
+        .next('span.prop').css("padding","0px 4px")
+        .next('input[type="range"]').css("float","right")
+    ;
+    $("#itimePosition").insertBefore("#isTimeVisible+*")
+        .css("border","black solid 1px")
+        .css("margin-left","16px")
+        .css("display","flex")
+        .css("flex-direction","column")
+    ;
+    $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;">').appendTo('#CommentColorSettings');
+    $('<input type="button" class="rightshift" value="この画面を右へ→" style="float:right;margin-top:10px;display:none;">').appendTo('#CommentColorSettings');
+    $("#settcont .leftshift").on("click",function(){
+        $("#settcont").css("right","320px");
+        $("#settcont .leftshift").css("display","none");
+        $("#settcont .rightshift").css("display","");
+    });
+    $("#settcont .rightshift").on("click",function(){
+        $("#settcont").css("right","40px");
+        $("#settcont .rightshift").css("display","none");
+        $("#settcont .leftshift").css("display","");
+    });
+    $("#optionbutton").on("click",function(){
+        if($("#settcont").css("display")=="none"){
+            openOption(1);
+        }else{
+            closeOption();
+        }
+    });
+    $("#settcont .closeBtn").on("click", closeOption);
+    $("#clearLocalStorage").on("click", function () {
+        window.localStorage.clear();
+console.info("cleared localStorage");
+    });
+    $("#saveBtn").on("click",function(){
+        settings.isResizeScreen = $("#isResizeScreen").prop("checked");
+        settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
+//        isEnterSubmit = $("#isEnterSubmit").prop("checked");
+        isHideOldComment = $("#isHideOldComment").prop("checked");
+        isCMBlack = $("#isCMBlack").prop("checked");
+        isCMBkTrans = $("#isCMBkTrans").prop("checked");
+        isCMsoundoff = $("#isCMsoundoff").prop("checked");
+        CMsmall = Math.min(100,Math.max(5,$("#CMsmall").val()));
+        isMovingComment = $("#isMovingComment").prop("checked");
+        settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
+        movingCommentLimit = parseInt($("#movingCommentLimit").val());
+        isMoveByCSS = $("#isMoveByCSS").prop("checked");
+        isComeNg = $("#isComeNg").prop("checked");
+        isComeDel = $("#isComeDel").prop("checked");
+        fullNg = $("#fullNg").val();
+        var beforeInpWinBottom=isInpWinBottom;
+        isInpWinBottom = $("#isInpWinBottom").prop("checked");
+        isCustomPostWin = $("#isCustomPostWin").prop("checked");
+        isCancelWheel = $("#isCancelWheel").prop("checked");
+        isVolumeWheel = $("#isVolumeWheel").prop("checked");
+        changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
+        isTimeVisible = $("#isTimeVisible").prop("checked");
+        isSureReadComment = $("#isSureReadComment").prop("checked");
+        sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
+//        isMovieResize = $("#isMovieResize").prop("checked");
+        isMovieMaximize = $("#isMovieMaximize").prop("checked");
+        settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
+        commentBackColor = parseInt($("#commentBackColor").val());
+        commentBackTrans = parseInt($("#commentBackTrans").val());
+        commentTextColor = parseInt($("#commentTextColor").val());
+        commentTextTrans = parseInt($("#commentTextTrans").val());
+        isCommentPadZero = $("#isCommentPadZero").prop("checked");
+        isCommentTBorder = $("#isCommentTBorder").prop("checked");
+        timePosition = $('#itimePosition [name="timePosition"]:checked').val();
 
-            setOptionHead();
-
-            if(isTimeVisible){
-              createTime(0);
-            }else{
-              createTime(1);
-            }
-
-            arrayFullNgMaker();
-            comevisiset(false);
-        });
-        $('#CommentColorSettings').change(function(){
-          var p=[];
-          $('#CommentColorSettings>div>input[type="range"]').each(function(i,jo){
+        setOptionHead();
+        setOptionElement();
+        arrayFullNgMaker();
+//console.log("comevisiset savebtnclick");
+        comevisiset(false);
+    });
+    $('#CommentColorSettings').change(function(){
+        var p=[];
+        $('#CommentColorSettings>div>input[type="range"]').each(function(i,jo){
             $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
             p[i]=$(jo).val();
-          });
-          var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
-          var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
-          var cl=$(EXcomelist);
-          cl.children('div').css("background-color",bc)
+        });
+        var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
+        var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
+        var cl=$(EXcomelist);
+        cl.children('div').css("background-color",bc)
             .css("color",tc)
             .children('p[class^="styles__message___"]').css("color",tc)
-          ;
-        });
-        $('#itimePosition,#isTimeVisible').change(function(){
-          if($("#isTimeVisible").prop("checked")){
+        ;
+    });
+    $('#itimePosition,#isTimeVisible').change(function(){
+        if($("#isTimeVisible").prop("checked")){
             $('#itimePosition').css("display","block");
             createTime(0);
             setTimePosition($('#itimePosition [name="timePosition"]:checked').val());
-          }else{
+        }else{
             $('#itimePosition').css("display","none");
             createTime(1);
             $('#forProEndTxt,#forProEndBk').css("display","none");
-          }
-        });
-        arrayFullNgMaker();
-
-        var eMoveContainer=document.createElement('div');
-        eMoveContainer.id="moveContainer";
-        eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
-        $("body").append(eMoveContainer);
-        comevisiset(false);
-        if(isSureReadComment){
-            popElement();
-        }else{
-          unpopElement();
         }
-        EXcomelist = $(commentListParentSelector)[0];
-        EXcomments = $(EXcomelist).contents().find('[class^="styles__message___"]');
-        //映像のリサイズ
-        onresize();
-        //拡張機能の設定をその他メニューに追加
-        var hoverContents = $('[class*="styles__hover-contents___"]');
-        var hoverLinkClass = hoverContents.children()[0].className;
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
-        if(isTimeVisible){
-          createTime(0);
-        }
-
-        console.log("delayset ok");
-    }else{
-        retrycount+=1;
-        if(retrycount<retrytick.length){
-            console.log("delayset failed#"+retrycount);
-            setTimeout(delayset,retrytick[retrycount]);
-        }
-    }
+    });
+console.log("createSettingWindow ok");
 }
 function toggleCommentList(){
+//console.log("comevisiset toggleCommentList");
     comevisiset(true);
 }
 function StartMoveComment(){
@@ -639,497 +618,478 @@ function StartMoveComment(){
         $('body>#moveContainer').css("left","1px");
     }
 }
-function unpopHeader(){
+//function unpopHeader(){
 //console.log("unpopHeader");
-  $(EXhead).css("visibility","")
-    .css("opacity","")
-  ;
-  $(EXfoot).css("visibility","")
-    .css("opacity","")
-  ;
-  comevisiset(false);
-}
+//    $(EXhead).css("visibility","")
+//        .css("opacity","")
+//    ;
+//    $(EXfoot).css("visibility","")
+//        .css("opacity","")
+//    ;
+//console.log("comevisiset unpopHeader");
+//    comevisiset(false);
+//}
 function popHeader(){
 //console.log("popHeader");
-//    var contHeader = $('[class^="AppContainer__header-container___"]');
     $(EXhead).css("visibility","visible")
       .css("opacity",1)
     ;
-//    var contFooter = $('[class^="TVContainer__footer-container___"]');
     $(EXfoot).css("visibility","visible")
       .css("opacity",1)
     ;
+//console.log("comevisiset popHeader");
     comevisiset(false);
 }
 function comevisiset(sw){
 //console.log("comevisiset");
-  var comeList = $(commentListParentSelector);
-  if(sw){
-//    comeList.css("display",(comeList.css("display")=="block")?"none":"block");
-    comeList.css("display",(comeList.css("display")!="none")?"none":(isInpWinBottom?"flex":"block"));
-  }
-//  $(EXcomesendinp).parent().next().css("display",isCustomPostWin?"none":"flex");
-  var contCome = $(EXcome);
-  var comeForm = $(EXcomesend);
-  var comeshown = $(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length>0?true:false;
-//  var hideCommentParam = isCustomPostWin?64:142;
-  var hideCommentParam = isCustomPostWin?64:108;
-//  var clipSlideBarTop = settings.isAlwaysShowPanel?44:0;
-//  var clipSlideBarBot = settings.isAlwaysShowPanel?61:0;
-  var clipSlideBarTop = ($(EXhead).css("visibility")=="visible")?44:0;
-  var clipSlideBarBot = ($(EXfoot).css("visibility")=="visible")?61:0;
-//  var butscr = $('[class^="styles__full-screen___"]button');
-  var butscr = $(EXfoot).contents().find('button[class^="styles__full-screen___"]:first');
-  var butvol = $(EXvolume);
-//  var comepro=$("#forProEndTxt,#forProEndBk");
-  var timepadtop=(isTimeVisible&&(timePosition=="windowtop")&&($(EXhead).css("visibility")=="hidden"))?15:0;
-  var timepadbot=(isTimeVisible&&(timePosition=="windowbottom")&&($(EXfoot).css("visibility")=="hidden"))?15:0;
-  contCome.css("transform",isSureReadComment?"translateX(0px)":"");
-  if(isInpWinBottom){
-    var b=80+((isSureReadComment||comeshown)?hideCommentParam:0);
-    butscr.css("bottom",b+"px");
-    butvol.css("bottom",b+"px");
-//    comepro.css("top","")
-//      .css("bottom",0)
-//    ;
-//    if(isTimeVisible&&$(EXfootcome).next('#timerthird').length==0){
-//      $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;border-right-width:1px;border-right-style:solid;border-right-color:#444;">').insertAfter(EXfootcome);
-//    }
-    if(comeList.css("display")=="none"){
-      contCome.css("position","absolute");
-      contCome.css("top",(window.innerHeight-hideCommentParam-clipSlideBarBot)+"px");
-      contCome.css("height",hideCommentParam+"px");
-      comeForm.css("position","absolute");
-      comeForm.css("top","");
-      comeForm.css("bottom",0);
-      comeForm.css("height",hideCommentParam+"px");
-      comeList.css("position","absolute");
-      comeList.css("width","100%");
-    }else{
-      contCome.css("position","absolute");
-      contCome.css("top",(clipSlideBarTop+timepadtop)+"px");
-      contCome.css("height",(window.innerHeight-clipSlideBarTop-clipSlideBarBot-timepadtop)+"px");
-      comeForm.css("position","absolute");
-      comeForm.css("top","");
-      comeForm.css("bottom",0);
-      comeForm.css("height",hideCommentParam+"px");
-      comeList.css("position","absolute");
-      comeList.css("bottom","");
-      comeList.css("top",0);
-      comeList.css("height",(window.innerHeight-hideCommentParam-clipSlideBarTop-clipSlideBarBot-timepadtop)+"px");
-      comeList.css("width","100%");
+    var comeList = $(commentListParentSelector);
+    if(sw){
+        comeList.css("display",(comeList.css("display")!="none")?"none":(isInpWinBottom?"flex":"block"));
     }
-  }else{
-    butscr.css("bottom","");
-    butvol.css("bottom","");
-//    comepro.css("bottom","")
-//      .css("top",0)
-//    ;
-//    $(EXfootcome).next('#timerthird').remove();
-    if(comeList.css("display")=="none"){
-      contCome.css("position","absolute");
-      contCome.css("top",clipSlideBarTop+"px");
-      contCome.css("height",hideCommentParam+"px");
-      comeForm.css("position","absolute");
-      comeForm.css("bottom","");
-      comeForm.css("top",0);
-      comeForm.css("height",hideCommentParam+"px");
-      comeList.css("position","absolute");
-      comeList.css("width","100%");
+    var contCome = $(EXcome);
+    var comeForm = $(EXcomesend);
+    var comeshown = $(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length>0?true:false;
+    var hideCommentParam = isCustomPostWin?64:108;
+    var clipSlideBarTop = ($(EXhead).css("visibility")=="visible")?44:0;
+    var clipSlideBarBot = ($(EXfoot).css("visibility")=="visible")?61:0;
+    var butscr = $(EXfoot).contents().find('button[class^="styles__full-screen___"]:first');
+    var butvol = $(EXvolume);
+    var timepadtop=(isTimeVisible&&(timePosition=="windowtop")&&($(EXhead).css("visibility")=="hidden"))?15:0;
+    var timepadbot=(isTimeVisible&&(timePosition=="windowbottom")&&($(EXfoot).css("visibility")=="hidden"))?15:0;
+    contCome.css("transform",isSureReadComment?"translateX(0px)":"");
+    if(isInpWinBottom){
+        var b=80+((isSureReadComment||comeshown)?hideCommentParam:0);
+        butscr.css("bottom",b+"px");
+        butvol.css("bottom",b+"px");
+        if(comeList.css("display")=="none"){
+            contCome.css("position","absolute");
+            contCome.css("top",(window.innerHeight-hideCommentParam-clipSlideBarBot)+"px");
+            contCome.css("height",hideCommentParam+"px");
+            comeForm.css("position","absolute");
+            comeForm.css("top","");
+            comeForm.css("bottom",0);
+            comeForm.css("height",hideCommentParam+"px");
+            comeList.css("position","absolute");
+            comeList.css("width","100%");
+        }else{
+            contCome.css("position","absolute");
+            contCome.css("top",(clipSlideBarTop+timepadtop)+"px");
+            contCome.css("height",(window.innerHeight-clipSlideBarTop-clipSlideBarBot-timepadtop)+"px");
+            comeForm.css("position","absolute");
+            comeForm.css("top","");
+            comeForm.css("bottom",0);
+            comeForm.css("height",hideCommentParam+"px");
+            comeList.css("position","absolute");
+            comeList.css("bottom","");
+            comeList.css("top",0);
+            comeList.css("height",(window.innerHeight-hideCommentParam-clipSlideBarTop-clipSlideBarBot-timepadtop)+"px");
+            comeList.css("width","100%");
+        }
     }else{
-      contCome.css("position","absolute");
-      contCome.css("top",clipSlideBarTop+"px");
-      contCome.css("height",(window.innerHeight-clipSlideBarTop-clipSlideBarBot-timepadbot)+"px");
-      comeForm.css("position","absolute");
-      comeForm.css("bottom","");
-      comeForm.css("top",0);
-      comeForm.css("height",hideCommentParam+"px");
-      comeList.css("position","absolute");
-      comeList.css("top","");
-      comeList.css("bottom",0);
-      comeList.css("height",(window.innerHeight-hideCommentParam-clipSlideBarTop-clipSlideBarBot-timepadbot)+"px");
-      comeList.css("width","100%");
+        butscr.css("bottom","");
+        butvol.css("bottom","");
+        if(comeList.css("display")=="none"){
+            contCome.css("position","absolute");
+            contCome.css("top",clipSlideBarTop+"px");
+            contCome.css("height",hideCommentParam+"px");
+            comeForm.css("position","absolute");
+            comeForm.css("bottom","");
+            comeForm.css("top",0);
+            comeForm.css("height",hideCommentParam+"px");
+            comeList.css("position","absolute");
+            comeList.css("width","100%");
+        }else{
+            contCome.css("position","absolute");
+            contCome.css("top",clipSlideBarTop+"px");
+            contCome.css("height",(window.innerHeight-clipSlideBarTop-clipSlideBarBot-timepadbot)+"px");
+            comeForm.css("position","absolute");
+            comeForm.css("bottom","");
+            comeForm.css("top",0);
+            comeForm.css("height",hideCommentParam+"px");
+            comeList.css("position","absolute");
+            comeList.css("top","");
+            comeList.css("bottom",0);
+            comeList.css("height",(window.innerHeight-hideCommentParam-clipSlideBarTop-clipSlideBarBot-timepadbot)+"px");
+            comeList.css("width","100%");
+        }
     }
-  }
 }
 function unpopElement(){
 //console.log("unpopElement");
     $(EXinfo).css("z-index","");
     $(EXside).css("transform","");
     $(EXchli).parent().css("z-index","");
-//  if(!sw){
     $(EXhead).css("visibility","")
       .css("opacity","")
     ;
     $(EXfoot).css("visibility","")
       .css("opacity","")
     ;
-//  }
     if(!isSureReadComment){
       $(EXcome).css("transform","")
         .css("position","")
       ;
     }
+//console.log("comevisiset unpopElement");
     comevisiset(false);
 }
 function popElement(){
 //console.log("popElement");
     //マウスオーバーで各要素表示
-//    console.log("popElement()")
-//    $('[class^="TVContainer__right-slide___"]').css("z-index",11);
-//    $('[class^="TVContainer__side___"]').css("transform","translate(0,-50%)");
-//    $('[class^="TVContainer__right-list-slide___"]').css("z-index",11);
     $(EXinfo).css("z-index",11);
     $(EXside).css("transform","translate(0,-50%)");
     $(EXchli).parent().css("z-index",11);
-//    var contHeader = $('[class^="AppContainer__header-container___"]');
     $(EXhead).css("visibility","visible")
       .css("opacity",1)
     ;
-//    var comeList = $(commentListParentSelector);
-//    var oldcontVisible = $(EXhead).css("visibility");
-//    var contFooter = $('[class^="TVContainer__footer-container___"]');
     $(EXfoot).css("visibility","visible")
       .css("opacity",1)
     ;
-//    var contCome = $('[class^="TVContainer__right-comment-area___"]');
     $(EXcome).css("transform","translateX(0px)")
       .css("position","absolute")
     ;
+//console.log("comevisiset popElement");
     comevisiset(false);
 }
-function setEXs(retrycount){
-  var b=true;
-  if((EXmain=$('#main')[0])==null){b=false;}
-  else if((EXhead=$('[class^="AppContainer__header-container___"]:first')[0])==null){b=false;}
-  else if((EXfoot=$('[class^="TVContainer__footer-container___"]:first')[0])==null){b=false;console.log("foot");}
-  else if((EXfootcome=$(EXfoot).contents().find('[class*="styles__right-container"]:first')[0])==null){b=false;console.log("footcome");}
-  else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
-  else if((EXfootcountview=EXfootcount[0])==null){b=false;console.log("footcountview");}
-  else if((EXfootcountcome=EXfootcount[1])==null){b=false;console.log("footcountcome");}
-  else if((EXside=$('[class^="TVContainer__side___"]:first')[0])==null){b=false;console.log("side");}
-  else if((EXchli=$('[class*="TVContainer__right-v-channel-list___"]:first')[0])==null){b=false;console.log("chli");}
-  else if((EXinfo=$('[class^="TVContainer__right-slide___"]:first')[0])==null){b=false;console.log("info");}
-  else if((EXcome=$('[class^="TVContainer__right-comment-area___"]:first')[0])==null){b=false;console.log("come");}
-  else if((EXcomesend=$(EXcome).contents().find('[class*="styles__comment-form___"]:first')[0])==null){b=false;console.log("comesend");}
-  else if((EXcomesendinp=$(EXcomesend).contents().find('textarea:first')[0])==null){b=false;console.log("comesendinp");}
-//  else if((EXcomelist0=$($(EXcome).contents().find('[class^="styles__no-contents-text___"]:first')[0]).parent()[0])==null){b=false;console.log("comelist");}
-  else if((EXvolume=$('[class^="styles__volume___"]:first')[0])==null){b=false;console.log("vol");}
-  else if((EXobli=$('[class*="TVContainer__tv-container___"]:first')[0])==null){b=false;console.log("obli");}
-  if(b==true){
-    console.log("setEXs");
-    setTimeout(setEX2,1000,30);
-  }else if(retrycount>0){
-    setTimeout(setEXs,1000,retrycount-1);
-  }
+function setEXs(){
+    var b=true;
+    if((EXmain=$('#main')[0])==null){b=false;}
+    else if((EXhead=$('[class^="AppContainer__header-container___"]:first')[0])==null){b=false;}
+    else if((EXfoot=$('[class^="TVContainer__footer-container___"]:first')[0])==null){b=false;console.log("foot");}
+    else if((EXfootcome=$(EXfoot).contents().find('[class*="styles__right-container"]:first')[0])==null){b=false;console.log("footcome");}
+    else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
+    else if((EXfootcountview=EXfootcount[0])==null){b=false;console.log("footcountview");}
+    else if((EXfootcountcome=EXfootcount[1])==null){b=false;console.log("footcountcome");}
+    else if((EXside=$('[class^="TVContainer__side___"]:first')[0])==null){b=false;console.log("side");}
+    else if((EXchli=$('[class*="TVContainer__right-v-channel-list___"]:first')[0])==null){b=false;console.log("chli");}
+    else if((EXinfo=$('[class^="TVContainer__right-slide___"]:first')[0])==null){b=false;console.log("info");}
+    else if((EXcome=$('[class^="TVContainer__right-comment-area___"]:first')[0])==null){b=false;console.log("come");}
+    else if((EXcomesend=$(EXcome).contents().find('[class*="styles__comment-form___"]:first')[0])==null){b=false;console.log("comesend");}
+    else if((EXcomesendinp=$(EXcomesend).contents().find('textarea:first')[0])==null){b=false;console.log("comesendinp");}
+//    else if((EXcomelist0=$($(EXcome).contents().find('[class^="styles__no-contents-text___"]:first')[0]).parent()[0])==null){b=false;console.log("comelist");}
+    else if((EXvolume=$('[class^="styles__volume___"]:first')[0])==null){b=false;console.log("vol");}
+    else if((EXobli=$('[class*="TVContainer__tv-container___"]:first')[0])==null){b=false;console.log("obli");}
+    if(b==true){
+console.log("setEXs ok");
+        setEX2();
+        setOptionHead();    //各オプションをhead内に記述
+        setOptionElement(); //各オプションを要素に直接適用
+        if(!eventAdded){
+            setOptionEvent();   //各オプションによるイベントを作成
+        }
+    }else{
+console.log("setEXs retry");
+        setTimeout(setEXs,1000);
+    }
 }
-function setEX2(retrycount){
-  var b=true;
-  if($(EXchli).children('[class*="styles__watch___"]:first').length==0){b=false;}
-  else if((EXwatchingstr=$(EXchli).children('[class*="styles__watch___"]:first').contents().find('img').prop("alt"))==null){b=false;}
-  else if((EXwatchingnum=$(EXobli).contents().find('img[alt='+EXwatchingstr+']').parents().index())==null){b=false;}
-  else{
-    $(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__watch___"]:first').index()*85-$(EXside).position().top);
-  }
-  if(b==true){
-    console.log("setEX2");
-//    waitforRightShown(0);
-  }else if(retrycount>0){
-    setTimeout(setEX2,1000,retrycount-1);
-  }
+function setEX2(){
+    var b=true;
+    if($(EXchli).children('[class*="styles__watch___"]:first').length==0){b=false;}
+    else if((EXwatchingstr=$(EXchli).children('[class*="styles__watch___"]:first').contents().find('img').prop("alt"))==null){b=false;}
+    else if((EXwatchingnum=$(EXobli).contents().find('img[alt='+EXwatchingstr+']').parents().index())==null){b=false;}
+    else{
+        $(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__watch___"]:first').index()*85-$(EXside).position().top);
+    }
+    if(b==true){
+console.log("setEX2 ok");
+    }else{
+console.log("setEX2 retry");
+        setTimeout(setEX2,1000);
+    }
 }
 function isComeOpen(){
-  return ($(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length==1)?true:false;
+    return ($(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length==1)?true:false;
 }
-function getComeId(inp){
-  return parseInt(/.*\$(\d+)$/.exec(EXcomelist.children[inp].getAttribute("data-reactid"))[1]);
+function isSlideShown(){
+    return ($(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==1)?true:false;
 }
-function comesort(){
-//  if(isComeOpen()&&(isInpWinBottom&&getComeId(EXcomelist.childElementCount-1)!=0)){
-  if(isComeOpen()&&isInpWinBottom){
-//  console.log("dec sort");
-    for(var i=0;i<EXcomelist.childElementCount-1;i++){
-      if(getComeId(i)<getComeId(i+1)){
-        EXcomelist.insertBefore(EXcomelist.children[i+1],EXcomelist.firstChild);
-      }
-    }
-//  }else if((isComeOpen()&&(!isInpWinBottom&&getComeId(EXcomelist.childElementCount-1)==0))||(!isComeOpen()&&getComeId(EXcomelist.childElementCount-1)==0)){
-  }else if(!isInpWinBottom||!isComeOpen()){
-//  console.log("inc sort");
-    for(var i=EXcomelist.childElementCount-1;i>=1;i--){
-      if(getComeId(i-1)>getComeId(i)){
-        EXcomelist.insertBefore(EXcomelist.children[i-1],null);
-      }
-    }
-  }
-}
+//function getComeId(inp){
+//    return parseInt(/.*\$(\d+)$/.exec(EXcomelist.children[inp].getAttribute("data-reactid"))[1]);
+//}
+//function comesort(){
+////  if(isComeOpen()&&(isInpWinBottom&&getComeId(EXcomelist.childElementCount-1)!=0)){
+//    if(isComeOpen()&&isInpWinBottom){
+////  console.log("dec sort");
+//        for(var i=0;i<EXcomelist.childElementCount-1;i++){
+//            if(getComeId(i)<getComeId(i+1)){
+//                EXcomelist.insertBefore(EXcomelist.children[i+1],EXcomelist.firstChild);
+//            }
+//        }
+////  }else if((isComeOpen()&&(!isInpWinBottom&&getComeId(EXcomelist.childElementCount-1)==0))||(!isComeOpen()&&getComeId(EXcomelist.childElementCount-1)==0)){
+//    }else if(!isInpWinBottom||!isComeOpen()){
+////  console.log("inc sort");
+//        for(var i=EXcomelist.childElementCount-1;i>=1;i--){
+//            if(getComeId(i-1)>getComeId(i)){
+//                EXcomelist.insertBefore(EXcomelist.children[i-1],null);
+//            }
+//        }
+//    }
+//}
 function otosageru(){
+    if(!EXvolume){return;}
     var teka=document.createEvent("MouseEvents");
-    var teki=$('[class^="styles__slider-container___"]').children();
+//    var teki=$('[class^="styles__slider-container___"]').children();
+    var teki=$(EXvolume).contents().find('[class^="styles__slider-container___"]:first').children();
     var teku=teki.offset().top+106-Math.min(92,Math.max(0,Math.floor(92*changeMaxVolume/100)));
     teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teku);
     setTimeout(otomouseup,100);
     return teki[0].dispatchEvent(teka);
 }
 function moVol(d){
-  if(EXvolume){
+    if(!EXvolume){return;}
     var teka=document.createEvent("MouseEvents");
     var teki=$(EXvolume).contents().find('[class^="styles__slider-container___"]:first').children();
     var teku=teki.offset().top+106;
     var teke=parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]:first').css("height"));
-//    teke=(teke+d>92)?92:(teke+d<0)?0:(teke+d);
     teke=(teke+d>91)?91:(teke+d<0)?0:(teke+d);
     teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teku-teke);
     setTimeout(otomouseup,100);
     return teki[0].dispatchEvent(teka);
-  }
 }
 function otomouseup(){
-  if(EXvolume){
+    if(!EXvolume){return;}
     var teka=document.createEvent("MouseEvents");
     var teki=$(EXvolume).contents().find('[class^="styles__slider-container___"]:first').children();
     var teku=teki.offset().top+106;
     var teke=parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]:first').css("height"));
     teka.initMouseEvent("mouseup",true,true,window,0,0,0,teki.offset().left+15,teku-teke);
     return teki[0].dispatchEvent(teka);
-  }
 }
 function otoColor(){
-  var jo=$(EXvolume).contents().find('svg:first');
-  if(jo.length>0){
+    var jo=$(EXvolume).contents().find('svg:first');
+    if(jo.length==0){return;}
     if(jo.css("fill")=="rgb(255, 255, 255)"){
-      jo.css("fill","red");
-      setTimeout(otoColor,800);
+        jo.css("fill","red");
+        setTimeout(otoColor,800);
     }else{
-      jo.css("fill","");
+        jo.css("fill","");
     }
-  }
 }
 function otoSize(ts){
-  var jo=$(EXvolume).contents().find('svg:first');
-  if(jo.length>0){
+    var jo=$(EXvolume).contents().find('svg:first');
+    if(jo.length==0){return;}
     if(jo.css("zoom")=="1"){
-      jo.css("zoom",ts);
-      setTimeout(otoSize,400);
+        jo.css("zoom",ts);
+        setTimeout(otoSize,400);
     }else{
-      jo.css("zoom","");
+        jo.css("zoom","");
     }
-  }
 }
 function faintcheck2(retrycount,fcd){
-  var pwaku = $('[class^="style__overlap___"]'); //動画枠
+    var pwaku = $('[class^="style__overlap___"]'); //動画枠
 //  var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
-  if(pwaku[0]&&EXfootcountcome){
-    if(isNaN(parseInt($(EXfootcountcome).text()))){
-      cmblockcd=fcd;
-      return;
+    if(pwaku[0]&&EXfootcountcome){
+        if(isNaN(parseInt($(EXfootcountcome).text()))){
+            cmblockcd=fcd;
+            return;
+        }
     }
-  }
-  if(retrycount>0){
-    setTimeout(faintcheck2,150,retrycount-1,fcd);
-  }
+    if(retrycount>0){
+        setTimeout(faintcheck2,150,retrycount-1,fcd);
+    }
 }
 function faintcheck(fcd){
-  faintcheck2(5,Math.max(1,fcd));
+    faintcheck2(5,Math.max(1,fcd));
 }
 function comeColor(inp){
 //console.log("comeColor:"+inp);
-  if(EXfootcountcome){
+    if(!EXfootcountcome){return;}
 //console.log($(EXfootcountcome).css("color"));
     if(inp==-1){
-      $(EXfootcountcome).css("color","");
-      $(EXfootcountcome).prev('svg').css("fill","");
-    }else{
-      var lim=[90,60,30];
-      if(inp>lim[0]){
         $(EXfootcountcome).css("color","");
-      }else if(inp>lim[1]){
-        $(EXfootcountcome).css("color","rgb(255, 255, "+Math.round(255*(inp-lim[1])/(lim[0]-lim[1]))+")");
-      }else if(inp>lim[2]){
-        $(EXfootcountcome).css("color","rgb(255, "+Math.round(255*(inp-lim[2])/(lim[2]-lim[1]))+", 0)");
-      }else{
-        $(EXfootcountcome).css("color","rgb(255, 0, 0)");
-      }
-      $(EXfootcountcome).prev('svg').css("fill","black");
-      setTimeout(comeColor,800,-1);
+        $(EXfootcountcome).prev('svg').css("fill","");
+    }else{
+       var lim=[90,60,30];
+       if(inp>lim[0]){
+            $(EXfootcountcome).css("color","");
+        }else if(inp>lim[1]){
+            $(EXfootcountcome).css("color","rgb(255, 255, "+Math.round(255*(inp-lim[1])/(lim[0]-lim[1]))+")");
+        }else if(inp>lim[2]){
+            $(EXfootcountcome).css("color","rgb(255, "+Math.round(255*(inp-lim[2])/(lim[2]-lim[1]))+", 0)");
+        }else{
+            $(EXfootcountcome).css("color","rgb(255, 0, 0)");
+        }
+        $(EXfootcountcome).prev('svg').css("fill","black");
+        setTimeout(comeColor,800,-1);
     }
-  }
 }
 function chkcomelist(retrycount){
-  var comeListLen = EXcomelist.childElementCount;
+    var comeListLen = EXcomelist.childElementCount;
 //console.log("chkcomelist#"+retrycount+",comelistlen="+comeListLen);
-  if(comeListLen<=100){
+    if(comeListLen<=100){
 console.log("comeRefreshed "+commentNum+"->"+comeListLen);
-    comeRefreshing=false;
-    commentNum=comeListLen;
-    comeHealth=Math.min(100,Math.max(0,commentNum));
-    comeColor(comeHealth);
-  }else if(retrycount>0){
-    setTimeout(chkcomelist,10,retrycount-1);
-  }
+        comeRefreshing=false;
+        commentNum=comeListLen;
+        comeHealth=Math.min(100,Math.max(0,commentNum));
+        comeColor(comeHealth);
+    }else if(retrycount>0){
+        setTimeout(chkcomelist,10,retrycount-1);
+    }
 }
 function waitforOpenCome(retrycount){
-  if(isComeOpen()){
-    chkcomelist(50);
-  }else if(retrycount>0){
-    setTimeout(waitforOpenCome,10,retrycount-1);
-  }
+    if(isComeOpen()){
+        chkcomelist(50);
+    }else if(retrycount>0){
+        setTimeout(waitforOpenCome,10,retrycount-1);
+    }
 }
 function waitforOpenableCome(retrycount){
-  if($(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
-    $(EXfootcome).trigger("click");
+    if(!isSlideShown()&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
+//    if($(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
+        $(EXfootcome).trigger("click");
 //console.log("comeopen waitforopenable");
-//    movieWidthMaximize(1);
-    waitforOpenCome(50);
-  }else if(retrycount>0){
-    setTimeout(waitforOpenableCome,10,retrycount-1);
-  }
+        waitforOpenCome(50);
+    }else if(retrycount>0){
+        setTimeout(waitforOpenableCome,10,retrycount-1);
+    }
 }
 function waitforCloseCome(retrycount){
-  if(!isComeOpen()){
-    waitforOpenableCome(50);
-  }else if(retrycount>0){
-    setTimeout(waitforCloseCome,10,retrycount-1);
-  }
+    if(!isComeOpen()){
+        waitforOpenableCome(50);
+    }else if(retrycount>0){
+        setTimeout(waitforCloseCome,10,retrycount-1);
+    }
 }
 function fastRefreshing(){
-  waitforCloseCome(100);
+    waitforCloseCome(100);
 }
 function movieZoomOut(sw){
-  if(EXobli){
+    if(!EXobli){return;}
     if(sw==1&&CMsmall<100){
-      $(EXobli).css("transform","translateY(-50%) scale("+CMsmall/100+")");
+        $(EXobli).css("transform","translateY(-50%) scale("+CMsmall/100+")");
     }else{
-      $(EXobli).css("transform","");
+        $(EXobli).css("transform","");
     }
-  }
 }
 function createTime(sw){
 //console.log("createTime:"+sw);
-  if(EXcome&&sw==0){
-    if($("#forProEndBk").length==0){
-      var eForProEndBk = document.createElement("span");
-      eForProEndBk.id="forProEndBk";
-      eForProEndBk.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;background-color:rgba(255,255,255,0.2);z-index:18;width:310px;top:0px;");
-      eForProEndBk.innerHTML="&nbsp;";
-      EXcome.insertBefore(eForProEndBk,EXcome.firstChild);
-    }
-    if($("#forProEndTxt").length==0){
-      var eForProEndTxt = document.createElement("span");
-      eForProEndTxt.id="forProEndTxt";
-      eForProEndTxt.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:19;width:310px;background:rgba(255,255,255,0.1);border-left-style:solid;border-left-width:1px;border-left-color:rgba(255,255,255,0.4);top:0px;");
-      eForProEndTxt.innerHTML="&nbsp;";
-      EXcome.insertBefore(eForProEndTxt,EXcome.firstChild);
-      //残り時間クリックで設定ウィンドウ開閉
-      $("#forProEndTxt").on("click",function(){
-        if($("#settcont").css("display")=="none"){
-          openOption(isInpWinBottom?3:2);
-        }else{
-          closeOption();
+    if(!EXcome){return;}
+    if(sw==0){
+        if($("#forProEndBk").length==0){
+            var eForProEndBk = document.createElement("span");
+            eForProEndBk.id="forProEndBk";
+            eForProEndBk.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;background-color:rgba(255,255,255,0.2);z-index:18;width:310px;top:0px;");
+            eForProEndBk.innerHTML="&nbsp;";
+            EXcome.insertBefore(eForProEndBk,EXcome.firstChild);
         }
-      });
+        if($("#forProEndTxt").length==0){
+           var eForProEndTxt = document.createElement("span");
+            eForProEndTxt.id="forProEndTxt";
+            eForProEndTxt.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:19;width:310px;background:rgba(255,255,255,0.1);border-left-style:solid;border-left-width:1px;border-left-color:rgba(255,255,255,0.4);top:0px;");
+            eForProEndTxt.innerHTML="&nbsp;";
+            EXcome.insertBefore(eForProEndTxt,EXcome.firstChild);
+            //残り時間クリックで設定ウィンドウ開閉
+            $("#forProEndTxt").on("click",function(){
+               if($("#settcont").css("display")=="none"){
+                    openOption(isInpWinBottom?3:2);
+                }else{
+                    closeOption();
+                }
+            });
+        }
+        setTimePosition();
+    }else if(sw==1){
+        var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
+        var parexfootcount=$(EXfootcount).parent();
+        var forpros=$("#forProEndTxt,#forProEndBk");
+        prehoverContents.css("padding-top","")
+            .prev().css("padding-top","")
+        ;
+        parexfootcount.css("padding-bottom","");
+        $(EXfootcome).next('#timerthird').remove();
+        $("#forProEndBk,#forProEndTxt").remove();
     }
-    setTimePosition();
-  }else if(sw==1){
-    var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
-    var parexfootcount=$(EXfootcount).parent();
-    var forpros=$("#forProEndTxt,#forProEndBk");
-    prehoverContents.css("padding-top","")
-      .prev().css("padding-top","")
-    ;
-    parexfootcount.css("padding-bottom","");
-    $(EXfootcome).next('#timerthird').remove();
-    $("#forProEndBk,#forProEndTxt").remove();
-  }
 }
 function setTimePosition(par){
-if(par===undefined){par=timePosition;}
-  var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
-  var parexfootcount=$(EXfootcount).parent();
-  var forpros=$("#forProEndTxt,#forProEndBk");
-  if(par=="windowtop"){
-    forpros.css("bottom","")
-      .css("top",0)
-    ;
-    prehoverContents.css("padding-top","9px")
-      .prev().css("padding-top","9px")
-    ;
-    parexfootcount.css("padding-bottom","");
-    $(EXfootcome).next('#timerthird').remove();
-    $("#forProEndBk,#forProEndTxt").prependTo('body');
-  }else if(par=="windowbottom"){
-    forpros.css("top","")
-      .css("bottom",0)
-    ;
-    prehoverContents.css("padding-top","")
-      .prev().css("padding-top","")
-    ;
-    parexfootcount.css("padding-bottom","14px");
-    if($(EXfootcome).next('#timerthird').length==0){
-      $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;border-right-width:1px;border-right-style:solid;border-right-color:#444;"></div>').insertAfter(EXfootcome);
+    if(par===undefined){par=timePosition;}
+    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
+    var parexfootcount=$(EXfootcount).parent();
+    var forpros=$("#forProEndTxt,#forProEndBk");
+    switch(par){
+        case "windowtop":
+        case "commentinputtop":
+        case "header":
+            forpros.css("bottom","")
+                .css("top",0)
+            ;
+            break;
+        case "windowbottom":
+        case "commentinputbottom":
+        case "footer":
+            forpros.css("top","")
+                .css("bottom",0)
+            ;
+            break;
+        default:
     }
-    $("#forProEndBk,#forProEndTxt").prependTo('body');
-  }else if(par=="commentinputtop"){
-    forpros.css("bottom","")
-      .css("top",0)
-    ;
-    prehoverContents.css("padding-top","")
-      .prev().css("padding-top","")
-    ;
-    parexfootcount.css("padding-bottom","");
-    $(EXfootcome).next('#timerthird').remove();
-    $("#forProEndBk,#forProEndTxt").prependTo(EXcomesend);
-  }else if(par=="commentinputbottom"){
-    forpros.css("top","")
-      .css("bottom",0)
-    ;
-    prehoverContents.css("padding-top","")
-      .prev().css("padding-top","")
-    ;
-    parexfootcount.css("padding-bottom","");
-    $(EXfootcome).next('#timerthird').remove();
-    $("#forProEndBk,#forProEndTxt").prependTo(EXcomesend);
-  }else if(par=="header"){
-    forpros.css("bottom","")
-      .css("top",0)
-    ;
-    prehoverContents.css("padding-top","9px")
-      .prev().css("padding-top","9px")
-    ;
-    parexfootcount.css("padding-bottom","");
-    $(EXfootcome).next('#timerthird').remove();
-    $("#forProEndBk,#forProEndTxt").prependTo(EXhead);
-  }else if(par=="footer"){
-    forpros.css("top","")
-      .css("bottom",0)
-    ;
-    prehoverContents.css("padding-top","")
-      .prev().css("padding-top","")
-    ;
-    parexfootcount.css("padding-bottom","14px");
-    if($(EXfootcome).next('#timerthird').length==0){
-      $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;border-right-width:1px;border-right-style:solid;border-right-color:#444;"></div>').insertAfter(EXfootcome);
+    switch(par){
+        case "windowtop":
+        case "header":
+            prehoverContents.css("padding-top","9px")
+                .prev().css("padding-top","9px")
+            ;
+            break;
+        case "commentinputtop":
+        case "windowbottom":
+        case "commentinputbottom":
+        case "footer":
+            prehoverContents.css("padding-top","")
+                .prev().css("padding-top","")
+            ;
+            break;
+        default:
     }
-    $("#forProEndBk,#forProEndTxt").prependTo(EXfoot);
-  }
+    switch(par){
+        case "windowtop":
+        case "commentinputtop":
+        case "header":
+        case "commentinputbottom":
+            parexfootcount.css("padding-bottom","");
+            $(EXfootcome).next('#timerthird').remove();
+            break;
+        case "windowbottom":
+        case "footer":
+            parexfootcount.css("padding-bottom","14px");
+            if($(EXfootcome).next('#timerthird').length==0){
+                $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;border-right-width:1px;border-right-style:solid;border-right-color:#444;"></div>').insertAfter(EXfootcome);
+            }
+            break;
+        default:
+    }
+    switch(par){
+        case "windowtop":
+        case "windowbottom":
+            $("#forProEndBk,#forProEndTxt").prependTo('body');
+            break;
+        case "commentinputtop":
+        case "commentinputbottom":
+            $("#forProEndBk,#forProEndTxt").prependTo(EXcomesend);
+            break;
+        case "header":
+            $("#forProEndBk,#forProEndTxt").prependTo(EXhead);
+        case "footer":
+            $("#forProEndBk,#forProEndTxt").prependTo(EXfoot);
+        default:
+    }
 }
 function waitforhide(retrycount){
-  if($(EXhead).css("visibility")=="hidden"){
-    comevisiset(false);
-  }else if(retrycount>0){
-    setTimeout(waitforhide,100,retrycount-1);
-  }
+    if($(EXhead).css("visibility")=="hidden"){
+//console.log("comevisiset waitforhide");
+        comevisiset(false);
+    }else if(retrycount>0){
+        setTimeout(waitforhide,100,retrycount-1);
+    }
 }
 function setOptionHead(){
     $('head:first>link[title="usermade"]').remove();
     var t="";
     //コメントのZ位置を上へ
     if(isMovingComment){
-      t+='[class="movingComment"]{z-index:5;}';
+        t+='[class="movingComment"]{z-index:5;}';
     }
-    //投稿ボタン削除
+    //投稿ボタン削除（入力欄1行化はこの下のコメ見た目のほうとoptionElementでやる）
     if(isCustomPostWin){
-      t+='[class^="styles__opened-textarea-wrapper___"]+div{display:none;}';
+        t+='[class^="styles__opened-textarea-wrapper___"]+div{display:none;}';
     }
     //コメント見た目
     var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
@@ -1141,152 +1101,190 @@ function setOptionHead(){
     t+='[class^="TVContainer__right-comment-area___"]>*{background-color:transparent;}';
     t+='[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]{background-color:'+bc+';}';
     t+='[class^="TVContainer__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{background-color:'+uc+';}';
-    t+='[class^="TVContainer__right-comment-area___"] textarea{background-color:'+uc+';color:'+tc+';}';
-    t+='[class^="TVContainer__right-comment-area___"] textarea+*{background-color:'+cc+';color:'+tc+';}';
+    t+='[class^="TVContainer__right-comment-area___"] textarea{background-color:'+uc+';color:'+tc+';';
+    if(isCustomPostWin){
+        t+='height:18px!important;';
+    }
+    t+='}';
+    t+='[class^="TVContainer__right-comment-area___"] textarea+*{background-color:'+cc+';color:'+tc+';';
+    if(isCustomPostWin){
+        t+='height:18px!important;';
+    }
+    t+='}';
     t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:'+bc+';color:'+tc+';';
     if(isCommentPadZero){
-      t+='padding:0px 15px;';
+        t+='padding:0px 15px;';
     }
     if(isCommentTBorder){
-      t+='border-top:'+vc+' solid 1px;';
+        t+='border-top:'+vc+' solid 1px;';
     }
     t+='}';
     t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
     //映像最大化
     if(isMovieMaximize||isSureReadComment){
-      t+='[class*="TVContainer__tv-container___"]{width:100%;';
-      if(isMovieMaximize){
-        t+='height:100%;';
-      }
-      t+='}';
-      t+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{';
-      if(isMovieMaximize){
-        t+='width:100%!important;height:100%!important;';
-      }else if(isSureReadComment){
-        t+='max-width:calc(100% - 310px);';
-      }
-      t+='}';
+        t+='[class*="TVContainer__tv-container___"]{width:100%;';
+        if(isMovieMaximize){
+            t+='height:100%;';
+        }
+        t+='}';
+        t+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{';
+        if(isMovieMaximize){
+            t+='width:100%!important;height:100%!important;';
+        }else if(isSureReadComment){
+            t+='max-width:calc(100% - 310px);';
+        }
+        t+='}';
     }
     //コメ一覧の逆順・スクロールバー非表示
     if(isInpWinBottom||isHideOldComment){
-      t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{';
-      if(isInpWinBottom){
-        t+='display:flex;flex-direction:column-reverse;';
-      }
-      if(isHideOldComment){
-        t+='overflow:hidden;';
-      }else{
-        t+='overflow-x:hidden;overflow-y:scroll;';
-      }
-      t+='}';
+        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{';
+        if(isInpWinBottom){
+            t+='display:flex;flex-direction:column-reverse;';
+        }
+        if(isHideOldComment){
+            t+='overflow:hidden;';
+        }else{
+            t+='overflow-x:hidden;overflow-y:scroll;';
+        }
+        t+='}';
     }
     //ユーザースクリプトのngconfigのz-index変更
     t+='#NGConfig{z-index:20;}';
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
+console.log("setOptionHead ok");
 }
 function setOptionElement(){
+    if(!EXcomesendinp){
+console.log("setOptionElement retry");
+        setTimeout(setOptionElement,1000);
+        return;
+    }
+    if(isCustomPostWin){
+        $(EXcomesendinp).prop("wrap","soft");
+    }else{
+        $(EXcomesendinp).prop("wrap","");
+    }
+    if(isTimeVisible){
+        createTime(0);
+        setTimePosition();
+    }else{
+        createTime(1);
+    }
+console.log("setOptionElement ok");
+}
+function usereventMouseover(){
+    //各要素を隠すまでのカウントをマウスオーバーで5にリセット
+    if(forElementClose<4){
+        forElementClose=5;
+//console.log("popElement usereventMouseover");
+        popElement(); //各要素を表示
+    }
+}
+function usereventWakuclick(){
+//console.log("wakuclick");
+    var pwaku=$('[class^="style__overlap___"]:first')[0];
+    if(bginfo[2]>=2||bginfo[3]==2){
+        if(pwaku.hasAttribute("style")){
+            endCM(true);
+        }else{
+            startCM();
+        }
+    }else{
+        if(pwaku.hasAttribute("style")){
+            endCM();
+        }else{
+//            startCM();
+        }
+    }
 }
 function setOptionEvent(){
-console.log("setOptionEvent");
-  var butfs;
-  var pwaku;
-  if(((butfs=$('button[class*="styles__full-screen___"]:first')[0])==null)||((pwaku=$('[class^="style__overlap___"]:first')[0])==null)||!EXcome){
-    setTimeout(setOptionEvent,1000);
-    return;
-  }
-  //ダブルクリックでフルスクリーン
-  $(window).on("dblclick",function(){
+    if(eventAdded){return;}
+    var butfs;
+    var pwaku;
+    if(((butfs=$('button[class*="styles__full-screen___"]:first')[0])==null)||((pwaku=$('[class^="style__overlap___"]:first')[0])==null)||!EXcome){
+console.log("setOptionEvent retry");
+        setTimeout(setOptionEvent,1000);
+        return;
+    }
+    eventAdded=true;
+    //ダブルクリックでフルスクリーン
+    $(window).on("dblclick",function(){
 console.log("dblclick");
-    if(settings.isDblFullscreen){
-      toggleFullscreen();
-    }
-  });
-  //コメ常時表示のときは画面クリックした後に開こうとする
-  $(window).on("click",function(){
-    if(isSureReadComment){
-      comeclickcd=2;
-    }
-  });
-  //マウスホイール無効か音量操作
-  window.addEventListener("mousewheel",function(e){
-    if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
-      if(EXvolume&&$(EXvolume).contents().find('svg:first').css("zoom")=="1"){
-        otoSize(e.wheelDelta<0?0.8:1.2);
-      }
-      moVol(e.wheelDelta<0?-5:5);
-    }
-    if (isCancelWheel||isVolumeWheel){ //設定ウィンドウ反映用
-      e.stopImmediatePropagation();
-    }
-  },true);
-  //フルスクリーンボタンの割り当て変更
-  butfs.addEventListener("click", function(e){
-    if (settings.isDblFullscreen) {
-      toggleFullscreen();
-      e.stopImmediatePropagation();
-    }
-  });
-  //右下にコメント一覧表示切替を設置
-  $(EXfootcome).on("click",function(){
-    if($(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length>0){
-      toggleCommentList();
-    }
-  });
-  //コメント一覧の表示切替
-  $(EXcomesend).on("click",function(e){
-    if(e.target.tagName.toLowerCase()=='form'){
-      toggleCommentList();
-    }
-  });
-  //入力欄のすぐ周りのクリックは何もしない
-  $(EXcomesendinp).parent().on("click",function(e){
-    if(e.target.tagName.toLowerCase()=='div'){
-      e.stopPropagation();
-    }
-  });
-  //各要素を隠すまでのカウントをマウスオーバーで5にリセット
-  window.addEventListener("mousemove",function(e){
-    if(forElementClose<=5){
-      forElementClose=5;
-      popElement(); //各要素を表示
-    }
-  },true);
-  pwaku.addEventListener("click",function(){
-    if(bginfo[2]>=2){
-      if(pwaku.hasAttribute("style")){
-        endCM(true);
-      }else{
-        startCM();
-      }
-    }else{
-      if(pwaku.hasAttribute("style")){
-        endCM();
-      }else{
-//        startCM();
-      }
-    }
-  },false);
-
+        if(settings.isDblFullscreen){
+            toggleFullscreen();
+        }
+    });
+    //コメ常時表示のときは画面クリックした後に開こうとする
+    $(window).on("click",function(){
+//console.log("windowclick");
+        if(isSureReadComment){
+            comeclickcd=2;
+        }
+    });
+    //マウスホイール無効か音量操作
+    window.addEventListener("mousewheel",function(e){
+        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+            if(EXvolume&&$(EXvolume).contents().find('svg:first').css("zoom")=="1"){
+                otoSize(e.wheelDelta<0?0.8:1.2);
+            }
+            moVol(e.wheelDelta<0?-5:5);
+        }
+        if (isCancelWheel||isVolumeWheel){ //設定ウィンドウ反映用
+            e.stopImmediatePropagation();
+        }
+    },true);
+    //フルスクリーンボタンの割り当て変更
+    butfs.addEventListener("click", function(e){
+        if (settings.isDblFullscreen) {
+            toggleFullscreen();
+            e.stopImmediatePropagation();
+        }
+    });
+    //右下にコメント一覧表示切替を設置
+    $(EXfootcome).on("click",function(){
+//        if($(EXcome).filter('[class*="TVContainer__right-slide--shown___"]').length>0){
+        if(isComeOpen()){
+//console.log("toggleCommentList EXfootcomeclick");
+            toggleCommentList();
+        }
+    });
+    //コメント一覧の表示切替
+    $(EXcomesend).on("click",function(e){
+        if(e.target.tagName.toLowerCase()=='form'){
+//console.log("toggleCommentList EXcomesendclick");
+            toggleCommentList();
+        }
+    });
+    //入力欄のすぐ周りのクリックは何もしない
+    $(EXcomesendinp).parent().on("click",function(e){
+        if(e.target.tagName.toLowerCase()=='div'){
+            e.stopPropagation();
+        }
+    });
+    window.addEventListener("mousemove",usereventMouseover,true);
+    pwaku.addEventListener("click",usereventWakuclick,false);
+console.log("setOptionEvent ok");
 }
 function startCM(){
-  console.log("startCM");
-  if(isCMBlack){screenBlackSet(isCMBkTrans?1:3);}
-  if(isCMsoundoff){soundSet(false);}
-  if(CMsmall<100){movieZoomOut(1);}
+console.log("startCM");
+    if(isCMBlack){screenBlackSet(isCMBkTrans?1:3);}
+    if(isCMsoundoff){soundSet(false);}
+    if(CMsmall<100){movieZoomOut(1);}
 }
 function endCM(sw){
-  console.log("endCM");
-  if(sw||bginfo[1].length==0){
-    if(isCMBlack){screenBlackSet(0);}
-    if(isCMsoundoff){soundSet(true);}
-    movieZoomOut(0);
-  }
+console.log("endCM");
+    if(sw||bginfo[1].length==0){
+        if(isCMBlack){screenBlackSet(0);}
+        if(isCMsoundoff){soundSet(true);}
+        movieZoomOut(0);
+    }
 }
 function tryCM(){
- if(bginfo[1].length==0){
-   bginfo[2]=0;
-   endCM();
- }
+    if(bginfo[1].length==0){
+        bginfo[2]=0;
+        cmblockcd=0;
+        endCM();
+    }
 }
 $(window).on('load', function () {
     console.log("loaded");
@@ -1299,10 +1297,9 @@ $(window).on('load', function () {
     checkUrlPattern(location.href);
     //ウィンドウをリサイズ
     setTimeout(onresize, 1000);
-
-    setOptionHead();    //各オプションをhead内に記述
-    setOptionElement(); //各オプションを要素に直接適用
-    setOptionEvent();   //各オプションによるイベントを作成
+    //要素チェック
+    setEXs();
+    delayset();
 
     setInterval(function () {
         // 1秒ごとに実行
@@ -1324,37 +1321,37 @@ $(window).on('load', function () {
         }
         //音量が最大なら設定値へ自動変更
         if(changeMaxVolume<100&&$('[class^="styles__highlighter___"]').css("height")=="92px"){
-          if($(EXvolume).contents().find('svg:first').css("fill")=="rgb(255, 255, 255)"){
-            otoColor();
-          }
-          otosageru();
+            if($(EXvolume).contents().find('svg:first').css("fill")=="rgb(255, 255, 255)"){
+                otoColor();
+            }
+            otosageru();
         }
         //コメント取得
         var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
         if(EXcomelist&&isComeOpen()){
             var comeListLen = EXcomelist.childElementCount;
             if(comeListLen>commentNum){ //コメ増加あり
-//              if(!comeRefreshing||!isSureReadComment){
-              if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
-                if(isMovingComment&&commentNum>0){
-                    for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
-                        putComment(comments[i].innerHTML);
+//                if(!comeRefreshing||!isSureReadComment){
+                if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
+                    if(isMovingComment&&commentNum>0){
+                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
+                            putComment(comments[i].innerHTML);
+                        }
                     }
+                }else{
+                    comeRefreshing=false;
                 }
-              }else{
-                comeRefreshing=false;
-              }
-              if(commentNum==0){
-                comeHealth=Math.min(100,Math.max(0,comeListLen));
-                comeColor(comeHealth);
-              }
-              commentNum=comeListLen;
-              if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
-                comeRefreshing=true;
-//                commentNum=0;
-                $('[class^="style__overlap___"]:first').trigger("click");
-                fastRefreshing();
-              }
+                if(commentNum==0){
+                    comeHealth=Math.min(100,Math.max(0,comeListLen));
+                    comeColor(comeHealth);
+                }
+                commentNum=comeListLen;
+                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){ //右下ボタンが押下可能設定のとき
+                    comeRefreshing=true;
+//                    commentNum=0;
+                    $('[class^="style__overlap___"]:first').trigger("click");
+                    fastRefreshing();
+                }
             }else if(comeListLen<commentNum){
                 commentNum=0;
                 comeHealth=100;
@@ -1427,19 +1424,21 @@ $(window).on('load', function () {
             }
         }
         if(cmblockcd!=0){
-          if(cmblockcd>0){
-            cmblockcd-=1;
-            if(cmblockcd<=0){
-              cmblockcd=0;
-              startCM();
+            if(cmblockcd>0){
+                cmblockcd-=1;
+                if(cmblockcd<=0){
+                    cmblockcd=0;
+                    bginfo[3]=2;
+                    startCM();
+                }
+            }else{
+                cmblockcd+=1;
+                if(cmblockcd>=0){
+                    cmblockcd=0;
+                    bginfo[3]=0;
+                    endCM(true);
+                }
             }
-          }else{
-            cmblockcd+=1;
-            if(cmblockcd>=0){
-              cmblockcd=0;
-              endCM(true);
-            }
-          }
         }
 
 //        var come = $('[class*="styles__counter___"]'); //画面右下のカウンター
@@ -1453,9 +1452,9 @@ $(window).on('load', function () {
 //            comeLatestCount=-1;
 //        }
         if(isNaN(parseInt($(EXfootcountcome).text()))){
-          comeLatestCount=-1;
+            comeLatestCount=-1;
         }else{
-          comeLatestCount=parseInt($(EXfootcountcome).text());
+            comeLatestCount=parseInt($(EXfootcountcome).text());
         }
 
         //残り時間表示
@@ -1516,38 +1515,29 @@ $(window).on('load', function () {
         if(isSureReadComment){
             //右下をクリックできそうならクリック
             if($(EXfoot).siblings('[class*="TVContainer__right-slide--shown___"]').length==0&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
-              if(comeclickcd>0){
-                comeclickcd-=1;
-                  if(comeclickcd<=0){
-//                                    $('[class^="TVContainer__footer___"] [class*="styles__right-container___"]').trigger("click");
-                    $(EXfootcome).trigger("click");
-                  }
-                }
-              }
-            }
-            //各要素を隠すまでのカウントダウン
-            if(forElementClose>0){
-                forElementClose-=1;
-                if(forElementClose<=0){
-                    //各要素を隠す
-//                    $('[class^="TVContainer__side___"]').css("transform","");
-                    $(EXside).css("transform","");
-//                    var contHeader = $('[class^="AppContainer__header-container___"]');
-//                    var contHeader = $(EXhead);
-//                    contHeader.css("visibility","")
-                    $(EXhead).css("visibility","")
-                      .css("opacity","")
-                    ;
-//                    var contFooter = $('[class^="TVContainer__footer-container___"]');
-//                    var contFooter = $(EXfoot);
-//                    contFooter.css("visibility","")
-                    $(EXfoot).css("visibility","")
-                      .css("opacity","")
-                    ;
-                    waitforhide(10);
+                if(comeclickcd>0){
+                    comeclickcd-=1;
+                    if(comeclickcd<=0){
+                        $(EXfootcome).trigger("click");
+                    }
                 }
             }
-//        }
+        }
+        //各要素を隠すまでのカウントダウン
+        if(forElementClose>0){
+            forElementClose-=1;
+            if(forElementClose<=0){
+                //各要素を隠す
+                $(EXside).css("transform","");
+                $(EXhead).css("visibility","")
+                  .css("opacity","")
+                ;
+                $(EXfoot).css("visibility","")
+                  .css("opacity","")
+                ;
+                waitforhide(10);
+            }
+        }
 
         //コメント位置のTTLを減らす
         for(var i=0;i<comeLatestLen;i++){
@@ -1560,7 +1550,7 @@ $(window).on('load', function () {
         }
 
     }, 1000);
-    setTimeout(delayset,1000);
+
     setTimeout(onresize,5000);
 });
 $(window).on("resize", onresize);
@@ -1577,12 +1567,13 @@ function chkurl() {
         setTimeout(onresize, 1000);
         commentNum = 0;
         currentLocation = window.location.href;
-//        urlchangedtick=Date.now();
         $(".movingComment").remove();
-        setEX2(30);
+        setEX2();
+        setOptionElement();
+        delayset();
+        comeclickcd=2;
         checkUrlPattern(currentLocation);
-        return true;
-    }else{return false;}
+    }
 }
 //onloadからも呼ばれる
 function checkUrlPattern(url){
@@ -1662,61 +1653,63 @@ function putNotifyButton(url){
 
 chrome.runtime.onMessage.addListener(function(r){
 //console.log(r);
- if(r.name!="bgsend"){return;}
- if(r.type==0){
+    if(r.name!="bgsend"){return;}
+    if(r.type==0){
 //console.log("ts,"+r.value+"p");
-   bginfo[0]=r.value;
-   if(bginfo[2]!=0){
-     if(bginfo[2]==-1){
+        bginfo[0]=r.value;
+        if(bginfo[2]!=0){
+            if(bginfo[2]==-1){
 //console.log("tryCM bginfo[2]= -1");
-       setTimeout(tryCM,500);
-     }
-     if(bginfo[1].length>0&&bginfo[1][2]-bginfo[1][1]>5){
+                setTimeout(tryCM,500);
+            }
+            if(bginfo[1].length>0&&bginfo[1][2]-bginfo[1][1]>5){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 3");
-       bginfo[2]=3;
-     }
-   }
- }else if(r.type==1){
+                bginfo[2]=3;
+            }
+        }
+    }else if(r.type==1){
 //console.log("nowcm#"+r.value[0]+","+r.value[1]+"/"+r.value[2]);
-   if(r.value[1]<r.value[2]){
-     var b=false;
-     if(bginfo[1].length==0){
-       b=true;
-     }else{
-       if(r.value[0]==bginfo[1][0]&&r.value[1]>bginfo[1][1]){
-         b=true;
-       }else if(r.value[0]>bginfo[1][0]){
-         b=true;
-       }
-     }
-     if(b){
-       bginfo[1]=[r.value[0],r.value[1],r.value[2]];
-     }
-     if(bginfo[2]<=1){
+        if(r.value[1]<r.value[2]){
+            var b=false;
+            if(bginfo[1].length==0){
+                b=true;
+            }else{
+                if(r.value[0]==bginfo[1][0]&&r.value[1]>bginfo[1][1]){
+                    b=true;
+                }else if(r.value[0]>bginfo[1][0]){
+                    b=true;
+                }
+            }
+            if(b){
+                bginfo[1]=[r.value[0],r.value[1],r.value[2]];
+            }
+            if(bginfo[2]<=1){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 2");
-       bginfo[2]=2;
-       startCM();
-     }
-   }else if(r.value[1]==r.value[2]){
-     if(bginfo[1].length>0&&r.value[0]==bginfo[1][0]){
-       bginfo[1]=[];
-     }
-     if(bginfo[1].length==0){
-       if(bginfo[2]==3){
+                bginfo[2]=2;
+                cmblockcd=0;
+                startCM();
+            }
+        }else if(r.value[1]==r.value[2]){
+            if(bginfo[1].length>0&&r.value[0]==bginfo[1][0]){
+                bginfo[1]=[];
+            }
+            if(bginfo[1].length==0){
+                if(bginfo[2]==3){
 //console.log("bginfo[2]= 3 -> 0");
-         bginfo[2]=0;
-         endCM();
-       }else{
+                    bginfo[2]=0;
+                    cmblockcd=0;
+                    endCM();
+                }else{
 //console.log("tryCM bginfo[2]= "+bginfo[2]);
-         setTimeout(tryCM,500);
-       }
-     }
-   }
- }else if(r.type==2){
+                    setTimeout(tryCM,500);
+                }
+            }
+        }
+    }else if(r.type==2){
 //console.log("precm");
-  if(bginfo[1].length==0){
+        if(bginfo[1].length==0){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 1");
-    bginfo[2]=1;
-  }
- }
+            bginfo[2]=1;
+        }
+    }
 });
