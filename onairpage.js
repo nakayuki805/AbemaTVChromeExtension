@@ -449,7 +449,7 @@ function closeOption(){
     setOptionElement();
 }
 function toast(message) {
-    var toastElem$("<div class='toast'><p>" + message + "</p></div>").appendTo("body");
+    var toastElem = $("<div class='toast'><p>" + message + "</p></div>").appendTo("body");
     setTimeout(function(){
         toastElem.fadeOut(3000);
     },4000);
