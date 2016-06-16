@@ -1357,15 +1357,15 @@ function usereventFCMouseout(){
         .css("background-color","")
     ;
     $('body:first>#manualblockrd').remove();
-    if(cmblockcd*100%100==62){
-        cmblockcd=0.61;
+    if(cmblockcd*100%100==63){
+        cmblockcd=0.63;
     }else if(cmblockcd*100%100==-63){
-        cmblockcd=-0.64;
+        cmblockcd=-0.63;
     }
 }
 function finishFCbgColored(){
     if(cmblockcd>0){
-        cmblockcd=299.62;
+        cmblockcd=299.63;
     }else if(cmblockcd<0){
         cmblockcd=-299.63;
     }
@@ -1405,12 +1405,12 @@ function chkFCbgc(retrycount){
 }
 function usereventFCMousemove(){
     if(!EXfootcome){return;}
-    if(cmblockcd!=0&&$('body:first>#manualblockrd').length==0){
-        if($(EXfootcome).css("transition")!="background-color 1s linear 0s"){
-            $(EXfootcome).css("transition","background-color 1s linear 0s")
+    if(cmblockcd!=0&&Math.abs(cmblockcd*100%100)!=63){
+        if($(EXfootcome).css("transition")!="background-color 1.2s linear 0s"){
+            $(EXfootcome).css("transition","background-color 1.2s linear 0s")
                 .css("background-color","rgb(255, 0, 255)")
             ;
-            setTimeout(chkFCbgc,1000,10);
+            setTimeout(chkFCbgc,1200,5);
         }
         if(isFCbgColored()){
             finishFCbgColored();
@@ -1498,7 +1498,7 @@ console.log("dblclick");
         }else if(e.keyCode==17){ //17ctrl
             if(cmblockcd!=0){
                 if(cmblockcd>0){
-                    cmblockcd=1.72;
+                    cmblockcd=1.73;
                 }else if(cmblockcd<0){
                     cmblockcd=-1.73;
                 }
@@ -1526,10 +1526,10 @@ console.log("dblclick");
     window.addEventListener("keyup",function(e){
         if(e.keyCode==17){
             if(cmblockcd==0){
-            }else if(cmblockcd==1.72){
-                cmblockcd=0.71;
+            }else if(cmblockcd==1.73){
+                cmblockcd=0.73;
             }else if(cmblockcd==-1.73){
-                cmblockcd=-0.74;
+                cmblockcd=-0.73;
             }
             var posi="";
             if(e.location==1){
@@ -1980,7 +1980,7 @@ chrome.runtime.onMessage.addListener(function(r){
                 if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
                     $(EXfootcome).next('#timerthird').text('CM');
                 }
-                if(cmblockcd!=1.72&&cmblockcd!=0.71&&cmblockcd*100%100!=62&&cmblockcd!=0.61){
+                if(cmblockcd*100%100!=73&&cmblockcd*100%100!=63){
                     cmblockcd=0;
                     startCM();
                 }
@@ -1996,7 +1996,7 @@ chrome.runtime.onMessage.addListener(function(r){
                     if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0&&bginfo[0]>0){
                         $(EXfootcome).next('#timerthird').html('&nbsp;');
                     }
-                    if(cmblockcd!=-1.73&&cmblockcd!=-0.74&&cmblockcd*100%100!=-63&&cmblockcd!=-0.64){
+                    if(cmblockcd*100%100!=-73&&cmblockcd*100%100!=-63){
                         cmblockcd=0;
                         endCM();
                     }
