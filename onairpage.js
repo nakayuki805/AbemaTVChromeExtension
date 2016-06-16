@@ -436,6 +436,7 @@ function openOption(sw){
     $("#isCommentTBorder").prop("checked", isCommentTBorder);
     $('#itimePosition [type="radio"][name="timePosition"]').val([timePosition]);
     $('#itimePosition').css("display",isTimeVisible?"block":"none");
+    $("#notifySeconds").val(notifySeconds);
 }
 function closeOption(){
     $("#settcont").css("display","none")
@@ -704,6 +705,7 @@ function setSaveClicked(){
     isCommentPadZero = $("#isCommentPadZero").prop("checked");
     isCommentTBorder = $("#isCommentTBorder").prop("checked");
     timePosition = $('#itimePosition [name="timePosition"]:checked').val();
+    notifySeconds = parseInt($("#notifySeconds").val());
     setOptionHead();
     setOptionElement();
     arrayFullNgMaker();
