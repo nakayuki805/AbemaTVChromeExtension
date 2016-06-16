@@ -473,13 +473,17 @@ console.log("delayset retry");
     }
     //拡張機能の設定をその他メニューに追加
     var hoverLinkClass = hoverContents.children()[0].className;
-    hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
+    if(hoverContents.children('#extSettingLink').length==0){
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
+    }
     createSettingWindow();
     arrayFullNgMaker();
-    var eMoveContainer=document.createElement('div');
-    eMoveContainer.id="moveContainer";
-    eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
-    $("body").append(eMoveContainer);
+    if($('body:first>#moveContainer').length==0){
+        var eMoveContainer=document.createElement('div');
+        eMoveContainer.id="moveContainer";
+        eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
+        $("body").append(eMoveContainer);
+    }
 //console.log("comevisiset delayset");
     comevisiset(false);
     if(isSureReadComment){
@@ -545,7 +549,7 @@ function optionStatsUpdate(outflg){
         }
         var nww=nmw+npw;
         var nwh=nmh+npb+npt;
-        tar.html("現在: 映像"+omw+"x"+omh+" +右"+opw+" +上"+opt+"下"+opb+" =窓"+oww+"x"+owh+"<br>変更: 映像"+nmw+"x"+nmh+" +右"+npw+" +上"+npt+"下"+npb+"px =窓"+nww+"x"+nwh)
+        tar.html("現在: 映像"+omw+"x"+omh+" +余白(右"+opw+", 上"+opt+", 下"+opb+") =窓"+oww+"x"+owh+"<br>変更: 映像"+nmw+"x"+nmh+" +余白(右"+npw+", 上"+npt+", 下"+npb+") =窓"+nww+"x"+nwh)
             .css("display","")
         ;
         out=[(nww-oww),(nwh-owh)];
@@ -566,6 +570,13 @@ console.log("createSettingWindow retry");
         optionbutton.setAttribute("style","width:40px;height:60px;background-color:gray;opacity:0.5;");
         optionbutton.innerHTML = "&nbsp;";
         slidecont.appendChild(optionbutton);
+        $("#optionbutton").on("click",function(){
+            if($("#settcont").css("display")=="none"){
+                openOption(1);
+            }else{
+                closeOption();
+            }
+        });
     }
     if($('body:first>#settcont').length==0){
         var settcont = document.createElement("div");
@@ -574,6 +585,11 @@ console.log("createSettingWindow retry");
         settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
         settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
         $(settcont).prependTo('body');
+        $('#CommentColorSettings').change(setComeColorChanged);
+        $('#itimePosition,#isTimeVisible').change(setTimePosiChanged);
+        $("#settcont .closeBtn").on("click", closeOption);
+        $("#clearLocalStorage").on("click", setClearStorageClicked);
+        $("#saveBtn").on("click",setSaveClicked);
     }
     $("#CommentMukouSettings").hide();
     $("#CommentColorSettings").css("width","600px")
@@ -591,146 +607,145 @@ console.log("createSettingWindow retry");
         .css("flex-direction","column")
         .css("padding","8px")
     ;
-    $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;">').appendTo('#CommentColorSettings');
-    $('<input type="button" class="rightshift" value="この画面を右へ→" style="float:right;margin-top:10px;display:none;">').appendTo('#CommentColorSettings');
-    $("#settcont .leftshift").on("click",function(){
-        $("#settcont").css("right","320px");
-        $("#settcont .leftshift").css("display","none");
-        $("#settcont .rightshift").css("display","");
-    });
-    $("#settcont .rightshift").on("click",function(){
-        $("#settcont").css("right","40px");
-        $("#settcont .rightshift").css("display","none");
-        $("#settcont .leftshift").css("display","");
-    });
-    $('<div id="windowresize">ウィンドウのサイズ変更<span id="windowsizes"></span></div>').insertAfter('#CommentColorSettings');
-    $('#settcont>#windowresize').css("display","flex")
-        .css("flex-direction","column")
-        .css("margin","24px 0px")
-        .css("padding","8px")
-        .css("border","black solid 1px")
-        .children('#windowsizes').css("display","none")
-    ;
-    $('<div id="movieheight">映像の縦長さ<br><p id="sourceheight"></p></div>').appendTo('#windowresize');
-    $('<div><input type="radio" name="movieheight" value=0>変更なし</div>').appendTo('#settcont>#windowresize>#movieheight');
-    $('<div><input type="radio" name="movieheight" value=240>240px</div>').appendTo('#settcont>#windowresize>#movieheight');
-    $('<div><input type="radio" name="movieheight" value=360>360px</div>').appendTo('#settcont>#windowresize>#movieheight');
-    $('<div><input type="radio" name="movieheight" value=480>480px</div>').appendTo('#settcont>#windowresize>#movieheight');
-    $('<div><input type="radio" name="movieheight" value=720>720px</div>').appendTo('#settcont>#windowresize>#movieheight');
-    $('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]').val([0]);
-    $('#settcont>#windowresize>#movieheight').css("display","flex")
-        .css("flex-direction","row")
-        .css("flex-wrap","wrap")
-        .css("padding","0px 8px")
-        .children('#sourceheight').css("display","none")
-        .siblings().css("padding","0px 3px")
-    ;
-    $('<div id="windowheight">ウィンドウの縦長さ</div>').appendTo('#windowresize');
-    $('<div><input type="radio" name="windowheight" value=0>変更なし</div>').appendTo('#settcont>#windowresize>#windowheight');
-    $('<div><input type="radio" name="windowheight" value=1>映像の縦長さに合わせる</div>').appendTo('#settcont>#windowresize>#windowheight');
-    $('<div><input type="radio" name="windowheight" value=2>黒枠の分だけ空ける</div>').appendTo('#settcont>#windowresize>#windowheight');
-    $('<div><input type="radio" name="windowheight" value=3>現在の余白を維持</div>').appendTo('#settcont>#windowresize>#windowheight');
-    $('#settcont>#windowresize>#windowheight input[type="radio"][name="windowheight"]').val([0]);
-    $('#settcont>#windowresize>#windowheight').css("display","flex")
-        .css("flex-direction","row")
-        .css("flex-wrap","wrap")
-        .css("padding","0px 8px")
-        .children().css("padding","0px 3px")
-    ;
-
-    $("#optionbutton").on("click",function(){
-        if($("#settcont").css("display")=="none"){
-            openOption(1);
-        }else{
-            closeOption();
-        }
-    });
-    $("#settcont .closeBtn").on("click", closeOption);
-    $("#clearLocalStorage").on("click", function () {
-        window.localStorage.clear();
-console.info("cleared localStorage");
-    });
-    $("#saveBtn").on("click",function(){
-        settings.isResizeScreen = $("#isResizeScreen").prop("checked");
-        settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
-//        isEnterSubmit = $("#isEnterSubmit").prop("checked");
-        isHideOldComment = $("#isHideOldComment").prop("checked");
-        isCMBlack = $("#isCMBlack").prop("checked");
-        isCMBkTrans = $("#isCMBkTrans").prop("checked");
-        isCMsoundoff = $("#isCMsoundoff").prop("checked");
-        CMsmall = Math.min(100,Math.max(5,$("#CMsmall").val()));
-        isMovingComment = $("#isMovingComment").prop("checked");
-        settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
-        movingCommentLimit = parseInt($("#movingCommentLimit").val());
-        isMoveByCSS = $("#isMoveByCSS").prop("checked");
-        isComeNg = $("#isComeNg").prop("checked");
-        isComeDel = $("#isComeDel").prop("checked");
-        fullNg = $("#fullNg").val();
-        var beforeInpWinBottom=isInpWinBottom;
-        isInpWinBottom = $("#isInpWinBottom").prop("checked");
-        isCustomPostWin = $("#isCustomPostWin").prop("checked");
-        isCancelWheel = $("#isCancelWheel").prop("checked");
-        isVolumeWheel = $("#isVolumeWheel").prop("checked");
-        changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
-        isTimeVisible = $("#isTimeVisible").prop("checked");
-        isSureReadComment = $("#isSureReadComment").prop("checked");
-        sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
-//        isMovieResize = $("#isMovieResize").prop("checked");
-        isMovieMaximize = $("#isMovieMaximize").prop("checked");
-        settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
-        commentBackColor = parseInt($("#commentBackColor").val());
-        commentBackTrans = parseInt($("#commentBackTrans").val());
-        commentTextColor = parseInt($("#commentTextColor").val());
-        commentTextTrans = parseInt($("#commentTextTrans").val());
-        isCommentPadZero = $("#isCommentPadZero").prop("checked");
-        isCommentTBorder = $("#isCommentTBorder").prop("checked");
-        timePosition = $('#itimePosition [name="timePosition"]:checked').val();
-
-        setOptionHead();
-        setOptionElement();
-        arrayFullNgMaker();
-//console.log("comevisiset savebtnclick");
-        comevisiset(false);
-        optionHeightFix();
-
-        var sm=parseInt($('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]:checked').val());
-        var sw=parseInt($('#settcont>#windowresize>#windowheight input[type="radio"][name="windowheight"]:checked').val());
-//console.log("sm="+sm+",sw="+sw);
-        if(sm!=0||sw!=0){
-            var s=optionStatsUpdate(true);
-            if(s[0]!=0||s[1]!=0){
-                chrome.runtime.sendMessage({type:"windowresize",valw:s[0],valh:s[1]},function(r){
-                    setTimeout(optionHeightFix,1000);
-                });
-            }
-        }
-    });
-    $('#CommentColorSettings').change(function(){
-        var p=[];
-        $('#CommentColorSettings>div>input[type="range"]').each(function(i,jo){
-            $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
-            p[i]=$(jo).val();
+    if($('#settcont .leftshift').length==0){
+        $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;">').appendTo('#CommentColorSettings');
+        $("#settcont .leftshift").on("click",function(){
+            $("#settcont").css("right","320px");
+            $("#settcont .leftshift").css("display","none");
+            $("#settcont .rightshift").css("display","");
         });
-        var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
-        var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
-        var cl=$(EXcomelist);
-        cl.children('div').css("background-color",bc)
-            .css("color",tc)
-            .children('p[class^="styles__message___"]').css("color",tc)
+    }
+    if($('#settcont .rightshift').length==0){
+        $('<input type="button" class="rightshift" value="この画面を右へ→" style="float:right;margin-top:10px;display:none;">').appendTo('#CommentColorSettings');
+        $("#settcont .rightshift").on("click",function(){
+            $("#settcont").css("right","40px");
+            $("#settcont .rightshift").css("display","none");
+            $("#settcont .leftshift").css("display","");
+        });
+    }
+    if($('#settcont #windowresize').length==0){
+        $('<div id="windowresize">ウィンドウのサイズ変更<span id="windowsizes"></span></div>').insertAfter('#CommentColorSettings');
+        $('#settcont>#windowresize').css("display","flex")
+            .css("flex-direction","column")
+            .css("margin","24px 0px")
+            .css("padding","8px")
+            .css("border","black solid 1px")
+            .children('#windowsizes').css("display","none")
         ;
-    });
-    $('#itimePosition,#isTimeVisible').change(function(){
-        if($("#isTimeVisible").prop("checked")){
-            $('#itimePosition').css("display","block");
-            createTime(0);
-            setTimePosition($('#itimePosition [name="timePosition"]:checked').val());
-        }else{
-            $('#itimePosition').css("display","none");
-            createTime(1);
-            $('#forProEndTxt,#forProEndBk').css("display","none");
-        }
-    });
+    }
+    if($('#settcont #movieheight').length==0){
+        $('<div id="movieheight">映像の縦長さ<br><p id="sourceheight"></p></div>').appendTo('#windowresize');
+        $('<div><input type="radio" name="movieheight" value=0>変更なし</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('<div><input type="radio" name="movieheight" value=240>240px</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('<div><input type="radio" name="movieheight" value=360>360px</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('<div><input type="radio" name="movieheight" value=480>480px</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('<div><input type="radio" name="movieheight" value=720>720px</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]').val([0]);
+        $('#settcont>#windowresize>#movieheight').css("display","flex")
+            .css("flex-direction","row")
+            .css("flex-wrap","wrap")
+            .css("padding","0px 8px")
+            .children('#sourceheight').css("display","none")
+            .siblings().css("padding","0px 3px")
+        ;
+    }
+    if($('#settcont #windowheight').length==0){
+        $('<div id="windowheight">ウィンドウの縦長さ</div>').appendTo('#windowresize');
+        $('<div><input type="radio" name="windowheight" value=0>変更なし</div>').appendTo('#settcont>#windowresize>#windowheight');
+        $('<div><input type="radio" name="windowheight" value=1>映像の縦長さに合わせる</div>').appendTo('#settcont>#windowresize>#windowheight');
+        $('<div><input type="radio" name="windowheight" value=2>黒枠の分だけ空ける</div>').appendTo('#settcont>#windowresize>#windowheight');
+        $('<div><input type="radio" name="windowheight" value=3>現在の余白を維持</div>').appendTo('#settcont>#windowresize>#windowheight');
+        $('#settcont>#windowresize>#windowheight input[type="radio"][name="windowheight"]').val([0]);
+        $('#settcont>#windowresize>#windowheight').css("display","flex")
+            .css("flex-direction","row")
+            .css("flex-wrap","wrap")
+            .css("padding","0px 8px")
+            .children().css("padding","0px 3px")
+        ;
+    }
 console.log("createSettingWindow ok");
+}
+function setClearStorageClicked(){
+    window.localStorage.clear();
+console.info("cleared localStorage");
+}
+function setSaveClicked(){
+    settings.isResizeScreen = $("#isResizeScreen").prop("checked");
+    settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
+//    isEnterSubmit = $("#isEnterSubmit").prop("checked");
+    isHideOldComment = $("#isHideOldComment").prop("checked");
+    isCMBlack = $("#isCMBlack").prop("checked");
+    isCMBkTrans = $("#isCMBkTrans").prop("checked");
+    isCMsoundoff = $("#isCMsoundoff").prop("checked");
+    CMsmall = Math.min(100,Math.max(5,$("#CMsmall").val()));
+    isMovingComment = $("#isMovingComment").prop("checked");
+    settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
+    movingCommentLimit = parseInt($("#movingCommentLimit").val());
+    isMoveByCSS = $("#isMoveByCSS").prop("checked");
+    isComeNg = $("#isComeNg").prop("checked");
+    isComeDel = $("#isComeDel").prop("checked");
+    fullNg = $("#fullNg").val();
+    var beforeInpWinBottom=isInpWinBottom;
+    isInpWinBottom = $("#isInpWinBottom").prop("checked");
+    isCustomPostWin = $("#isCustomPostWin").prop("checked");
+    isCancelWheel = $("#isCancelWheel").prop("checked");
+    isVolumeWheel = $("#isVolumeWheel").prop("checked");
+    changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
+    isTimeVisible = $("#isTimeVisible").prop("checked");
+    isSureReadComment = $("#isSureReadComment").prop("checked");
+    sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
+//    isMovieResize = $("#isMovieResize").prop("checked");
+    isMovieMaximize = $("#isMovieMaximize").prop("checked");
+    settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
+    commentBackColor = parseInt($("#commentBackColor").val());
+    commentBackTrans = parseInt($("#commentBackTrans").val());
+    commentTextColor = parseInt($("#commentTextColor").val());
+    commentTextTrans = parseInt($("#commentTextTrans").val());
+    isCommentPadZero = $("#isCommentPadZero").prop("checked");
+    isCommentTBorder = $("#isCommentTBorder").prop("checked");
+    timePosition = $('#itimePosition [name="timePosition"]:checked').val();
+    setOptionHead();
+    setOptionElement();
+    arrayFullNgMaker();
+//console.log("comevisiset savebtnclick");
+    comevisiset(false);
+    optionHeightFix();
+    var sm=parseInt($('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]:checked').val());
+    var sw=parseInt($('#settcont>#windowresize>#windowheight input[type="radio"][name="windowheight"]:checked').val());
+//console.log("sm="+sm+",sw="+sw);
+    if(sm!=0||sw!=0){
+        var s=optionStatsUpdate(true);
+        if(s[0]!=0||s[1]!=0){
+            chrome.runtime.sendMessage({type:"windowresize",valw:s[0],valh:s[1]},function(r){
+                setTimeout(optionHeightFix,1000);
+                setTimeout(comevisiset,1000,false);
+            });
+        }
+    }
+}
+function setTimePosiChanged(){
+    if($("#isTimeVisible").prop("checked")){
+        $('#itimePosition').css("display","block");
+        createTime(0);
+        setTimePosition($('#itimePosition [name="timePosition"]:checked').val());
+    }else{
+        $('#itimePosition').css("display","none");
+        createTime(1);
+        $('#forProEndTxt,#forProEndBk').css("display","none");
+    }
+}
+function setComeColorChanged(){
+    var p=[];
+    $('#CommentColorSettings>div>input[type="range"]').each(function(i,jo){
+        $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
+        p[i]=$(jo).val();
+    });
+    var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
+    var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
+    $(EXcomelist).children('div').css("background-color",bc)
+        .css("color",tc)
+        .children('p[class^="styles__message___"]').css("color",tc)
+    ;
 }
 function toggleCommentList(){
 //console.log("comevisiset toggleCommentList");
