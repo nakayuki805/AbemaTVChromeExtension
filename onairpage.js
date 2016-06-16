@@ -133,7 +133,7 @@ var EXwatchingnum;
 var EXwatchingstr;
 var EXvolume;
 var comeclickcd=2; //コメント欄を早く開きすぎないためのウェイト
-var cmblockia=10; //コメント欄が無効になってからCM処理までのウェイト(+1以上)
+var cmblockia=12; //コメント欄が無効になってからCM処理までのウェイト(+1以上)
 var cmblockib=-1; //有効になってから解除までのウェイト(-1以下)
 var cmblockcd=0; //カウント用
 var comeRefreshing=false; //コメ欄自動開閉中はソートを実行したいのでコメント更新しない用
@@ -371,12 +371,13 @@ function triggerMouseMoving(){
 function openOption(sw){
     var settcontjq = $("#settcont");
     settcontjq.css("display","block");
-    var settcontheight=settcontjq[0].scrollHeight;
-    var settcontpadv=parseInt(settcontjq.css("padding-top"))+parseInt(settcontjq.css("padding-bottom"));
-//    if (settconttop < 0){//設定ウィンドウが画面からはみ出したときにスクロールできるように
-    if(settcontheight>$(window).height()-105-settcontpadv){
-        settcontjq.height($(window).height()-105-settcontpadv).css("overflow-y", "scroll");
-    }
+//    var settcontheight=settcontjq[0].scrollHeight;
+//    var settcontpadv=parseInt(settcontjq.css("padding-top"))+parseInt(settcontjq.css("padding-bottom"));
+////    if (settconttop < 0){//設定ウィンドウが画面からはみ出したときにスクロールできるように
+//    if(settcontheight>$(window).height()-105-settcontpadv){
+//        settcontjq.height($(window).height()-105-settcontpadv).css("overflow-y", "scroll");
+//    }
+    optionHeightFix();
     sw=sw.data||sw;
     if(sw==1){ //サイドバーボタン
     }else if(sw==2){ //残り時間上
@@ -435,6 +436,7 @@ function openOption(sw){
     $("#isCommentTBorder").prop("checked", isCommentTBorder);
     $('#itimePosition [type="radio"][name="timePosition"]').val([timePosition]);
     $('#itimePosition').css("display",isTimeVisible?"block":"none");
+    $("#notifySeconds").val(notifySeconds);
 }
 function closeOption(){
     $("#settcont").css("display","none")
@@ -447,6 +449,15 @@ function closeOption(){
         .children('p[class^="styles__message___"]').css("color","")
     ;
     setOptionElement();
+}
+function optionHeightFix(){
+    var settcontjq = $("#settcont");
+    var settcontheight=settcontjq[0].scrollHeight;
+    var settcontpadv=parseInt(settcontjq.css("padding-top"))+parseInt(settcontjq.css("padding-bottom"));
+    if(settcontheight>$(window).height()-105-settcontpadv){
+//console.log("optionHeightFix: "+settcontjq.height()+" -> "+($(window).height()-105-settcontpadv));
+        settcontjq.height($(window).height()-105-settcontpadv).css("overflow-y", "scroll");
+    }
 }
 function toast(message) {
     var toastElem = $("<div class='toast'><p>" + message + "</p></div>").appendTo("body");
@@ -463,13 +474,17 @@ console.log("delayset retry");
     }
     //拡張機能の設定をその他メニューに追加
     var hoverLinkClass = hoverContents.children()[0].className;
-    hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
+    if(hoverContents.children('#extSettingLink').length==0){
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
+    }
     createSettingWindow();
     arrayFullNgMaker();
-    var eMoveContainer=document.createElement('div');
-    eMoveContainer.id="moveContainer";
-    eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
-    $("body").append(eMoveContainer);
+    if($('body:first>#moveContainer').length==0){
+        var eMoveContainer=document.createElement('div');
+        eMoveContainer.id="moveContainer";
+        eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
+        $("body").append(eMoveContainer);
+    }
 //console.log("comevisiset delayset");
     comevisiset(false);
     if(isSureReadComment){
@@ -484,6 +499,64 @@ console.log("delayset retry");
     onresize();
 console.log("delayset ok");
 }
+function optionStatsUpdate(outflg){
+    var out=[0,0];
+    if($('body:first>#settcont').length==0){return;}
+    var tar=$('#settcont>#windowresize>#movieheight>#sourceheight');
+    if(bginfo[0]>0&&tar.length>0){
+        tar.text("(ソース:"+bginfo[0]+"p)")
+            .css("display","")
+        ;
+    }
+    tar=$('#settcont>#windowresize>#windowsizes');
+    if(EXwatchingnum&&tar.length>0){
+        var jo=$(EXobli.children[EXwatchingnum]);
+        var omw=jo.width();
+        var omh=jo.height();
+        var oww=$(window).width();
+        var owh=$(window).height();
+        var opw=oww-omw;
+        var opb=Math.floor((owh-omh)/2);
+        var opt=owh-omh-opb;
+        var nmw=omw;
+        var nmh=omh;
+        var sm=parseInt($('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]:checked').val());
+        if(sm>0){
+            nmh=sm;
+            nmw=Math.ceil(nmh*16/9);
+        }
+        var npw=opw;
+        var npb=opb;
+        var npt=opt;
+        var sw=parseInt($('#settcont>#windowresize>#windowheight input[type="radio"][name="windowheight"]:checked').val());
+        switch(sw){
+            case 0: //変更なし
+                npb=Math.floor((owh-nmh)/2);
+                npt=owh-nmh-npb;
+                break;
+            case 1: //映像の縦長さに合わせる
+                npb=0;
+                npt=0;
+                break;
+            case 2: //黒枠の分だけ空ける
+                npb=64;
+                npt=64;
+                break;
+            case 3: //現在の空きを維持
+                npb=opb;
+                npt=opt;
+                break;
+            default:
+        }
+        var nww=nmw+npw;
+        var nwh=nmh+npb+npt;
+        tar.html("現在: 映像"+omw+"x"+omh+" +余白(右"+opw+", 上"+opt+", 下"+opb+") =窓"+oww+"x"+owh+"<br>変更: 映像"+nmw+"x"+nmh+" +余白(右"+npw+", 上"+npt+", 下"+npb+") =窓"+nww+"x"+nwh)
+            .css("display","")
+        ;
+        out=[(nww-oww),(nwh-owh)];
+    }
+    if(outflg){return out;}
+}
 function createSettingWindow(){
     if(!EXside){
 console.log("createSettingWindow retry");
@@ -492,20 +565,37 @@ console.log("createSettingWindow retry");
     }
     var slidecont = EXside
     //設定ウィンドウ・開くボタン設置
-    var optionbutton = document.createElement("div");
-    optionbutton.id = "optionbutton";
-    optionbutton.setAttribute("style","width:40px;height:60px;background-color:gray;opacity:0.5;");
-    optionbutton.innerHTML = "&nbsp;";
-    var settcont = document.createElement("div");
-    settcont.id = "settcont";
-    //設定ウィンドウの中身
-    settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
-    settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
-    slidecont.appendChild(optionbutton);
-    $(settcont).prependTo('body');
+    if($(EXside).children('#optionbutton').length==0){
+        var optionbutton = document.createElement("div");
+        optionbutton.id = "optionbutton";
+        optionbutton.setAttribute("style","width:40px;height:60px;background-color:gray;opacity:0.5;");
+        optionbutton.innerHTML = "&nbsp;";
+        slidecont.appendChild(optionbutton);
+        $("#optionbutton").on("click",function(){
+            if($("#settcont").css("display")=="none"){
+                openOption(1);
+            }else{
+                closeOption();
+            }
+        });
+    }
+    if($('body:first>#settcont').length==0){
+        var settcont = document.createElement("div");
+        settcont.id = "settcont";
+        //設定ウィンドウの中身
+        settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
+        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
+        $(settcont).prependTo('body');
+        $('#CommentColorSettings').change(setComeColorChanged);
+        $('#itimePosition,#isTimeVisible').change(setTimePosiChanged);
+        $("#settcont .closeBtn").on("click", closeOption);
+        $("#clearLocalStorage").on("click", setClearStorageClicked);
+        $("#saveBtn").on("click",setSaveClicked);
+    }
     $("#CommentMukouSettings").hide();
     $("#CommentColorSettings").css("width","600px")
         .css("padding","8px")
+        .css("border","black solid 1px")
         .children('div').css("clear","both")
         .children('span.desc').css("padding","0px 4px")
         .next('span.prop').css("padding","0px 4px")
@@ -516,99 +606,148 @@ console.log("createSettingWindow retry");
         .css("margin-left","16px")
         .css("display","flex")
         .css("flex-direction","column")
+        .css("padding","8px")
     ;
-    $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;">').appendTo('#CommentColorSettings');
-    $('<input type="button" class="rightshift" value="この画面を右へ→" style="float:right;margin-top:10px;display:none;">').appendTo('#CommentColorSettings');
-    $("#settcont .leftshift").on("click",function(){
-        $("#settcont").css("right","320px");
-        $("#settcont .leftshift").css("display","none");
-        $("#settcont .rightshift").css("display","");
-    });
-    $("#settcont .rightshift").on("click",function(){
-        $("#settcont").css("right","40px");
-        $("#settcont .rightshift").css("display","none");
-        $("#settcont .leftshift").css("display","");
-    });
-    $("#optionbutton").on("click",function(){
-        if($("#settcont").css("display")=="none"){
-            openOption(1);
-        }else{
-            closeOption();
-        }
-    });
-    $("#settcont .closeBtn").on("click", closeOption);
-    $("#clearLocalStorage").on("click", function () {
-        window.localStorage.clear();
-console.info("cleared localStorage");
-    });
-    $("#saveBtn").on("click",function(){
-        settings.isResizeScreen = $("#isResizeScreen").prop("checked");
-        settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
-//        isEnterSubmit = $("#isEnterSubmit").prop("checked");
-        isHideOldComment = $("#isHideOldComment").prop("checked");
-        isCMBlack = $("#isCMBlack").prop("checked");
-        isCMBkTrans = $("#isCMBkTrans").prop("checked");
-        isCMsoundoff = $("#isCMsoundoff").prop("checked");
-        CMsmall = Math.min(100,Math.max(5,$("#CMsmall").val()));
-        isMovingComment = $("#isMovingComment").prop("checked");
-        settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
-        movingCommentLimit = parseInt($("#movingCommentLimit").val());
-        isMoveByCSS = $("#isMoveByCSS").prop("checked");
-        isComeNg = $("#isComeNg").prop("checked");
-        isComeDel = $("#isComeDel").prop("checked");
-        fullNg = $("#fullNg").val();
-        var beforeInpWinBottom=isInpWinBottom;
-        isInpWinBottom = $("#isInpWinBottom").prop("checked");
-        isCustomPostWin = $("#isCustomPostWin").prop("checked");
-        isCancelWheel = $("#isCancelWheel").prop("checked");
-        isVolumeWheel = $("#isVolumeWheel").prop("checked");
-        changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
-        isTimeVisible = $("#isTimeVisible").prop("checked");
-        isSureReadComment = $("#isSureReadComment").prop("checked");
-        sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
-//        isMovieResize = $("#isMovieResize").prop("checked");
-        isMovieMaximize = $("#isMovieMaximize").prop("checked");
-        settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
-        commentBackColor = parseInt($("#commentBackColor").val());
-        commentBackTrans = parseInt($("#commentBackTrans").val());
-        commentTextColor = parseInt($("#commentTextColor").val());
-        commentTextTrans = parseInt($("#commentTextTrans").val());
-        isCommentPadZero = $("#isCommentPadZero").prop("checked");
-        isCommentTBorder = $("#isCommentTBorder").prop("checked");
-        timePosition = $('#itimePosition [name="timePosition"]:checked').val();
-
-        setOptionHead();
-        setOptionElement();
-        arrayFullNgMaker();
-//console.log("comevisiset savebtnclick");
-        comevisiset(false);
-    });
-    $('#CommentColorSettings').change(function(){
-        var p=[];
-        $('#CommentColorSettings>div>input[type="range"]').each(function(i,jo){
-            $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
-            p[i]=$(jo).val();
+    if($('#settcont .leftshift').length==0){
+        $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;">').appendTo('#CommentColorSettings');
+        $("#settcont .leftshift").on("click",function(){
+            $("#settcont").css("right","320px");
+            $("#settcont .leftshift").css("display","none");
+            $("#settcont .rightshift").css("display","");
         });
-        var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
-        var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
-        var cl=$(EXcomelist);
-        cl.children('div').css("background-color",bc)
-            .css("color",tc)
-            .children('p[class^="styles__message___"]').css("color",tc)
+    }
+    if($('#settcont .rightshift').length==0){
+        $('<input type="button" class="rightshift" value="この画面を右へ→" style="float:right;margin-top:10px;display:none;">').appendTo('#CommentColorSettings');
+        $("#settcont .rightshift").on("click",function(){
+            $("#settcont").css("right","40px");
+            $("#settcont .rightshift").css("display","none");
+            $("#settcont .leftshift").css("display","");
+        });
+    }
+    if($('#settcont #windowresize').length==0){
+        $('<div id="windowresize">ウィンドウのサイズ変更<span id="windowsizes"></span></div>').insertAfter('#CommentColorSettings');
+        $('#settcont>#windowresize').css("display","flex")
+            .css("flex-direction","column")
+            .css("margin","24px 0px")
+            .css("padding","8px")
+            .css("border","black solid 1px")
+            .children('#windowsizes').css("display","none")
         ;
-    });
-    $('#itimePosition,#isTimeVisible').change(function(){
-        if($("#isTimeVisible").prop("checked")){
-            $('#itimePosition').css("display","block");
-            createTime(0);
-            setTimePosition($('#itimePosition [name="timePosition"]:checked').val());
-        }else{
-            $('#itimePosition').css("display","none");
-            createTime(1);
-            $('#forProEndTxt,#forProEndBk').css("display","none");
-        }
-    });
+    }
+    if($('#settcont #movieheight').length==0){
+        $('<div id="movieheight">映像の縦長さ<br><p id="sourceheight"></p></div>').appendTo('#windowresize');
+        $('<div><input type="radio" name="movieheight" value=0>変更なし</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('<div><input type="radio" name="movieheight" value=240>240px</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('<div><input type="radio" name="movieheight" value=360>360px</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('<div><input type="radio" name="movieheight" value=480>480px</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('<div><input type="radio" name="movieheight" value=720>720px</div>').appendTo('#settcont>#windowresize>#movieheight');
+        $('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]').val([0]);
+        $('#settcont>#windowresize>#movieheight').css("display","flex")
+            .css("flex-direction","row")
+            .css("flex-wrap","wrap")
+            .css("padding","0px 8px")
+            .children('#sourceheight').css("display","none")
+            .siblings().css("padding","0px 3px")
+        ;
+    }
+    if($('#settcont #windowheight').length==0){
+        $('<div id="windowheight">ウィンドウの縦長さ</div>').appendTo('#windowresize');
+        $('<div><input type="radio" name="windowheight" value=0>変更なし</div>').appendTo('#settcont>#windowresize>#windowheight');
+        $('<div><input type="radio" name="windowheight" value=1>映像の縦長さに合わせる</div>').appendTo('#settcont>#windowresize>#windowheight');
+        $('<div><input type="radio" name="windowheight" value=2>黒枠の分だけ空ける</div>').appendTo('#settcont>#windowresize>#windowheight');
+        $('<div><input type="radio" name="windowheight" value=3>現在の余白を維持</div>').appendTo('#settcont>#windowresize>#windowheight');
+        $('#settcont>#windowresize>#windowheight input[type="radio"][name="windowheight"]').val([0]);
+        $('#settcont>#windowresize>#windowheight').css("display","flex")
+            .css("flex-direction","row")
+            .css("flex-wrap","wrap")
+            .css("padding","0px 8px")
+            .children().css("padding","0px 3px")
+        ;
+    }
 console.log("createSettingWindow ok");
+}
+function setClearStorageClicked(){
+    window.localStorage.clear();
+console.info("cleared localStorage");
+}
+function setSaveClicked(){
+    settings.isResizeScreen = $("#isResizeScreen").prop("checked");
+    settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
+//    isEnterSubmit = $("#isEnterSubmit").prop("checked");
+    isHideOldComment = $("#isHideOldComment").prop("checked");
+    isCMBlack = $("#isCMBlack").prop("checked");
+    isCMBkTrans = $("#isCMBkTrans").prop("checked");
+    isCMsoundoff = $("#isCMsoundoff").prop("checked");
+    CMsmall = Math.min(100,Math.max(5,$("#CMsmall").val()));
+    isMovingComment = $("#isMovingComment").prop("checked");
+    settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
+    movingCommentLimit = parseInt($("#movingCommentLimit").val());
+    isMoveByCSS = $("#isMoveByCSS").prop("checked");
+    isComeNg = $("#isComeNg").prop("checked");
+    isComeDel = $("#isComeDel").prop("checked");
+    fullNg = $("#fullNg").val();
+    var beforeInpWinBottom=isInpWinBottom;
+    isInpWinBottom = $("#isInpWinBottom").prop("checked");
+    isCustomPostWin = $("#isCustomPostWin").prop("checked");
+    isCancelWheel = $("#isCancelWheel").prop("checked");
+    isVolumeWheel = $("#isVolumeWheel").prop("checked");
+    changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
+    isTimeVisible = $("#isTimeVisible").prop("checked");
+    isSureReadComment = $("#isSureReadComment").prop("checked");
+    sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
+//    isMovieResize = $("#isMovieResize").prop("checked");
+    isMovieMaximize = $("#isMovieMaximize").prop("checked");
+    settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
+    commentBackColor = parseInt($("#commentBackColor").val());
+    commentBackTrans = parseInt($("#commentBackTrans").val());
+    commentTextColor = parseInt($("#commentTextColor").val());
+    commentTextTrans = parseInt($("#commentTextTrans").val());
+    isCommentPadZero = $("#isCommentPadZero").prop("checked");
+    isCommentTBorder = $("#isCommentTBorder").prop("checked");
+    timePosition = $('#itimePosition [name="timePosition"]:checked').val();
+    notifySeconds = parseInt($("#notifySeconds").val());
+    setOptionHead();
+    setOptionElement();
+    arrayFullNgMaker();
+//console.log("comevisiset savebtnclick");
+    comevisiset(false);
+    optionHeightFix();
+    var sm=parseInt($('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]:checked').val());
+    var sw=parseInt($('#settcont>#windowresize>#windowheight input[type="radio"][name="windowheight"]:checked').val());
+//console.log("sm="+sm+",sw="+sw);
+    if(sm!=0||sw!=0){
+        var s=optionStatsUpdate(true);
+        if(s[0]!=0||s[1]!=0){
+            chrome.runtime.sendMessage({type:"windowresize",valw:s[0],valh:s[1]},function(r){
+                setTimeout(optionHeightFix,1000);
+                setTimeout(comevisiset,1000,false);
+            });
+        }
+    }
+}
+function setTimePosiChanged(){
+    if($("#isTimeVisible").prop("checked")){
+        $('#itimePosition').css("display","block");
+        createTime(0);
+        setTimePosition($('#itimePosition [name="timePosition"]:checked').val());
+    }else{
+        $('#itimePosition').css("display","none");
+        createTime(1);
+        $('#forProEndTxt,#forProEndBk').css("display","none");
+    }
+}
+function setComeColorChanged(){
+    var p=[];
+    $('#CommentColorSettings>div>input[type="range"]').each(function(i,jo){
+        $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
+        p[i]=$(jo).val();
+    });
+    var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
+    var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
+    $(EXcomelist).children('div').css("background-color",bc)
+        .css("color",tc)
+        .children('p[class^="styles__message___"]').css("color",tc)
+    ;
 }
 function toggleCommentList(){
 //console.log("comevisiset toggleCommentList");
@@ -1054,7 +1193,8 @@ function setTimePosition(par){
         case "footer":
             parexfootcount.css("padding-bottom","14px");
             if($(EXfootcome).next('#timerthird').length==0){
-                $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;border-right-width:1px;border-right-style:solid;border-right-color:#444;"></div>').insertAfter(EXfootcome);
+                $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;width:143px;color:white;font-size:x-small;letter-spacing:1px;padding:0px 5px;border-right-width:1px;border-right-style:solid;border-right-color:#444;"></div>').insertAfter(EXfootcome);
+                $(EXfootcome).next('#timerthird').html('&nbsp;');
             }
             break;
         default:
@@ -1200,6 +1340,14 @@ function usereventWakuclick(){
         }
     }
 }
+function usereventVolMousemove(){
+    if(!EXside){return;}
+    $(EXside).css("transform","translate(50%,-50%)");
+}
+function usereventVolMouseout(){
+    if(!EXside){return;}
+    $(EXside).css("transform","translate(0px,-50%)");
+}
 function setOptionEvent(){
     if(eventAdded){return;}
     var butfs;
@@ -1266,6 +1414,32 @@ console.log("dblclick");
     });
     window.addEventListener("mousemove",usereventMouseover,true);
     pwaku.addEventListener("click",usereventWakuclick,false);
+    $(EXvolume).on("mousemove",usereventVolMousemove);
+    $(EXvolume).on("mouseout",usereventVolMouseout);
+    window.addEventListener("keydown",function(e){
+        if(e.keyCode==38||e.keyCode==40){
+            if(isCancelWheel||isVolumeWheel){
+                e.stopPropagation();
+            }
+        }else if(e.keyCode==17&&e.location==2){
+            if(cmblockcd==0){
+            }else if(cmblockcd>0){
+                cmblockcd=1.72;
+            }else if(cmblockcd<0){
+                cmblockcd=-1.73;
+            }
+        }
+    },true);
+    window.addEventListener("keyup",function(e){
+        if(e.keyCode==17&&e.location==2){
+            if(cmblockcd==0){
+            }else if(cmblockcd==1.72){
+                cmblockcd=0.71;
+            }else if(cmblockcd==-1.73){
+                cmblockcd=-0.74;
+            }
+        }
+    },true);
 console.log("setOptionEvent ok");
 }
 function startCM(){
@@ -1552,6 +1726,11 @@ $(window).on('load', function () {
             }
         }
 
+        //一時設定画面の情報更新
+        if($('body:first>#settcont').css("display")!="none"){
+            optionStatsUpdate(false);
+        }
+
     }, 1000);
 
     setTimeout(onresize,5000);
@@ -1668,6 +1847,13 @@ chrome.runtime.onMessage.addListener(function(r){
             if(bginfo[1].length>0&&bginfo[1][2]-bginfo[1][1]>5){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 3");
                 bginfo[2]=3;
+                if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
+                    $(EXfootcome).next('#timerthird').text('CM>');
+                }
+            }
+        }else{
+            if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0&&bginfo[0]>0){
+                $(EXfootcome).next('#timerthird').html('&nbsp;');
             }
         }
     }else if(r.type==1){
@@ -1689,6 +1875,9 @@ chrome.runtime.onMessage.addListener(function(r){
             if(bginfo[2]<=1){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 2");
                 bginfo[2]=2;
+                if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
+                    $(EXfootcome).next('#timerthird').text('CM');
+                }
                 cmblockcd=0;
                 startCM();
             }
@@ -1700,6 +1889,9 @@ chrome.runtime.onMessage.addListener(function(r){
                 if(bginfo[2]==3){
 //console.log("bginfo[2]= 3 -> 0");
                     bginfo[2]=0;
+                    if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0&&bginfo[0]>0){
+                        $(EXfootcome).next('#timerthird').html('&nbsp;');
+                    }
                     cmblockcd=0;
                     endCM();
                 }else{
@@ -1713,6 +1905,9 @@ chrome.runtime.onMessage.addListener(function(r){
         if(bginfo[1].length==0){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 1");
             bginfo[2]=1;
+            if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
+                $(EXfootcome).next('#timerthird').text('>CM');
+            }
         }
     }
 });

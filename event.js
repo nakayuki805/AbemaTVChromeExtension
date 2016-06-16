@@ -141,6 +141,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
                 sendResponse({result: "removed"});
             });
         });
+    } else if (request.type === "windowresize"){
+        chrome.windows.getCurrent(function(w){
+            chrome.windows.update(w.id,{width:(w.width+request.valw),height:(w.height+request.valh)});
+            sendResponse(0);
+        });
     } else {
         console.warn("message type not match", request.type);
     }

@@ -86,13 +86,15 @@ var settingsList = [
     },
     {
         "name": "isCancelWheel",
-        "description": "マウスホイールによる番組移動を禁止する",
+//        "description": "マウスホイールによる番組移動を禁止する",
+        "description": "マウスホイール及び上下矢印キーによる番組移動を無効化する",
         "type": "boolean",
         "isInstantChangable": true
     },
     {
         "name": "isVolumeWheel",
-        "description": "マウスホイールによる番組移動を音量操作へ変更する",
+//        "description": "マウスホイールによる番組移動を音量操作へ変更する",
+        "description": "マウスホイールで音量を操作する（&番組移動無効化）",
         "type": "boolean",
         "isInstantChangable": true
     },

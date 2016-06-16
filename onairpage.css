@@ -109,3 +109,6 @@ body{
 .toast p{
     margin: 10px;
 }
+[class^="TVContainer__footer___"] [class^="styles__volume___"] [class^="styles__slider-container___"]:after{
+    border-top-width:15px;
+}
