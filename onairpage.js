@@ -1980,7 +1980,7 @@ chrome.runtime.onMessage.addListener(function(r){
                 if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
                     $(EXfootcome).next('#timerthird').text('CM');
                 }
-                if(cmblockcd!=1.72&&cmblockcd!=0.71){
+                if(cmblockcd!=1.72&&cmblockcd!=0.71&&cmblockcd*100%100!=62&&cmblockcd!=0.61){
                     cmblockcd=0;
                     startCM();
                 }
@@ -1996,7 +1996,7 @@ chrome.runtime.onMessage.addListener(function(r){
                     if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0&&bginfo[0]>0){
                         $(EXfootcome).next('#timerthird').html('&nbsp;');
                     }
-                    if(cmblockcd!=-1.73&&cmblockcd!=-0.74){
+                    if(cmblockcd!=-1.73&&cmblockcd!=-0.74&&cmblockcd*100%100!=-63&&cmblockcd!=-0.64){
                         cmblockcd=0;
                         endCM();
                     }
