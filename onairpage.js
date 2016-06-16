@@ -437,6 +437,8 @@ function openOption(sw){
     $('#itimePosition [type="radio"][name="timePosition"]').val([timePosition]);
     $('#itimePosition').css("display",isTimeVisible?"block":"none");
     $("#notifySeconds").val(notifySeconds);
+    $('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]').val([0]);
+    $('#settcont>#windowresize>#windowheight input[type="radio"][name="movieheight"]').val([0]);
 }
 function closeOption(){
     $("#settcont").css("display","none")
@@ -1313,6 +1315,7 @@ console.log("setOptionElement retry");
     }else{
         createTime(1);
     }
+    $(EXfootcome).css("pointer-events","auto");
 console.log("setOptionElement ok");
 }
 function usereventMouseover(){
@@ -1348,7 +1351,89 @@ function usereventVolMouseout(){
     if(!EXside){return;}
     $(EXside).css("transform","translate(0px,-50%)");
 }
+//function usereventFCMouseout(){
+function usereventFCMouseleave(){
+//console.log("ueFCMouseleave");
+    if(!EXfootcome){return;}
+    $(EXfootcome).css("transition","")
+        .css("background-color","")
+    ;
+//    $('body:first>#manualblockrd').remove();
+    $('body:first>.manualblock').remove();
+//    if($('body:first>.manualblock').length==0){
+    $('body').css("overflow-y","");
+//    }
+    if(cmblockcd*100%100==63){
+        bginfo[3]=2;
+        startCM();
+    }else if(cmblockcd*100%100==-63){
+        bginfo[3]=0;
+        endCM(true);
+    }
+}
+function finishFCbgColored(){
+    if(cmblockcd>0){
+        cmblockcd=299.63;
+    }else if(cmblockcd<0){
+        cmblockcd=-299.63;
+    }
+    $(EXfootcome).css("transition","")
+        .css("background-color","")
+    ;
+    if($('body:first>#manualblockrd').length==0){
+        $('body').css("overflow-y","hidden");
+        $('<div id="manualblockrd" class="manualblock"></div>').appendTo('body');
+        $('body:first>#manualblockrd').html('&nbsp;')
+            .css("position","absolute")
+            .css("height","5px")
+            .css("width","5px")
+            .css("bottom",0)
+            .css("right",0)
+            .css("background-color","magenta")
+            .css("z-index",20)
+        ;
+    }
+}
+function isFCbgColored(){
+    if(Math.abs(cmblockcd*100%100)==63){return true;}
+    if(!EXfootcome){return false;}
+    var re=/^rgba?\( *(\d+) *, *(\d+) *, *(\d+) *(?:, *(\d+) *)?\)$/;
+    var tar=$(EXfootcome).css("background-color");
+    if(re.test(tar)){
+        var rex=re.exec(tar);
+        if(parseInt(rex[1])==255&&parseInt(rex[2])==0&&parseInt(rex[3])==255&&((rex[4]===undefined)||rex[4]==1)){
+            return true;
+        }else{return false;}
+    }else{return false;}
+}
+function chkFCbgc(retrycount){
+    if(isFCbgColored()){
+        finishFCbgColored();
+    }else if(retrycount>0){
+        setTimeout(chkFCbgc,100,retrycount-1);
+    }
+}
+function usereventFCMousemove(){
+//console.log("ueFCMousemove");
+    if(!EXfootcome){return;}
+    if(cmblockcd!=0&&Math.abs(cmblockcd*100%100)!=63){
+        if($(EXfootcome).css("transition")!="background-color 1.2s linear 0s"){
+            $(EXfootcome).css("transition","background-color 1.2s linear 0s")
+                .css("background-color","rgb(255, 0, 255)")
+            ;
+            setTimeout(chkFCbgc,1200,5);
+        }
+        if(isFCbgColored()){
+            finishFCbgColored();
+        }
+    }else{
+        $(EXfootcome).css("transition","")
+            .css("background-color","")
+        ;
+    }
+}
 function setOptionEvent(){
+//自作要素のイベントは自作部分で対応
     if(eventAdded){return;}
     var butfs;
     var pwaku;
@@ -1417,39 +1502,77 @@ console.log("dblclick");
     $(EXvolume).on("mousemove",usereventVolMousemove);
     $(EXvolume).on("mouseout",usereventVolMouseout);
     window.addEventListener("keydown",function(e){
-        if(e.keyCode==38||e.keyCode==40){
+        if(e.keyCode==38||e.keyCode==40){ //38^ 40v
             if(isCancelWheel||isVolumeWheel){
                 e.stopPropagation();
             }
-        }else if(e.keyCode==17&&e.location==2){
-            if(cmblockcd==0){
-            }else if(cmblockcd>0){
-                cmblockcd=1.72;
-            }else if(cmblockcd<0){
-                cmblockcd=-1.73;
+        }else if(e.keyCode==17){ //17ctrl
+            if(cmblockcd!=0){
+                if(cmblockcd>0){
+                    cmblockcd=1.73;
+                }else if(cmblockcd<0){
+                    cmblockcd=-1.73;
+                }
+                var posi="";
+                if(e.location==1){
+                    posi="left";
+                }else if(e.location==2){
+                    posi="right";
+                }
+                if($('body:first>#manualblock'+posi).length==0){
+                    $('body').css("overflow-y","hidden");
+                    $('<div id="manualblock'+posi+'" class="manualblock"></div>').appendTo('body');
+                    $('body:first>#manualblock'+posi).html('&nbsp;')
+                        .css("position","absolute")
+                        .css("height","5px")
+                        .css("width","5px")
+                        .css("bottom",0)
+                        .css(posi,0)
+                        .css("background-color","magenta")
+                        .css("z-index",20)
+                    ;
+                }
             }
         }
     },true);
     window.addEventListener("keyup",function(e){
-        if(e.keyCode==17&&e.location==2){
+        if(e.keyCode==17){
             if(cmblockcd==0){
-            }else if(cmblockcd==1.72){
-                cmblockcd=0.71;
-            }else if(cmblockcd==-1.73){
-                cmblockcd=-0.74;
+            }else if(cmblockcd*100%100==73){
+                bginfo[3]=2;
+                startCM();
+            }else if(cmblockcd*100%100==-73){
+                bginfo[3]=0;
+                endCM(true);
             }
+            var posi="";
+            if(e.location==1){
+                posi="left";
+            }else if(e.location==2){
+                posi="right";
+            }
+//            $('body:first>#manualblock'+posi).remove();
+            $('body:first>.manualblock').remove();
+//            if($('body:first>.manualblock').length==0){
+            $('body').css("overflow-y","");
+//            }
         }
     },true);
+    $(EXfootcome).on("mousemove",usereventFCMousemove);
+//    $(EXfootcome).on("mouseout",usereventFCMouseout);
+    $(EXfootcome).on("mouseleave",usereventFCMouseleave);
 console.log("setOptionEvent ok");
 }
 function startCM(){
 console.log("startCM");
+    cmblockcd=0;
     if(isCMBlack){screenBlackSet(isCMBkTrans?1:3);}
     if(isCMsoundoff){soundSet(false);}
     if(CMsmall<100){movieZoomOut(1);}
 }
 function endCM(sw){
 console.log("endCM");
+    cmblockcd=0;
     if(sw||bginfo[1].length==0){
         if(isCMBlack){screenBlackSet(0);}
         if(isCMsoundoff){soundSet(true);}
@@ -1459,7 +1582,6 @@ console.log("endCM");
 function tryCM(){
     if(bginfo[1].length==0){
         bginfo[2]=0;
-        cmblockcd=0;
         endCM();
     }
 }
@@ -1604,14 +1726,12 @@ $(window).on('load', function () {
             if(cmblockcd>0){
                 cmblockcd-=1;
                 if(cmblockcd<=0){
-                    cmblockcd=0;
                     bginfo[3]=2;
                     startCM();
                 }
             }else{
                 cmblockcd+=1;
                 if(cmblockcd>=0){
-                    cmblockcd=0;
                     bginfo[3]=0;
                     endCM(true);
                 }
@@ -1878,8 +1998,9 @@ chrome.runtime.onMessage.addListener(function(r){
                 if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
                     $(EXfootcome).next('#timerthird').text('CM');
                 }
-                cmblockcd=0;
-                startCM();
+                if(cmblockcd*100%10!=3){
+                    startCM();
+                }
             }
         }else if(r.value[1]==r.value[2]){
             if(bginfo[1].length>0&&r.value[0]==bginfo[1][0]){
@@ -1892,8 +2013,9 @@ chrome.runtime.onMessage.addListener(function(r){
                     if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0&&bginfo[0]>0){
                         $(EXfootcome).next('#timerthird').html('&nbsp;');
                     }
-                    cmblockcd=0;
-                    endCM();
+                    if(cmblockcd*100%10!=-3){
+                        endCM();
+                    }
                 }else{
 //console.log("tryCM bginfo[2]= "+bginfo[2]);
                     setTimeout(tryCM,500);
