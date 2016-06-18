@@ -227,8 +227,20 @@ var CMSettingList = [
             "isInstantChangable": true
         },
         {
+            "name": "isCMBkR",
+            "description": "↑を映像クリックで解除・再適用する",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
             "name": "isCMsoundoff",
             "description": "コメント数が表示されないとき音量ミュート",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isCMsoundR",
+            "description": "↑を映像クリックで解除・再適用する",
             "type": "boolean",
             "isInstantChangable": true
         },
@@ -237,6 +249,42 @@ var CMSettingList = [
 //            "description": "コメント数が表示されないとき映像部分を1/xに縮小する",
             "description": "コメント数が表示されないとき映像部分を100%(縮小なし)～5%に縮小する",
             "type": "number",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isCMsmlR",
+            "description": "↑を映像クリックで解除・再適用する",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "beforeCMWait",
+            "description": "コメント数が表示されなくなってから↑実行までの待機時間",
+            "type": "number",
+            "isInstantChangable": true
+        },
+        {
+            "name": "afterCMWait",
+            "description": "コメント数が表示されてから↑解除までの待機時間",
+            "type": "number",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isManualKeyCtrlR",
+            "description": "↑の待機中、右ctrlを押している間は実行しない（離すと即実行）",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isManualKeyCtrlL",
+            "description": "↑の待機中、左ctrlを押している間は実行しない（離すと即実行）",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isManualMouseBR",
+            "description": "↑の待機中、画面右下のコメ数表示部に1.2秒以上連続でカーソルを合わせている間は実行しない（カーソルを外すと即実行）",
+            "type": "boolean",
             "isInstantChangable": true
         }
     ];
