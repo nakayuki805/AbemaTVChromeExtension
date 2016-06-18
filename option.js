@@ -16,6 +16,69 @@ $(function(){
       .css("display","flex")
       .css("flex-direction","column")
     ;
+    if($('#settingsArea #CommentMukouSettings .setTables').length==0){
+        $('#settingsArea #CommentMukouSettings').wrapInner('<div id="ComeMukouD">');
+        $('<div id="ComeMukouO" class="setTables">コメント数が表示されないとき</div>').prependTo('#settingsArea #CommentMukouSettings');
+        $('#settingsArea #ComeMukouO').css("margin-top","8px")
+            .css("padding","8px")
+            .css("border","1px solid black")
+        ;
+        $('<table id="setTable">').appendTo('#settingsArea #ComeMukouO');
+        $('#settingsArea table#setTable').css("border-collapse","collapse");
+        $('<tr><th></th><th colspan=2>画面真っ黒</th><th>画面縮小</th><th>音量ミュート</th></tr>').appendTo('#settingsArea table#setTable');
+        $('<tr><td>適用</td><td></td><td></td><td></td><td></td></tr>').appendTo('#settingsArea table#setTable');
+        $('<tr><td>画面クリックで<br>解除・再適用</td><td colspan=2></td><td></td><td></td></tr>').appendTo('#settingsArea table#setTable');
+        $('#settingsArea #isCMBlack').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(1)');
+        $('#settingsArea #isCMBkTrans').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(1)').css("display","none");
+        $('<input type="radio" name="cmbktype" value=0>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(2)')
+            .after("全面真黒<br>")
+        ;
+        $('<input type="radio" name="cmbktype" value=1>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(2)')
+            .after("下半透明")
+        ;
+        $('#settingsArea input[type="radio"][name="cmbktype"]').prop("disabled",!isCMBlack)
+            .val([isCMBkTrans?1:0])
+        ;
+        $('#settingsArea table#setTable input[type="radio"][name="cmbktype"]').change(setCMBKChangedR);
+        $('#settingsArea #CMsmall').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(3)').after("％")
+            .css("text-align","right")
+            .css("width","4em")
+        ;
+        $('#settingsArea #isCMsoundoff').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(4)');
+        $('#settingsArea table#setTable #isCMBlack').change(setCMBKChangedB);
+        $('#settingsArea table#setTable #CMsmall').change(setCMzoomChangedR);
+        $('#settingsArea table#setTable #isCMsoundoff').change(setCMsoundChangedB);
+        $('#settingsArea #isCMBkR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(1)');
+        $('#settingsArea #isCMsmlR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(2)');
+        $('#settingsArea #isCMsoundR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(3)');
+        $('#settingsArea table#setTable td').css("border","1px solid black")
+            .css("text-align","center")
+            .css("padding","3px")
+        ;
+        $('#settingsArea table#setTable tr:eq(1)>td:eq(1)').css("border-right","none");
+        $('#settingsArea table#setTable tr:eq(1)>td:eq(2)').css("border-left","none")
+            .css("text-align","left")
+        ;
+        $('<div id="ComeMukouW" class="setTables">↑の実行待機(秒)</div>').insertAfter('#settingsArea #ComeMukouO');
+        $('#settingsArea #ComeMukouW').css("margin-top","8px")
+            .css("padding","8px")
+            .css("border","1px solid black")
+        ;
+        $('#settingsArea #beforeCMWait').appendTo('#settingsArea #ComeMukouW')
+            .before("　開始後")
+        ;
+        $('#settingsArea #afterCMWait').appendTo('#settingsArea #ComeMukouW')
+            .before("　終了後")
+            .after("<br>待機時間中、押している間は実行せず、離すと即実行するキー<br>")
+        ;
+        $('#settingsArea #isManualKeyCtrlL').appendTo('#settingsArea #ComeMukouW').after("左ctrl");
+        $('#settingsArea #isManualKeyCtrlR').appendTo('#settingsArea #ComeMukouW').after("右ctrl");
+        $('#settingsArea #isManualMouseBR').appendTo('#settingsArea #ComeMukouW')
+            .before("<br>待機時間中、カーソルを合わせている間は実行せず、外すと即実行する場所<br>")
+            .after("右下のコメント数表示部")
+        ;
+        $('#settingsArea #ComeMukouD').remove();
+    }
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -54,6 +117,14 @@ $(function(){
         var notifySeconds = (value.notifySeconds!==undefined)?value.notifySeconds : 60;
         var isNotifyAndOpen = value.isNotifyAndOpen || false;
         var isNaOinActive = value.isNaOinActive || false;
+        var beforeCMWait = Math.max(0,((value.beforeCMWait!==undefined)?value.beforeCMWait : 0));
+        var afterCMWait = Math.max(0,((value.afterCMWait!==undefined)?value.afterCMWait : 0));
+        var isManualKeyCtrlR = value.manualKeyCtrlR || false;
+        var isManualKeyCtrlL = value.manualKeyCtrlL || false;
+        var isManualMouseBR = value.manualMouseBR || false;
+        var isCMBkR = (value.CMBkR || false)&&isCMBlack;
+        var isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
+        var isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -103,6 +174,14 @@ $(function(){
         $("#notifySeconds").val(notifySeconds);
         $("#isNotifyAndOpen").prop("checked", isNotifyAndOpen);
         $("#isNaOinActive").prop("checked", isNaOinActive);
+        $("#beforeCMWait").val(beforeCMWait);
+        $("#afterCMWait").val(afterCMWait);
+        $("#isManualKeyCtrlR").prop("checked", isManualKeyCtrlR);
+        $("#isManualKeyCtrlL").prop("checked", isManualKeyCtrlL);
+        $("#isManualMouseBR").prop("checked", isManualMouseBR);
+        $("#isCMBkR").prop("checked", isCMBkR);
+        $("#isCMsoundR").prop("checked", isCMsoundR);
+        $("#isCMsmlR").prop("checked", isCMsmlR);
     });
     $("#saveBtn").click(function () {
         chrome.storage.local.set({
@@ -141,7 +220,15 @@ $(function(){
             "timePosition": $('#itimePosition [name="timePosition"]:checked').val(),
             "notifySeconds": parseInt($("#notifySeconds").val()),
             "isNotifyAndOpen": $("#isNotifyAndOpen").prop("checked"),
-            "isNaOinActive": $("#isNaOinActive").prop("checked")
+            "isNaOinActive": $("#isNaOinActive").prop("checked"),
+            "beforeCMWait": Math.max(0,parseInt($("#beforeCMWait").val())),
+            "afterCMWait": Math.max(0,parseInt($("#afterCMWait").val())),
+            "manualKeyCtrlR": $("#isManualKeyCtrlR").prop("checked"),
+            "manualKeyCtrlL": $("#isManualKeyCtrlL").prop("checked"),
+            "manualMouseBR": $("#isManualMouseBR").prop("checked"),
+            "CMBkR": $("#isCMBkR").prop("checked")&&$("#isCMBlack").prop("checked"),
+            "CMsoundR": $("#isCMsoundR").prop("checked")&&$("#isCMsoundoff").prop("checked"),
+            "CMsmlR": $("#isCMsmlR").prop("checked")&&(parseInt($("#CMsmall").val())!=100)
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
@@ -156,13 +243,46 @@ $(function(){
         .css("color","rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")")
       ;
     });
+
 });
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";
 $(window).keyup(function(e){
     keyinput.push(e.keyCode);
-    if (keyinput.toString().indexOf(keyCodes) >= 0) {
+    if (keyinput.toString().indexOf(keyCodes) == 0) {
         $("#CommentMukouSettings").show();
         keyinput = [];
+    }else{
+        while(keyinput.length>0&&keyCodes.indexOf(keyinput.toString())!=0){
+            if(keyinput.length>1){
+                keyinput.shift();
+            }else{
+                keyinput=[];
+            }
+        }
     }
 });
+function setCMzoomChangedR(){
+    var jo=$('#settingsArea #isCMsmlR');
+    if(parseInt($("#CMsmall").val())==100){
+        jo.prop("checked",false)
+            .prop("disabled",true)
+        ;
+    }else{
+      jo.prop("disabled",false);
+    }
+}
+function setCMsoundChangedB(){
+    $('#settingsArea #isCMsoundR').prop("checked",false)
+        .prop("disabled",!$("#isCMsoundoff").prop("checked"))
+    ;
+}
+function setCMBKChangedB(){
+    $('#settingsArea input[type="radio"][name="cmbktype"]').prop("disabled",!$("#isCMBlack").prop("checked"));
+    $('#settingsArea #isCMBkR').prop("checked",false)
+        .prop("disabled",!$("#isCMBlack").prop("checked"))
+    ;
+}
+function setCMBKChangedR(){
+    $('#settingsArea #isCMBkTrans').prop("checked",$('#settingsArea input[type="radio"][name="cmbktype"]:checked').val()==1?true:false);
+}
