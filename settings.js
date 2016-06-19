@@ -26,7 +26,7 @@ var settingsList = [
     },
     {
         "name": "isMovingComment",
-        "description": "新着コメントをあの動画サイトのように横に流す",
+        "description": "新着コメントをあの動画サイトのように横に流す(CSSのtransitionで流すを同時に有効にすることをおすすめします)",
         "type": "boolean",
         "isInstantChangable": true
     },
