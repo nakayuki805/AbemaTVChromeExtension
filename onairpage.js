@@ -1487,19 +1487,19 @@ function setOptionHead(){
         }
         t+='}';
     }
-    //コメ一覧の逆順・スクロールバー非表示
-    if(isInpWinBottom||isHideOldComment){
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{';
-        if(isInpWinBottom){
-            t+='display:flex;flex-direction:column-reverse;';
-        }
-        if(isHideOldComment){
-            t+='overflow:hidden;';
-        }else{
-            t+='overflow-x:hidden;overflow-y:scroll;';
-        }
-        t+='}';
+    
+    t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{';
+    if(isInpWinBottom){
+        //コメ逆順
+        t+='display:flex;flex-direction:column-reverse;';
     }
+    if(isHideOldComment){
+        //スクロールバー非表示
+        t+='overflow:hidden;';
+    }else{
+        t+='overflow-x:hidden;overflow-y:scroll;';
+    }
+    t+='}';
     //ユーザースクリプトのngconfigのz-index変更
     t+='#NGConfig{z-index:20;}';
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
