@@ -299,7 +299,8 @@ function putComeArray(inp){
 
         //コメント設置位置の保持
         //コメント右端が画面右端に出てくるまでの時間を保持する
-        comeLatestPosi.push([inp[i][1],Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor(settings.movingCommentSecond*(mcleft+mcwidth-winwidth)/(winwidth+mcwidth))))]);
+        var r=settings.movingCommentSecond*(mcleft+mcwidth-winwidth)/(winwidth+mcwidth);
+        comeLatestPosi.push([inp[i][1],Math.min(comeTTLmax,Math.max(comeTTLmin,2+Math.ceil(r)))]);
         comeLatestPosi.shift();
 
         var waitsec=settings.movingCommentSecond*(mcleft+mcwidth)/(winwidth+mcwidth);
