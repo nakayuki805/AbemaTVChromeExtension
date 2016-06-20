@@ -234,7 +234,14 @@ var CMSettingList = [
         },
         {
             "name": "isCMsoundoff",
-            "description": "コメント数が表示されないとき音量ミュート",
+//            "description": "コメント数が表示されないとき音量ミュート",
+            "description": "コメント数が表示されないときプレイヤーの音量ミュート",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isTabSoundplay",
+            "description": "↑をプレイヤーでなくchromeタブ設定でミュートにする",
             "type": "boolean",
             "isInstantChangable": true
         },
