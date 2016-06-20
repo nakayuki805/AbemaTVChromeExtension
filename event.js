@@ -142,10 +142,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             });
         });
     } else if (request.type === "windowresize"){
-        chrome.windows.getCurrent(function(w){
+        chrome.windows.get(sender.tab.windowId,function(w){
             chrome.windows.update(w.id,{width:(w.width+request.valw),height:(w.height+request.valh)});
-            sendResponse(0);
         });
+        sendResponse(0);
+    } else if (request.type === "tabsoundplaystop"){
+        chrome.tabs.update(sender.tab.id,{muted:request.valb});
+        sendResponse(0);
     } else {
         console.warn("message type not match", request.type);
     }
