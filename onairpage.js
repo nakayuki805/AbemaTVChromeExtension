@@ -160,6 +160,7 @@ var eventAdded=false; //各イベントを1回だけ作成する用
 var setBlacked=[false,false,false];
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";
+var comeArray=[]; //流すコメントで、新着の複数コメントのうちNG処理等を経て実際に出力するコメントのリスト
 
 function onresize() {
     if (settings.isResizeScreen) {
@@ -271,13 +272,59 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/(...*?)\1*(...*?)(\1|\2){2,}/g,"$1$2");
     return ngedcome;
 }
-function putComment(commentText,indexvalue) {
+function putComeArray(inp){
+    var mci=$('body:first>#moveContainer');
+    var mcj=$(mci).children('.movingComment');
+    var mclen=mcj.length;
+    var inplen=inp.length;
+    var comeoverflowlen=inplen+mclen-movingCommentLimit;
+    //あふれる分を削除
+    if(comeoverflowlen>0){
+        mcj.slice(0,comeoverflowlen).remove();
+//        mclen-=comeoverflowlen;
+    }
+    var winwidth=window.innerWidth;
+    var outxt='';
+    for(var i=0;i<inplen;i++){
+        outxt+='<span class="movingComment" style="position:absolute;top:'+inp[i][1]+'px;left:'+(inp[i][2]+winwidth)+'px;">'+inp[i][0]+'</span>';
+    }
+    $(outxt).appendTo(mci);
+//    mclen+=inplen;
+    mcj=$(mci).children('.movingComment');
+    mclen=mcj.length;
+    for(var i=0;i<inplen;i++){
+        var mck=mcj.eq(-inplen+i);
+        var mcwidth=mck.width();
+        var mcleft=inp[i][2]+winwidth;
+
+        //コメント設置位置の保持
+        //コメント右端が画面右端に出てくるまでの時間を保持する
+        comeLatestPosi.push([inp[i][1],Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor(settings.movingCommentSecond*(mcleft+mcwidth-winwidth)/(winwidth+mcwidth))))]);
+        comeLatestPosi.shift();
+
+        var waitsec=settings.movingCommentSecond*(mcleft+mcwidth)/(winwidth+mcwidth);
+        setTimeout(function(jo,w,l){
+            jo.css("transition","left "+w+"s linear")
+                .css("left",l+"px")
+            ;
+        },0,mck,waitsec,(-mcwidth-2));
+    }
+}
+function putComment(commentText,index,inmax) {
+    var outflg=false;
+    if(index==0){
+        comeArray=[];
+    }else if(index==inmax-1){
+        outflg=true;
+    }
     if (isComeDel) {
         //arFullNgがマッチしたコメントは流さない
         for(var ngi=0;ngi<arFullNg.length;ngi++){
             if(commentText.match(arFullNg[ngi])){
                 console.log("userNG matched text:" + commentText  + "ngword:" + arFullNg[ngi].toString())
-                return "";
+//                return "";
+                commentText="";
+                break;
             }
         }
     }
@@ -285,21 +332,23 @@ function putComment(commentText,indexvalue) {
         commentText = comeNG(commentText);
     }
     var commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
-    i=0;
-    var k=false;
-    while(i<20){
-        k=false;
-        for(var j=0;j<comeLatestLen;j++){
-            if(Math.abs(commentTop-comeLatestPosi[j][0])<30){
-                k=true;
+    if(commentText.length>0){
+        i=0;
+        var k=false;
+        while(i<20){
+            k=false;
+            for(var j=0;j<comeLatestLen;j++){
+                if(Math.abs(commentTop-comeLatestPosi[j][0])<30){
+                    k=true;
+                }
             }
+            if(k){
+                commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
+            }else{
+                break;
+            }
+            i+=1;
         }
-        if(k){
-            commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
-        }else{
-            break;
-        }
-        i+=1;
     }
 //    if(i>=20){
 //        commentTop=50;
@@ -311,38 +360,38 @@ function putComment(commentText,indexvalue) {
 //    moveComment(commentElement);
 //    comeLatestPosi.push([commentTop,comeTTL]);
     var maxLeftOffset = window.innerWidth*5 / settings.movingCommentSecond; //5秒の移動長さ
-    
-    if (isMoveByCSS) {
+
+//    if (isMoveByCSS) {
 //        var leftOffset = maxLeftOffset - Math.floor(Math.random()*maxLeftOffset);
 //        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(window.innerWidth+leftOffset)+"px;twidth:"+window.innerWidth+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
-        var leftOffset = Math.floor(maxLeftOffset*indexvalue);
-        var cl=window.innerWidth+leftOffset;
-        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+cl+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
-        setTimeout(function(){
+    var leftOffset = Math.floor(maxLeftOffset*index/inmax);
+    if(commentText.length>0){
+        comeArray.push([commentText,commentTop,leftOffset]);
+    }
+    if(outflg&&comeArray.length>0){
+        setTimeout(putComeArray,50,comeArray);
+    }
+//        setTimeout(function(){
 //            commentElement.css("transition", "left "+settings.movingCommentSecond*(1+maxLeftOffset/window.innerWidth)+"s linear");
 //            commentElement.css("left", -(commentElement.width()+maxLeftOffset-leftOffset) + "px");
-            var cw=commentElement.width();
-            var ww=window.innerWidth;
-            commentElement.css("transition", "left "+settings.movingCommentSecond*(cl+cw)/(ww+cw)+"s linear");
-            commentElement.css("left", -cw-2+"px");
-        },0);
-    } else {
-        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(Math.floor(window.innerWidth-$("#moveContainer").offset().left+Math.random()*maxLeftOffset))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
-    }
-    //コメント設置位置の保持
-    comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+maxLeftOffset)*settings.movingCommentSecond/window.innerWidth+2)))]);
-    comeLatestPosi.shift();
-    if(parseInt($("#moveContainer").css("left"))>=1 && !isMoveByCSS){ //初期位置にいたら動かす
-        StartMoveComment();
-    }
+//        },0);
+//    } else {
+//        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(Math.floor(window.innerWidth-$("#moveContainer").offset().left+Math.random()*maxLeftOffset))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
+//    }
+//    //コメント設置位置の保持
+//    comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+maxLeftOffset)*settings.movingCommentSecond/window.innerWidth+2)))]);
+//    comeLatestPosi.shift();
+//    if(parseInt($("#moveContainer").css("left"))>=1 && !isMoveByCSS){ //初期位置にいたら動かす
+//        StartMoveComment();
+//    }
 }
-function StartMoveComment(){
-    if($('body>#moveContainer').children('.movingComment').length>0){
-        $('body>#moveContainer').animate({"left":"-="+Math.floor(window.innerWidth/settings.movingCommentSecond)+"px"},{duration:1000,easing:"linear",complete:StartMoveComment});
-    }else{
-        $('body>#moveContainer').css("left","1px");
-    }
-}
+//function StartMoveComment(){
+//    if($('body>#moveContainer').children('.movingComment').length>0){
+//        $('body>#moveContainer').animate({"left":"-="+Math.floor(window.innerWidth/settings.movingCommentSecond)+"px"},{duration:1000,easing:"linear",complete:StartMoveComment});
+//    }else{
+//        $('body>#moveContainer').css("left","1px");
+//    }
+//}
 //ミュート(false)・ミュート解除(true)する関数
 function soundSet(isSound) {
     if(isTabSoundplay){
@@ -556,7 +605,8 @@ console.log("delayset retry");
     if($('body:first>#moveContainer').length==0){
         var eMoveContainer=document.createElement('div');
         eMoveContainer.id="moveContainer";
-        eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
+//        eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
+        eMoveContainer.setAttribute("style","z-index:9;");
         $("body").append(eMoveContainer);
     }
 //console.log("comevisiset delayset");
@@ -1904,16 +1954,16 @@ $(window).on('load', function () {
         var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
         if(EXcomelist&&isComeOpen()){
             var comeListLen = EXcomelist.childElementCount;
-            if(comeListLen>commentNum){ //コメ増加あり
+            var d=comeListLen-commentNum;
+//            if(comeListLen>commentNum){ //コメ増加あり
 //                if(!comeRefreshing||!isSureReadComment){
+            if(d>0){ //コメ増加あり
                 if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
                     if(isMovingComment&&commentNum>0){
 //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
 //                            putComment(comments[i].innerHTML);
-                        var j;
-                        for(var i=0;i<comeListLen-commentNum;i++){
-                            j=comeListLen-commentNum-1-i;
-                            putComment(comments[j].innerHTML,i/(comeListLen-commentNum));
+                        for(var i=0;i<d;i++){
+                            putComment(comments[d-i-1].innerHTML,i,d);
                         }
                     }
                 }else{
@@ -1939,20 +1989,19 @@ $(window).on('load', function () {
 
         //流れるコメントのうち画面外に出たものを削除
 //        var arMovingComment = $('[class="movingComment"]');
-        var arMovingComment = $('body:first>#moveContainer>.movingComment');
 //        if(arMovingComment.length>0){
         if(isMovingComment){
+            var arMovingComment = $('body:first>#moveContainer>.movingComment');
             for (var j = arMovingComment.length-1;j>=0;j--){
                 if(arMovingComment.eq(j).offset().left + arMovingComment.eq(j).width()<=0){
                     arMovingComment[j].remove();
                 }
             }
-            if(arMovingComment.length>movingCommentLimit){
-                //流れるコメント過多の場合は消していく
-                for(var j=arMovingComment.length-movingCommentLimit-1;j>=0;j--){
-                    arMovingComment[j].remove();
-                }
-            }
+//putCommentArrayにて設置時に対応
+//            if(arMovingComment.length>movingCommentLimit){
+//                //流れるコメント過多の場合は消していく
+//                arMovingComment.slice(0,-movingCommentLimit).remove();
+//            }
         }
 //        //流れるコメント過多の場合は消していく
 //        if (isMovingComment){
