@@ -49,6 +49,10 @@ var isCMBkR=false; //画面クリックによる真っ黒解除
 var isCMsoundR=false; //画面クリックによるミュート解除
 var isCMsmlR=false; //画面クリックによる縮小解除
 var isTabSoundplay=false; //タブ設定によるミュート切替
+var isOpenPanelwCome=true;
+var isProtitleVisible=false;
+var protitlePosition="windowtopleft";
+var proSamePosition="over";
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -99,6 +103,10 @@ if (chrome.storage) {
         isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
         isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
         isTabSoundplay = value.tabSoundplay || false;
+        isOpenPanelwCome=value.openPanelwCome||false;
+        isProtitleVisible=value.protitleVisible||false;
+        protitlePosition=value.protitlePosition||protitlePosition;
+        proSamePosition=value.proSamePosition||proSamePosition;
     });
 }
 
@@ -161,6 +169,10 @@ var setBlacked=[false,false,false];
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";
 var comeArray=[]; //流すコメントで、新着の複数コメントのうちNG処理等を経て実際に出力するコメントのリスト
+var popElemented=false; //mouseoverでunpopElementが実行されまくるのを防止
+var proTitle="";
+//var samePosition="over";
+var proinfoOpened=false; //番組タイトルクリックで番組情報枠を開いた後にクリックで閉じれるようにする
 
 function onresize() {
     if (settings.isResizeScreen) {
@@ -296,14 +308,21 @@ function putComeArray(inp){
         var mck=mcj.eq(-inplen+i);
         var mcwidth=mck.width();
         var mcleft=inp[i][2]+winwidth;
+        //コメント長さによって流れる速度が違いすぎるのでlogを速度計算部分に適用することで差を減らす
+        //短いコメントは設定値より少し短い時間で見えなくなる
+        var mcfixedwidth=mcwidth<237?mcwidth:100*Math.floor(Math.log(mcwidth));
 
-        //コメント設置位置の保持
+        //コメント設置位置の更新
         //コメント右端が画面右端に出てくるまでの時間を保持する
-        var r=settings.movingCommentSecond*(mcleft+mcwidth-winwidth)/(winwidth+mcwidth);
-        comeLatestPosi.push([inp[i][1],Math.min(comeTTLmax,Math.max(comeTTLmin,2+Math.ceil(r)))]);
-        comeLatestPosi.shift();
+        var r=settings.movingCommentSecond*(mcleft+mcwidth-winwidth)/(winwidth+mcfixedwidth);
+        for(var j=comeLatestPosi.length-1;j>=0;j--){
+            if(comeLatestPosi[j][1]>comeTTLmax&&comeLatestPosi[j][0]==inp[i][1]){
+                comeLatestPosi[j][1]=Math.min(comeTTLmax,Math.max(comeTTLmin,1+Math.ceil(r)));
+                break;
+            }
+        }
 
-        var waitsec=settings.movingCommentSecond*(mcleft+mcwidth)/(winwidth+mcwidth);
+        var waitsec=settings.movingCommentSecond*(mcleft+mcwidth)/(winwidth+mcfixedwidth);
         setTimeout(function(jo,w,l){
             jo.css("transition","left "+w+"s linear")
                 .css("left",l+"px")
@@ -315,7 +334,8 @@ function putComment(commentText,index,inmax) {
     var outflg=false;
     if(index==0){
         comeArray=[];
-    }else if(index==inmax-1){
+    }
+    if(index==inmax-1){
         outflg=true;
     }
     if (isComeDel) {
@@ -339,7 +359,7 @@ function putComment(commentText,index,inmax) {
         while(i<20){
             k=false;
             for(var j=0;j<comeLatestLen;j++){
-                if(Math.abs(commentTop-comeLatestPosi[j][0])<30){
+                if(Math.abs(commentTop-comeLatestPosi[j][0])<48){ //xx-large
                     k=true;
                 }
             }
@@ -379,9 +399,11 @@ function putComment(commentText,index,inmax) {
 //    } else {
 //        var commentElement = $("<span class='movingComment' style='position:absolute;top:"+commentTop+"px;left:"+(Math.floor(window.innerWidth-$("#moveContainer").offset().left+Math.random()*maxLeftOffset))+"px;'>" + commentText + "</div>").appendTo("#moveContainer");
 //    }
-//    //コメント設置位置の保持
+    //コメント設置位置の保持
 //    comeLatestPosi.push([commentTop,Math.min(comeTTLmax,Math.max(comeTTLmin,Math.floor((commentElement.width()+maxLeftOffset)*settings.movingCommentSecond/window.innerWidth+2)))]);
-//    comeLatestPosi.shift();
+//この時点では要素長さが未確定なので暫定的
+    comeLatestPosi.push([commentTop,comeTTLmax+2]);
+    comeLatestPosi.shift();
 //    if(parseInt($("#moveContainer").css("left"))>=1 && !isMoveByCSS){ //初期位置にいたら動かす
 //        StartMoveComment();
 //    }
@@ -548,7 +570,7 @@ function openOption(sw){
     $("#isCommentPadZero").prop("checked", isCommentPadZero);
     $("#isCommentTBorder").prop("checked", isCommentTBorder);
     $('#itimePosition [type="radio"][name="timePosition"]').val([timePosition]);
-    $('#itimePosition').css("display",isTimeVisible?"block":"none");
+    $('#itimePosition').css("display",isTimeVisible?"flex":"none");
     $("#notifySeconds").val(notifySeconds);
     $('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#settcont>#windowresize>#windowheight input[type="radio"][name="movieheight"]').val([0]);
@@ -561,6 +583,12 @@ function openOption(sw){
     $("#isCMsoundR").prop("checked", isCMsoundR);
     $("#isCMsmlR").prop("checked", isCMsmlR);
     $("#isTabSoundplay").prop("checked",isTabSoundplay);
+    $("#isOpenPanelwCome").prop("checked",isOpenPanelwCome);
+    $("#isProtitleVisible").prop("checked",isProtitleVisible);
+    $('#iprotitlePosition [type="radio"][name="protitlePosition"]').val([protitlePosition]);
+    $('#iprotitlePosition').css("display",isProtitleVisible?"flex":"none");
+    $('#iproSamePosition [type="radio"][name="proSamePosition"]').val([proSamePosition]);
+    $('#iproSamePosition').css("display",(isProtitleVisible&&isTimeVisible)?"block":"none");
 }
 function closeOption(){
     $("#settcont").css("display","none")
@@ -612,12 +640,12 @@ console.log("delayset retry");
     }
 //console.log("comevisiset delayset");
     comevisiset(false);
-    if(isSureReadComment){
+//    if(isSureReadComment){
 //console.log("popElement delayset");
-        popElement();
-    }else{
-        unpopElement();
-    }
+//        popElement();
+//    }else{
+//        unpopElement();
+//    }
     EXcomelist = $(commentListParentSelector)[0];
     EXcomments = $(EXcomelist).contents().find('[class^="styles__message___"]');
     //映像のリサイズ
@@ -713,10 +741,12 @@ console.log("createSettingWindow retry");
         settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";
         $(settcont).prependTo('body');
         $('#settcont #CommentColorSettings').change(setComeColorChanged);
-        $('#settcont #itimePosition,#isTimeVisible').change(setTimePosiChanged);
+        $('#settcont #itimePosition,#settcont #isTimeVisible').change(setTimePosiChanged);
         $("#settcont .closeBtn").on("click", closeOption);
         $("#settcont #clearLocalStorage").on("click", setClearStorageClicked);
         $("#settcont #saveBtn").on("click",setSaveClicked);
+        $('#settcont #iprotitlePosition,#settcont #isProtitleVisible').change(setProtitlePosiChanged);
+        $('#settcont #iproSamePosition').change(setProSamePosiChanged);
     }
     $("#CommentMukouSettings").hide();
     $("#settcont #CommentColorSettings").css("width","600px")
@@ -733,7 +763,29 @@ console.log("createSettingWindow retry");
         .css("display","flex")
         .css("flex-direction","column")
         .css("padding","8px")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
     ;
+    $("#settcont #iprotitlePosition").insertBefore("#settcont #isProtitleVisible+*")
+        .css("border","black solid 1px")
+        .css("margin-left","16px")
+        .css("display","flex")
+        .css("flex-direction","column")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
+    ;
+    $("#settcont #iproSamePosition").insertBefore("#settcont #isProtitleVisible")
+        .css("border","black solid 1px")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
+    ;
+    $('<span style="margin-left:4px;">↑と↓が同じ位置の場合: </span>').prependTo("#settcont #iproSamePosition>*");
     if($('#settcont .leftshift').length==0){
         $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;padding:0px 3px;">').appendTo('#settcont #CommentColorSettings');
         $("#settcont .leftshift").on("click",function(){
@@ -1002,11 +1054,16 @@ function setSaveClicked(){
     isCMsoundR = $("#isCMsoundR").prop("checked")&&$("#isCMsoundoff").prop("checked");
     isCMsmlR = $("#isCMsmlR").prop("checked")&&($("#CMsmall").val()!=100);
     isTabSoundplay = $("#isTabSoundplay").prop("checked");
+    isOpenPanelwCome=$("#isOpenPanelwCome").prop("checked");
+    isProtitleVisible=$("#isProtitleVisible").prop("checked");
+    protitlePosition=$('#iprotitlePosition [name="protitlePosition"]:checked').val();
+    proSamePosition=$('#iproSamePosition [name="proSamePosition"]:checked').val();
+
     setOptionHead();
     setOptionElement();
     arrayFullNgMaker();
 //console.log("comevisiset savebtnclick");
-    comevisiset(false);
+    setTimeout(comevisiset,200,false);
     optionHeightFix();
     var sm=parseInt($('#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]:checked').val());
     var sw=parseInt($('#settcont>#windowresize>#windowheight input[type="radio"][name="windowheight"]:checked').val());
@@ -1027,15 +1084,49 @@ function setSaveClicked(){
     ;
     setTimeout(clearBtnColored,1200,$("#saveBtn"));
 }
+function setProSamePosiChanged(){
+    if($("#isProtitleVisible").prop("checked")||$("#isTimeVisible").prop("checked")){
+        if($("#isProtitleVisible").prop("checked")){
+            createProtitle(0,false);
+        }
+        if($("#isTimeVisible").prop("checked")){
+            createTime(0,false);
+        }
+        setProtitlePosition($('#itimePosition [name="timePosition"]:checked').val(),$('#iprotitlePosition [name="protitlePosition"]:checked').val());
+    }
+}
+function setProtitlePosiChanged(){
+    if($("#isProtitleVisible").prop("checked")){
+        $('#iprotitlePosition').css("display","flex");
+        createProtitle(0,false);
+        setProtitlePosition($('#itimePosition [name="timePosition"]:checked').val(),$('#iprotitlePosition [name="protitlePosition"]:checked').val());
+    }else{
+        $('#iprotitlePosition').css("display","none");
+        createProtitle(1);
+        setProtitlePosition();
+        $('#tProtitle').css("display","none");
+    }
+    if($("#isProtitleVisible").prop("checked")&&$("#isTimeVisible").prop("checked")){
+        $('#iproSamePosition').css("display","block");
+    }else{
+        $('#iproSamePosition').css("display","none");
+    }
+}
 function setTimePosiChanged(){
     if($("#isTimeVisible").prop("checked")){
-        $('#itimePosition').css("display","block");
-        createTime(0);
-        setTimePosition($('#itimePosition [name="timePosition"]:checked').val());
+        $('#itimePosition').css("display","flex");
+        createTime(0,false);
+        setTimePosition($('#itimePosition [name="timePosition"]:checked').val(),$('#iprotitlePosition [name="protitlePosition"]:checked').val());
     }else{
         $('#itimePosition').css("display","none");
         createTime(1);
+        setTimePosition();
         $('#forProEndTxt,#forProEndBk').css("display","none");
+    }
+    if($("#isProtitleVisible").prop("checked")&&$("#isTimeVisible").prop("checked")){
+        $('#iproSamePosition').css("display","block");
+    }else{
+        $('#iproSamePosition').css("display","none");
     }
 }
 function setCMzoomChangedR(){
@@ -1119,8 +1210,17 @@ function comevisiset(sw){
     var clipSlideBarBot = ($(EXfoot).css("visibility")=="visible")?61:0;
     var butscr = $(EXfoot).contents().find('button[class^="styles__full-screen___"]:first');
     var butvol = $(EXvolume);
-    var timepadtop=(isTimeVisible&&(timePosition=="windowtop")&&($(EXhead).css("visibility")=="hidden"))?15:0;
-    var timepadbot=(isTimeVisible&&(timePosition=="windowbottom")&&($(EXfoot).css("visibility")=="hidden"))?15:0;
+    var itimeposi=($('#settcont').css("display")=="none")?(isTimeVisible?timePosition:""):($('#isTimeVisible').prop("checked")?$('#itimePosition [name="timePosition"]:checked').val():"");
+    var ititleposi=($('#settcont').css("display")=="none")?(isProtitleVisible?protitlePosition:""):($('#isProtitleVisible').prop("checked")?$('#iprotitlePosition [name="protitlePosition"]:checked').val():"");
+    var iprosame=($('#settcont').css("display")=="none")?proSamePosition:$('#iproSamePosition [name="proSamePosition"]:checked').val();
+    var timepadtop=(isTimeVisible&&(itimeposi=="windowtop")&&($(EXhead).css("visibility")=="hidden"))?15:0;
+    var timepadbot=(isTimeVisible&&(itimeposi=="windowbottom")&&($(EXfoot).css("visibility")=="hidden"))?15:0;
+    var titlepadtop=(isProtitleVisible&&(ititleposi=="windowtopright")&&($(EXhead).css("visibility")=="hidden"))?15:0;
+    var titlepadbot=(isProtitleVisible&&(ititleposi=="windowbottomright")&&($(EXfoot).css("visibility")=="hidden"))?15:0;
+    if(timepadtop==0||titlepadtop==0||iprosame=="vertical"){
+        timepadtop+=titlepadtop;
+        timepadbot+=titlepadbot;
+    }
     contCome.css("transform",isSureReadComment?"translateX(0px)":"");
     if(isInpWinBottom){
         var b=80+((isSureReadComment||comeshown)?hideCommentParam:0);
@@ -1178,9 +1278,14 @@ function comevisiset(sw){
             comeList.css("width","100%");
         }
     }
+    proPositionAllReset()
+    setProtitlePosition("","",true);
+    setTimePosition("","",true);
+    proSamePositionFix();
 }
 function unpopElement(){
 //console.log("unpopElement");
+    popElemented=false;
     $(EXinfo).css("z-index","");
     $(EXside).css("transform","");
     $(EXchli).parent().css("z-index","");
@@ -1190,18 +1295,20 @@ function unpopElement(){
     $(EXfoot).css("visibility","")
       .css("opacity","")
     ;
-    if(!isSureReadComment){
-      $(EXcome).css("transform","")
-        .css("position","")
+//    if(!isSureReadComment){
+    $(EXcome).css("transform","")
+//        .css("position","")
       ;
-    }
+//    }
 //console.log("comevisiset unpopElement");
-    comevisiset(false);
+//    comevisiset(false);
+    waitforhide(10);
 }
 function popElement(){
 //console.log("popElement");
+    popElemented=true;
     //マウスオーバーで各要素表示
-    $(EXinfo).css("z-index",11);
+    $(EXinfo).css("z-index",11); //コメ欄が10なのでそれより上へ
     $(EXside).css("transform","translate(0,-50%)");
     $(EXchli).parent().css("z-index",11);
     $(EXhead).css("visibility","visible")
@@ -1211,10 +1318,11 @@ function popElement(){
       .css("opacity",1)
     ;
     $(EXcome).css("transform","translateX(0px)")
-      .css("position","absolute")
+//      .css("position","absolute")
     ;
 //console.log("comevisiset popElement");
-    comevisiset(false);
+//    comevisiset(false);
+    waitforpop(10);
 }
 function setEXs(){
     var b=true;
@@ -1422,7 +1530,328 @@ function waitforCloseCome(retrycount){
 function fastRefreshing(){
     waitforCloseCome(100);
 }
-function createTime(sw){
+function proPositionAllReset(){
+//console.log("proSameUnFix");
+    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
+    var headlogo=prehoverContents.siblings().first();
+    var parexfootcount=$(EXfootcount).parent();
+    var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
+    var forpros=$("#forProEndTxt,#forProEndBk");
+    var tpro=$("#tProtitle");
+    tpro.css("overflow","")
+        .css("width","")
+        .css("text-align","")
+        .css("left","")
+        .css("right","")
+        .css("top","")
+        .css("bottom","")
+    ;
+//    forpros.css("left","")
+//        .css("right","")
+    forpros.css("top","")
+        .css("bottom","")
+    ;
+    prehoverContents.css("padding-top","")
+        .prev().css("padding-top","")
+    ;
+//console.log("windowTR.pad=0 unfix");
+    headlogo.css("padding-top","")
+        .next().css("padding-top","")
+    ;
+//console.log("windowTL.pad=0 unfix");
+    parexfootcount.css("padding-bottom","");
+//console.log("windowBR.pad=0 unfix");
+    footlogo.css("padding-bottom","")
+        .next().css("padding-bottom","")
+    ;
+//console.log("windowBL.pad=0 unfix");
+    $(EXfootcome).next('#timerthird').remove();
+}
+//function proSamePositionFix(inptime,inptitle,inpsame){
+function proSamePositionFix(){
+//    if(!inptime||inptime==""){inptime=($('#settcont').css("display")=="none")?(isTimeVisible?timePosition:""):($('#isTimeVisible').prop("checked")?$('#itimePosition [name="timePosition"]:checked').val():"");}
+//    if(!inptitle||inptitle==""){inptitle=($('#settcont').css("display")=="none")?(isProtitleVisible?protitlePosition:""):($('#isProtitleVisible').prop("checked")?$('#iprotitlePosition [name="protitlePosition"]:checked').val():"");}
+//    if(!inptime||inptime==""){inptime=timePosition;}
+//    if(!inptitle||inptitle==""){inptitle=protitlePosition;}
+    var inptime=($('#settcont').css("display")=="none")?(isTimeVisible?timePosition:""):($('#isTimeVisible').prop("checked")?$('#itimePosition [name="timePosition"]:checked').val():"");
+    var inptitle=($('#settcont').css("display")=="none")?(isProtitleVisible?protitlePosition:""):($('#isProtitleVisible').prop("checked")?$('#iprotitlePosition [name="protitlePosition"]:checked').val():"");
+    var inpsame=($('#settcont').css("display")=="none")?proSamePosition:$('#iproSamePosition [name="proSamePosition"]:checked').val();
+//console.log("proSameFix inptime:"+inptime+", inptitle:"+inptitle);
+    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
+    var headlogo=prehoverContents.siblings().first();
+    var parexfootcount=$(EXfootcount).parent();
+    var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
+    var forpros=$("#forProEndTxt,#forProEndBk");
+    var tpro=$("#tProtitle");
+    var timeshown=inptime;
+    if(timeshown=="header"){
+        if($(EXhead).css("visibility")=="visible"){
+            timeshown="windowtop";
+        }else{
+            timeshown="";
+        }
+    }else if(timeshown=="footer"){
+        if($(EXfoot).css("visibility")=="visible"){
+            timeshown="windowbottom";
+        }else{
+            timeshown="";
+        }
+    }
+    var titleshown=inptitle;
+    if(titleshown=="headerright"){
+        if($(EXhead).css("visibility")=="visible"){
+            titleshown="windowtopright";
+        }else{
+            titleshown="";
+        }
+    }else if(titleshown=="footerright"){
+        if($(EXfoot).css("visibility")=="visible"){
+            titleshown="windowbottomright";
+        }else{
+            titleshown="";
+        }
+    }
+//console.log("fix timeshown:"+timeshown+",titleshown:"+titleshown);
+    if(timeshown=="windowtop"&&titleshown=="windowtopright"){
+        switch(inpsame){
+            case "over":
+                tpro.css("overflow","hidden")
+                    .css("width","310px")
+                    .css("text-align","left")
+                ;
+                break;
+            case "vertical":
+                if(!isInpWinBottom&&$(EXhead).css("visibility")=="hidden"&&isComeOpen()){
+                    tpro.css("overflow","hidden")
+                        .css("width","310px")
+                        .css("text-align","left")
+                    ;
+                }else{
+                    forpros.css("top","15px");
+                    prehoverContents.css("padding-top","16px")
+                        .prev().css("padding-top","16px")
+                    ;
+//console.log("windowTR.pad=16 fix");
+                }
+                break;
+            case "horizontal":
+                tpro.css("right","310px");
+                break;
+            default:
+        }
+    }else if(timeshown=="windowbottom"&&titleshown=="windowbottomright"){
+        switch(inpsame){
+            case "over":
+                tpro.css("overflow","hidden")
+                    .css("width","310px")
+                    .css("text-align","left")
+                ;
+                break;
+            case "vertical":
+                if(isInpWinBottom&&$(EXfoot).css("visibility")=="hidden"&&isComeOpen()){
+                    tpro.css("overflow","hidden")
+                        .css("width","310px")
+                        .css("text-align","left")
+                    ;
+                }else{
+                    tpro.css("bottom","15px");
+                    parexfootcount.css("padding-bottom","28px");
+//console.log("windowBR.pad=28 fix");
+                }
+                break;
+            case "horizontal":
+                tpro.css("right","310px");
+                break;
+            default:
+        }
+    }else if(timeshown=="commentinputtop"&&titleshown=="commentinputtopright"){
+        tpro.css("overflow","hidden")
+            .css("width","310px")
+            .css("text-align","left")
+        ;
+    }else if(timeshown=="commentinputbottom"&&titleshown=="commentinputbottomright"){
+        tpro.css("overflow","hidden")
+            .css("width","310px")
+            .css("text-align","left")
+        ;
+    }
+}
+function openInfo(sw){
+    if(!EXinfo){return;}
+    if(sw){
+        $(EXinfo).css("transform","translateX(0)");
+        proinfoOpened=true; //クリックで解除できるようにする
+    }else{
+        $(EXinfo).css("transform","");
+        proinfoOpened=false;
+    }
+}
+function createProtitle(sw,posiset){
+    if(!EXcome){return;}
+    if(sw==0){
+        if($("#tProtitle").length==0){
+           var eProtitle = document.createElement("span");
+            eProtitle.id="tProtitle";
+            eProtitle.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 8px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:20;background-color:transparent;top:0px;");
+            eProtitle.innerHTML="&nbsp;";
+            EXcome.insertBefore(eProtitle,EXcome.firstChild);
+            //番組名クリックで番組情報タブ開閉
+            $("#tProtitle").on("click",function(){
+                if(!EXinfo){return;}
+                if(!proinfoOpened){
+                    setTimeout(openInfo,50,true);
+                }else{
+                    setTimeout(openInfo,50,false);
+                }
+            });
+        }
+        if(posiset){
+            setProtitlePosition();
+        }
+    }else if(sw==1){
+        var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
+        var headlogo=prehoverContents.siblings().first();
+        var parexfootcount=$(EXfootcount).parent();
+        var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
+        var forpros=$("#forProEndTxt,#forProEndBk");
+        prehoverContents.css("padding-top","")
+            .prev().css("padding-top","")
+        ;
+        headlogo.css("padding-top","")
+            .next().css("padding-top","")
+        ;
+        footlogo.css("padding-bottom","")
+            .next().css("padding-bottom","");
+        $("#tProtitle").remove();
+    }
+}
+function setProtitlePosition(timepar,par,subfunc){
+//console.log("setProtitle timepar:"+timepar+", par:"+par+", sub:"+(subfunc?"true":"false"));
+    if(!subfunc){
+        proPositionAllReset();
+        setTimePosition(timepar,par,true);
+    }
+    //残り時間との重なり処理はこれが終わってから
+    if(!par||par==""){par=($('#settcont').css("display")=="none")?protitlePosition:$('#iprotitlePosition [name="protitlePosition"]:checked').val();}
+    if(!timepar||timepar==""){timepar=($('#settcont').css("display")=="none")?timePosition:$('#itimePosition [name="timePosition"]:checked').val();}
+//console.log("setProtitle timepar:"+timepar+", par:"+par+", sub:"+(subfunc?"true":"false"));
+    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
+    var headlogo=prehoverContents.siblings().first();
+    var parexfootcount=$(EXfootcount).parent();
+    var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
+    var tpro=$("#tProtitle");
+    switch(par){
+        case "windowtopleft":
+        case "windowtopright":
+        case "commentinputtopleft":
+        case "commentinputtopright":
+        case "headerleft":
+        case "headerright":
+            tpro.css("bottom","")
+                .css("top",0)
+            ;
+            break;
+        case "windowbottomleft":
+        case "windowbottomright":
+        case "commentinputbottomleft":
+        case "commentinputbottomright":
+        case "footerleft":
+        case "footerright":
+            tpro.css("top","")
+                .css("bottom",0)
+            ;
+            break;
+        default:
+    }
+    switch(par){
+        case "windowtopleft":
+        case "windowbottomleft":
+        case "commentinputtopleft":
+        case "commentinputbottomleft":
+        case "headerleft":
+        case "footerleft":
+            tpro.css("right","")
+                .css("left",0)
+            ;
+            break;
+        case "windowtopright":
+        case "windowbottomright":
+        case "commentinputtopright":
+        case "commentinputbottomright":
+        case "headerright":
+        case "footerright":
+            tpro.css("left","")
+                .css("right",0)
+            ;
+            break;
+        default:
+    }
+    switch(par){
+        case "windowtopright":
+        case "headerright":
+            prehoverContents.css("padding-top","9px")
+                .prev().css("padding-top","9px")
+            ;
+//console.log("windowTR.pad=9 setTitle("+(subfunc?"sub":"main"));
+            break;
+        default:
+    }
+    switch(par){
+        case "windowtopleft":
+        case "headerleft":
+            headlogo.css("padding-top","18px")
+                .next().css("padding-top","18px")
+            ;
+//console.log("windowTL.pad=18 setTitle("+(subfunc?"sub":"main"));
+            break;
+        default:
+    }
+    switch(par){
+        case "windowbottomright":
+        case "footerright":
+            parexfootcount.css("padding-bottom","14px");
+//console.log("windowBR.pad=14 setTitle("+(subfunc?"sub":"main"));
+            break;
+        default:
+    }
+    switch(par){
+        case "windowbottomleft":
+        case "footerleft":
+            footlogo.css("padding-bottom","14px")
+                .next().css("padding-bottom","14px")
+            ;
+//console.log("windowBL.pad=14 setTitle("+(subfunc?"sub":"main"));
+            break;
+        default:
+    }
+    switch(par){
+        case "windowtopleft":
+        case "windowtopright":
+        case "windowbottomleft":
+        case "windowbottomright":
+            tpro.prependTo('body');
+            break;
+        case "commentinputtopleft":
+        case "commentinputtopright":
+        case "commentinputbottomleft":
+        case "commentinputbottomright":
+            tpro.prependTo(EXcomesend);
+            break;
+        case "headerleft":
+        case "headerright":
+            tpro.prependTo(EXhead);
+            break;
+        case "footerleft":
+        case "footerright":
+            tpro.prependTo(EXfoot);
+            break;
+        default:
+    }
+    if(!subfunc){
+        proSamePositionFix(timepar,par);
+    }
+}
+function createTime(sw,posiset){
 //console.log("createTime:"+sw);
     if(!EXcome){return;}
     if(sw==0){
@@ -1436,7 +1865,7 @@ function createTime(sw){
         if($("#forProEndTxt").length==0){
            var eForProEndTxt = document.createElement("span");
             eForProEndTxt.id="forProEndTxt";
-            eForProEndTxt.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:19;width:310px;background:rgba(255,255,255,0.1);border-left:1px solid rgba(255,255,255,0.4);top:0px;");
+            eForProEndTxt.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:0px 5px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:19;width:310px;background-color:rgba(255,255,255,0.1);border-left:1px solid rgba(255,255,255,0.4);top:0px;");
             eForProEndTxt.innerHTML="&nbsp;";
             EXcome.insertBefore(eForProEndTxt,EXcome.firstChild);
             //残り時間クリックで設定ウィンドウ開閉
@@ -1448,7 +1877,9 @@ function createTime(sw){
                 }
             });
         }
-        setTimePosition();
+        if(posiset){
+            setTimePosition();
+        }
     }else if(sw==1){
         var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
         var parexfootcount=$(EXfootcount).parent();
@@ -1461,8 +1892,17 @@ function createTime(sw){
         $("#forProEndBk,#forProEndTxt").remove();
     }
 }
-function setTimePosition(par){
-    if(par===undefined){par=timePosition;}
+function setTimePosition(par,titlepar,subfunc){
+//console.log("setTimePosi par:"+par+", titlepar:"+titlepar+", sub:"+(subfunc?"true":"false"));
+    if(!subfunc){
+        proPositionAllReset();
+        setProtitlePosition(par,titlepar,true);
+    }
+    if(!par||par==""){par=($('#settcont').css("display")=="none")?timePosition:$('#itimePosition [name="timePosition"]:checked').val();}
+    if(!titlepar||titlepar==""){titlepar=($('#settcont').css("display")=="none")?protitlePosition:$('#iprotitlePosition [name="protitlePosition"]:checked').val();}
+//    if(!par||par==""){par=timePosition;}
+//    if(!titlepar||titlepar==""){titlepar=protitlePosition;}
+//console.log("setTimePosi par:"+par+", titlepar:"+titlepar+", sub:"+(subfunc?"true":"false"));
     var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
     var parexfootcount=$(EXfootcount).parent();
     var forpros=$("#forProEndTxt,#forProEndBk");
@@ -1489,28 +1929,15 @@ function setTimePosition(par){
             prehoverContents.css("padding-top","9px")
                 .prev().css("padding-top","9px")
             ;
-            break;
-        case "commentinputtop":
-        case "windowbottom":
-        case "commentinputbottom":
-        case "footer":
-            prehoverContents.css("padding-top","")
-                .prev().css("padding-top","")
-            ;
+//console.log("windowTR.pad=9 setTime("+(subfunc?"sub":"main"));
             break;
         default:
     }
     switch(par){
-        case "windowtop":
-        case "commentinputtop":
-        case "header":
-        case "commentinputbottom":
-            parexfootcount.css("padding-bottom","");
-            $(EXfootcome).next('#timerthird').remove();
-            break;
         case "windowbottom":
         case "footer":
             parexfootcount.css("padding-bottom","14px");
+//console.log("windowBR.pad=14 setTime("+(subfunc?"sub":"main"));
             if($(EXfootcome).next('#timerthird').length==0){
                 $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;width:143px;color:white;font-size:x-small;letter-spacing:1px;padding:0px 5px;border-right:1px solid #444;"></div>').insertAfter(EXfootcome);
                 $(EXfootcome).next('#timerthird').html('&nbsp;');
@@ -1521,17 +1948,28 @@ function setTimePosition(par){
     switch(par){
         case "windowtop":
         case "windowbottom":
-            $("#forProEndBk,#forProEndTxt").prependTo('body');
+            forpros.prependTo('body');
             break;
         case "commentinputtop":
         case "commentinputbottom":
-            $("#forProEndBk,#forProEndTxt").prependTo(EXcomesend);
+            forpros.prependTo(EXcomesend);
             break;
         case "header":
-            $("#forProEndBk,#forProEndTxt").prependTo(EXhead);
+            forpros.prependTo(EXhead);
         case "footer":
-            $("#forProEndBk,#forProEndTxt").prependTo(EXfoot);
+            forpros.prependTo(EXfoot);
         default:
+    }
+    if(!subfunc){
+        proSamePositionFix(par,titlepar);
+    }
+}
+function waitforpop(retrycount){
+    if($(EXhead).css("visibility")=="visible"){
+//console.log("comevisiset waitforhide");
+        comevisiset(false);
+    }else if(retrycount>0){
+        setTimeout(waitforpop,100,retrycount-1);
     }
 }
 function waitforhide(retrycount){
@@ -1603,6 +2041,7 @@ function setOptionHead(){
         //コメ逆順
         t+='display:flex;flex-direction:column-reverse;';
     }
+    //コメ欄スクロールバー非表示
     if(isHideOldComment){
         t+='overflow:hidden;';
     }else{
@@ -1611,6 +2050,18 @@ function setOptionHead(){
     t+='}';
     //ユーザースクリプトのngconfigのz-index変更
     t+='#NGConfig{z-index:20;}';
+    //黒帯パネルを常に表示
+    if(settings.isAlwaysShowPanel){
+        t+='[class^="AppContainer__header-container___"]{visibility:visible;opacity:1;}';
+        t+='[class^="TVContainer__footer-container___"]{visibility:visible;opacity:1;}';
+        t+='[class^="TVContainer__side___"]{transform:translate(0px, -50%);}';
+    }
+    //コメント欄を常に表示
+    if(isSureReadComment){
+        t+='[class^="TVContainer__right-comment-area___"]{transform:translateX(0);}';
+        t+='[class^="TVContainer__right-list-slide___"]{z-index:11;}'; //コメ欄は10
+        t+='[class^="TVContainer__right-slide___"]{z-index:11;}';
+    }
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
 console.log("setOptionHead ok");
 }
@@ -1626,20 +2077,30 @@ console.log("setOptionElement retry");
         $(EXcomesendinp).prop("wrap","");
     }
     if(isTimeVisible){
-        createTime(0);
+        createTime(0,false);
         setTimePosition();
     }else{
         createTime(1);
+    }
+    if(isProtitleVisible){
+        createProtitle(0,false);
+        setProtitlePosition();
+    }else{
+        createProtitle(1);
     }
     $(EXfootcome).css("pointer-events","auto");
 console.log("setOptionElement ok");
 }
 function usereventMouseover(){
-    //各要素を隠すまでのカウントをマウスオーバーで5にリセット
-    if(forElementClose<4){
-        forElementClose=5;
-//console.log("popElement usereventMouseover");
-        popElement(); //各要素を表示
+    if(isOpenPanelwCome&&!settings.isAlwaysShowPanel&&isComeOpen()){
+        //各要素を隠すまでのカウントをマウスオーバーで5にリセット
+        if(forElementClose<4){
+            forElementClose=5;
+console.log("popElement usereventMouseover");
+            popElement(); //各要素を表示
+        }
+    }else if(popElemented){
+        unpopElement(); //popElementの設定を消す
     }
 }
 function usereventWakuclick(){
@@ -1764,6 +2225,9 @@ console.log("dblclick");
 //console.log("windowclick");
         if(isSureReadComment){
             comeclickcd=2;
+        }
+        if(proinfoOpened){
+            setTimeout(openInfo,50,false);
         }
     });
     //マウスホイール無効か音量操作
@@ -1941,7 +2405,8 @@ $(window).on('load', function () {
         if (settings.isAlwaysShowPanel) {
             triggerMouseMoving();
             if(!isSureReadComment){
-                popHeader();
+//console.log("popHeader 1s");
+//                popHeader();
             }
         }
         //音量が最大なら設定値へ自動変更
@@ -2095,11 +2560,12 @@ $(window).on('load', function () {
         }
 
         //残り時間表示
-        if (isTimeVisible){
-            var eProTime = $('[class^="TVContainer__right-slide___"] [class^="styles__time___"]');
+        if (isTimeVisible&&EXinfo){
+//            var eProTime = $('[class^="TVContainer__right-slide___"] [class^="styles__time___"]');
+            var eProTime = $(EXinfo).contents().find('[class^="styles__time___"]');
             var reProTime = /(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?[　 ]*\~[　 ]*(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?/;
             var arProTime;
-            if(eProTime[0]&&(arProTime=reProTime.exec(eProTime[0].textContent))!=null){
+            if(eProTime.length>0&&(arProTime=reProTime.exec(eProTime[0].textContent))!=null){
                 //番組開始時刻を設定
                 if(arProTime[1]&&1<=parseInt(arProTime[1])&&parseInt(arProTime[1])<=12){
                     proStart.setMonth(parseInt(arProTime[1])-1);
@@ -2145,7 +2611,7 @@ $(window).on('load', function () {
             if(forProEnd>0){
                 strProEnd = (("0"+Math.floor(forProEnd/3600000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%3600000)/60000)).slice(-2)+" : "+("0"+Math.floor((forProEnd%60000)/1000)).slice(-2)).replace(/^00?( : )?0?0?( : )?0?/,"");
             }
-            $("#forProEndTxt").html(strProEnd);
+            $("#forProEndTxt").text(strProEnd);
             $("#forProEndBk").css("width",((forProEnd>0)?Math.floor(310*forProEnd/proLength):310)+"px");
         }
         //コメント欄を常時表示
@@ -2165,19 +2631,24 @@ $(window).on('load', function () {
             forElementClose-=1;
             if(forElementClose<=0){
                 //各要素を隠す
-                $(EXside).css("transform","");
-                $(EXhead).css("visibility","")
-                  .css("opacity","")
-                ;
-                $(EXfoot).css("visibility","")
-                  .css("opacity","")
-                ;
-                waitforhide(10);
+                unpopElement();
+//                $(EXside).css("transform","");
+//                $(EXhead).css("visibility","")
+//                  .css("opacity","")
+//                ;
+//                $(EXfoot).css("visibility","")
+//                  .css("opacity","")
+//                ;
+//                waitforhide(10);
             }
         }
 
         //コメント位置のTTLを減らす
+//var ttlmonitora="0:"
+//var ttlmonitorb="1:"
         for(var i=0;i<comeLatestLen;i++){
+//            ttlmonitora+=" "+("...."+comeLatestPosi[i][0]).slice(-4);
+//            ttlmonitorb+=" "+("...."+comeLatestPosi[i][1]).slice(-4);
             if(comeLatestPosi[i][1]>0){
                 comeLatestPosi[i][1]-=1;
                 if(comeLatestPosi[i][1]<=0){
@@ -2190,6 +2661,17 @@ $(window).on('load', function () {
         if($('body:first>#settcont').css("display")!="none"){
             optionStatsUpdate(false);
         }
+        //番組タイトルの更新
+        if(isProtitleVisible&&EXinfo){
+            var jo=$(EXinfo).contents().find('h2');
+            if(jo.length>0){
+                proTitle=jo.first().text();
+                $('#tProtitle').text(proTitle);
+            }
+        }
+
+//console.log(ttlmonitora);
+//console.log(ttlmonitorb);
 
     }, 1000);
 
