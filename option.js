@@ -2,20 +2,42 @@ $(function(){
     $("#settingsArea").html(generateOptionHTML(true));
     $("#CommentMukouSettings").hide();
     $("#CommentColorSettings").css("width","600px")
-      .css("background-color","darkgreen")
-      .css("padding","8px")
-      .children('div').css("clear","both")
-      .children('span.desc').css("padding","0px 4px")
-      .next('span.prop').css("background-color","white")
-      .css("padding","0px 4px")
-      .next('input[type="range"]').css("float","right")
+        .css("background-color","darkgreen")
+        .css("padding","8px")
+        .children('div').css("clear","both")
+        .children('span.desc').css("padding","0px 4px")
+        .next('span.prop').css("background-color","white")
+        .css("padding","0px 4px")
+        .next('input[type="range"]').css("float","right")
     ;
     $("#itimePosition").insertBefore("#isTimeVisible+*")
-      .css("border","black solid 1px")
-      .css("margin-left","16px")
-      .css("display","flex")
-      .css("flex-direction","column")
+        .css("border","black solid 1px")
+        .css("margin-left","16px")
+        .css("display","flex")
+        .css("flex-direction","column")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
     ;
+    $("#iprotitlePosition").insertBefore("#isProtitleVisible+*")
+        .css("border","black solid 1px")
+        .css("margin-left","16px")
+        .css("display","flex")
+        .css("flex-direction","column")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
+    ;
+    $("#iproSamePosition").insertBefore("#isProtitleVisible")
+        .css("border","black solid 1px")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
+    ;
+    $('<span style="margin-left:4px;">↑と↓が同じ位置の場合: </span>').prependTo("#iproSamePosition>*");
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -63,6 +85,10 @@ $(function(){
         var isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
         var isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
         var isTabSoundplay = value.tabSoundplay || false;
+        var isOpenPanelwCome=value.openPanelwCome||false;
+        var isProtitleVisible=value.protitleVisible||false;
+        var protitlePosition=value.protitlePosition||"windowtopleft";
+        var proSamePosition=value.proSamePosition||"over";
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -121,6 +147,10 @@ $(function(){
         $("#isCMsoundR").prop("checked", isCMsoundR);
         $("#isCMsmlR").prop("checked", isCMsmlR);
         $("#isTabSoundplay").prop("checked", isTabSoundplay);
+        $("#isOpenPanelwCome").prop("checked",isOpenPanelwCome);
+        $("#isProtitleVisible").prop("checked",isProtitleVisible);
+        $('#iprotitlePosition [type="radio"][name="protitlePosition"]').val([protitlePosition]);
+        $('#iproSamePosition [type="radio"][name="proSamePosition"]').val([proSamePosition]);
     });
     if($('#settingsArea #CommentMukouSettings .setTables').length==0){
         $('#settingsArea #CommentMukouSettings').wrapInner('<div id="ComeMukouD">');
@@ -246,7 +276,11 @@ $(function(){
             "CMBkR": $("#isCMBkR").prop("checked")&&$("#isCMBlack").prop("checked"),
             "CMsoundR": $("#isCMsoundR").prop("checked")&&$("#isCMsoundoff").prop("checked"),
             "CMsmlR": $("#isCMsmlR").prop("checked")&&(parseInt($("#CMsmall").val())!=100),
-            "tabSoundplay": $("#isTabSoundplay").prop("checked")
+            "tabSoundplay": $("#isTabSoundplay").prop("checked"),
+            "openPanelwCome":$("#isOpenPanelwCome").prop("checked"),
+            "protitleVisible":$("#isProtitleVisible").prop("checked"),
+            "protitlePosition":$('#iprotitlePosition [name="protitlePosition"]:checked').val(),
+            "proSamePosition":$('#iproSamePosition [name="proSamePosition"]:checked').val()
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
