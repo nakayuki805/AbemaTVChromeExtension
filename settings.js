@@ -44,10 +44,11 @@ var settingsList = [
     },
     {
         "name": "isMoveByCSS",
-        "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)",
+//        "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)",
+        "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)※現在このオプションは強制的に有効として扱っています",
         "type": "boolean",
-//        "isInstantChangable": false
-        "isInstantChangable": true
+        "isInstantChangable": false
+//        "isInstantChangable": true
     },
     {
         "name": "isComeNg",
@@ -113,6 +114,12 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
+        "name": "isProtitleVisible",
+        "description": "番組タイトルを表示",
+        "type": "boolean",
+        "isInstantChangable": true
+    },
+    {
         "name": "isSureReadComment",
         "description": "常にコメント欄を表示する",
         "type": "boolean",
@@ -172,6 +179,12 @@ var settingsList = [
         "description": "↑既に開いている放送画面があれば新しいタブを開かずそのタブを切り替える(アクティブなタブ優先)",
         "type": "boolean",
         "isInstantChangable": false
+    },
+    {
+        "name": "isOpenPanelwCome",
+        "description": "コメント欄を開いていても黒帯パネルを表示する",
+        "type": "boolean",
+        "isInstantChangable": true
     }
     ];
 var ComeColorSettingList = [
@@ -204,13 +217,44 @@ var RadioSettingList = [
     {
         "name": "timePosition",
         "list":[
-            ["windowtop","ウィンドウの右上（常時表示）"],
-            ["windowbottom","ウィンドウの右下（常時表示）"],
-            ["commentinputtop","コメント入力の右上"],
-            ["commentinputbottom","コメント入力の右下"],
-            ["header","右上のメニューの上"],
-            ["footer","右下のコメント数の下"]
+            [["windowtop","ウィンドウの右上（常時表示）"]],
+            [["windowbottom","ウィンドウの右下（常時表示）"]],
+            [["commentinputtop","コメント入力の右上"]],
+            [["commentinputbottom","コメント入力の右下"]],
+            [["header","右上のメニューの上"]],
+            [["footer","右下のコメント数の下"]]
         ]
+    },
+    {
+        "name": "protitlePosition",
+        "list":[
+            [
+                ["windowtopleft","ウィンドウの左上（常時表示）"],
+                ["windowtopright","ウィンドウの右上（常時表示）"]
+            ],[
+                ["windowbottomleft","ウィンドウの左下（常時表示）"],
+                ["windowbottomright","ウィンドウの右下（常時表示）"]
+            ],[
+                ["commentinputtopleft","コメント入力の左上"],
+                ["commentinputtopright","コメント入力の右上"]
+            ],[
+                ["commentinputbottomleft","コメント入力の左下"],
+                ["commentinputbottomright","コメント入力の右下"]
+            ],[
+                ["headerleft","左上のアイコンの上"],
+                ["headerright","右上のメニューの上"]
+            ],[
+                ["footerleft","左下のアイコンの下"],
+                ["footerright","右下のコメント数の下"]
+            ]
+        ]
+    },{
+        "name": "proSamePosition",
+        "list":[[
+                ["over","重ねる"],
+                ["vertical","縦(コメ入力欄周辺で無効)"],
+                ["horizontal","横(同)"]
+            ]]
     }
     ];
 var CMSettingList = [
@@ -234,7 +278,14 @@ var CMSettingList = [
         },
         {
             "name": "isCMsoundoff",
-            "description": "コメント数が表示されないとき音量ミュート",
+//            "description": "コメント数が表示されないとき音量ミュート",
+            "description": "コメント数が表示されないときプレイヤーの音量ミュート",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isTabSoundplay",
+            "description": "↑をプレイヤーでなくchromeタブ設定でミュートにする",
             "type": "boolean",
             "isInstantChangable": true
         },
@@ -340,8 +391,12 @@ function generateRadioInput(settingsArr){
         inputHTML+='<div id="i'+settingsArr[i].name+'">';
         for(var j=0;j<settingsArr[i].list.length;j++){
             inputHTML+='<div>';
-            inputHTML+='<input type="radio" name="'+settingsArr[i].name+'" value="'+settingsArr[i].list[j][0]+'">';
-            inputHTML+=settingsArr[i].list[j][1];
+            for(var k=0;k<settingsArr[i].list[j].length;k++){
+                inputHTML+='<div>';
+                inputHTML+='<input type="radio" name="'+settingsArr[i].name+'" value="'+settingsArr[i].list[j][k][0]+'">';
+                inputHTML+=settingsArr[i].list[j][k][1];
+                inputHTML+='</div>';
+            }
             inputHTML+='</div>';
         }
         inputHTML+='</div>';

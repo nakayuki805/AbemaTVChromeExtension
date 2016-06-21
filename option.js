@@ -2,83 +2,42 @@ $(function(){
     $("#settingsArea").html(generateOptionHTML(true));
     $("#CommentMukouSettings").hide();
     $("#CommentColorSettings").css("width","600px")
-      .css("background-color","darkgreen")
-      .css("padding","8px")
-      .children('div').css("clear","both")
-      .children('span.desc').css("padding","0px 4px")
-      .next('span.prop').css("background-color","white")
-      .css("padding","0px 4px")
-      .next('input[type="range"]').css("float","right")
+        .css("background-color","darkgreen")
+        .css("padding","8px")
+        .children('div').css("clear","both")
+        .children('span.desc').css("padding","0px 4px")
+        .next('span.prop').css("background-color","white")
+        .css("padding","0px 4px")
+        .next('input[type="range"]').css("float","right")
     ;
     $("#itimePosition").insertBefore("#isTimeVisible+*")
-      .css("border","black solid 1px")
-      .css("margin-left","16px")
-      .css("display","flex")
-      .css("flex-direction","column")
+        .css("border","black solid 1px")
+        .css("margin-left","16px")
+        .css("display","flex")
+        .css("flex-direction","column")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
     ;
-    if($('#settingsArea #CommentMukouSettings .setTables').length==0){
-        $('#settingsArea #CommentMukouSettings').wrapInner('<div id="ComeMukouD">');
-        $('<div id="ComeMukouO" class="setTables">コメント数が表示されないとき</div>').prependTo('#settingsArea #CommentMukouSettings');
-        $('#settingsArea #ComeMukouO').css("margin-top","8px")
-            .css("padding","8px")
-            .css("border","1px solid black")
-        ;
-        $('<table id="setTable">').appendTo('#settingsArea #ComeMukouO');
-        $('#settingsArea table#setTable').css("border-collapse","collapse");
-        $('<tr><th></th><th colspan=2>画面真っ黒</th><th>画面縮小</th><th>音量ミュート</th></tr>').appendTo('#settingsArea table#setTable');
-        $('<tr><td>適用</td><td></td><td></td><td></td><td></td></tr>').appendTo('#settingsArea table#setTable');
-        $('<tr><td>画面クリックで<br>解除・再適用</td><td colspan=2></td><td></td><td></td></tr>').appendTo('#settingsArea table#setTable');
-        $('#settingsArea #isCMBlack').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(1)');
-        $('#settingsArea #isCMBkTrans').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(1)').css("display","none");
-        $('<input type="radio" name="cmbktype" value=0>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(2)')
-            .after("全面真黒<br>")
-        ;
-        $('<input type="radio" name="cmbktype" value=1>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(2)')
-            .after("下半透明")
-        ;
-        $('#settingsArea input[type="radio"][name="cmbktype"]').prop("disabled",!isCMBlack)
-            .val([isCMBkTrans?1:0])
-        ;
-        $('#settingsArea table#setTable input[type="radio"][name="cmbktype"]').change(setCMBKChangedR);
-        $('#settingsArea #CMsmall').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(3)').after("％")
-            .css("text-align","right")
-            .css("width","4em")
-        ;
-        $('#settingsArea #isCMsoundoff').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(4)');
-        $('#settingsArea table#setTable #isCMBlack').change(setCMBKChangedB);
-        $('#settingsArea table#setTable #CMsmall').change(setCMzoomChangedR);
-        $('#settingsArea table#setTable #isCMsoundoff').change(setCMsoundChangedB);
-        $('#settingsArea #isCMBkR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(1)');
-        $('#settingsArea #isCMsmlR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(2)');
-        $('#settingsArea #isCMsoundR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(3)');
-        $('#settingsArea table#setTable td').css("border","1px solid black")
-            .css("text-align","center")
-            .css("padding","3px")
-        ;
-        $('#settingsArea table#setTable tr:eq(1)>td:eq(1)').css("border-right","none");
-        $('#settingsArea table#setTable tr:eq(1)>td:eq(2)').css("border-left","none")
-            .css("text-align","left")
-        ;
-        $('<div id="ComeMukouW" class="setTables">↑の実行待機(秒)</div>').insertAfter('#settingsArea #ComeMukouO');
-        $('#settingsArea #ComeMukouW').css("margin-top","8px")
-            .css("padding","8px")
-            .css("border","1px solid black")
-        ;
-        $('#settingsArea #beforeCMWait').appendTo('#settingsArea #ComeMukouW')
-            .before("　開始後")
-        ;
-        $('#settingsArea #afterCMWait').appendTo('#settingsArea #ComeMukouW')
-            .before("　終了後")
-            .after("<br>待機時間中、押している間は実行せず、離すと即実行するキー<br>")
-        ;
-        $('#settingsArea #isManualKeyCtrlL').appendTo('#settingsArea #ComeMukouW').after("左ctrl");
-        $('#settingsArea #isManualKeyCtrlR').appendTo('#settingsArea #ComeMukouW').after("右ctrl");
-        $('#settingsArea #isManualMouseBR').appendTo('#settingsArea #ComeMukouW')
-            .before("<br>待機時間中、カーソルを合わせている間は実行せず、外すと即実行する場所<br>")
-            .after("右下のコメント数表示部")
-        ;
-        $('#settingsArea #ComeMukouD').remove();
-    }
+    $("#iprotitlePosition").insertBefore("#isProtitleVisible+*")
+        .css("border","black solid 1px")
+        .css("margin-left","16px")
+        .css("display","flex")
+        .css("flex-direction","column")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
+    ;
+    $("#iproSamePosition").insertBefore("#isProtitleVisible")
+        .css("border","black solid 1px")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .children().css("margin-left","4px")
+    ;
+    $('<span style="margin-left:4px;">↑と↓が同じ位置の場合: </span>').prependTo("#iproSamePosition>*");
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -125,6 +84,11 @@ $(function(){
         var isCMBkR = (value.CMBkR || false)&&isCMBlack;
         var isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
         var isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
+        var isTabSoundplay = value.tabSoundplay || false;
+        var isOpenPanelwCome=value.openPanelwCome||false;
+        var isProtitleVisible=value.protitleVisible||false;
+        var protitlePosition=value.protitlePosition||"windowtopleft";
+        var proSamePosition=value.proSamePosition||"over";
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -182,7 +146,90 @@ $(function(){
         $("#isCMBkR").prop("checked", isCMBkR);
         $("#isCMsoundR").prop("checked", isCMsoundR);
         $("#isCMsmlR").prop("checked", isCMsmlR);
+        $("#isTabSoundplay").prop("checked", isTabSoundplay);
+        $("#isOpenPanelwCome").prop("checked",isOpenPanelwCome);
+        $("#isProtitleVisible").prop("checked",isProtitleVisible);
+        $('#iprotitlePosition [type="radio"][name="protitlePosition"]').val([protitlePosition]);
+        $('#iproSamePosition [type="radio"][name="proSamePosition"]').val([proSamePosition]);
     });
+    if($('#settingsArea #CommentMukouSettings .setTables').length==0){
+        $('#settingsArea #CommentMukouSettings').wrapInner('<div id="ComeMukouD">');
+        $('<div id="ComeMukouO" class="setTables">コメント数が表示されないとき</div>').prependTo('#settingsArea #CommentMukouSettings');
+        $('#settingsArea #ComeMukouO').css("margin-top","8px")
+            .css("padding","8px")
+            .css("border","1px solid black")
+        ;
+        $('<table id="setTable">').appendTo('#settingsArea #ComeMukouO');
+        $('#settingsArea table#setTable').css("border-collapse","collapse");
+        $('<tr><th></th><th colspan=2>画面真っ黒</th><th>画面縮小</th><th colspan=2>音量ミュート</th></tr>').appendTo('#settingsArea table#setTable');
+        $('<tr><td>適用</td><td></td><td></td><td></td><td></td><td></td></tr>').appendTo('#settingsArea table#setTable');
+        $('<tr><td>画面クリックで<br>解除・再適用</td><td colspan=2></td><td></td><td colspan=2></td></tr>').appendTo('#settingsArea table#setTable');
+
+        $('#settingsArea #isCMBlack').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(1)');
+        $('#settingsArea #isCMBkTrans').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(1)').css("display","none");
+        $('<input type="radio" name="cmbktype" value=0>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(2)')
+            .after("全面真黒<br>")
+        ;
+        $('<input type="radio" name="cmbktype" value=1>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(2)')
+            .after("下半透明")
+        ;
+        $('#settingsArea table#setTable input[type="radio"][name="cmbktype"]').change(setCMBKChangedR);
+
+        $('#settingsArea #CMsmall').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(3)').after("％")
+            .css("text-align","right")
+            .css("width","4em")
+        ;
+
+        $('#settingsArea #isCMsoundoff').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(4)');
+        $('#settingsArea #isTabSoundplay').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(4)').css("display","none");
+        $('<input type="radio" name="cmsotype" value=0>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(5)')
+            .after("プレイヤー<br>")
+        ;
+        $('<input type="radio" name="cmsotype" value=1>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(5)')
+            .after("タブ設定")
+        ;
+        $('#settingsArea table#setTable input[type="radio"][name="cmsotype"]').change(setCMsoundChangedR);
+
+        $('#settingsArea table#setTable #isCMBlack').change(setCMBKChangedB);
+        $('#settingsArea table#setTable #CMsmall').change(setCMzoomChangedR);
+        $('#settingsArea table#setTable #isCMsoundoff').change(setCMsoundChangedB);
+        $('#settingsArea #isCMBkR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(1)');
+        $('#settingsArea #isCMsmlR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(2)');
+        $('#settingsArea #isCMsoundR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(3)');
+        $('#settingsArea table#setTable td').css("border","1px solid black")
+            .css("text-align","center")
+            .css("padding","3px")
+        ;
+        $('#settingsArea table#setTable tr:eq(1)>td:eq(1)').css("border-right","none");
+        $('#settingsArea table#setTable tr:eq(1)>td:eq(2)').css("border-left","none")
+            .css("text-align","left")
+        ;
+        $('#settingsArea table#setTable tr:eq(1)>td:eq(4)').css("border-right","none");
+        $('#settingsArea table#setTable tr:eq(1)>td:eq(5)').css("border-left","none")
+            .css("text-align","left")
+        ;
+
+        $('<div id="ComeMukouW" class="setTables">↑の実行待機(秒)</div>').insertAfter('#settingsArea #ComeMukouO');
+        $('#settingsArea #ComeMukouW').css("margin-top","8px")
+            .css("padding","8px")
+            .css("border","1px solid black")
+        ;
+        $('#settingsArea #beforeCMWait').appendTo('#settingsArea #ComeMukouW')
+            .before("　開始後")
+        ;
+        $('#settingsArea #afterCMWait').appendTo('#settingsArea #ComeMukouW')
+            .before("　終了後")
+            .after("<br>待機時間中、押している間は実行せず、離すと即実行するキー<br>")
+        ;
+        $('#settingsArea #isManualKeyCtrlL').appendTo('#settingsArea #ComeMukouW').after("左ctrl");
+        $('#settingsArea #isManualKeyCtrlR').appendTo('#settingsArea #ComeMukouW').after("右ctrl");
+        $('#settingsArea #isManualMouseBR').appendTo('#settingsArea #ComeMukouW')
+            .before("<br>待機時間中、カーソルを1秒以上連続で合わせている間は実行せず、外すと即実行する場所<br>")
+            .after("右下のコメント数表示部")
+        ;
+        $('#settingsArea #ComeMukouD').remove();
+        setTimeout(radiodelayset,50);
+    }
     $("#saveBtn").click(function () {
         chrome.storage.local.set({
             "resizeScreen": $("#isResizeScreen").prop("checked"), 
@@ -228,7 +275,12 @@ $(function(){
             "manualMouseBR": $("#isManualMouseBR").prop("checked"),
             "CMBkR": $("#isCMBkR").prop("checked")&&$("#isCMBlack").prop("checked"),
             "CMsoundR": $("#isCMsoundR").prop("checked")&&$("#isCMsoundoff").prop("checked"),
-            "CMsmlR": $("#isCMsmlR").prop("checked")&&(parseInt($("#CMsmall").val())!=100)
+            "CMsmlR": $("#isCMsmlR").prop("checked")&&(parseInt($("#CMsmall").val())!=100),
+            "tabSoundplay": $("#isTabSoundplay").prop("checked"),
+            "openPanelwCome":$("#isOpenPanelwCome").prop("checked"),
+            "protitleVisible":$("#isProtitleVisible").prop("checked"),
+            "protitlePosition":$('#iprotitlePosition [name="protitlePosition"]:checked').val(),
+            "proSamePosition":$('#iproSamePosition [name="proSamePosition"]:checked').val()
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
@@ -273,6 +325,7 @@ function setCMzoomChangedR(){
     }
 }
 function setCMsoundChangedB(){
+    $('#settingsArea input[type="radio"][name="cmsotype"]').prop("disabled",!$("#isCMsoundoff").prop("checked"));
     $('#settingsArea #isCMsoundR').prop("checked",false)
         .prop("disabled",!$("#isCMsoundoff").prop("checked"))
     ;
@@ -285,4 +338,15 @@ function setCMBKChangedB(){
 }
 function setCMBKChangedR(){
     $('#settingsArea #isCMBkTrans').prop("checked",$('#settingsArea input[type="radio"][name="cmbktype"]:checked').val()==1?true:false);
+}
+function setCMsoundChangedR(){
+    $('#settingsArea #isTabSoundplay').prop("checked",$('#settingsArea input[type="radio"][name="cmsotype"]:checked').val()==1?true:false);
+}
+function radiodelayset(){
+    $('#settingsArea input[type="radio"][name="cmbktype"]').prop("disabled",!$("#isCMBlack").prop("checked"))
+        .val([$("#isCMBkTrans").prop("checked")?1:0])
+    ;
+    $('#settingsArea input[type="radio"][name="cmsotype"]').prop("disabled",!$("#isCMsoundoff").prop("checked"))
+        .val([$("#isTabSoundplay").prop("checked")?1:0])
+    ;
 }
