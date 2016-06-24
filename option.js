@@ -85,7 +85,7 @@ $(function(){
         var isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
         var isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
         var isTabSoundplay = value.tabSoundplay || false;
-        var isOpenPanelwCome=value.openPanelwCome||false;
+        var isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : true;
         var isProtitleVisible=value.protitleVisible||false;
         var protitlePosition=value.protitlePosition||"windowtopleft";
         var proSamePosition=value.proSamePosition||"over";
