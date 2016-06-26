@@ -1729,8 +1729,8 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
         .css("margin-bottom",jcmbot)
     ;
     if(volshift){
-        $(EXvolume).css("bottom",(80+34+jfptop+jfpbot)+"px")
-            .prev('[class^="styles__full-screen___"]').css("bottom",(80+34+jfptop+jfpbot)+"px")
+        $(EXvolume).css("bottom",(80+jform.height()+jfptop+jfpbot)+"px")
+            .prev('[class^="styles__full-screen___"]').css("bottom",(80+jform.height()+jfptop+jfpbot)+"px")
         ;
     }
     if(repeatcount>0){
