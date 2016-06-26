@@ -109,6 +109,11 @@ body{
 .toast p{
     margin: 10px;
 }
+/* 音量ゲージ下部の吹き出しを下へ伸ばす */
 [class^="TVContainer__footer___"] [class^="styles__volume___"] [class^="styles__slider-container___"]:after{
     border-top-width:15px;
+}
+/* 左下からpopしてくるボタンの処理 */
+[class^="TVContainer__ad-reserve-button___"] {
+    transform:translateX(-170px);
 }
