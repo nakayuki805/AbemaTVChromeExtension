@@ -120,8 +120,15 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
+        "name": "isProTextLarge",
+        "description": "番組残り時間・タイトルの文字を大きくする",
+        "type": "boolean",
+        "isInstantChangable": true
+    },
+    {
         "name": "isSureReadComment",
-        "description": "常にコメント欄を表示する",
+//        "description": "常にコメント欄を表示する",
+        "description": "常にコメント欄を表示しようとする",
         "type": "boolean",
 //        "isInstantChangable": false
         "isInstantChangable": true
@@ -139,6 +146,13 @@ var settingsList = [
         "description": "常に黒帯パネルを表示する",
         "type": "boolean",
 //        "isInstantChangable": false
+        "isInstantChangable": true
+    },
+    {
+        "name": "isOpenPanelwCome",
+//        "description": "コメント欄を開いていても黒帯パネルを表示する",
+        "description": "コメント欄を開いていても黒帯パネル等を表示できるようにする",
+        "type": "boolean",
         "isInstantChangable": true
     },
     {
@@ -163,6 +177,12 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
+        "name": "isCommentWide",
+        "description": "コメントを横にほんの少し広げる",
+        "type": "boolean",
+        "isInstantChangable": true
+    },
+    {
         "name": "notifySeconds",
         "description": "番組通知を番組開始の何秒前にするか(番組表の番組ページから番組開始前の通知を設定できます。)",
         "type": "number",
@@ -179,12 +199,6 @@ var settingsList = [
         "description": "↑既に開いている放送画面があれば新しいタブを開かずそのタブを切り替える(アクティブなタブ優先)",
         "type": "boolean",
         "isInstantChangable": false
-    },
-    {
-        "name": "isOpenPanelwCome",
-        "description": "コメント欄を開いていても黒帯パネルを表示する",
-        "type": "boolean",
-        "isInstantChangable": true
     }
     ];
 var ComeColorSettingList = [
@@ -252,8 +266,9 @@ var RadioSettingList = [
         "name": "proSamePosition",
         "list":[[
                 ["over","重ねる"],
-                ["vertical","縦(コメ入力欄周辺で無効)"],
-                ["horizontal","横(同)"]
+                ["vertical","縦"],
+                ["horizontal","横(コメ欄周辺で無効)"],
+                ["horizshort","タイトルを少し左へ"]
             ]]
     }
     ];
