@@ -69,6 +69,12 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
+        "name": "kakikomiwait",
+        "description": "自分のコメントを流すまでの待ち時間(秒)マイナスだと流れない",
+        "type": "number",
+        "isInstantChangable": true
+    },
+    {
         "name": "isInpWinBottom",
 //        "description": "コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール(コメ欄を常に表示しているときのみ)",
 //        "description": "コメント入力欄の位置を下へ(コメント一覧の逆順・スクロール機能は一時廃止)",
