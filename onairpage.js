@@ -1498,7 +1498,6 @@ function popElement(inp){
 //true,falseは見た目の変化のみで内部の開閉状態は変化しないので映像の横縮小などは変化しないはず
 //"force"なら各triggerで開こうとする（視聴中番組情報、放送中番組一覧、コメントリスト）
 //クリックによる影響（他要素の開閉やイベント）は全く考慮していない
-//音量ボタン等の高さ位置はここで調整
     var comefix=false;
     if(inp.head!==undefined){
         comefix=true;
@@ -1575,6 +1574,7 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
 //黒帯パネルとコメント欄が重なるのを防ぎ
 //番組残り時間とタイトルの分を考慮して入力欄周辺とコメ欄端のmarginを設定する
 //再試行はヘッダとフッタの開閉遅延を考慮
+//音量ボタン等の高さ位置はここで調整
     var jform=$(EXcomesend);
     var jcome=$(EXcomesend).siblings(['class^="styles__comment-list-wrapper___"']);
     var jfptop=0; //jformのpadding-top
