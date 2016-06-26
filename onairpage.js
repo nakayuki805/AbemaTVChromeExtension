@@ -263,8 +263,8 @@ function arrayFullNgMaker(){
 function comeNG(prengcome){
     //規定のNG処理
     var ngedcome = prengcome;
-    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\'☆〜～ｗﾍ√ﾚｖꉂ꒰·‧º∑]*[　 ]*[┌└┐⊂二乁＼ヾヽつっdｄo_ƪ\\\\╭╰m👆ฅｍ\╲٩Ｏ∩┗┏]*[　 ]*[（\\(《〈\\[\\|｜fζ]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ罒ᗜ◒◊vਊ⍛ー3xエェｪｴρｐё]+.*";
-    var strface2 = "[）\\)》〉\\]\\|｜]";
+    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\'☆〜～ｗﾍ√ﾚｖꉂ꒰·‧º∑]*[　 ]*[┌└┐⊂二乁＼ヾヽつっdｄo_ƪ\\\\╭╰m👆ฅｍ\╲٩Ｏ∩┗┏]*[　 ]*[（\\(《〈\\[\\|｜fζᔦ]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ罒ᗜ◒◊vਊ⍛ー3xエェｪｴρｐё灬]+.*";
+    var strface2 = "[）\\)》〉\\]\\|｜ᔨ]";
     var strface3 = "[　 ]*[┐┘┌┸┓／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」Ｏσ二⊃ゝʃง╭☞∩ゞ┛︎]";
     var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞ｗﾍ√ﾚｖ꒱‧º·]*[　 ]*";
     var reface1 = new RegExp(strface1+strface2+"+"+strface3+"*"+strface4,"g");
@@ -506,20 +506,20 @@ function movieZoomOut(sw){
     }
 }
 //マウスを動かすイベント
-var movecnt = 0;
-function triggerMousemoveEvt(x, y){
-    var evt = document.createEvent("MouseEvents");
-    evt.initMouseEvent("mousemove", true, false, window, 0, 0, 0, x, y);
-    return document.dispatchEvent(evt);
-}
-function triggerMouseMoving(){
+//var movecnt = 0;
+//function triggerMousemoveEvt(x, y){
+//    var evt = document.createEvent("MouseEvents");
+//    evt.initMouseEvent("mousemove", true, false, window, 0, 0, 0, x, y);
+//    return document.dispatchEvent(evt);
+//}
+//function triggerMouseMoving(){
 //console.log('triggerMM')
-    var overlap = $('[class^="AppContainer__background-black___"]');
-    overlap.trigger('mouseover').trigger('mousemove');
-    $('body').trigger('mouseover').trigger('mousemove');
-    var xy = Math.random()*100+300;
-    triggerMousemoveEvt(xy,xy);
-}
+//    var overlap = $('[class^="AppContainer__background-black___"]');
+//    overlap.trigger('mouseover').trigger('mousemove');
+//    $('body').trigger('mouseover').trigger('mousemove');
+//    var xy = Math.random()*100+300;
+//    triggerMousemoveEvt(xy,xy);
+//}
 function openOption(sw){
     var settcontjq = $("#settcont");
     settcontjq.css("display","block");
@@ -731,7 +731,10 @@ function optionStatsUpdate(outflg){
         out=[(nww-oww),(nwh-owh)];
     }
     clearBtnColored($("#saveBtn"));
-    if(outflg){return out;}
+
+    if(outflg){return out;}else{
+        setTimeout(optionStatsUpdate,800,false);
+    }
 }
 function createSettingWindow(){
     if(!EXside){
@@ -1408,6 +1411,8 @@ function toggleCommentList(){
 //    setProSamePosiChanged();
 //}
 function hideElement(inp){
+//console.log("hideElement");
+//console.log(inp);
 //trueなら積極的に隠すよう設定
 //falseはtrueの解除(trueの設定値どおりの時のみ機能するので、積極的に表示する場合はpopElementを使用する)
 //true,falseは見た目の変化のみで内部の開閉状態は変化しないので映像の横縮小などは変化しない
@@ -1469,7 +1474,7 @@ function hideElement(inp){
         EXchli.parentElement.style.transform="translateX(100%)";
     }else if(inp.channellist==false){
         if(EXchli.parentElement.style.transform=="translateX(100%)"){
-            EXinfo.parentElement.style.transform="";
+            EXchli.parentElement.style.transform="";
         }
     }else if(inp.channellist=="force"){
         EXchli.parentElement.style.transform="translateX(100%)";
@@ -1493,11 +1498,14 @@ function hideElement(inp){
     }
 }
 function popElement(inp){
+//console.log("popElement");
+//console.log(inp);
 //trueなら積極的に表示するよう設定
 //falseはtrueの解除(trueの設定値どおりの時のみ機能するので、積極的に隠す場合はhideElementを使用する)
 //true,falseは見た目の変化のみで内部の開閉状態は変化しないので映像の横縮小などは変化しないはず
 //"force"なら各triggerで開こうとする（視聴中番組情報、放送中番組一覧、コメントリスト）
 //クリックによる影響（他要素の開閉やイベント）は全く考慮していない
+//音量ボタン等の高さ位置はここで調整
     var comefix=false;
     if(inp.head!==undefined){
         comefix=true;
@@ -1574,7 +1582,6 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
 //黒帯パネルとコメント欄が重なるのを防ぎ
 //番組残り時間とタイトルの分を考慮して入力欄周辺とコメ欄端のmarginを設定する
 //再試行はヘッダとフッタの開閉遅延を考慮
-//音量ボタン等の高さ位置はここで調整
     var jform=$(EXcomesend);
     var jcome=$(EXcomesend).siblings(['class^="styles__comment-list-wrapper___"']);
     var jfptop=0; //jformのpadding-top
@@ -2722,7 +2729,7 @@ function usereventMouseover(){
     if(!settings.isAlwaysShowPanel&&(!isComeOpen()||isOpenPanelwCome)){
         if(forElementClose<4){
             forElementClose=5;
-console.log("popElement usereventMouseover");
+//console.log("popElement usereventMouseover");
             popElement({head:true,foot:true,side:true});
         }
     }
@@ -2835,6 +2842,21 @@ function usereventFCMousemove(){
             .css("background-color","")
         ;
     }
+}
+function usereventSideChliButClick(){
+//番組情報枠と被らないようにする
+    popElement({channellist:false});
+    hideElement({channellist:false});
+    hideElement({programinfo:true});
+//    $(EXchli.parentElement).css("z-index",12);
+//    $(EXinfo).css("z-index",11);
+}
+function usereventFootInfoButClick(){
+    popElement({programinfo:false});
+    hideElement({programinfo:false});
+    hideElement({channellist:true});
+//    $(EXinfo).css("z-index",12);
+//    $(EXchli.parentElement).css("z-index",11);
 }
 function setOptionEvent(){
 //自作要素のイベントは自作部分で対応
@@ -2984,6 +3006,10 @@ console.log("dblclick");
     $(EXfootcome).on("mousemove",usereventFCMousemove);
 //    $(EXfootcome).on("mouseout",usereventFCMouseout);
     $(EXfootcome).on("mouseleave",usereventFCMouseleave);
+    //放送中番組一覧を開く
+    $(EXside).contents().find('button').eq(1).on("click",usereventSideChliButClick);
+    //番組情報を開く
+    $(EXfootcome).prev().on("click",usereventFootInfoButClick);
 console.log("setOptionEvent ok");
 }
 function startCM(){
