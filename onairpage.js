@@ -53,8 +53,9 @@ var isOpenPanelwCome=true; //コメント欄を開いてる時にもマウスオ
 var isProtitleVisible=false; //番組名を画面右の情報枠から取得して表示する
 var protitlePosition="windowtopleft"; //番組名の表示位置
 var proSamePosition="over"; //番組名と残り時間の位置が重なった場合の対処方法
-var isCommentWide=true;
-var isProTextLarge=true;
+var isCommentWide=false; //コメント一覧内のコメント部分の横幅を広げる
+var isProTextLarge=false; //番組名と残り時間の文字を大きくする
+var kakikomiwait=0; //自分のコメントを流すまでのウェイト(マイナスは流さない)
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -111,6 +112,7 @@ if (chrome.storage) {
         proSamePosition=value.proSamePosition||proSamePosition;
         isCommentWide=value.commentWide||false;
         isProTextLarge=value.proTextLarge||false;
+        kakikomiwait=(value.kakikomiwait!==undefined)?value.kakikomiwait:kakikomiwait;
     });
 }
 
@@ -135,7 +137,7 @@ var arFullNg=[];
 var proStart = new Date(); //番組開始時刻として現在時刻を仮設定
 //var proEnd = new Date(Date.now()+60*60*1000); //番組終了として現在時刻から1時間後を仮設定
 var proEnd = new Date(); //↑で23時～24時の間に実行すると終了時刻が1日ずれるので現時刻にした
-var forElementClose = 5; //コメント表示中でも各要素を表示させた時に自動で隠す場合のカウントダウン
+var forElementClose = 0; //コメント表示中でも各要素を表示させた時に自動で隠す場合のカウントダウン
 var EXcomelist;
 var EXcomments;
 
@@ -176,6 +178,8 @@ var comeArray=[]; //流すコメントで、新着の複数コメントのうち
 var popElemented=false; //mouseoverでunpopElementが実行されまくるのを防止
 var proTitle="未取得"; //番組タイトル
 var proinfoOpened=false; //番組タイトルクリックで番組情報枠を開いた後にクリックで閉じれるようにする
+var optionStatsUpdated=false; //optionStatsUpdateの重複起動防止
+var kakikomitxt=""; //自分の投稿内容
 
 function onresize() {
     if (settings.isResizeScreen) {
@@ -344,10 +348,24 @@ function putComment(commentText,index,inmax) {
     if(index==inmax-1){
         outflg=true;
     }
-    if (isComeDel) {
+    //kakikomiwaitが0でない時は自分の書き込みをputCommentから除外する
+//console.log("commentText="+commentText+", kakikomitxt="+kakikomitxt);
+    if(commentText.length>0&&commentText==kakikomitxt){
+//console.log("kakikomi match,wait="+kakikomiwait)
+        if(kakikomiwait>0){ //waitがプラスなら後から単独で流す
+            setTimeout(putComment,kakikomiwait*1000,commentText,0,1);
+            commentText="";
+        }else if(kakikomiwait<0){
+            commentText="";
+        }
+        kakikomitxt="";
+    }
+    if (isComeDel&&commentText.length>0) {
         //arFullNgがマッチしたコメントは流さない
         for(var ngi=0;ngi<arFullNg.length;ngi++){
-            if(commentText.match(arFullNg[ngi])){
+//console.log("commentText="+commentText+",ngi="+ngi+",arFullNg["+ngi+"]="+arFullNg[ngi]);
+//            if(commentText.match(arFullNg[ngi])){
+            if(arFullNg[ngi].test(commentText)){
                 console.log("userNG matched text:" + commentText  + "ngword:" + arFullNg[ngi].toString())
 //                return "";
                 commentText="";
@@ -355,7 +373,7 @@ function putComment(commentText,index,inmax) {
             }
         }
     }
-    if (isComeNg) {
+    if (isComeNg&&commentText.length>0) {
         commentText = comeNG(commentText);
     }
     var commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
@@ -608,7 +626,11 @@ function openOption(sw){
     $('#iproSamePosition').css("display",(isProtitleVisible&&isTimeVisible)?"flex":"none");
     $('#isCommentWide').prop("checked",isCommentWide);
     $('#isProTextLarge').prop("checked",isProTextLarge);
-    setTimeout(optionStatsUpdate,500,false);
+    $('#kakikomiwait').val(kakikomiwait);
+    if(!optionStatsUpdated){
+        optionStatsUpdated=true;
+        setTimeout(optionStatsUpdate,500,false);
+    }
 }
 function closeOption(){
     $("#settcont").css("display","none")
@@ -621,6 +643,7 @@ function closeOption(){
         .children('[class^="styles__message___"]').css("color","")
     ;
     setOptionElement();
+    optionStatsUpdated=false;
 }
 function optionHeightFix(){
     var settcontjq = $("#settcont");
@@ -1113,6 +1136,7 @@ function setSaveClicked(){
     proSamePosition=$('#iproSamePosition input[type="radio"][name="proSamePosition"]:checked').val();
     isCommentWide=$('#isCommentWide').prop("checked");
     isProTextLarge=$('#isProTextLarge').prop("checked");
+    kakikomiwait=parseInt($('#kakikomiwait').val());
 
     setOptionHead();
     setOptionElement();
@@ -2728,6 +2752,7 @@ function usereventMouseover(){
     //マウスオーバーで表示させる場合はカウントリセット
     if(!settings.isAlwaysShowPanel&&(!isComeOpen()||isOpenPanelwCome)){
         if(forElementClose<4){
+//console.log("usereventMouseover forElementClose=5");
             forElementClose=5;
 //console.log("popElement usereventMouseover");
             popElement({head:true,foot:true,side:true});
@@ -2858,6 +2883,31 @@ function usereventFootInfoButClick(){
 //    $(EXinfo).css("z-index",12);
 //    $(EXchli.parentElement).css("z-index",11);
 }
+function delkakikomitxt(inptxt){
+    if(kakikomitxt==inptxt){
+        kakikomitxt="";
+    }
+}
+function usercommentposted(inptxt){
+//console.log("usercommentposted inp="+inptxt);
+    kakikomitxt=inptxt;
+    setTimeout(delkakikomitxt,1100,inptxt);
+}
+function waitforinperase(retrycount,inptxt){
+//console.log("waitforinperase#"+retrycount+",textarea="+$(EXcomesendinp).val()+",inp="+inptxt);
+    if($(EXcomesendinp).val()!=inptxt){
+        usercommentposted(inptxt);
+    }else if(retrycount>0){
+        setTimeout(waitforinperase,10,retrycount-1,inptxt);
+    }
+}
+function usereventSendButClick(){
+    var ta=$(EXcomesendinp).val();
+//console.log("usereventSendButClick textarea="+ta);
+    if(ta.length>0){
+        waitforinperase(10,ta);
+    }
+}
 function setOptionEvent(){
 //自作要素のイベントは自作部分で対応
     if(eventAdded){return;}
@@ -2932,7 +2982,10 @@ console.log("dblclick");
     $(EXvolume).on("mousemove",usereventVolMousemove);
     $(EXvolume).on("mouseout",usereventVolMouseout);
     window.addEventListener("keydown",function(e){
-        if(e.keyCode==38||e.keyCode==40){ //38^ 40v
+//console.log(e);
+        if(e.keyCode==13||e.keyCode==229){ //enter
+            usereventSendButClick();
+        }else if(e.keyCode==38||e.keyCode==40){ //38^ 40v
             if(isCancelWheel||isVolumeWheel){
                 e.stopPropagation();
             }
@@ -3010,6 +3063,9 @@ console.log("dblclick");
     $(EXside).contents().find('button').eq(1).on("click",usereventSideChliButClick);
     //番組情報を開く
     $(EXfootcome).prev().on("click",usereventFootInfoButClick);
+    //投稿ボタンを押した時
+    $(EXcomesend).on("click",'[class*="styles__post-button___"]',usereventSendButClick);//コメント欄に入るまで投稿ボタンが存在しないためクリック時に探す
+//    $(EXcomesend).contents().find('[class*="styles__post-button___"]').on("click",usereventSendButClick);
 console.log("setOptionEvent ok");
 }
 function startCM(){
@@ -3324,6 +3380,7 @@ $(window).on('load', function () {
         }
         //各要素を隠すまでのカウントダウン
         if(forElementClose>0){
+//console.log("forElementClose:"+forElementClose+"->"+(forElementClose-1));
             forElementClose-=1;
             if(forElementClose<=0){
                 //黒パネルを隠す

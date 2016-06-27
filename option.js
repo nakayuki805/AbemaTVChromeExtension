@@ -91,6 +91,7 @@ $(function(){
         var proSamePosition=value.proSamePosition||"over";
         var isProTextLarge=value.proTextLarge||false;
         var isCommentWide=value.commentWide||false;
+        var kakikomiwait=(value.kakikomiwait!==undefined)?value.kakikomiwait:0;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -155,6 +156,7 @@ $(function(){
         $('#iproSamePosition [type="radio"][name="proSamePosition"]').val([proSamePosition]);
         $('#isProTextLarge').prop("checked",isProTextLarge);
         $('#isCommentWide').prop("checked",isCommentWide);
+        $('#kakikomiwait').val(kakikomiwait);
     });
     if($('#settingsArea #CommentMukouSettings .setTables').length==0){
         $('#settingsArea #CommentMukouSettings').wrapInner('<div id="ComeMukouD">');
@@ -286,7 +288,8 @@ $(function(){
             "protitlePosition":$('#iprotitlePosition [name="protitlePosition"]:checked').val(),
             "proSamePosition":$('#iproSamePosition [name="proSamePosition"]:checked').val(),
             "proTextLarge":$('#isProTextLarge').prop("checked"),
-            "commentWide":$('#isCommentWide').prop("checked")
+            "commentWide":$('#isCommentWide').prop("checked"),
+            "kakikomiwait":parseInt($('#kakikomiwait').val())
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
