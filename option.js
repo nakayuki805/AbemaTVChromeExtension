@@ -38,6 +38,129 @@ $(function(){
         .children().css("margin-left","4px")
     ;
     $('<span style="margin-left:4px;">↑と↓が同じ位置の場合: </span>').prependTo("#iproSamePosition>*");
+    if($('#CommentMukouSettings .setTables').length==0){
+        $('#CommentMukouSettings').wrapInner('<div id="ComeMukouD">');
+        $('<div id="ComeMukouO" class="setTables">コメント数が表示されないとき</div>').prependTo('#CommentMukouSettings');
+        $('#ComeMukouO').css("margin-top","8px")
+            .css("padding","8px")
+            .css("border","1px solid black")
+        ;
+        $('<table id="setTable">').appendTo('#ComeMukouO');
+        $('#setTable').css("border-collapse","collapse");
+        $('<tr><th></th><th colspan=2>画面真っ黒</th><th>画面縮小</th><th colspan=2>音量ミュート</th></tr>').appendTo('#setTable');
+        $('<tr><td>適用</td><td></td><td></td><td></td><td></td><td></td></tr>').appendTo('#setTable');
+        $('<tr><td>画面クリックで<br>解除・再適用</td><td colspan=2></td><td></td><td colspan=2></td></tr>').appendTo('#setTable');
+
+        $('#isCMBlack').appendTo('#setTable tr:eq(1)>td:eq(1)');
+        $('#isCMBkTrans').appendTo('#setTable tr:eq(1)>td:eq(1)').css("display","none");
+        $('<input type="radio" name="cmbktype" value=0>').appendTo('#setTable tr:eq(1)>td:eq(2)')
+            .after("全面真黒<br>")
+        ;
+        $('<input type="radio" name="cmbktype" value=1>').appendTo('#setTable tr:eq(1)>td:eq(2)')
+            .after("下半透明")
+        ;
+        $('#setTable input[type="radio"][name="cmbktype"]').change(setCMBKChangedR);
+
+        $('#CMsmall').appendTo('#setTable tr:eq(1)>td:eq(3)').after("％")
+            .css("text-align","right")
+            .css("width","4em")
+        ;
+
+        $('#isCMsoundoff').appendTo('#setTable tr:eq(1)>td:eq(4)');
+        $('#isTabSoundplay').appendTo('#setTable tr:eq(1)>td:eq(4)').css("display","none");
+        $('<input type="radio" name="cmsotype" value=0>').appendTo('#setTable tr:eq(1)>td:eq(5)')
+            .after("プレイヤー<br>")
+        ;
+        $('<input type="radio" name="cmsotype" value=1>').appendTo('#setTable tr:eq(1)>td:eq(5)')
+            .after("タブ設定")
+        ;
+        $('#setTable input[type="radio"][name="cmsotype"]').change(setCMsoundChangedR);
+
+        $('#setTable #isCMBlack').change(setCMBKChangedB);
+        $('#setTable #CMsmall').change(setCMzoomChangedR);
+        $('#setTable #isCMsoundoff').change(setCMsoundChangedB);
+        $('#isCMBkR').appendTo('#setTable tr:eq(2)>td:eq(1)');
+        $('#isCMsmlR').appendTo('#setTable tr:eq(2)>td:eq(2)');
+        $('#isCMsoundR').appendTo('#setTable tr:eq(2)>td:eq(3)');
+        $('#setTable td').css("border","1px solid black")
+            .css("text-align","center")
+            .css("padding","3px")
+        ;
+        $('#setTable tr:eq(1)>td:eq(1)').css("border-right","none");
+        $('#setTable tr:eq(1)>td:eq(2)').css("border-left","none")
+            .css("text-align","left")
+        ;
+        $('#setTable tr:eq(1)>td:eq(4)').css("border-right","none");
+        $('#setTable tr:eq(1)>td:eq(5)').css("border-left","none")
+            .css("text-align","left")
+        ;
+
+        $('<div id="ComeMukouW" class="setTables">↑の実行待機(秒)</div>').insertAfter('#ComeMukouO');
+        $('#ComeMukouW').css("margin-top","8px")
+            .css("padding","8px")
+            .css("border","1px solid black")
+        ;
+        $('#beforeCMWait').appendTo('#ComeMukouW')
+            .before("　開始後")
+        ;
+        $('#afterCMWait').appendTo('#ComeMukouW')
+            .before("　終了後")
+            .after("<br>待機時間中、押している間は実行せず、離すと即実行するキー<br>")
+        ;
+        $('#isManualKeyCtrlL').appendTo('#ComeMukouW').after("左ctrl");
+        $('#isManualKeyCtrlR').appendTo('#ComeMukouW').after("右ctrl");
+        $('#isManualMouseBR').appendTo('#ComeMukouW')
+            .before("<br>待機時間中、カーソルを1秒以上連続で合わせている間は実行せず、外すと即実行する場所<br>")
+            .after("右下のコメント数表示部")
+        ;
+        $('<div id="ComeMukouN" class="setTables"></div>').insertAfter('#ComeMukouW');
+        $('#ComeMukouN').css("margin-top","8px")
+            .css("padding","8px")
+            .css("border","1px solid black")
+        ;
+        $('#useEyecatch').appendTo('#ComeMukouN').after("左上ロゴのタイミングも利用する<br>");
+        $('#isHidePopTL').appendTo('#ComeMukouN').after("左上ロゴを非表示<br>");
+        $('#isHidePopBL').appendTo('#ComeMukouN').after("左下の通知を非表示");
+        $('#ComeMukouD').remove();
+    }
+    if($('#panelCustom').length==0){
+        $('<div id="panelCustom"">黒帯パネル開閉設定<br></div>').insertBefore('#CommentMukouSettings');
+        $('#panelCustom').css("margin-top","8px")
+            .css("padding","8px")
+            .css("border","1px solid black")
+        ;
+        $('#isAlwaysShowPanel').appendTo('#panelCustom').prop("disabled",true).before("旧");
+        $('<input type="button" id="alwaysShowPanelB" value="下表に適用">').insertAfter('#isAlwaysShowPanel').before("常に黒帯パネルを表示する");
+        $('#isOpenPanelwCome').appendTo('#panelCustom').prop("disabled",true).before("<br>旧");
+        $('<input type="button" id="openPanelwComeB" value="下表に適用">').insertAfter('#isOpenPanelwCome').before("コメント欄を開いていても黒帯パネル等を表示できるようにする");
+        $('<br><span>※以上の古いオプションは以下の新オプションに統合され、適当な経過期間の後に削除予定</span>').appendTo('#panelCustom');
+        $('#ipanelopenset').appendTo('#panelCustom')
+            .children().css("display","flex")
+            .css("flex-direction","row")
+        ;
+        $('<table id="panelcustomTable">').appendTo('#panelCustom');
+        $('#panelcustomTable').css("border-collapse","collapse");
+        $('<tr><th></th><th>上のメニュー</th><th>下のバー</th><th>右のボタン</th></tr>').appendTo('#panelcustomTable');
+        $('<tr><td>基本</td><td></td><td></td><td></td></tr>').appendTo('#panelcustomTable');
+        $('<tr><td>番組情報<br>表示時</td><td></td><td></td><td></td></tr>').appendTo('#panelcustomTable');
+        $('<tr><td>放送中一覧<br>表示時</td><td></td><td></td><td></td></tr>').appendTo('#panelcustomTable');
+        $('<tr><td>コメント<br>表示時</td><td></td><td></td><td></td></tr>').appendTo('#panelcustomTable');
+        var rd=["非表示<br>","マウス反応<br>","常に表示"];
+        for(var i=0;i<4;i++){
+            for(var j=0;j<3;j++){
+                for(var k=0;k<3;k++){
+                    $('<input type="radio" name="d'+i+''+j+'" value='+k+'>').appendTo('#panelcustomTable tr:eq('+(i+1)+')>td:eq('+(j+1)+')')
+                        .after(rd[k])
+                    ;
+                }
+            }
+        }
+        $('#panelcustomTable td').css("border","1px solid black")
+            .css("text-align","left")
+            .css("padding","3px")
+        ;
+        $('#panelcustomTable td:first-child').css("text-align","center");
+    }
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -92,6 +215,11 @@ $(function(){
         var isProTextLarge=value.proTextLarge||false;
         var isCommentWide=value.commentWide||false;
         var kakikomiwait=(value.kakikomiwait!==undefined)?value.kakikomiwait:0;
+        var useEyecatch=value.useEyecatch||false;
+        var isHidePopTL=value.hidePopTL||false;
+        var isHidePopBL=value.hidePopBL||false;
+        var panelopenset=value.panelopenset||(isAlwaysShowPanel?"222222222222":(isOpenPanelwCome?"111000000111":"111000000000"));//isA..とisO..を初回のみ適用
+        var comeMovingAreaTrim=value.comeMovingAreaTrim||false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -157,86 +285,36 @@ $(function(){
         $('#isProTextLarge').prop("checked",isProTextLarge);
         $('#isCommentWide').prop("checked",isCommentWide);
         $('#kakikomiwait').val(kakikomiwait);
+        $('#useEyecatch').prop("checked",useEyecatch);
+        $('#isHidePopTL').prop("checked",isHidePopTL);
+        $('#isHidePopBL').prop("checked",isHidePopBL);
+
+        $('#settingsArea input[type="radio"][name="cmbktype"]').prop("disabled",!isCMBlack)
+            .val([isCMBkTrans?1:0])
+        ;
+        $('#settingsArea input[type="radio"][name="cmsotype"]').prop("disabled",!isCMsoundoff)
+            .val([isTabSoundplay?1:0])
+        ;
+        if($('#ipanelopenset [type="radio"][name="panelopenset"][value='+panelopenset+']').length>0){
+            $('#ipanelopenset [type="radio"][name="panelopenset"]').val([panelopenset]);
+        }else{
+            $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
+        }
+        var sp=panelopenset.split('');
+        for(var i=0;i<4;i++){
+            for(var j=0;j<3;j++){
+                $('#panelcustomTable [type="radio"][name="d'+i+''+j+'"]').val([sp[i*3+j]]);
+            }
+        }
+        $('#comeMovingAreaTrim').prop("checked",comeMovingAreaTrim);
     });
-    if($('#settingsArea #CommentMukouSettings .setTables').length==0){
-        $('#settingsArea #CommentMukouSettings').wrapInner('<div id="ComeMukouD">');
-        $('<div id="ComeMukouO" class="setTables">コメント数が表示されないとき</div>').prependTo('#settingsArea #CommentMukouSettings');
-        $('#settingsArea #ComeMukouO').css("margin-top","8px")
-            .css("padding","8px")
-            .css("border","1px solid black")
-        ;
-        $('<table id="setTable">').appendTo('#settingsArea #ComeMukouO');
-        $('#settingsArea table#setTable').css("border-collapse","collapse");
-        $('<tr><th></th><th colspan=2>画面真っ黒</th><th>画面縮小</th><th colspan=2>音量ミュート</th></tr>').appendTo('#settingsArea table#setTable');
-        $('<tr><td>適用</td><td></td><td></td><td></td><td></td><td></td></tr>').appendTo('#settingsArea table#setTable');
-        $('<tr><td>画面クリックで<br>解除・再適用</td><td colspan=2></td><td></td><td colspan=2></td></tr>').appendTo('#settingsArea table#setTable');
-
-        $('#settingsArea #isCMBlack').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(1)');
-        $('#settingsArea #isCMBkTrans').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(1)').css("display","none");
-        $('<input type="radio" name="cmbktype" value=0>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(2)')
-            .after("全面真黒<br>")
-        ;
-        $('<input type="radio" name="cmbktype" value=1>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(2)')
-            .after("下半透明")
-        ;
-        $('#settingsArea table#setTable input[type="radio"][name="cmbktype"]').change(setCMBKChangedR);
-
-        $('#settingsArea #CMsmall').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(3)').after("％")
-            .css("text-align","right")
-            .css("width","4em")
-        ;
-
-        $('#settingsArea #isCMsoundoff').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(4)');
-        $('#settingsArea #isTabSoundplay').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(4)').css("display","none");
-        $('<input type="radio" name="cmsotype" value=0>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(5)')
-            .after("プレイヤー<br>")
-        ;
-        $('<input type="radio" name="cmsotype" value=1>').appendTo('#settingsArea table#setTable tr:eq(1)>td:eq(5)')
-            .after("タブ設定")
-        ;
-        $('#settingsArea table#setTable input[type="radio"][name="cmsotype"]').change(setCMsoundChangedR);
-
-        $('#settingsArea table#setTable #isCMBlack').change(setCMBKChangedB);
-        $('#settingsArea table#setTable #CMsmall').change(setCMzoomChangedR);
-        $('#settingsArea table#setTable #isCMsoundoff').change(setCMsoundChangedB);
-        $('#settingsArea #isCMBkR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(1)');
-        $('#settingsArea #isCMsmlR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(2)');
-        $('#settingsArea #isCMsoundR').appendTo('#settingsArea table#setTable tr:eq(2)>td:eq(3)');
-        $('#settingsArea table#setTable td').css("border","1px solid black")
-            .css("text-align","center")
-            .css("padding","3px")
-        ;
-        $('#settingsArea table#setTable tr:eq(1)>td:eq(1)').css("border-right","none");
-        $('#settingsArea table#setTable tr:eq(1)>td:eq(2)').css("border-left","none")
-            .css("text-align","left")
-        ;
-        $('#settingsArea table#setTable tr:eq(1)>td:eq(4)').css("border-right","none");
-        $('#settingsArea table#setTable tr:eq(1)>td:eq(5)').css("border-left","none")
-            .css("text-align","left")
-        ;
-
-        $('<div id="ComeMukouW" class="setTables">↑の実行待機(秒)</div>').insertAfter('#settingsArea #ComeMukouO');
-        $('#settingsArea #ComeMukouW').css("margin-top","8px")
-            .css("padding","8px")
-            .css("border","1px solid black")
-        ;
-        $('#settingsArea #beforeCMWait').appendTo('#settingsArea #ComeMukouW')
-            .before("　開始後")
-        ;
-        $('#settingsArea #afterCMWait').appendTo('#settingsArea #ComeMukouW')
-            .before("　終了後")
-            .after("<br>待機時間中、押している間は実行せず、離すと即実行するキー<br>")
-        ;
-        $('#settingsArea #isManualKeyCtrlL').appendTo('#settingsArea #ComeMukouW').after("左ctrl");
-        $('#settingsArea #isManualKeyCtrlR').appendTo('#settingsArea #ComeMukouW').after("右ctrl");
-        $('#settingsArea #isManualMouseBR').appendTo('#settingsArea #ComeMukouW')
-            .before("<br>待機時間中、カーソルを1秒以上連続で合わせている間は実行せず、外すと即実行する場所<br>")
-            .after("右下のコメント数表示部")
-        ;
-        $('#settingsArea #ComeMukouD').remove();
-        setTimeout(radiodelayset,50);
-    }
     $("#saveBtn").click(function () {
+        var panelopenset='';
+        for(var i=0;i<4;i++){
+            for(var j=0;j<3;j++){
+                panelopenset+=''+$('#panelcustomTable [type="radio"][name="d'+i+''+j+'"]:checked').val();
+            }
+        }
         chrome.storage.local.set({
             "resizeScreen": $("#isResizeScreen").prop("checked"), 
             "dblFullscreen": $("#isDblFullscreen").prop("checked"),
@@ -289,22 +367,35 @@ $(function(){
             "proSamePosition":$('#iproSamePosition [name="proSamePosition"]:checked').val(),
             "proTextLarge":$('#isProTextLarge').prop("checked"),
             "commentWide":$('#isCommentWide').prop("checked"),
-            "kakikomiwait":parseInt($('#kakikomiwait').val())
+            "kakikomiwait":parseInt($('#kakikomiwait').val()),
+            "useEyecatch":$('#useEyecatch').prop("checked"),
+            "hidePopBL":$('#isHidePopBL').prop("checked"),
+            "hidePopTL":$('#isHidePopTL').prop("checked"),
+            "panelopenset":panelopenset,
+            "comeMovingAreaTrim":$('#comeMovingAreaTrim').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
     });
     $('#CommentColorSettings').change(function(){
-      var p=[];
-      $('#CommentColorSettings>div>input[type="range"]').each(function(i,jo){
-        $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
-        p[i]=$(jo).val();
-      });
-      $('#CommentColorSettings>div>span.desc').css("background-color","rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")")
-        .css("color","rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")")
-      ;
+        var p=[];
+        var jo=$('#CommentColorSettings input[type="range"]');
+        for(var i=0;i<jo.length;i++){
+            jo.eq(i).prev('span.prop').text(jo.eq(i).val()+" ("+Math.round(jo.eq(i).val()*100/255)+"%)");
+            p[i]=jo.eq(i).val();
+        }
+//        $('#CommentColorSettings input[type="range"]').each(function(i,jo){
+//            $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
+//            p[i]=$(jo).val();
+//        });
+        $('#CommentColorSettings>div>span.desc').css("background-color","rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")")
+            .css("color","rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")")
+        ;
     });
-
+    $('#alwaysShowPanelB').on("click",panelTableUpdateA);
+    $('#openPanelwComeB').on("click",panelTableUpdateO);
+    $('#ipanelopenset').change(panelTableUpdateS);
+    $('#panelcustomTable').change(panelTableUpdateT);
 });
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";
@@ -351,11 +442,24 @@ function setCMBKChangedR(){
 function setCMsoundChangedR(){
     $('#settingsArea #isTabSoundplay').prop("checked",$('#settingsArea input[type="radio"][name="cmsotype"]:checked').val()==1?true:false);
 }
-function radiodelayset(){
-    $('#settingsArea input[type="radio"][name="cmbktype"]').prop("disabled",!$("#isCMBlack").prop("checked"))
-        .val([$("#isCMBkTrans").prop("checked")?1:0])
-    ;
-    $('#settingsArea input[type="radio"][name="cmsotype"]').prop("disabled",!$("#isCMsoundoff").prop("checked"))
-        .val([$("#isTabSoundplay").prop("checked")?1:0])
-    ;
+function panelTableUpdateA(){
+    $('#panelcustomTable [type="radio"]').val([2]);
+}
+function panelTableUpdateO(){
+    $('#panelcustomTable [type="radio"][name^="d3"]').val([1]);
+}
+function panelTableUpdateS(){
+    var jo=$('#panelcustomTable [type="radio"]');
+    var jv=$('#ipanelopenset [type="radio"][name="panelopenset"]:checked').val();
+    var js=jv.split('');
+    for(var i=0;i<4;i++){
+        for(var j=0;j<3;j++){
+            if(parseInt(js[i*3+j])<3){
+                jo.filter('[name^="d'+i+''+j+'"]').val([js[i*3+j]]);
+            }
+        }
+    }
+}
+function panelTableUpdateT(){
+    $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
 }
