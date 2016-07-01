@@ -3060,15 +3060,18 @@ function pophideSelector(sv,sw){
         if(jo.length==0){
 //console.log("panel none");
             st=panelopenset[0];
-        }else if(jo.is(EXcome)){
-//console.log("panel come");
-            st=panelopenset[3];
-        }else if(jo.is(EXinfo)){
+//        }else if(jo.is(EXinfo)){
+        }else if(isInfoOpen(3)){
 //console.log("panel info");
             st=panelopenset[2];
-        }else if(jo.is(EXchli.parentElement)){
+//        }else if(jo.is(EXchli.parentElement)){
+        }else if(isChliOpen(3)){
 //console.log("panel chli");
             st=panelopenset[1];
+//        }else if(jo.is(EXcome)){
+        }else if(isComeOpen()){
+//console.log("panel come");
+            st=panelopenset[3];
         }
     }
 //console.log(st);
