@@ -75,6 +75,12 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
+        "name": "comeMovingAreaTrim",
+        "description": "コメントを流す領域の横幅を、ウィンドウ全体でなく映像の横幅に合わせる",
+        "type": "boolean",
+        "isInstantChangable": true
+    },
+    {
         "name": "isInpWinBottom",
 //        "description": "コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール(コメ欄を常に表示しているときのみ)",
 //        "description": "コメント入力欄の位置を下へ(コメント一覧の逆順・スクロール機能は一時廃止)",
@@ -134,7 +140,7 @@ var settingsList = [
     {
         "name": "isSureReadComment",
 //        "description": "常にコメント欄を表示する",
-        "description": "常にコメント欄を表示しようとする",
+        "description": "常にコメント欄を開こうとする(開閉が制限されている時は開けません)",
         "type": "boolean",
 //        "isInstantChangable": false
         "isInstantChangable": true
@@ -276,6 +282,9 @@ var RadioSettingList = [
                 ["horizontal","横(コメ欄周辺で無効)"],
                 ["horizshort","タイトルを少し左へ"]
             ]]
+    },{
+        "name": "panelopenset",
+        "list":[[["111000000000","デフォルト"],["222222222222","常に表示"],["333333333333","カスタム"]]]
     }
     ];
 var CMSettingList = [
@@ -356,6 +365,24 @@ var CMSettingList = [
         {
             "name": "isManualMouseBR",
             "description": "↑の待機中、画面右下のコメ数表示部に1.2秒以上連続でカーソルを合わせている間は実行しない（カーソルを外すと即実行）",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "useEyecatch",
+            "description": "左上ロゴのタイミングに合わせる",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isHidePopTL",
+            "description": "左上に出てくるロゴを非表示",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isHidePopBL",
+            "description": "左下に出てくる通知を非表示",
             "type": "boolean",
             "isInstantChangable": true
         }
