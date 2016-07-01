@@ -112,7 +112,7 @@ if (chrome.storage) {
         isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
         isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
         isTabSoundplay = value.tabSoundplay || false;
-        isOpenPanelwCome=value.openPanelwCome||false;
+        isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : isOpenPanelwCome;
         isProtitleVisible=value.protitleVisible||false;
         protitlePosition=value.protitlePosition||protitlePosition;
         proSamePosition=value.proSamePosition||proSamePosition;
