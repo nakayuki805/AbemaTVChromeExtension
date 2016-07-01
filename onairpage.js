@@ -1859,6 +1859,9 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
     var jfmbot=0;
     var jcmtop=0; //jcomeのmargin-top
     var jcmbot=0;
+    var jccont=$(EXcome);
+    var jcct=0; //jccontのtop
+    var jcchd=0; //jccontのheightの100%からの減り分(最後にcalcで100%から引く)
     var htime=isTimeVisible?($('#forProEndTxt').height()+parseInt($('#forProEndTxt').css("padding-top"))+parseInt($('#forProEndTxt').css("padding-bottom"))+parseInt($('#forProEndTxt').css("margin-top"))+parseInt($('#forProEndTxt').css("margin-bottom"))):0;
     var htitle=isProtitleVisible?($('#tProtitle').height()+parseInt($('#tProtitle').css("padding-top"))+parseInt($('#tProtitle').css("padding-bottom"))+parseInt($('#tProtitle').css("margin-top"))+parseInt($('#tProtitle').css("margin-bottom"))):0;
     var ptime=(inptime!==undefined)?inptime:(isTimeVisible?timePosition:"");
@@ -1874,6 +1877,8 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             }else{
                 jcmtop=44;
             }
+            jcct=jcmtop;
+            jcchd+=jcmtop;
         }else{
             //入力欄が上＝対象はjformのtopmargin＋番組情報(コメ上)
             if(ptime=="windowtop"&&ptitle=="windowtopright"&&psame=="vertical"){
@@ -1888,6 +1893,8 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             }else{
                 jfptop=15;
             }
+            jcct=jfmtop;
+            jcchd+=jfmtop;
         }
     }else{
         //ヘッダ非表示時
@@ -1899,6 +1906,8 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             }else{
                 jcmtop=0;
             }
+            jcct=jcmtop;
+            jcchd+=jcmtop;
         }else{ //jftop
             var margincut=0;
             if((ptime=="windowtop"||ptitle=="windowtopright")&&(ptime!="commentinputtop"&&ptitle!="commentinputtopright"&&ptitle!="commentinputtopleft")){
@@ -1922,6 +1931,8 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             }else{
                 jfptop=15;
             }
+            jcct=jfmtop;
+            jcchd+=jfmtop;
         }
     }
     //フッタ表示かつコメ入力下の場合は音量ボタン等の下位置を上げる
@@ -1935,7 +1946,8 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             if(isComeOpen()){
                 volshift=true;
             }
-            jfmbot=$(EXfoot).children('[class^="TVContainer__footer___"]').height();
+//            jfmbot=$(EXfoot).children('[class^="TVContainer__footer___"]').height();
+            jfmbot=61;
             if(ptime=="commentinputbottom"&&ptitle=="commentinputbottomright"&&psame=="vertical"){//(ptitle=="commentinputbottomleft"||
                 jfpbot=Math.max(htime+htitle,15);
             }else if(ptime=="commentinputbottom"||(ptitle=="commentinputbottomleft"||ptitle=="commentinputbottomright")){
@@ -1943,8 +1955,11 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             }else{
                 jfpbot=15;
             }
+            jcchd+=jfmbot;
         }else{ // jftop,jcbot
-            jcmbot=$(EXfoot).children('[class^="TVContainer__footer___"]').height();
+//            jcmbot=$(EXfoot).children('[class^="TVContainer__footer___"]').height();
+            jcmbot=61;
+            jcchd+=jcmbot;
         }
     }else{
         //フッタ非表示時
@@ -1971,6 +1986,7 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             }else{
                 jfpbot=15;
             }
+            jcchd+=jfmbot;
         }else{ // jftop,jcbot
             if(ptime=="windowbottom"&&ptitle=="windowbottomright"&&psame=="vertical"){
                 jcmbot=htime+htitle;
@@ -1979,6 +1995,7 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             }else{
                 jcmbot=0;
             }
+            jcchd+=jcmbot;
         }
     }
     if(isInpWinBottom){ //jctop,jfbot,jftop
@@ -1998,14 +2015,27 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
             jfpbot=15;
         }
     }
-    jform.css("margin-top",jfmtop)
-        .css("margin-bottom",jfmbot)
-        .css("padding-top",jfptop)
-        .css("padding-bottom",jfpbot)
+
+    jccont.css("top",jcct)
+        .css("height","calc(100% - "+jcchd+"px)")
     ;
-    jcome.css("margin-top",jcmtop)
-        .css("margin-bottom",jcmbot)
-    ;
+    if(isInpWinBottom){
+        jform.css("padding-top",jfptop)
+            .css("padding-bottom",jfpbot)
+        ;
+    }else{
+        jform.css("padding-top",jfptop)
+            .css("padding-bottom",jfpbot)
+        ;
+    }
+//    jform.css("margin-top",jfmtop)
+//        .css("margin-bottom",jfmbot)
+//        .css("padding-top",jfptop)
+//        .css("padding-bottom",jfpbot)
+//    ;
+//    jcome.css("margin-top",jcmtop)
+//        .css("margin-bottom",jcmbot)
+//    ;
     if(volshift){
         $(EXvolume).css("bottom",(80+jform.height()+jfptop+jfpbot)+"px")
             .prev('[class^="styles__full-screen___"]').css("bottom",(80+jform.height()+jfptop+jfpbot)+"px")
@@ -2791,8 +2821,7 @@ function setTimePosition(timepar,titlepar,samepar,bigpar){
     var parexfootcount=$(EXfootcount).parent();
     var forpros=$("#forProEndTxt,#forProEndBk,#proTimeEpNum");
 //    var bigtext=(bigpar!==undefined)?bigpar:isProTextLarge;
-    var tpro=$("#tProtitle");
-    var tproh=tpro.height();
+    var fproh=$("#forProEndTxt").height();
     var par=timepar;
     switch(par){
         case "windowtop":
@@ -2814,7 +2843,7 @@ function setTimePosition(timepar,titlepar,samepar,bigpar){
     switch(par){
         case "windowtop":
         case "header":
-            var hmt=(tproh-12)+Math.floor((44-tproh-12)/2);
+            var hmt=(fproh-12)+Math.floor((44-fproh-12)/2);
 //            prehoverContents.css("margin-top",(bigtext?14:9)+"px")
 //                .prev().css("margin-top",(bigtext?14:9)+"px")
 //            ;
@@ -2827,7 +2856,7 @@ function setTimePosition(timepar,titlepar,samepar,bigpar){
     switch(par){
         case "windowbottom":
         case "footer":
-            var fmb=tproh;
+            var fmb=fproh;
 //            parexfootcount.css("margin-bottom",(bigtext?24:14)+"px")
 //                .css("height","unset")
 //            ;
