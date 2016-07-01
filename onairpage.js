@@ -17,7 +17,7 @@ var CMsmall=100; //コメント数無効の時ずっと映像縮小
 var isMovingComment = false; //あの動画サイトのように画面上をコメントが流れる(コメント欄を表示しているときのみ機能)
 settings.movingCommentSecond = 10;//コメントが画面を流れる秒数
 var movingCommentLimit = 30;//同時コメント最大数
-var isMoveByCSS = false;//CSSのanimationでコメントを動かす
+//var isMoveByCSS = false;//CSSのanimationでコメントを動かす//デフォに
 var isComeNg = false;//流れるコメントのうち特定の文字列を削除or置き換えする
 var isComeDel = false;//流れるコメントのうちユーザー指定の文字列を含むものを流さない(この処理は↑の除去前に実行される)
 var fullNg = "";//流れるコメントのうち特定の文字列を含む場合は流さない
@@ -81,7 +81,7 @@ if (chrome.storage) {
         isMovingComment = value.movingComment || false;
         settings.movingCommentSecond = (value.movingCommentSecond!==undefined)?value.movingCommentSecond : settings.movingCommentSecond;
         movingCommentLimit = (value.movingCommentLimit!==undefined)?value.movingCommentLimit : movingCommentLimit;
-        isMoveByCSS =　value.moveByCSS || false;
+        //isMoveByCSS =　value.moveByCSS || false;
         isComeNg = value.comeNg || false;
         isComeDel = value.comeDel || false;
         fullNg = value.fullNg || fullNg;
@@ -124,7 +124,7 @@ if (chrome.storage) {
         isHidePopTL=value.hidePopTL||false;
         isHidePopBL=value.hidePopBL||false;
 //        panelopenses=value.panelopenset||"111000000000";
-        panelopenses=value.panelopenset||(isAlwaysShowPanel?"222222222222":(isOpenPanelwCome?"111000000111":"111000000000"));//isA..とisO..を初回のみ適用
+        panelopenses=value.panelopenset||(settings.isAlwaysShowPanel?"222222222222":(isOpenPanelwCome?"111000000111":"111000000000"));//isA..とisO..を初回のみ適用
         for(var i=0;i<4;i++){
             for(var j=0;j<3;j++){
                 panelopenset[i][j]=panelopenses.split('')[i*3+j];
@@ -594,7 +594,7 @@ function openOption(sw){
     $("#isMovingComment").prop("checked", isMovingComment);
     $("#movingCommentSecond").val(settings.movingCommentSecond);
     $("#movingCommentLimit").val(movingCommentLimit);
-    $("#isMoveByCSS").prop("checked", isMoveByCSS);
+//    $("#isMoveByCSS").prop("checked", isMoveByCSS);
     $("#isComeNg").prop("checked", isComeNg);
     $("#isComeDel").prop("checked", isComeDel);
     $("#fullNg").val(fullNg);
@@ -1213,7 +1213,7 @@ function setSaveClicked(){
     isMovingComment = $("#isMovingComment").prop("checked");
     settings.movingCommentSecond = parseInt($("#movingCommentSecond").val());
     movingCommentLimit = parseInt($("#movingCommentLimit").val());
-    isMoveByCSS = $("#isMoveByCSS").prop("checked");
+//    isMoveByCSS = $("#isMoveByCSS").prop("checked");
     isComeNg = $("#isComeNg").prop("checked");
     isComeDel = $("#isComeDel").prop("checked");
     fullNg = $("#fullNg").val();
@@ -3915,7 +3915,7 @@ function putNotifyButton(url){
     var programID = urlarray[3];
     var programTitle = $('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__heading___"]').text();
     var programTimeStr = $('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__time___"]').text();
-    console.log(programTimeStr, urlarray)
+    //console.log(programTimeStr, urlarray)
     var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
     var programTime = new Date();
     var now = new Date();

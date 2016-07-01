@@ -42,14 +42,14 @@ var settingsList = [
         "type": "number",
         "isInstantChangable": true
     },
-    {
+/*    {
         "name": "isMoveByCSS",
 //        "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)",
         "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)※現在このオプションは強制的に有効として扱っています",
         "type": "boolean",
         "isInstantChangable": false
 //        "isInstantChangable": true
-    },
+    },*/
     {
         "name": "isComeNg",
         "description": "流れるコメントから規定の単語を除去(顔文字,連続する単語など)",
