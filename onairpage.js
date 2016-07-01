@@ -49,7 +49,7 @@ var isCMBkR=false; //画面クリックによる真っ黒解除
 var isCMsoundR=false; //画面クリックによるミュート解除
 var isCMsmlR=false; //画面クリックによる縮小解除
 var isTabSoundplay=false; //タブ設定によるミュート切替
-var isOpenPanelwCome=false; //コメント欄を開いてる時にもマウスオーバーで各要素を表示する
+var isOpenPanelwCome=true; //コメント欄を開いてる時にもマウスオーバーで各要素を表示する
 var isProtitleVisible=false; //番組名を画面右の情報枠から取得して表示する
 var protitlePosition="windowtopleft"; //番組名の表示位置
 var proSamePosition="over"; //番組名と残り時間の位置が重なった場合の対処方法
@@ -113,7 +113,7 @@ if (chrome.storage) {
         isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
         isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
         isTabSoundplay = value.tabSoundplay || false;
-        isOpenPanelwCome=value.openPanelwCome||false;
+        isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : isOpenPanelwCome;
         isProtitleVisible=value.protitleVisible||false;
         protitlePosition=value.protitlePosition||protitlePosition;
         proSamePosition=value.proSamePosition||proSamePosition;
