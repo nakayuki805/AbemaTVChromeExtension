@@ -195,6 +195,12 @@ var settingsList = [
         "isInstantChangable": true
     },
     {
+        "name": "isHideButtons",
+        "description": "全画面ボタンと音量ボタンを非表示",
+        "type": "boolean",
+        "isInstantChangable": true
+    },
+    {
         "name": "notifySeconds",
         "description": "番組通知を番組開始の何秒前にするか(番組表の番組ページから番組開始前の通知を設定できます。)",
         "type": "number",
