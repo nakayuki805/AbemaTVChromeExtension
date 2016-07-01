@@ -3916,7 +3916,7 @@ function putNotifyButton(url){
     var programTitle = $('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__heading___"]').text();
     var programTimeStr = $('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__time___"]').text();
     console.log(programTimeStr, urlarray)
-    var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（.+）(\d+):(\d+)/);
+    var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
     var programTime = new Date();
     var now = new Date();
     programTime.setMonth(parseInt(programTimeArray[1])-1);
@@ -3925,7 +3925,7 @@ function putNotifyButton(url){
     programTime.setMinutes(parseInt(programTimeArray[4]));
     programTime.setSeconds(0);
     if (now.getMonth === 11 && programTime.getMonth === 0) {programTime.setFullYear(now.getFullYear+1);} //現在12月なら1月は来年とする
-    //console.log(programTime)
+    console.log(programTime)
     var notifyTime = programTime - notifySeconds*1000;
     if (notifyTime > now){
         var progNotifyName = "progNotify_"+channel+"_"+programID;
