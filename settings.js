@@ -1,222 +1,228 @@
 var settingsList = [
     {
-        "name": "isResizeScreen",
-        "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
-        "type": "boolean",
-        "isInstantChangable": true
+        "description" : "映像・表示・操作関連設定",
+        "settings": [
+            {
+                "name": "isResizeScreen",
+                "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                //        "name": "isMovieResize",
+                "name": "isMovieMaximize",
+                //        "description": "映像を枠に合わせて縮小する",
+                //        "description": "映像の横長さを最大に固定する",
+                "description": "映像の縦横長さを最大で固定する",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isDblFullscreen",
+                "description": "<s>ダブルクリックで全画面表示に切り替え＆全画面ボタンをF11相当のフルスクリーンに割り当て(コメント欄を表示したまま全画面にできます。)</s>※現在うまくフルスクリーン表示できません。かわりにF11キーを使用してください>",
+                "instantDescription": "ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません※現在不具合があります",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isCancelWheel",
+                //        "description": "マウスホイールによる番組移動を禁止する",
+                "description": "マウスホイール及び上下矢印キーによる番組移動を無効化する",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isVolumeWheel",
+                //        "description": "マウスホイールによる番組移動を音量操作へ変更する",
+                "description": "マウスホイールで音量を操作する（&番組移動無効化）",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "changeMaxVolume",
+                "description": "音量が最大(100)の場合は以下へ自動変更する",
+                "type": "number",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isHideButtons",
+                "description": "全画面ボタンと音量ボタンを非表示",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isAlwaysShowPanel",
+                "description": "常に黒帯パネルを表示する※下の黒帯パネル開閉設定で設定",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isOpenPanelwCome",
+                "description": "コメント欄を開いていても黒帯パネル等を表示できるようにする※下の黒帯パネル開閉設定で設定",
+                "type": "boolean",
+                "isInstantChangable": true
+            }
+        ]
     },
     {
-        "name": "isDblFullscreen",
-        "description": "<s>ダブルクリックで全画面表示に切り替え＆全画面ボタンをF11相当のフルスクリーンに割り当て(コメント欄を表示したまま全画面にできます。)</s>※現在うまくフルスクリーン表示できません。かわりにF11キーを使用してください>",
-        "instantDescription": "ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません※現在不具合があります",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-//    {
-//        "name": "isEnterSubmit",
-//        "description": "エンターでコメント送信",
-//        "type": "boolean",
-//        "isInstantChangable": true
-//    },
-    {
-        "name": "isHideOldComment",
-        "description": "コメント欄のスクロールバーを非表示にする",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isMovingComment",
-        "description": "新着コメントをあの動画サイトのように横に流す(CSSのtransitionで流すを同時に有効にすることをおすすめします)",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "movingCommentSecond",
-        "description": "↑のコメントの速さ(コメントが画面を流れる秒数)",
-        "type": "number",
-        "isInstantChangable": true
-    },
-    {
-        "name": "movingCommentLimit",
-        "description": "↑のコメントの同時表示上限",
-        "type": "number",
-        "isInstantChangable": true
-    },
-/*    {
-        "name": "isMoveByCSS",
-//        "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)",
-        "description": "コメントをCSSのtransitionで流す(速度も変更できます。コメント流しが重い場合、これで軽減するかもしれません。)※現在このオプションは強制的に有効として扱っています",
-        "type": "boolean",
-        "isInstantChangable": false
-//        "isInstantChangable": true
-    },*/
-    {
-        "name": "isComeNg",
-        "description": "流れるコメントから規定の単語を除去(顔文字,連続する単語など)",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isComeDel",
-        "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/、//コメント)",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "fullNg",
-        "description": "",
-        "type": "textarea",
-        "isInstantChangable": true
+        "description": "コメント欄関連設定",
+        "settings": [
+            {
+                "name": "isHideOldComment",
+                "description": "コメント欄のスクロールバーを非表示にする",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isInpWinBottom",
+                "description": "コメント入力欄を下へ(コメント一覧は逆順・下スクロール)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isCustomPostWin",
+                //        "description": "投稿ボタン削除・入力欄1行化",
+                "description": "投稿ボタン等を非表示",
+                "type": "boolean",
+                //        "isInstantChangable": false
+                "isInstantChangable": true
+            },
+            {
+                "name": "isSureReadComment",
+                //        "description": "常にコメント欄を表示する",
+                "description": "常にコメント欄を開こうとする(開閉が制限されている時は開けません)",
+                "type": "boolean",
+                //        "isInstantChangable": false
+                "isInstantChangable": true
+            },
+            {
+                "name": "sureReadRefreshx",
+                //        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+                //        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+                "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、100以前の古いコメントが破棄されることで動作が軽くなります)",
+                "type": "number",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isCommentPadZero",
+                "description": "コメントの縦の隙間を詰める",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isCommentTBorder",
+                "description": "コメントの区切り線を付ける",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isCommentWide",
+                "description": "コメントを横にほんの少し広げる",
+                "type": "boolean",
+                "isInstantChangable": true
+            }
+        ]
     },
     {
-        "name": "kakikomiwait",
-        "description": "自分のコメントを流すまでの待ち時間(秒)マイナスだと流れない",
-        "type": "number",
-        "isInstantChangable": true
+        "description": "コメント流し関連設定",
+        "settings": [
+            {
+                "name": "isMovingComment",
+                "description": "新着コメントをあの動画サイトのように横に流す(コメント欄を開いているときのみ有効、コメント欄関連設定の常にコメント欄を開こうとするを同時に有効にすると常にコメントが流れます)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "movingCommentSecond",
+                "description": "↑のコメントの速さ(コメントが画面を流れる秒数)",
+                "type": "number",
+                "isInstantChangable": true
+            },
+            {
+                "name": "movingCommentLimit",
+                "description": "↑のコメントの同時表示上限",
+                "type": "number",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isComeNg",
+                "description": "流れるコメントから規定の単語を除去(顔文字,連続する単語など)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isComeDel",
+                "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/、//コメント)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "fullNg",
+                "description": "",
+                "type": "textarea",
+                "isInstantChangable": true
+            },
+            {
+                "name": "kakikomiwait",
+                "description": "自分のコメントを流すまでの待ち時間(秒)マイナスだと流れない",
+                "type": "number",
+                "isInstantChangable": true
+            },
+            {
+                "name": "comeMovingAreaTrim",
+                "description": "コメントを流す領域の横幅を、ウィンドウ全体でなく映像の横幅に合わせる",
+                "type": "boolean",
+                "isInstantChangable": true
+            }
+        ]
     },
     {
-        "name": "comeMovingAreaTrim",
-        "description": "コメントを流す領域の横幅を、ウィンドウ全体でなく映像の横幅に合わせる",
-        "type": "boolean",
-        "isInstantChangable": true
+        "description": "番組時間・タイトル表示関連設定",
+        "settings": [
+            {
+                "name": "isTimeVisible",
+                //        "description": "コメント入力欄の近くに番組残り時間を表示",
+                //        "description": "画面右上に番組残り時間を表示",
+                "description": "番組残り時間を表示",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isProtitleVisible",
+                "description": "番組タイトルを表示",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isProTextLarge",
+                "description": "番組残り時間・タイトルの文字を大きくする",
+                "type": "boolean",
+                "isInstantChangable": true
+            }
+        ]
     },
     {
-        "name": "isInpWinBottom",
-//        "description": "コメント入力欄の位置を下へ・コメント一覧を逆順・下へスクロール(コメ欄を常に表示しているときのみ)",
-//        "description": "コメント入力欄の位置を下へ(コメント一覧の逆順・スクロール機能は一時廃止)",
-//        "description": "コメント入力欄と番組残り時間を下へ(コメント一覧は逆順・下スクロール)",
-        "description": "コメント入力欄を下へ(コメント一覧は逆順・下スクロール)",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isCustomPostWin",
-//        "description": "投稿ボタン削除・入力欄1行化",
-        "description": "投稿ボタン等を非表示",
-        "type": "boolean",
-//        "isInstantChangable": false
-        "isInstantChangable": true
-    },
-    {
-        "name": "isCancelWheel",
-//        "description": "マウスホイールによる番組移動を禁止する",
-        "description": "マウスホイール及び上下矢印キーによる番組移動を無効化する",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isVolumeWheel",
-//        "description": "マウスホイールによる番組移動を音量操作へ変更する",
-        "description": "マウスホイールで音量を操作する（&番組移動無効化）",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "changeMaxVolume",
-        "description": "音量が最大(100)の場合は以下へ自動変更する",
-        "type": "number",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isTimeVisible",
-//        "description": "コメント入力欄の近くに番組残り時間を表示",
-//        "description": "画面右上に番組残り時間を表示",
-        "description": "番組残り時間を表示",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isProtitleVisible",
-        "description": "番組タイトルを表示",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isProTextLarge",
-        "description": "番組残り時間・タイトルの文字を大きくする",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isSureReadComment",
-//        "description": "常にコメント欄を表示する",
-        "description": "常にコメント欄を開こうとする(開閉が制限されている時は開けません)",
-        "type": "boolean",
-//        "isInstantChangable": false
-        "isInstantChangable": true
-    },
-    {
-        "name": "sureReadRefreshx",
-//        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
-//        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
-        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、100以前の古いコメントが破棄されることで動作が軽くなります)",
-        "type": "number",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isAlwaysShowPanel",
-        "description": "常に黒帯パネルを表示する",
-        "type": "boolean",
-//        "isInstantChangable": false
-        "isInstantChangable": true
-    },
-    {
-        "name": "isOpenPanelwCome",
-//        "description": "コメント欄を開いていても黒帯パネルを表示する",
-        "description": "コメント欄を開いていても黒帯パネル等を表示できるようにする",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-//        "name": "isMovieResize",
-        "name": "isMovieMaximize",
-//        "description": "映像を枠に合わせて縮小する",
-//        "description": "映像の横長さを最大に固定する",
-        "description": "映像の縦横長さを最大で固定する",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isCommentPadZero",
-        "description": "コメントの縦の隙間を詰める",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isCommentTBorder",
-        "description": "コメントの区切り線を付ける",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isCommentWide",
-        "description": "コメントを横にほんの少し広げる",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isHideButtons",
-        "description": "全画面ボタンと音量ボタンを非表示",
-        "type": "boolean",
-        "isInstantChangable": true
-    },
-    {
-        "name": "notifySeconds",
-        "description": "番組通知を番組開始の何秒前にするか(番組表の番組ページから番組開始前の通知を設定できます。)",
-        "type": "number",
-        "isInstantChangable": true
-    },
-    {
-        "name": "isNotifyAndOpen",
-        "description": "番組通知時に自動で新しいタブで放送画面を開く",
-        "type": "boolean",
-        "isInstantChangable": false
-    },
-    {
-        "name": "isNaOinActive",
-        "description": "↑既に開いている放送画面があれば新しいタブを開かずそのタブを切り替える(アクティブなタブ優先)",
-        "type": "boolean",
-        "isInstantChangable": false
+        "description": "番組通知関連設定",
+        "settings": [
+            {
+                "name": "notifySeconds",
+                "description": "番組通知を番組開始の何秒前にするか(番組表の番組ページから番組開始前の通知を設定できます。)",
+                "type": "number",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isNotifyAndOpen",
+                "description": "番組通知時に自動で新しいタブで放送画面を開く",
+                "type": "boolean",
+                "isInstantChangable": false
+            },
+            {
+                "name": "isNaOinActive",
+                "description": "↑既に開いている放送画面があれば新しいタブを開かずそのタブを切り替える(アクティブなタブ優先)",
+                "type": "boolean",
+                "isInstantChangable": false
+            }
+        ]
     }
     ];
 var ComeColorSettingList = [
@@ -458,9 +464,14 @@ function generateRadioInput(settingsArr){
     return inputHTML;
 }
 function generateOptionHTML(isPermanent) {
-    var htmlstr = generateOptionInput(settingsList, isPermanent);
-    htmlstr += '<div id="CommentColorSettings">' + generateOptionInput(ComeColorSettingList, isPermanent) + '</div>';
-    htmlstr += '<div id="CommentMukouSettings">' + generateOptionInput(CMSettingList, isPermanent) + '</div>';
+    var htmlstr = "";
+    for (var i=0; i < settingsList.length; i++) {
+        htmlstr += "<fieldset><legend>" + settingsList[i].description + "</legend>";
+        htmlstr += generateOptionInput(settingsList[i].settings, isPermanent);
+        htmlstr += "</fieldset>";
+    }
+    htmlstr += '<fieldset><legend>コメント色関連設定</legend><div id="CommentColorSettings">' + generateOptionInput(ComeColorSettingList, isPermanent) + '</div></fieldset>';
     htmlstr += generateRadioInput(RadioSettingList);
+    htmlstr += '<div id="CommentMukouSettings"><fieldset><legend>コメント無効時関連設定</legend>' + generateOptionInput(CMSettingList, isPermanent) + '</fieldset></div>';
     return htmlstr;
 }

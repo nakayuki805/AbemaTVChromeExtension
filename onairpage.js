@@ -8,7 +8,6 @@ var isFuga = false; //利用したくない機能
 */
 settings.isResizeScreen = false; //ウィンドウが横長でも映像の端が切れることないようウィンドウに収まるようリサイズ 不具合報告があったのでデフォルトでfalse
 settings.isDblFullscreen = false; //ダブルクリックで全画面表示に切り替え(全画面表示のときは機能しません。通常→全画面のみ)
-//var isEnterSubmit = false; //エンターでコメント送信(無効にしていてもShift+エンターで送信できます。)
 var isHideOldComment = false; //古いコメントを非表示
 var isCMBlack = false; //コメント数無効(CommentMukou)の時ずっと画面真っ黒
 var isCMBkTrans = false; //コメント数無効の時ずっと画面真っ黒を少し透かす
@@ -72,7 +71,6 @@ if (chrome.storage) {
         $.extend(settings, value);
         settings.isResizeScreen = value.resizeScreen || false;
         settings.isDblFullscreen = value.dblFullscreen || false;
-//        isEnterSubmit = value.enterSubmit || false;
         isHideOldComment = value.hideOldComment || false;
         isCMBlack = value.CMBlack || false;
         isCMBkTrans = value.CMBkTrans || false;
@@ -585,7 +583,6 @@ function openOption(sw){
     //設定ウィンドウにロード
     $("#isResizeScreen").prop("checked", settings.isResizeScreen);
     $("#isDblFullscreen").prop("checked", settings.isDblFullscreen);
-//    $("#isEnterSubmit").prop("checked", isEnterSubmit);
     $("#isHideOldComment").prop("checked", isHideOldComment);
     $("#isCMBlack").prop("checked", isCMBlack);
     $("#isCMBkTrans").prop("checked", isCMBkTrans);
@@ -1204,7 +1201,6 @@ function clearBtnColored(target){
 function setSaveClicked(){
     settings.isResizeScreen = $("#isResizeScreen").prop("checked");
     settings.isDblFullscreen = $("#isDblFullscreen").prop("checked");
-//    isEnterSubmit = $("#isEnterSubmit").prop("checked");
     isHideOldComment = $("#isHideOldComment").prop("checked");
     isCMBlack = $("#isCMBlack").prop("checked");
     isCMBkTrans = $("#isCMBkTrans").prop("checked");

@@ -124,10 +124,10 @@ $(function(){
         $('#ComeMukouD').remove();
     }
     if($('#panelCustom').length==0){
-        $('<div id="panelCustom"">黒帯パネル開閉設定<br></div>').insertBefore('#CommentMukouSettings');
+        $('<fieldset><legend>黒帯パネル開閉設定</legend><div id="panelCustom""></div></fieldset>').insertBefore('#CommentMukouSettings');
         $('#panelCustom').css("margin-top","8px")
-            .css("padding","8px")
-            .css("border","1px solid black")
+            .css("padding","8px");
+            //.css("border","1px solid black")
         ;
         $('#isAlwaysShowPanel').appendTo('#panelCustom').prop("disabled",true).before("旧");
         $('<input type="button" id="alwaysShowPanelB" value="下表に適用">').insertAfter('#isAlwaysShowPanel').before("常に黒帯パネルを表示する");
