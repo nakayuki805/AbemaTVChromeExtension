@@ -49,19 +49,20 @@ var isCMBkR=false; //画面クリックによる真っ黒解除
 var isCMsoundR=false; //画面クリックによるミュート解除
 var isCMsmlR=false; //画面クリックによる縮小解除
 var isTabSoundplay=false; //タブ設定によるミュート切替
-var isOpenPanelwCome=true; //コメント欄を開いてる時にもマウスオーバーで各要素を表示する
+var isOpenPanelwCome=false; //コメント欄を開いてる時にもマウスオーバーで各要素を表示する
 var isProtitleVisible=false; //番組名を画面右の情報枠から取得して表示する
 var protitlePosition="windowtopleft"; //番組名の表示位置
 var proSamePosition="over"; //番組名と残り時間の位置が重なった場合の対処方法
 var isCommentWide=false; //コメント一覧内のコメント部分の横幅を広げる
 var isProTextLarge=false; //番組名と残り時間の文字を大きくする
 var kakikomiwait=0; //自分のコメントを流すまでのウェイト(マイナスは流さない)
-var isHidePopBL=true; //左下に出る告知
+var isHidePopBL=false; //左下に出る告知
 var isHidePopTL=false; //左上に出るロゴ
 var panelopenset=[[1,1,1],[0,0,0],[0,0,0],[0,0,0]];//head,foot,sideの開閉設定[全閉,info開,chli開,come開] 0:非表示 1:5秒で隠す 2:常に表示
 var panelopenses='111000000000'; //設定との読み書き時にのみ使用
-var useEyecatch=true; //左上に出るロゴのタイミングを利用する
+var useEyecatch=false; //左上に出るロゴのタイミングを利用する
 var comeMovingAreaTrim=false; //false:ウィンドウ全体 true:映像でない右側では流さない
+var isHideButtons=false; //全画面と音量ボタンの非表示
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -112,7 +113,7 @@ if (chrome.storage) {
         isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
         isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
         isTabSoundplay = value.tabSoundplay || false;
-        isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : isOpenPanelwCome;
+        isOpenPanelwCome=value.openPanelwCome||false;
         isProtitleVisible=value.protitleVisible||false;
         protitlePosition=value.protitlePosition||protitlePosition;
         proSamePosition=value.proSamePosition||proSamePosition;
@@ -133,6 +134,7 @@ if (chrome.storage) {
             putPopacti();
         }
         comeMovingAreaTrim=value.comeMovingAreaTrim||false;
+        isHideButtons=value.hideButtons||false;
     });
 }
 
@@ -202,7 +204,7 @@ var proinfoOpened=false; //番組タイトルクリックで番組情報枠を�
 var optionStatsUpdated=false; //optionStatsUpdateの重複起動防止
 var kakikomitxt=""; //自分の投稿内容
 var eyecatched=false;//前回(1s前)の左上のロゴの存在 false:無かった true:有った
-var eyecatchange=false;//false:eyecatchedに変化なし true:変化あり
+var eyecatcheck=false; //eyecatch利用時の高速チェックの多重起動を防止
 var popCodes="39"+",39".repeat(50); //黒帯パネルを全て非表示にした時の脱出コマンド(右矢印を51回連打)
 var popinput=[];
 var popacti=false; //脱出コマンドを受け付けるかどうか
@@ -309,7 +311,7 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g,"ー");
     ngedcome = ngedcome.replace(/[・\･…‥、\､。\｡．\.]{2,}/g,"‥");
     ngedcome = ngedcome.replace(/[　 \n]+/g," ");
-    ngedcome = ngedcome.replace(/[？\?❔]+/g,"？");
+    ngedcome = ngedcome.replace(/[？\?❔❓]+/g,"？");
     ngedcome = ngedcome.replace(/[！\!‼️❗❗️]+/g,"！");
     ngedcome = ngedcome.replace(/[○●]+/g,"○");
     ngedcome = ngedcome.replace(/[͜͜͏̘̣͔͙͎͎̘̜̫̗͍͚͓]+/g,"");
@@ -498,7 +500,8 @@ function soundSet(isSound) {
 }
 //画面を真っ暗、透過する関数 0:無 1:半分透過 2:すべて透過 3:真っ黒
 function screenBlackSet(type) {
-    var pwaku = $('[class^="style__overlap___"]'); //動画枠
+//    var pwaku = $('[class^="style__overlap___"]'); //動画枠
+    var pwaku=$('#ComeMukouMask');
     if (type == 0) {
         setBlacked[0]=false;
         pwaku.css("background-color","")
@@ -657,6 +660,7 @@ function openOption(sw){
     $('#isHidePopTL').prop("checked",isHidePopTL);
     $('#isHidePopBL').prop("checked",isHidePopBL);
     $('#comeMovingAreaTrim').prop("checked",comeMovingAreaTrim);
+    $('#isHideButtons').prop("checked",isHideButtons);
 
     var panelopenseu=[];
     for(var i=0;i<4;i++){
@@ -728,15 +732,18 @@ console.log("delayset retry");
     createSettingWindow();
     arrayFullNgMaker();
     if($('#moveContainer').length==0){
-        var eMoveContainer=document.createElement('div');
-        eMoveContainer.id="moveContainer";
+//        var eMoveContainer=document.createElement('div');
+//        eMoveContainer.id="moveContainer";
 ////        eMoveContainer.setAttribute("style","position:absolute;top:50px;left:1px;z-index:9;");
 //        eMoveContainer.setAttribute("style","z-index:9;"); //コメ欄10の下
-        eMoveContainer.setAttribute("style","z-index:7;");
-//overlap8より下
-//areatrimした場合に画面クリックでoverlapでなくmovecontainerがクリックされるためoverlapより下にする
-//overlapは元々3しか無いので念のため積極的に8へ引き上げる(setoptionhead)
-        document.body.appendChild(eMoveContainer);
+//        eMoveContainer.setAttribute("style","z-index:7;");
+//        document.body.appendChild(eMoveContainer);
+//z位置はsetoptionheadで対応
+        $('<div id="moveContainer">').appendTo('body');
+        $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter('[class^="style__overlap___"]');
+//moveareatrimの場合#moveContainerがクリックできるようになり.overlapより下にする必要がある
+//.overlapに装飾がある場合#moveContainerに被ってしまうので装飾用の#ComeMukouMaskを新設
+//moveareatrimでない場合もMaskに装飾していく
     }
 //console.log("comevisiset delayset");
 //    comevisiset(false);
@@ -1063,7 +1070,7 @@ console.log("createSettingWindow retry");
             .css("padding","8px")
             .css("border","1px solid black")
         ;
-        $('#useEyecatch').appendTo('#ComeMukouN').after("左上ロゴのタイミングも利用する<br>");
+        $('#useEyecatch').appendTo('#ComeMukouN').after("左上ロゴのタイミングを利用(キー/カーソルでの実行待機中は効きません)<br>");
         $('#isHidePopTL').appendTo('#ComeMukouN').after("左上ロゴを非表示<br>");
         $('#isHidePopBL').appendTo('#ComeMukouN').after("左下の通知を非表示");
         $('#ComeMukouD').remove();
@@ -1255,6 +1262,7 @@ function setSaveClicked(){
         }
     }
     comeMovingAreaTrim=$('#comeMovingAreaTrim').prop("checked");
+    isHideButtons=$('#isHideButtons').prop("checked");
 
     setOptionHead();
     setOptionElement();
@@ -2308,7 +2316,7 @@ console.log("comeRefreshed "+commentNum+"->"+comeListLen);
         comeHealth=Math.min(100,Math.max(0,commentNum));
         comeColor(comeHealth);
     }else if(retrycount>0){
-        setTimeout(chkcomelist,100,retrycount-1);
+        setTimeout(chkcomelist,200,retrycount-1);
     }else{
         comeRefreshing=false;
         comeFastOpen=false;
@@ -2317,7 +2325,7 @@ console.log("comeRefreshed "+commentNum+"->"+comeListLen);
 function waitforOpenCome(retrycount){
 //console.log("waitforOpenCome#"+retrycount);
     if(isComeOpen()){
-        setTimeout(chkcomelist,100,1);
+        setTimeout(chkcomelist,100,2);
     }else if(retrycount>0){
         setTimeout(waitforOpenCome,10,retrycount-1);
     }else{
@@ -2364,40 +2372,6 @@ function waitforCloseCome(retrycount){
 function fastRefreshing(){
     waitforCloseCome(5);
 }
-//function proFontChange(timepar,titlepar,samepar){
-//    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
-//    var headlogo=prehoverContents.siblings().first();
-//    var parexfootcount=$(EXfootcount).parent();
-//    var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
-//    var forpros=$("#forProEndTxt,#forProEndBk,#proTimeEpNum");
-//    var tpro=$("#tProtitle");
-//    switch(titlepar){
-//        case "windowtopleft":
-//        case "headerleft":
-//            tpro.css("font-size","medium");
-//            headlogo.css("padding-top","9px")
-//                .next().css("padding-top","9px")
-//            ;
-//            break;
-/////        case "windowbottomleft":
-//        case "footerleft":
-//            tpro.css("font-size","medium");
-//            footlogo.css("padding-bottom","18px")
-//                .next().css("padding-bottom","18px")
-//            ;
-//            break;
-//        case "windowtopright":
-//        case "headerright":
-//            if(timepar!="windowtop"&&timepar!="header"||samepar=="horizontal"){
-//                tpro.css("font-size","medium");
-//                prehoverContents.css("padding-top","12px")
-//                    .prev().css("padding-top","12px")
-//                ;
-//            }
-//            break;
-//    }
-////    if(titlepar=="window$(EXhead).css("visibility")=="visible")
-//}
 function proPositionAllReset(bigtext){
 //console.log("proSameUnFix");
     var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
@@ -2405,51 +2379,42 @@ function proPositionAllReset(bigtext){
     var parexfootcount=$(EXfootcount).parent();
     var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
     var forpros=$("#forProEndTxt,#forProEndBk,#proTimeEpNum");
-    var bsize=(bigtext!==undefined)?bigtext:isProTextLarge;
-    var fsize=bsize?"medium":"x-small";
+//    var bsize=(bigtext!==undefined)?bigtext:isProTextLarge;
+//    var fsize=bsize?"medium":"x-small";
     var tpro=$("#tProtitle");
-//    tpro.css("overflow","")
-//        .css("width","")
-//        .css("text-align","")
     tpro.css("transform","")
         .css("left","")
         .css("right","")
         .css("top","")
         .css("bottom","")
-        .css("font-size",fsize)
+//        .css("font-size",fsize)
     ;
-//    forpros.css("left","")
-//        .css("right","")
     forpros.css("top","")
         .css("bottom","")
-        .css("font-size",fsize)
+//        .css("font-size",fsize)
     ;
     prehoverContents.css("margin-top","")
         .css("margin-right","")
-        .css("transform","")
+//        .css("transform","")
         .css("margin-left","")
         .prev().css("margin-top","")
-        .css("transform","")
+//        .css("transform","")
         .contents().find('li').slice(1).css("margin-left","")
     ;
-//console.log("windowTR.pad=0 unfix");
     headlogo.css("margin-top","")
         .next().css("margin-top","")
     ;
-//console.log("windowTL.pad=0 unfix");
     parexfootcount.css("margin-bottom","")
+        .css("margin-top","")
         .css("height","")
     ;
     $(EXfootcome).css("border-left","")
         .css("margin-right","")
         .prev().css("border-right","")
     ;
-//console.log("windowBR.pad=0 unfix");
     footlogo.css("margin-bottom","")
         .next().css("margin-bottom","")
     ;
-//console.log("windowBL.pad=0 unfix");
-//    $(EXfootcome).next('#timerthird').remove();
 }
 //function proSamePositionFix(){
 function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
@@ -2473,7 +2438,7 @@ function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
     var tprow=tpro.width()+parseInt(tpro.css("padding-left"))+parseInt(tpro.css("padding-right"))+parseInt(tpro.css("margin-left"))+parseInt(tpro.css("margin-right"));
     var fprow=forprot.width()+parseInt(forprot.css("padding-top"))+parseInt(forprot.css("padding-bottom"))+parseInt(forprot.css("margin-top"))+parseInt(forprot.css("margin-bottom"));
     var timeshown=inptime;
-    var bigtext=(inpbig!==undefined)?bigtext:isProTextLarge;
+//    var bigtext=(inpbig!==undefined)?bigtext:isProTextLarge;
     if(timeshown=="header"){
         if($(EXhead).css("visibility")=="visible"){
             timeshown="windowtop";
@@ -2505,9 +2470,6 @@ function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
     if(timeshown=="windowtop"&&titleshown=="windowtopright"){
         switch(inpsame){
             case "over":
-//                tpro.css("overflow","hidden")
-//                    .css("width","310px")
-//                    .css("text-align","left")
                 tpro.css("right","310px")
                     .css("transform","translateX(100%)")
                 ;
@@ -2517,10 +2479,8 @@ function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
                 if(tprow<=320){
                     prehoverContents.css("margin-right","310px")
                         .css("margin-top","")
-//                    .css("transform","translateX(-"+Math.max(tprow,310)+"px)")
                         .css("margin-left","12px")
                         .prev().css("margin-top","")
-//                    .css("transform","translateX(-"+Math.max(tprow,310)+"px)")
                         .contents().find('li').slice(1).css("margin-left","12px")
                     ;
                 }else{
@@ -2529,8 +2489,6 @@ function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
                         .prev().contents().find('li').slice(1).css("margin-left","12px")
                     ;
                 }
-//console.log("windowTR.pad=16 fix");
-//                }
                 break;
             case "horizontal":
                 tpro.css("right","310px");
@@ -2543,9 +2501,6 @@ function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
     }else if(timeshown=="windowbottom"&&titleshown=="windowbottomright"){
         switch(inpsame){
             case "over":
-//                tpro.css("overflow","hidden")
-//                    .css("width","310px")
-//                    .css("text-align","left")
                 tpro.css("right","310px")
                     .css("transform","translateX(100%)")
                 ;
@@ -2553,15 +2508,16 @@ function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
             case "vertical":
                 tpro.css("bottom",(fproh-4)+"px");
                 $(EXfootcome).css("margin-right","310px");
-                parexfootcount.css("margin-bottom","");
-//                parexfootcount.css("margin-bottom","45px")
-//                    .css("height","unset")
-//                ;
-//                $(EXfootcome).css("border-left","1px solid #444")
-//                    .prev().css("border-right","none")
-//                ;
-//console.log("windowBR.pad=31 fix");
-//                }
+                if(tprow<=320){
+                    parexfootcount.css("margin-bottom","");
+                    $(EXfootcome).css("border-left","")
+                        .prev().css("border-right","")
+                    ;
+                }else{ //タイトルが長い場合はmargin-bottomをtopに入れ替えてタイトルを避ける
+                    var fcmb=parseInt(parexfootcount.css("margin-bottom"));
+                    parexfootcount.css("margin-bottom","");
+                    parexfootcount.css("margin-top",fcmb+"px");
+                }
                 break;
             case "horizontal":
                 tpro.css("right","310px");
@@ -2575,12 +2531,8 @@ function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
         switch(inpsame){
             case "over":
             case "horizontal":
-//        tpro.css("overflow","hidden")
-//            .css("width","310px")
-//            .css("text-align","left")
                 tpro.css("right","")
                     .css("left",0)
-//                .css("transform","translateX(100%)")
                 ;
                 break;
             case "vertical":
@@ -2595,12 +2547,8 @@ function proSamePositionFix(inptime,inptitle,inpsame,inpbig){
         switch(inpsame){
             case "over":
             case "horizontal":
-//        tpro.css("overflow","hidden")
-//            .css("width","310px")
-//            .css("text-align","left")
                 tpro.css("right","")
                     .css("left",0)
-//                .css("transform","translateX(100%)")
                 ;
                 break;
             case "vertical":
@@ -2643,41 +2591,30 @@ function createProtitle(sw,bt){
             });
         }
     }else if(sw==1){
-        var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
-        var headlogo=prehoverContents.siblings().first();
-        var parexfootcount=$(EXfootcount).parent();
-        var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
-        var forpros=$("#forProEndTxt,#forProEndBk,#proTimeEpNum");
-        prehoverContents.css("padding-top","")
-            .prev().css("padding-top","")
-        ;
-        headlogo.css("padding-top","")
-            .next().css("padding-top","")
-        ;
-        footlogo.css("padding-bottom","")
-            .next().css("padding-bottom","");
+//        var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
+//        var headlogo=prehoverContents.siblings().first();
+//        var parexfootcount=$(EXfootcount).parent();
+//        var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
+//        var forpros=$("#forProEndTxt,#forProEndBk,#proTimeEpNum");
+//        prehoverContents.css("padding-top","")
+//            .prev().css("padding-top","")
+//        ;
+//        headlogo.css("padding-top","")
+//            .next().css("padding-top","")
+//        ;
+//        footlogo.css("padding-bottom","")
+//            .next().css("padding-bottom","");
         $("#tProtitle").remove();
     }
 }
 function setProtitlePosition(timepar,titlepar,samepar,bigpar){
-//console.log("setProtitle timepar:"+timepar+", par:"+par+", sub:"+(subfunc?"true":"false"));
     //残り時間との重なり処理はこれが終わってから
-//    if(!titlepar||titlepar==""){
-//        titlepar=isProtitleVisible?protitlePosition:"";
-//    }
-//    if(!timepar||timepar==""){
-//        timepar=isTimeVisible?timePosition:"";
-//    }
-//    if(!samepar||samepar==""){
-//        samepar=proSamePosition;
-//    }
-//console.log("setProtitle timepar:"+timepar+", par:"+par+", sub:"+(subfunc?"true":"false"));
     var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
     var headlogo=prehoverContents.siblings().first();
     var parexfootcount=$(EXfootcount).parent();
     var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
     var tpro=$("#tProtitle");
-    var bigtext=(bigpar!==undefined)?bigpar:isProTextLarge;
+//    var bigtext=(bigpar!==undefined)?bigpar:isProTextLarge;
     var tproh=tpro.height();
     var par=titlepar;
     switch(par){
@@ -2733,10 +2670,6 @@ function setProtitlePosition(timepar,titlepar,samepar,bigpar){
             prehoverContents.css("margin-top",hmt+"px")
                 .prev().css("margin-top",hmt+"px")
             ;
-//            prehoverContents.css("margin-top",(bigtext?14:9)+"px")
-//                .prev().css("margin-top",(bigtext?14:9)+"px")
-//            ;
-//console.log("windowTR.pad=9 setTitle("+(subfunc?"sub":"main"));
             break;
         default:
     }
@@ -2747,10 +2680,6 @@ function setProtitlePosition(timepar,titlepar,samepar,bigpar){
             headlogo.css("margin-top",hmt+"px")
                 .next().css("margin-top",hmt+"px")
             ;
-//            headlogo.css("margin-top",(bigtext?10:6)+"px")
-//                .next().css("margin-top",(bigtext?10:6)+"px")
-//            ;
-//console.log("windowTL.pad=18 setTitle("+(subfunc?"sub":"main"));
             break;
         default:
     }
@@ -2758,14 +2687,12 @@ function setProtitlePosition(timepar,titlepar,samepar,bigpar){
         case "windowbottomright":
         case "footerright":
             var fmb=tproh;
-//            parexfootcount.css("margin-bottom",(bigtext?24:14)+"px")
             parexfootcount.css("margin-bottom",fmb+"px")
                 .css("height","unset")
             ;
             $(EXfootcome).css("border-left","1px solid #444")
                 .prev().css("border-right","none")
             ;
-//console.log("windowBR.pad=14 setTitle("+(subfunc?"sub":"main"));
             break;
         default:
     }
@@ -2773,11 +2700,9 @@ function setProtitlePosition(timepar,titlepar,samepar,bigpar){
         case "windowbottomleft":
         case "footerleft":
             var fmb=tproh;
-//            footlogo.css("margin-bottom",(bigtext?24:14)+"px")
             footlogo.css("margin-bottom",fmb+"px")
-                .next().css("margin-bottom",(bigtext?24:14)+"px")
+                .next().css("margin-bottom",fmb+"px")
             ;
-//console.log("windowBL.pad=14 setTitle("+(subfunc?"sub":"main"));
             break;
         default:
     }
@@ -2845,40 +2770,29 @@ function createTime(sw,bt){
         if($("#proTimeEpNum").length==0){
             var eproTimeEpNum = document.createElement("div");
             eproTimeEpNum.id="proTimeEpNum";
-            eproTimeEpNum.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:4px 0px;background-color:transparent;z-index:13;width:310px;top:0px;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;");
+//            eproTimeEpNum.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:4px 0px;background-color:transparent;z-index:13;width:310px;top:0px;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;");
+            eproTimeEpNum.setAttribute("style","position:absolute;right:0;font-size:"+fsize+";padding:4px 0px;background-color:transparent;z-index:13;width:310px;top:0px;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;");
             eproTimeEpNum.innerHTML='<div style="border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;">&nbsp;</div><div style="border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;">&nbsp;</div>';
             EXcome.insertBefore(eproTimeEpNum,EXcome.firstChild);
         }
     }else if(sw==1){
-        var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
-        var parexfootcount=$(EXfootcount).parent();
-        var forpros=$("#forProEndTxt,#forProEndBk,#proTimeEpNum");
-        prehoverContents.css("padding-top","")
-            .prev().css("padding-top","")
-        ;
-        parexfootcount.css("padding-bottom","");
-//        $(EXfootcome).next('#timerthird').remove();
+//        var prehoverContents = $('[class*="styles__hover-contents___"]').prev();
+//        var parexfootcount=$(EXfootcount).parent();
+//        var forpros=$("#forProEndTxt,#forProEndBk,#proTimeEpNum");
+//        prehoverContents.css("padding-top","")
+//            .prev().css("padding-top","")
+//        ;
+//        parexfootcount.css("padding-bottom","");
         $("#forProEndBk,#forProEndTxt,#proTimeEpNum").remove();
     }
 }
 function setTimePosition(timepar,titlepar,samepar,bigpar){
-//console.log("setTimePosi par:"+par+", titlepar:"+titlepar+", sub:"+(subfunc?"true":"false"));
-//    if(!timepar||timepar==""){
-//        timepar=isTimeVisible?timePosition:"";
-//    }
-//    if(!titlepar||titlepar==""){
-//        titlepar=isProtitleVisible?protitlePosition:"";
-//    }
-//    if(!samepar||samepar==""){
-//        samepar=proSamePosition;
-//    }
-//    if(!par||par==""){par=timePosition;}
-//    if(!titlepar||titlepar==""){titlepar=protitlePosition;}
-//console.log("setTimePosi par:"+par+", titlepar:"+titlepar+", sub:"+(subfunc?"true":"false"));
     var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
     var parexfootcount=$(EXfootcount).parent();
     var forpros=$("#forProEndTxt,#forProEndBk,#proTimeEpNum");
-    var bigtext=(bigpar!==undefined)?bigpar:isProTextLarge;
+//    var bigtext=(bigpar!==undefined)?bigpar:isProTextLarge;
+    var tpro=$("#tProtitle");
+    var tproh=tpro.height();
     var par=timepar;
     switch(par){
         case "windowtop":
@@ -2900,27 +2814,29 @@ function setTimePosition(timepar,titlepar,samepar,bigpar){
     switch(par){
         case "windowtop":
         case "header":
-            prehoverContents.css("margin-top",(bigtext?14:9)+"px")
-                .prev().css("margin-top",(bigtext?14:9)+"px")
+            var hmt=(tproh-12)+Math.floor((44-tproh-12)/2);
+//            prehoverContents.css("margin-top",(bigtext?14:9)+"px")
+//                .prev().css("margin-top",(bigtext?14:9)+"px")
+//            ;
+            prehoverContents.css("margin-top",hmt+"px")
+                .prev().css("margin-top",hmt+"px")
             ;
-//console.log("windowTR.pad=9 setTime("+(subfunc?"sub":"main"));
             break;
         default:
     }
     switch(par){
         case "windowbottom":
         case "footer":
-            parexfootcount.css("margin-bottom",(bigtext?24:14)+"px")
+            var fmb=tproh;
+//            parexfootcount.css("margin-bottom",(bigtext?24:14)+"px")
+//                .css("height","unset")
+//            ;
+            parexfootcount.css("margin-bottom",fmb+"px")
                 .css("height","unset")
             ;
             $(EXfootcome).css("border-left","1px solid #444")
                 .prev().css("border-right","none")
             ;
-//console.log("windowBR.pad=14 setTime("+(subfunc?"sub":"main"));
-//            if($(EXfootcome).next('#timerthird').length==0){
-//                $('<div id="timerthird" style="position:absolute;bottom:0;right:207px;height:15px;width:143px;color:white;font-size:x-small;letter-spacing:1px;padding:0px 5px;border-right:1px solid #444;"></div>').insertAfter(EXfootcome);
-//                $(EXfootcome).next('#timerthird').html('&nbsp;');
-//            }
             break;
         default:
     }
@@ -2967,10 +2883,11 @@ function setTimePosition(timepar,titlepar,samepar,bigpar){
 function setOptionHead(){
     $('head>link[title="usermade"]').remove();
     var t="";
-    //コメントのZ位置を上へ
-    if(isMovingComment){
-        t+='[class="movingComment"]{z-index:5;}';
-    }
+//#moveContainerで対応
+//    //コメントのZ位置を上へ
+//    if(isMovingComment){
+//        t+='[class="movingComment"]{z-index:5;}';
+//    }
     //投稿ボタン削除（入力欄1行化はこの下のコメ見た目のほうとoptionElementでやる）
     if(isCustomPostWin){
 //        t+='[class^="styles__opened-textarea-wrapper___"]+div{display:none;}';
@@ -3058,7 +2975,8 @@ function setOptionHead(){
     t+='[class^="TVContainer__side___"]{transform:translateY(-50%);}';
     t+='[class^="TVContainer__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
     t+='[class^="TVContainer__right-slide___"]{z-index:15;}';
-    t+='[class^="TVContainer__right-comment-area___"]{z-index:11;}';//foot10より上(全画面・音ボタンをマスク)
+    t+='[class^="TVContainer__right-comment-area___"]{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
+    //左上・左下の非表示
     if(isHidePopBL){
         t+='[class^="TVContainer__ad-reserve-button___"]{transform:translateX(-170px);}';
     }
@@ -3066,14 +2984,22 @@ function setOptionHead(){
         t+='[class*="styles__eyecatch___"]{display:none;}';
         t+='[class*="styles__eyecatch-blind___"]{display:none;}';
     }
+    //z-index調整、コメ流す範囲
+    t+='#moveContainer{z-index:7;';
     if(comeMovingAreaTrim){
-        t+='#moveContainer{position:absolute;top:0;left:0;overflow:hidden;height:100%;';
+        t+='position:absolute;top:0;left:0;overflow:hidden;height:100%;';
         if(isSureReadComment){
             t+='max-width:calc(100% - 310px);';
         }
-        t+='}';
     }
+    t+='}';
     t+='[class^="style__overlap___"]{z-index:8;}';
+    t+='#ComeMukouMask{z-index:6;}';
+    //全画面・音量ボタン非表示 display:noneだとホイール音量操作でスタック
+    if(isHideButtons){
+        t+='[class^="TVContainer__footer___"]>[class^="styles__full-screen___"]{opacity:0;visibility:hidden;}';
+        t+='[class^="TVContainer__footer___"]>[class^="styles__volume___"]{opacity:0;visibility:hidden;}';
+    }
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
 console.log("setOptionHead ok");
 }
@@ -3517,6 +3443,21 @@ function tryCM(){
         endCM();
     }
 }
+function fastEyecatching(retrycount){
+//console.log("fastEyecatch#"+retrycount);
+    if($('.manualblock').length>0||retrycount<=0){eyecatcheck=false;return;}//手動対応を優先
+    if($(EXobli.children[EXwatchingnum]).children().is('[class*="styles__eyecatch"]')&&retrycount>0){
+        setTimeout(fastEyecatching,100,retrycount-1);
+    }else{
+        //eyecatch消失
+        eyecatcheck=false;
+        if(isNaN(parseInt(EXfootcountcome.innerHTML))){
+            bginfo[3]=2;
+            cmblockcd=0;
+            startCM();
+        }
+    }
+}
 $(window).on('load', function () {
     console.log("loaded");
     var csspath = chrome.extension.getURL("onairpage.css");
@@ -3662,13 +3603,15 @@ $(window).on('load', function () {
                 //eyecatchが有る
                 if(eyecatched==true){
                     //前回も有った=eyecatchが引き続き出現中
-                    eyecatchange=false;
                 }else{
                     //前回は無かった=eyecatchが今出現した
-                    eyecatchange=true;
                     if(cmblockcd<-1){
                         //カウントアップ中なら早めてこの後すぐ発動
                         cmblockcd=-1;
+                    }
+                    if(!eyecatcheck){
+                        eyecatcheck=true;
+                        fastEyecatching(100);
                     }
                 }
                 eyecatched=true;
@@ -3676,14 +3619,12 @@ $(window).on('load', function () {
                 //eyecatchが無い
                 if(eyecatched==true){
                     //前回は有った=eyecatchが今消えた
-                    eyecatchange=true;
-                    if(cmblockcd>1){
-                        //カウントダウン中なら早めてこの後すぐ発動
-                        cmblockcd=1;
-                    }
+//                    if(cmblockcd>1){
+//                        //カウントダウン中なら早めてこの後すぐ発動
+//                        cmblockcd=1;
+//                    }
                 }else{
                     //前回も無かった=eyecatchは引き続き無い
-                    eyecatchange=false;
                 }
                 eyecatched=false;
             }
