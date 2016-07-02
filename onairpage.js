@@ -721,10 +721,11 @@ console.log("delayset retry");
         setTimeout(delayset,1000);
         return;
     }
-    //拡張機能の設定をその他メニューに追加
+    //拡張機能の設定と通知番組一覧をその他メニューに追加
     var hoverLinkClass = hoverContents.children()[0].className;
     if(hoverContents.children('#extSettingLink').length==0){
         hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank">拡張通知登録一覧</a>');
     }
     createSettingWindow();
     arrayFullNgMaker();
