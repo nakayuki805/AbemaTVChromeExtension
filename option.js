@@ -399,6 +399,21 @@ $(function(){
     $('#openPanelwComeB').on("click",panelTableUpdateO);
     $('#ipanelopenset').change(panelTableUpdateS);
     $('#panelcustomTable').change(panelTableUpdateT);
+    //クリアボタン
+    $('#resetSettingsBtn').click(function(){
+        if (window.confirm("設定をすべて削除しますか？")) {
+            resetSettings(function(){
+                window.alert("設定をリセットしました。");
+                location.reload();
+            });
+        }
+    });
+    $("#resetCMSettingsBtn").click(function(){
+        resetCMSettings(function(){
+            window.alert("コメント無効時の情報をリセットしました。");
+            location.reload();
+        });
+    });
 });
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";

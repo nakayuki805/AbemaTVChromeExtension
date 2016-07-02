@@ -406,8 +406,36 @@ var CMSettingList = [
     "special-plus": "SPECIAL PLUS",
     "drama": "ドラマ"
 }*/
+function removeIs(str) {
+    var afteris = str.indexOf("is")==0?str.slice(2):str;
+    var firtsLetter = afteris.substr(0,2)=="CM"?"C":afteris.substr(0,1).toLocaleLowerCase();
+    return firtsLetter + afteris.slice(1);
+}
 function getSettings(callback) {
     var res = {};
+}
+function resetSettings(callback) {
+    chrome.storage.local.get(function(value){
+        var keys = [];
+        for (var key in value) {
+            if (key.indexOf("progNotify")<0) {//通知登録データは除外
+                keys.push(key);
+            }
+        }
+        chrome.storage.local.remove(keys, callback);
+    });
+    
+}
+function resetCMSettings(callback) {
+    var keys = [];
+    for (var i=0; i<CMSettingList.length; i++) {
+        keys.push(CMSettingList[i].name);
+        if (CMSettingList[i].name.indexOf("is")==0) {
+            keys.push(removeIs(CMSettingList[i].name));
+        }
+    }
+    chrome.storage.local.remove(keys, callback);
+
 }
 function generateOptionInput(settingsArr, isPermanent) {
     var inputHTML = "";

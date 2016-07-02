@@ -2,9 +2,9 @@
 //webストア公開版のmanifest.jsonにはcontent_scriptsのjsの最後にこのファイルが加えられる
 //github版では不使用
 
-var currentUpdateNotifyVersion = 1;//1は0.0.16の時
+var currentUpdateNotifyVersion = 2;//2は0.0.20の時
 var optionUrl = chrome.extension.getURL("option.html");
-var notifyContent = "AbemaTV Chrome拡張(_bem_tv ext)の最近追加された機能をご存知ですか？<br>最近のアップデートで番組開始前通知やそのときに自動で画面を開く機能(要設定)のほかコメント欄のスタイルを変えれたりいくつかの機能が追加されています。<br><b>この拡張機能の<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>を長らく開いていなければ開いて新たな機能を確認してみてください。</b><br>この拡張機能はAbemaTVの仕様変更によりある日突然うまく動かなくなることがあります。その際はアップデートをお待ちください。";
+var notifyContent = "最近の更新で設定画面のがカテゴリー分けされ見やすくなりました。<br>また詳細な挙動設定など設定項目や機能も増えました。<br><b>この拡張機能の<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>を開いて新たな機能を確認してみてください。</b><br>この拡張機能はAbemaTVの仕様変更によりある日突然うまく動かなくなることがあります。その際はアップデートをお待ちください。";
 
 function updateInfo(message) {
     var toastElem = $("<div class='toast' id='updateInfo'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
