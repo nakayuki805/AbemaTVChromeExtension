@@ -164,6 +164,7 @@ getStorage(null, function (value) {
 
 var currentLocation = window.location.href;
 //var urlchangedtick=Date.now();
+var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
 var commentNum = 0;
 var comeLatestPosi=[];
 var comeTTLmin=3;
@@ -235,7 +236,7 @@ var popacti=false; //脱出コマンドを受け付けるかどうか
 
 function onresize() {
     if (settings.isResizeScreen) {
-        var obj = $("object").parent(),
+        var obj = $("object,video").parent(),
             wd = window.innerWidth,
             hg = window.innerHeight,
             wdbyhg = hg*16/9,
@@ -257,7 +258,7 @@ function onresize() {
         obj.offset({"top": newtop, "left": ((wd-newwd)/2)})
         console.log("screen resized");
     }else{
-        $("object").parent().css("width","100%")
+        $("object,video").parent().css("width","100%")
             .css("height","100%")
             .css("top","")
             .css("left","")
@@ -384,7 +385,7 @@ function putComeArray(inp){
         mcj.slice(0,comeoverflowlen).remove();
 //        mclen-=comeoverflowlen;
     }
-    var winwidth=comeMovingAreaTrim?$("object").parent().width():window.innerWidth;
+    var winwidth=comeMovingAreaTrim?$("object,video").parent().width():window.innerWidth;
     var outxt='';
     for(var i=0;i<inplen;i++){
         outxt+='<span class="movingComment" style="position:absolute;top:'+inp[i][1]+'px;left:'+(inp[i][2]+winwidth)+'px;">'+inp[i][0]+'</span>';
@@ -420,6 +421,7 @@ function putComeArray(inp){
     }
 }
 function putComment(commentText,index,inmax) {
+    //console.log(commentText)
     var outflg=false;
     if(index==0){
         comeArray=[];
@@ -903,7 +905,7 @@ console.log("createSettingWindow retry");
         var settcont = document.createElement("div");
         settcont.id = "settcont";
         //設定ウィンドウの中身
-        settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
+        settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><a href='"+chrome.extension.getURL("option.html")+"' target='_blank'>永久設定オプション画面</a><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
 //        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";//コメ欄10より上の番組情報等11より上
 //        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;";//head11より上の残り時間12,13,14より上の番組情報等15より上
         settcont.style = "width:670px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;";//head11より上の残り時間12,13,14より上の番組情報等15より上
@@ -3421,7 +3423,8 @@ console.log("dblclick");
     });
     $(window).on("click",usereventWindowclick);
     //マウスホイール無効か音量操作
-    window.addEventListener("mousewheel",function(e){
+    var mousewheelEvtName = isFirefox?'DOMMouseScroll':'mousewheel';
+    window.addEventListener(mousewheelEvtName,function(e){
         if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
             if(EXvolume&&$(EXvolume).contents().find('svg').css("zoom")=="1"){
                 otoSize(e.wheelDelta<0?0.8:1.2);
@@ -3615,7 +3618,6 @@ $(window).on('load', function () {
     //要素チェック
     setEXs();
     delayset();
-
     setInterval(function () {
         // 1秒ごとに実行
         if(EXcome){
@@ -3626,7 +3628,7 @@ $(window).on('load', function () {
             }
         }
         //映像のtopが変更したらonresize()実行
-        if(settings.isResizeScreen && $("object").parent().offset().top !== newtop) {
+        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
             onresize();
         }
 //        //黒帯パネル表示のためマウスを動かすイベント発火
@@ -3649,6 +3651,7 @@ $(window).on('load', function () {
         if(EXcomelist&&isComeOpen()){
             var comeListLen = EXcomelist.childElementCount;
             var d=comeListLen-commentNum;
+            //console.log(comments.length,comeListLen,d)
 //            if(comeListLen>commentNum){ //コメ増加あり
 //                if(!comeRefreshing||!isSureReadComment){
             if(d>0){ //コメ増加あり
@@ -3974,7 +3977,7 @@ $(window).on('load', function () {
 
 //        if(comeMovingAreaTrim&&(EXwatchingnum!==undefined)&&parseInt($('#moveContainer').css("width"))!=$(EXobli.children[EXwatchingnum]).width()){
         if(comeMovingAreaTrim){
-            $('#moveContainer').css("width",$("object").parent().width()+"px");
+            $('#moveContainer').css("width",$("object,video").parent().width()+"px");
         }
 
     }, 1000);
@@ -4044,7 +4047,7 @@ function putNotifyButton(url){
         var notifyButton = $('<input type="button" id="addNotify">');
         notifyButton.appendTo('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__checkbox-button-area___"]');
         getStorage(progNotifyName, function(notifyData) {
-            //console.log(notifyData,progNotifyName)
+            console.log(notifyData,progNotifyName)
            if(!notifyData[progNotifyName]){
                //未登録
                notifyButton.val("拡張機能の通知登録").click(function() {
