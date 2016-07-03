@@ -67,78 +67,100 @@ var isDeleteStrangeCaps=false;
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
-//設定のロード
-if (chrome.storage) {
-    chrome.storage.local.get(function (value) {
-        $.extend(settings, value);
-        settings.isResizeScreen = value.resizeScreen || false;
-        settings.isDblFullscreen = value.dblFullscreen || false;
-        isHideOldComment = value.hideOldComment || false;
-        isCMBlack = value.CMBlack || false;
-        isCMBkTrans = value.CMBkTrans || false;
-        isCMsoundoff = value.CMsoundoff || false;
-        CMsmall = Math.min(100,Math.max(5,((value.CMsmall!==undefined)?value.CMsmall : CMsmall)));
-        isMovingComment = value.movingComment || false;
-        settings.movingCommentSecond = (value.movingCommentSecond!==undefined)?value.movingCommentSecond : settings.movingCommentSecond;
-        movingCommentLimit = (value.movingCommentLimit!==undefined)?value.movingCommentLimit : movingCommentLimit;
-        //isMoveByCSS =　value.moveByCSS || false;
-        isComeNg = value.comeNg || false;
-        isComeDel = value.comeDel || false;
-        fullNg = value.fullNg || fullNg;
-        isInpWinBottom = value.inpWinBottom || false;
-        isCustomPostWin = value.customPostWin || false;
-        isCancelWheel = value.cancelWheel || false;
-        isVolumeWheel = value.volumeWheel || false;
-        changeMaxVolume = Math.min(100,Math.max(0,((value.changeMaxVolume!==undefined)?value.changeMaxVolume : changeMaxVolume)));
-        isTimeVisible = value.timeVisible || false;
-        isSureReadComment = value.sureReadComment || false;
-        sureReadRefreshx = Math.max(101,((value.sureReadRefreshx!==undefined)?value.sureReadRefreshx : sureReadRefreshx));
-//        isMovieResize = value.movieResize || false;
-        isMovieMaximize = value.movieMaximize || false;
-        settings.isAlwaysShowPanel = value.isAlwaysShowPanel || false;
-        commentBackColor = (value.commentBackColor!==undefined)?value.commentBackColor : commentBackColor;
-        commentBackTrans = (value.commentBackTrans!==undefined)?value.commentBackTrans : commentBackTrans;
-        commentTextColor = (value.commentTextColor!==undefined)?value.commentTextColor : commentTextColor;
-        commentTextTrans = (value.commentTextTrans!==undefined)?value.commentTextTrans : commentTextTrans;
-        isCommentPadZero = value.commentPadZero || false;
-        isCommentTBorder = value.commentTBorder || false;
-        timePosition = value.timePosition || timePosition;
-        notifySeconds = (value.notifySeconds!==undefined)?value.notifySeconds : notifySeconds
-        cmblockia = Math.max(1,((value.beforeCMWait!==undefined)?(1+value.beforeCMWait) : cmblockia));
-        cmblockib = -Math.max(1,((value.afterCMWait!==undefined)?(1+value.afterCMWait) : (-cmblockib)));
-        isManualKeyCtrlR = value.manualKeyCtrlR || false;
-        isManualKeyCtrlL = value.manualKeyCtrlL || false;
-        isManualMouseBR = value.manualMouseBR || false;
-        isCMBkR = (value.CMBkR || false)&&isCMBlack;
-        isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
-        isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
-        isTabSoundplay = value.tabSoundplay || false;
-        isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : isOpenPanelwCome;
-        isProtitleVisible=value.protitleVisible||false;
-        protitlePosition=value.protitlePosition||protitlePosition;
-        proSamePosition=value.proSamePosition||proSamePosition;
-        isCommentWide=value.commentWide||false;
-        isProTextLarge=value.proTextLarge||false;
-        kakikomiwait=(value.kakikomiwait!==undefined)?value.kakikomiwait:kakikomiwait;
-        useEyecatch=value.useEyecatch||false;
-        isHidePopTL=value.hidePopTL||false;
-        isHidePopBL=value.hidePopBL||false;
-//        panelopenses=value.panelopenset||"111000000000";
-        panelopenses=value.panelopenset||(settings.isAlwaysShowPanel?"222222222222":(isOpenPanelwCome?"111000000111":"111000000000"));//isA..とisO..を初回のみ適用
-        for(var i=0;i<4;i++){
-            for(var j=0;j<3;j++){
-                panelopenset[i][j]=panelopenses.split('')[i*3+j];
-            }
+//chrome.storageの関数
+function getStorage(keys, callback) {
+    if (chrome.storage) {
+        if (keys) {
+            chrome.storage.local.get(keys, callback);
+        } else {
+            chrome.storage.local.get(callback);
         }
-        if(panelopenses=="000000000000"){
-            putPopacti();
-        }
-        comeMovingAreaTrim=value.comeMovingAreaTrim||false;
-        isHideButtons=value.hideButtons||false;
-        isResizeSpacing=value.resizeSpacing||false;
-        isDeleteStrangeCaps=value.deleteStrangeCaps||false;
-    });
+    } else {
+        chrome.runtime.sendMessage({type: "getStorage", keys: keys}, function(response) {
+            callback(response.items);
+        });
+    }
 }
+function setStorage(items, callback) {
+    if (chrome.storage) {
+        chrome.storage.local.set(items, callback);
+    } else {
+        chrome.runtime.sendMessage({type: "setStorage", items: items}, function(response) {
+            //console.log(response.result)
+            callback();
+        });
+    }
+}
+//設定のロード
+getStorage(null, function (value) {
+    $.extend(settings, value);
+    settings.isResizeScreen = value.resizeScreen || false;
+    settings.isDblFullscreen = value.dblFullscreen || false;
+    isHideOldComment = value.hideOldComment || false;
+    isCMBlack = value.CMBlack || false;
+    isCMBkTrans = value.CMBkTrans || false;
+    isCMsoundoff = value.CMsoundoff || false;
+    CMsmall = Math.min(100,Math.max(5,((value.CMsmall!==undefined)?value.CMsmall : CMsmall)));
+    isMovingComment = value.movingComment || false;
+    settings.movingCommentSecond = (value.movingCommentSecond!==undefined)?value.movingCommentSecond : settings.movingCommentSecond;
+    movingCommentLimit = (value.movingCommentLimit!==undefined)?value.movingCommentLimit : movingCommentLimit;
+    //isMoveByCSS =　value.moveByCSS || false;
+    isComeNg = value.comeNg || false;
+    isComeDel = value.comeDel || false;
+    fullNg = value.fullNg || fullNg;
+    isInpWinBottom = value.inpWinBottom || false;
+    isCustomPostWin = value.customPostWin || false;
+    isCancelWheel = value.cancelWheel || false;
+    isVolumeWheel = value.volumeWheel || false;
+    changeMaxVolume = Math.min(100,Math.max(0,((value.changeMaxVolume!==undefined)?value.changeMaxVolume : changeMaxVolume)));
+    isTimeVisible = value.timeVisible || false;
+    isSureReadComment = value.sureReadComment || false;
+    sureReadRefreshx = Math.max(101,((value.sureReadRefreshx!==undefined)?value.sureReadRefreshx : sureReadRefreshx));
+//        isMovieResize = value.movieResize || false;
+    isMovieMaximize = value.movieMaximize || false;
+    settings.isAlwaysShowPanel = value.isAlwaysShowPanel || false;
+    commentBackColor = (value.commentBackColor!==undefined)?value.commentBackColor : commentBackColor;
+    commentBackTrans = (value.commentBackTrans!==undefined)?value.commentBackTrans : commentBackTrans;
+    commentTextColor = (value.commentTextColor!==undefined)?value.commentTextColor : commentTextColor;
+    commentTextTrans = (value.commentTextTrans!==undefined)?value.commentTextTrans : commentTextTrans;
+    isCommentPadZero = value.commentPadZero || false;
+    isCommentTBorder = value.commentTBorder || false;
+    timePosition = value.timePosition || timePosition;
+    notifySeconds = (value.notifySeconds!==undefined)?value.notifySeconds : notifySeconds
+    cmblockia = Math.max(1,((value.beforeCMWait!==undefined)?(1+value.beforeCMWait) : cmblockia));
+    cmblockib = -Math.max(1,((value.afterCMWait!==undefined)?(1+value.afterCMWait) : (-cmblockib)));
+    isManualKeyCtrlR = value.manualKeyCtrlR || false;
+    isManualKeyCtrlL = value.manualKeyCtrlL || false;
+    isManualMouseBR = value.manualMouseBR || false;
+    isCMBkR = (value.CMBkR || false)&&isCMBlack;
+    isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
+    isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
+    isTabSoundplay = value.tabSoundplay || false;
+    isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : isOpenPanelwCome;
+    isProtitleVisible=value.protitleVisible||false;
+    protitlePosition=value.protitlePosition||protitlePosition;
+    proSamePosition=value.proSamePosition||proSamePosition;
+    isCommentWide=value.commentWide||false;
+    isProTextLarge=value.proTextLarge||false;
+    kakikomiwait=(value.kakikomiwait!==undefined)?value.kakikomiwait:kakikomiwait;
+    useEyecatch=value.useEyecatch||false;
+    isHidePopTL=value.hidePopTL||false;
+    isHidePopBL=value.hidePopBL||false;
+//        panelopenses=value.panelopenset||"111000000000";
+    panelopenses=value.panelopenset||(settings.isAlwaysShowPanel?"222222222222":(isOpenPanelwCome?"111000000111":"111000000000"));//isA..とisO..を初回のみ適用
+    for(var i=0;i<4;i++){
+        for(var j=0;j<3;j++){
+            panelopenset[i][j]=panelopenses.split('')[i*3+j];
+        }
+    }
+    if(panelopenses=="000000000000"){
+        putPopacti();
+    }
+    comeMovingAreaTrim=value.comeMovingAreaTrim||false;
+    isHideButtons=value.hideButtons||false;
+    isResizeSpacing=value.resizeSpacing||false;
+    isDeleteStrangeCaps=value.deleteStrangeCaps||false;
+});
 
 var currentLocation = window.location.href;
 //var urlchangedtick=Date.now();
@@ -1224,7 +1246,7 @@ function setSaveDisable(){
 function setPSaveNG(){
     fullNg = $("#fullNg").val();
     arrayFullNgMaker();
-    chrome.storage.local.set({
+    setStorage({
         "fullNg": fullNg
     },function(){
         $('#PsaveNG').prop("disabled",true)
@@ -1240,7 +1262,7 @@ function setPSaveCome(){
     commentTextColor = parseInt($("#commentTextColor").val());
     commentTextTrans = parseInt($("#commentTextTrans").val());
     setOptionHead();
-    chrome.storage.local.set({
+    setStorage({
         "commentBackColor": commentBackColor,
         "commentBackTrans": commentBackTrans,
         "commentTextColor": commentTextColor,
@@ -4021,7 +4043,7 @@ function putNotifyButton(url){
         var progNotifyName = "progNotify_"+channel+"_"+programID;
         var notifyButton = $('<input type="button" id="addNotify">');
         notifyButton.appendTo('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__checkbox-button-area___"]');
-        chrome.storage.local.get(progNotifyName, function(notifyData) {
+        getStorage(progNotifyName, function(notifyData) {
             //console.log(notifyData,progNotifyName)
            if(!notifyData[progNotifyName]){
                //未登録

@@ -97,6 +97,15 @@ chrome.notifications.onClicked.addListener(function(notificationID) {
     }
     chrome.notifications.clear(notificationID);
 });
+
+function getNotificationPermission(callback){
+    if (chrome.notifications.getPermissionLevel) {
+        chrome.notifications.getPermissionLevel(callback);
+    } else {
+        console.log("getPermissionLevel not supported so returned granted");
+        callback("granted");
+    }
+}
 //messageが来た時
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     //console.log("message", request,sender)
@@ -111,7 +120,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         if ((new Date()) > notifyTime) {
             sendResponse({result: "pastTimeError"});
         } else {
-            chrome.notifications.getPermissionLevel(function(ret){
+            getNotificationPermission(function(ret){
                 if (ret === "granted") {
                     chrome.alarms.create(progNotifyName, {
                         when: notifyTime
@@ -149,6 +158,20 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     } else if (request.type === "tabsoundplaystop"){
         chrome.tabs.update(sender.tab.id,{muted:request.valb});
         sendResponse(0);
+    } else if (request.type === "getStorage"){
+        if (request.keys) {
+            chrome.storage.local.get(request.keys, function(items){
+                sendResponse({items: items});
+            });
+        } else {
+            chrome.storage.local.get(function(items){
+                sendResponse({items: items});
+            });
+        }
+    } else if (request.type === "setStorage"){
+        chrome.storage.local.set(request.items,function(){
+            sendResponse({result: "seted"});
+        });
     } else {
         console.warn("message type not match", request.type);
     }
