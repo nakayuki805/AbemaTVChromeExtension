@@ -157,6 +157,12 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isDeleteStrangeCaps",
+                "description": "↑に加えて、一般的な文字以外を全て削除する(英数字や漢字、ひらがな、一部の記号などは削除されません)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
                 "name": "isComeDel",
                 "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/、//コメント)",
                 "type": "boolean",
@@ -177,12 +183,6 @@ var settingsList = [
             {
                 "name": "comeMovingAreaTrim",
                 "description": "コメントを流す領域の横幅を、ウィンドウ全体でなく映像の横幅に合わせる",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isDeleteStrangeCaps",
-                "description": "一般的な文字だけを流す(英数字や漢字、ひらがな、一部の記号など)",
                 "type": "boolean",
                 "isInstantChangable": true
             }
