@@ -62,6 +62,8 @@ var panelopenses='111000000000'; //設定との読み書き時にのみ使用
 var useEyecatch=false; //左上に出るロゴのタイミングを利用する
 var comeMovingAreaTrim=false; //false:ウィンドウ全体 true:映像でない右側では流さない
 var isHideButtons=false; //全画面と音量ボタンの非表示
+var isResizeSpacing=false; //リサイズ時に上ヘッダ分の余白を入れるかどうか
+var isDeleteStrangeCaps=false;
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -133,6 +135,8 @@ if (chrome.storage) {
         }
         comeMovingAreaTrim=value.comeMovingAreaTrim||false;
         isHideButtons=value.hideButtons||false;
+        isResizeSpacing=value.resizeSpacing||false;
+        isDeleteStrangeCaps=value.deleteStrangeCaps||false;
     });
 }
 
@@ -215,7 +219,7 @@ function onresize() {
             wdbyhg = hg*16/9,
             newwd,
             newhg;
-        newtop = 0;
+        newtop = isResizeSpacing?44:0;
         if (wd > wdbyhg) {
             newwd = wdbyhg;
             newhg = hg;
@@ -230,6 +234,12 @@ function onresize() {
         //obj.css("top", newtop+"px");
         obj.offset({"top": newtop, "left": ((wd-newwd)/2)})
         console.log("screen resized");
+    }else{
+        $("object").parent().css("width","100%")
+            .css("height","100%")
+            .css("top","")
+            .css("left","")
+        ;
     }
 }
 function toggleFullscreen() {
@@ -306,10 +316,10 @@ function arrayFullNgMaker(){
 function comeNG(prengcome){
     //規定のNG処理
     var ngedcome = prengcome;
-    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\'☆〜～ｗﾍ√ﾚｖꉂ꒰·‧º∑]*[　 ]*[┌└┐⊂二乁＼ヾヽつっdｄo_ƪ\\\\╭╰m👆ฅｍ\╲٩Ｏ∩┗┏∠٩]*[　 ]*[（\\(《〈\\[\\|｜fζᔦ]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ罒ᗜ◒◊vਊ⍛ー3xエェｪｴρｐё灬▿┓ڡ◡凵]+.*";
+    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\'☆〜～ｗﾍ√ﾚｖꉂ꒰·‧º∑♪₍⁺✧]*[　 ]*[┌└┐⊂二乁＼ヾヽつっdｄo_ƪ\\\\╭╰m👆ฅｍ\╲٩Ｏ∩┗┏∠٩☜ᕕԅ]*[　 ]*[（\\(《〈\\[\\|｜fζᔦ]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ罒ᗜ◒◊vਊ⍛ー3xエェｪｴρｐё灬▿┓ڡ◡凵⌑︎▾0▼]+.*";
     var strface2 = "[）\\)》〉\\]\\|｜ᔨ]";
-    var strface3 = "[　 ]*[┐┘┌┸┓／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」Ｏσ二⊃ゝʃง╭☞∩ゞ┛︎۶]";
-    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞ｗﾍ√ﾚｖ꒱‧º·…⋆ฺ✲]*[　 ]*";
+    var strface3 = "[　 ]*[┐┘┌┸┓／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」Ｏσ二⊃ゝʃง╭☞∩ゞ┛︎۶งวᕗ]";
+    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞ｗﾍ√ﾚｖ꒱‧º·…⋆ฺ✲⁾♪⁺✧]*[　 ]*";
     var reface1 = new RegExp(strface1+strface2+"+"+strface3+"*"+strface4,"g");
     var reface2 = new RegExp(strface1+strface2+"*"+strface3+"+"+strface4,"g");
     ngedcome = ngedcome.replace(reface1,"");
@@ -319,6 +329,9 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/[ｗw]{3,}/g,"ｗｗｗ");
     ngedcome = ngedcome.replace(/ʬ+/g,"ｗ");
     ngedcome = ngedcome.replace(/h?ttps?\:\/\/.*\..*/,"");
+    if(isDeleteStrangeCaps){
+        ngedcome = ngedcome.replace(/[^ - -⁯■□▲△▼▽◆◇○◎●　-ヿ一-鿿＀-￯]/g,""); //基本ラテン・一般句読点・幾何学模様(一部)・CJK用の記号および分音記号・ひらがな・かたかな・CJK統合漢字・半角形/全角形
+    }
     ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g,"ー");
     ngedcome = ngedcome.replace(/[・\･…‥、\､。\｡．\.]{2,}/g,"‥");
     ngedcome = ngedcome.replace(/[　 \n]+/g," ");
@@ -327,10 +340,11 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/[○●]+/g,"○");
     ngedcome = ngedcome.replace(/[͜͜͏̘̣͔͙͎͎̘̜̫̗͍͚͓]+/g,"");
     ngedcome = ngedcome.replace(/[ด็้]+/g,"");
-    ngedcome = ngedcome.replace(/[가-힣]+/g,"");
+
     ngedcome = ngedcome.replace(/[⑧❽８]{3,}/g,"888");
     ngedcome = ngedcome.replace(/[▀-▓]+/g,"");
-    ngedcome = ngedcome.replace(/工エｴｪ/g,"エエエ");
+    ngedcome = ngedcome.replace(/[工エｴｪ]{3,}/g,"エエエ");
+    ngedcome = ngedcome.replace(/([ﾊハ八]|[ﾉノ/][ヽ＼]){3,}/g,"ハハハ");
     ngedcome = ngedcome.replace(/(.)\1{3,}/g,"$1$1$1");
     ngedcome = ngedcome.replace(/(...*?)\1{3,}/,"$1$1$1");
     ngedcome = ngedcome.replace(/(...*?)\1*(...*?)(\1|\2){2,}/g,"$1$2");
@@ -348,7 +362,7 @@ function putComeArray(inp){
         mcj.slice(0,comeoverflowlen).remove();
 //        mclen-=comeoverflowlen;
     }
-    var winwidth=comeMovingAreaTrim?$(EXobli.children[EXwatchingnum]).width():window.innerWidth;
+    var winwidth=comeMovingAreaTrim?$("object").parent().width():window.innerWidth;
     var outxt='';
     for(var i=0;i<inplen;i++){
         outxt+='<span class="movingComment" style="position:absolute;top:'+inp[i][1]+'px;left:'+(inp[i][2]+winwidth)+'px;">'+inp[i][0]+'</span>';
@@ -675,6 +689,8 @@ function openOption(sw){
     $('#isHidePopBL').prop("checked",isHidePopBL);
     $('#comeMovingAreaTrim').prop("checked",comeMovingAreaTrim);
     $('#isHideButtons').prop("checked",isHideButtons);
+    $('#isResizeSpacing').prop("checked",isResizeSpacing);
+    $('#isDeleteStrangeCaps').prop("checked",isDeleteStrangeCaps);
 
     var panelopenseu=[];
     for(var i=0;i<4;i++){
@@ -1304,7 +1320,10 @@ function setSaveClicked(){
     }
     comeMovingAreaTrim=$('#comeMovingAreaTrim').prop("checked");
     isHideButtons=$('#isHideButtons').prop("checked");
+    isResizeSpacing=$('#isResizeSpacing').prop("checked");
+    isDeleteStrangeCaps=$('#isDeleteStrangeCaps').prop("checked");
 
+    onresize();
     setOptionHead();
     setOptionElement();
     arrayFullNgMaker();
@@ -3072,9 +3091,6 @@ function setOptionHead(){
     t+='#moveContainer{z-index:7;';
     if(comeMovingAreaTrim){
         t+='position:absolute;top:0;left:0;overflow:hidden;height:100%;';
-        if(isSureReadComment){
-            t+='max-width:calc(100% - 310px);';
-        }
     }
     t+='}';
     t+='[class^="style__overlap___"]{z-index:8;}';
@@ -3934,8 +3950,9 @@ $(window).on('load', function () {
 //        //コメ欄表示調整（黒帯が自動で閉じた時に崩れるのを直す）
 //        setTimeout(comevisiset,500,false);
 
-        if(comeMovingAreaTrim&&(EXwatchingnum!==undefined)&&parseInt($('#moveContainer').css("width"))!=$(EXobli.children[EXwatchingnum]).width()){
-            $('#moveContainer').css("width",$(EXobli.children[EXwatchingnum]).width()+"px");
+//        if(comeMovingAreaTrim&&(EXwatchingnum!==undefined)&&parseInt($('#moveContainer').css("width"))!=$(EXobli.children[EXwatchingnum]).width()){
+        if(comeMovingAreaTrim){
+            $('#moveContainer').css("width",$("object").parent().width()+"px");
         }
 
     }, 1000);

@@ -9,6 +9,12 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isResizeSpacing",
+                "description": "↑で映像の上側の余白をメニュー分だけ空ける",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
                 //        "name": "isMovieResize",
                 "name": "isMovieMaximize",
                 //        "description": "映像を枠に合わせて縮小する",
@@ -147,6 +153,12 @@ var settingsList = [
             {
                 "name": "isComeNg",
                 "description": "流れるコメントから規定の単語を除去(顔文字,連続する単語など)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isDeleteStrangeCaps",
+                "description": "↑に加えて、一般的な文字以外を全て削除する(英数字や漢字、ひらがな、一部の記号などは削除されません)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
