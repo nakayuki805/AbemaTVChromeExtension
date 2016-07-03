@@ -221,6 +221,8 @@ $(function(){
         var panelopenset=value.panelopenset||(isAlwaysShowPanel?"222222222222":(isOpenPanelwCome?"111000000111":"111000000000"));//isA..とisO..を初回のみ適用
         var comeMovingAreaTrim=value.comeMovingAreaTrim||false;
         var isHideButtons=value.hideButtons||false;
+        var isResizeSpacing=value.resizeSpacing||false;
+        var isDeleteStrangeCaps=value.deleteStrangeCaps||false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -309,6 +311,8 @@ $(function(){
         }
         $('#comeMovingAreaTrim').prop("checked",comeMovingAreaTrim);
         $('#isHideButtons').prop("checked",isHideButtons);
+        $('#isResizeSpacing').prop("checked",isResizeSpacing);
+        $('#isDeleteStrangeCaps').prop("checked",isDeleteStrangeCaps);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -375,7 +379,9 @@ $(function(){
             "hidePopTL":$('#isHidePopTL').prop("checked"),
             "panelopenset":panelopenset,
             "comeMovingAreaTrim":$('#comeMovingAreaTrim').prop("checked"),
-            "hideButtons":$('#isHideButtons').prop("checked")
+            "hideButtons":$('#isHideButtons').prop("checked"),
+            "resizeSpacing":$('#isResizeSpacing').prop("checked"),
+            "deleteStrangeCaps":$('#isDeleteStrangeCaps').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
