@@ -277,14 +277,27 @@ function arrayFullNgMaker(){
         spfullng[ngi]=spfullng[ngi].replace(/\/\/.*$/,""); //文中コメントを除去
         var refullng = /^\/(.+)\/([igm]*)$/;
         var rexefullng;
+        var b=true;
         if((rexefullng=refullng.exec(spfullng[ngi]))!=null){
             try{
                 spfullng[ngi]=new RegExp(rexefullng[1],rexefullng[2]);
+                b=false;
             }catch(e){
-                spfullng[ngi]=new RegExp("\\"+spfullng[ngi].split("").join("\\"));
+//                spfullng[ngi]=new RegExp("\\"+spfullng[ngi].split("").join("\\"));
             }
         }else{
-            spfullng[ngi]=new RegExp("\\"+spfullng[ngi].split("").join("\\"));
+//            spfullng[ngi]=new RegExp("\\"+spfullng[ngi].split("").join("\\"));
+        }
+        if(b){
+            var ia=spfullng[ngi].split("");
+            var ib="";
+            for(var iai=0;iai<ia.length;iai++){
+                if(!/[0bfnrtv]/.test(ia[iai])){
+                    ib+="\\";
+                }
+                ib+=ia[iai];
+            }
+            spfullng[ngi]=new RegExp(ib);
         }
         console.log(spfullng[ngi]);
         arFullNg.push(spfullng[ngi]);
@@ -293,17 +306,17 @@ function arrayFullNgMaker(){
 function comeNG(prengcome){
     //規定のNG処理
     var ngedcome = prengcome;
-    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\'☆〜～ｗﾍ√ﾚｖꉂ꒰·‧º∑]*[　 ]*[┌└┐⊂二乁＼ヾヽつっdｄo_ƪ\\\\╭╰m👆ฅｍ\╲٩Ｏ∩┗┏∠٩]*[　 ]*[（\\(《〈\\[\\|｜fζᔦ]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ罒ᗜ◒◊vਊ⍛ー3xエェｪｴρｐё灬▿┓]+.*";
+    var strface1 = "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\'☆〜～ｗﾍ√ﾚｖꉂ꒰·‧º∑]*[　 ]*[┌└┐⊂二乁＼ヾヽつっdｄo_ƪ\\\\╭╰m👆ฅｍ\╲٩Ｏ∩┗┏∠٩]*[　 ]*[（\\(《〈\\[\\|｜fζᔦ]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ罒ᗜ◒◊vਊ⍛ー3xエェｪｴρｐё灬▿┓ڡ◡凵]+.*";
     var strface2 = "[）\\)》〉\\]\\|｜ᔨ]";
     var strface3 = "[　 ]*[┐┘┌┸┓／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」Ｏσ二⊃ゝʃง╭☞∩ゞ┛︎۶]";
-    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞ｗﾍ√ﾚｖ꒱‧º·…⋆ฺ]*[　 ]*";
+    var strface4 = "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞ｗﾍ√ﾚｖ꒱‧º·…⋆ฺ✲]*[　 ]*";
     var reface1 = new RegExp(strface1+strface2+"+"+strface3+"*"+strface4,"g");
     var reface2 = new RegExp(strface1+strface2+"*"+strface3+"+"+strface4,"g");
     ngedcome = ngedcome.replace(reface1,"");
     ngedcome = ngedcome.replace(reface2,"");
     ngedcome = ngedcome.replace(/(\@\w+[　 ]*)+/g,""); //twitter-dest.
     ngedcome = ngedcome.replace(/(#[^　 ]+[　 ]*)+$/g,""); //twitter-tag
-    ngedcome = ngedcome.replace(/[ｗw]{4,}/g,"ｗｗｗ");
+    ngedcome = ngedcome.replace(/[ｗw]{3,}/g,"ｗｗｗ");
     ngedcome = ngedcome.replace(/ʬ+/g,"ｗ");
     ngedcome = ngedcome.replace(/h?ttps?\:\/\/.*\..*/,"");
     ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g,"ー");
@@ -314,6 +327,10 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/[○●]+/g,"○");
     ngedcome = ngedcome.replace(/[͜͜͏̘̣͔͙͎͎̘̜̫̗͍͚͓]+/g,"");
     ngedcome = ngedcome.replace(/[ด็้]+/g,"");
+    ngedcome = ngedcome.replace(/[가-힣]+/g,"");
+    ngedcome = ngedcome.replace(/[⑧❽８]{3,}/g,"888");
+    ngedcome = ngedcome.replace(/[▀-▓]+/g,"");
+    ngedcome = ngedcome.replace(/工エｴｪ/g,"エエエ");
     ngedcome = ngedcome.replace(/(.)\1{3,}/g,"$1$1$1");
     ngedcome = ngedcome.replace(/(...*?)\1{3,}/,"$1$1$1");
     ngedcome = ngedcome.replace(/(...*?)\1*(...*?)(\1|\2){2,}/g,"$1$2");
@@ -850,7 +867,9 @@ console.log("createSettingWindow retry");
         //設定ウィンドウの中身
         settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
 //        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";//コメ欄10より上の番組情報等11より上
-        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;";//head11より上の残り時間12,13,14より上の番組情報等15より上
+//        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;";//head11より上の残り時間12,13,14より上の番組情報等15より上
+        settcont.style = "width:670px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;";//head11より上の残り時間12,13,14より上の番組情報等15より上
+//ピッタリの658pxから少し余裕を見る
         $(settcont).prependTo('body');
         $('#CommentColorSettings').change(setComeColorChanged);
         $('#itimePosition,#isTimeVisible').change(setTimePosiChanged);
@@ -1129,11 +1148,36 @@ console.log("createSettingWindow ok");
 }
 function epcountchange(){
     var c=parseInt($('#epnumedit input[type="number"][name="epcount"]').val());
+    var proLength=0;
+    var oneLength=0;
+    if(c>6){
+        proLength = proEnd.getTime() - proStart.getTime(); //番組の全体長さms
+        if(proLength>0){
+            oneLength=Math.floor(proLength/c); //1話あたりの長さms
+        }
+        $('#forProEndTxt').css("background-color","rgba(0,0,0,0.4)");
+    }else{
+        $('#forProEndTxt').css("background-color","transparent");
+    }
     var f=parseInt($('#epnumedit input[type="number"][name="epfirst"]').val());
     var eo='<div style="border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;">';
     var ea='';
     for(var i=0;i<c;i++){
-        ea+=eo+(c>6?(i+f):'&nbsp;')+'</div>';
+        ea+=eo;
+        if(c>6){
+            var sprost=new Date(proStart);
+            var eprost=new Date(proStart);
+            sprost.setSeconds(Math.floor(i*oneLength/1000));
+            var sh=('0'+sprost.getHours()).slice(-2);
+            var sm=('0'+sprost.getMinutes()).slice(-2);
+            eprost.setSeconds(Math.floor((i+1)*oneLength/1000));
+            var eh=('0'+eprost.getHours()).slice(-2);
+            var em=('0'+eprost.getMinutes()).slice(-2);
+            ea+='<a title="#'+(i+f)+' '+sh+':'+sm+'-'+eh+':'+em+'">'+(i+f)+'</a>';
+        }else{
+            ea+='&nbsp;';
+        }
+        ea+='</div>';
     }
     $('#proTimeEpNum').html(ea);
 }
@@ -1479,21 +1523,35 @@ function toggleCommentList(){
 //console.log("comevisiset toggleCommentList");
 //    comevisiset(true);
     var jo=$(EXcomelist).parent();
-    var jv=jo.css("display");
-    if(jv!="none"){
-        jo.css("display","none");
-        $(EXcome).css("height","unset");
-        if(isInpWinBottom){
-            $(EXcome).css("top","unset")
-                .css("bottom","0px")
-            ;
-        }
-    }else{
-        jo.css("display",isInpWinBottom?"flex":"");
-        $(EXcome).css("height","")
-            .css("top","")
-            .css("bottom","")
+//    var jv=jo.css("display");
+//display:noneだと崩れるので変更
+//重なっていて下にあるfooterの音量ボタン等を使用できるようにpointer-eventsを利用
+    var jv=jo.css("visibility");
+//    if(jv!="none"){
+    if(jv!="hidden"){
+//        jo.css("display","none");
+//        $(EXcome).css("height","unset");
+        jo.css("visibility","hidden")
+            .css("opacity",0)
         ;
+        $(EXcome).css("pointer-events","none");
+        $(EXcomesend).css("pointer-events","auto");
+//        if(isInpWinBottom){
+//            $(EXcome).css("top","unset")
+//                .css("bottom","0px")
+//            ;
+//        }
+    }else{
+//        jo.css("display",isInpWinBottom?"flex":"");
+//        $(EXcome).css("height","")
+//            .css("top","")
+//            .css("bottom","")
+//        ;
+        jo.css("visibility","")
+            .css("opacity","")
+        ;
+        $(EXcome).css("pointer-events","");
+        $(EXcomesend).css("pointer-events","");
     }
 }
 //function unpopHeader(){
@@ -3021,6 +3079,24 @@ function setOptionHead(){
     t+='}';
     t+='[class^="style__overlap___"]{z-index:8;}';
     t+='#ComeMukouMask{z-index:6;}';
+    t+='[class^="TVContainer__ad-reserve-button___"]{z-index:9;}'; //元はoverlapと同じ3
+//変更後のz-index(これを書いてる時点)
+//20 side 右のボタン
+//16 #settcont 一時設定画面
+//15 right-slide 番組情報
+//15 right-list-slide 放送中一覧
+//14 #forProEndTxt 残り時間
+//13 #proTimeEpNum 残り時間の背景区切り
+//12 #forProEndBk 残り時間の背景
+//11 right-comment-area コメント一覧・入力欄
+//11 header ヘッダー
+//10 balloon 右のボタンの吹き出しポップ
+//10 footer フッター 全画面・音量ボタン
+//9 ad-reserve-button 番宣中の左下ポップ
+//8 overlap 映像クリック受付
+//7 #moveContainer 流れるコメント
+//6 #ComeMukouMask 画面装飾用
+
     //全画面・音量ボタン非表示 display:noneだとホイール音量操作でスタック
     if(isHideButtons){
         t+='[class^="TVContainer__footer___"]>[class^="styles__full-screen___"]{opacity:0;visibility:hidden;}';
