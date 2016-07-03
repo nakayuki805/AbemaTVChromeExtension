@@ -9,6 +9,12 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isResizeSpacing",
+                "description": "↑で映像の上側の余白をメニュー分だけ空ける",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
                 //        "name": "isMovieResize",
                 "name": "isMovieMaximize",
                 //        "description": "映像を枠に合わせて縮小する",
@@ -171,6 +177,12 @@ var settingsList = [
             {
                 "name": "comeMovingAreaTrim",
                 "description": "コメントを流す領域の横幅を、ウィンドウ全体でなく映像の横幅に合わせる",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isDeleteStrangeCaps",
+                "description": "一般的な文字だけを流す(英数字や漢字、ひらがな、一部の記号など)",
                 "type": "boolean",
                 "isInstantChangable": true
             }
