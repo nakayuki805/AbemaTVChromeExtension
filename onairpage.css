@@ -113,6 +113,14 @@ body{
 [class^="TVContainer__footer___"] [class^="styles__volume___"] [class^="styles__slider-container___"]:after{
     border-top-width:15px;
 }
+/* その他メニューがコメ欄の下にくぐらないように */
+[class*="styles__hover-contents___"]{
+    z-index: 15;
+}
+/* z-indexが効かない→音量とフルスクリーンボタンがコメ欄をくぐらないように 
+[class*="styles__full-screen___"] *,[class*="styles__volume___"] *{
+    z-index: 15;
+}*/
 /* 左下からpopしてくるボタンの処理
 [class^="TVContainer__ad-reserve-button___"] {
     transform:translateX(-170px);

@@ -190,6 +190,7 @@ var EXcomments;
 
 var commentsSelector = '[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]';
 var commentListParentSelector = '[class*="styles__comment-list-wrapper___"] > div';
+var overlapSelector = '[class^="style__overlap___"]';
 
 var EXmain;
 var EXhead;
@@ -3102,7 +3103,7 @@ function setOptionHead(){
     t+='[class^="TVContainer__side___"]{transform:translateY(-50%);}';
     t+='[class^="TVContainer__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
     t+='[class^="TVContainer__right-slide___"]{z-index:15;}';
-    t+='[class^="TVContainer__right-comment-area___"]{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
+    t+='[class^="TVContainer__right-comment-area___"] *{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
     //左上・左下の非表示
     if(isHidePopBL){
         t+='[class^="TVContainer__ad-reserve-button___"]{transform:translateX(-170px);}';
@@ -3425,6 +3426,7 @@ console.log("dblclick");
     //マウスホイール無効か音量操作
     var mousewheelEvtName = isFirefox?'DOMMouseScroll':'mousewheel';
     window.addEventListener(mousewheelEvtName,function(e){
+        //console.log("onmousewheel",e)
         if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
             if(EXvolume&&$(EXvolume).contents().find('svg').css("zoom")=="1"){
                 otoSize(e.wheelDelta<0?0.8:1.2);
@@ -3432,9 +3434,10 @@ console.log("dblclick");
             moVol(e.wheelDelta<0?-5:5);
         }
         if (isCancelWheel||isVolumeWheel){ //設定ウィンドウ反映用
+            //console.log("cancelling wheel")
             e.stopImmediatePropagation();
         }
-    },true);
+    }, true);
     //フルスクリーンボタンの割り当て変更
     butfs.addEventListener("click", function(e){
         if (settings.isDblFullscreen) {
