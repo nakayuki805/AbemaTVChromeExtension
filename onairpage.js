@@ -236,13 +236,14 @@ var popacti=false; //脱出コマンドを受け付けるかどうか
 
 function onresize() {
     if (settings.isResizeScreen) {
+        newtop = isResizeSpacing?44:0;
         var obj = $("object,video").parent(),
             wd = window.innerWidth,
-            hg = window.innerHeight,
+            hg = window.innerHeight-newtop,
             wdbyhg = hg*16/9,
             newwd,
-            newhg;
-        newtop = isResizeSpacing?44:0;
+            newhg;        
+        if(obj.length==0){return;}
         if(setBlacked[2]){
             newtop+=Math.floor(obj.height()*(100-CMsmall)/200);
         }
@@ -394,7 +395,19 @@ function putComeArray(inp){
         mcj.slice(0,comeoverflowlen).remove();
 //        mclen-=comeoverflowlen;
     }
-    var winwidth=comeMovingAreaTrim?$("object,video").parent().width():window.innerWidth;
+    var jo=$("object,video").parent();
+    var er=jo[0].getBoundingClientRect();
+    var movieRightEdge;
+    if(isMovieMaximize){
+        if(jo.width()>jo.height()*16/9){ //横長
+            movieRightEdge=jo.width()/2+jo.height()*8/9; //画面半分+映像横長さ/2
+        }else{ //縦長
+            movieRightEdge=jo.width();
+        }
+    }else{
+        movieRightEdge=er.left+er.width/2+jo.width()/2;
+    }
+    var winwidth=comeMovingAreaTrim?movieRightEdge:window.innerWidth;
     var outxt='';
     for(var i=0;i<inplen;i++){
         outxt+='<span class="movingComment" style="position:absolute;top:'+inp[i][1]+'px;left:'+(inp[i][2]+winwidth)+'px;">'+inp[i][0]+'</span>';
@@ -731,6 +744,9 @@ function openOption(sw){
     $('#isResizeSpacing').prop("checked",isResizeSpacing);
     $('#isDeleteStrangeCaps').prop("checked",isDeleteStrangeCaps);
 
+    $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
+    $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
+
     var panelopenseu=[];
     for(var i=0;i<4;i++){
         panelopenseu[i]=panelopenset[i].join('');
@@ -751,6 +767,18 @@ function openOption(sw){
         for(var j=0;j<3;j++){
             $('#panelcustomTable [type="radio"][name="d'+i+''+j+'"]').val([sp[i*3+j]]);
         }
+    }
+
+    if(settings.isResizeScreen||isMovieMaximize){
+        $('#movieResizeChkA').prop("checked",true);
+        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",false)
+            .val([settings.isResizeScreen?(isResizeSpacing?1:0):2])
+        ;
+    }else{
+        $('#movieResizeChkA').prop("checked",false);
+        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').val([0])
+            .prop("disabled",true)
+        ;
     }
 
     if(!optionStatsUpdated){
@@ -863,6 +891,7 @@ function optionStatsUpdate(outflg){
         var ropw=opw;
         var ropb=opb;
         var ropt=opt;
+        var er=jp[0].getBoundingClientRect();
         if(settings.isResizeScreen){ //映像リサイズ1
             odes="(拡大中)";
             ndes="(拡大後)";
@@ -870,7 +899,7 @@ function optionStatsUpdate(outflg){
             romh=jp.height();
             ropw=oww-romw;
 //            ropt=isResizeSpacing?44:0;
-            ropt=jp.offset().top;
+            ropt=Math.round(jp.offset().top-(jp.height()-er.height)/2);
             ropb=owh-romh-ropt;
         }else if(isMovieMaximize){ //映像リサイズ2
             odes="(拡大中)";
@@ -906,19 +935,15 @@ function optionStatsUpdate(outflg){
         var rnpw=ropw;
         var rnpb=ropb;
         var rnpt=ropt;
-        var rodar=romw/romh;
-        if(rodar>16/9){ //darが16/9超 横に長い 縦にfit
-            rnpt=0;
-            rnpb=0;
-        }else if(rodar<16/9){ //darが16/9未満 縦に長い 横にfit
-            rnpw=0;
-        }
         var sw=parseInt($('#windowheight input[type="radio"][name="windowheight"]:checked').val());
         switch(sw){
             case 0: //変更なし
                 if(settings.isResizeScreen||isMovieMaximize){
                     rnpt=ropt;
                     rnpb=owh-rnmh-rnpt;
+                    if(rnpt!=0||rnpb!=0){
+                        rnpw=0;
+                    }
                 }else{
                     npb=Math.floor((owh-nmh)/2);
                     npt=owh-nmh-npb;
@@ -935,9 +960,11 @@ function optionStatsUpdate(outflg){
                 break;
             case 2: //黒枠の分だけ空ける
                 if(settings.isResizeScreen){
+                    rnpw=0;
                     rnpt=44;
                     rnpb=61;
                 }else if(isMovieMaximize){
+                    rnpw=0;
                     rnpb=64;
                     rnpt=64;
                 }else{
@@ -1287,7 +1314,64 @@ console.log("createSettingWindow retry");
         $('#ipanelopenset').change(panelTableUpdateS);
         $('#panelcustomTable').change(panelTableUpdateT);
     }
+    if($('#movieResizeContainer').length==0){
+        var jo=$('#isResizeScreen');
+        var ja=jo.parent().contents();
+        var jm=$('#isMovieMaximize');
+        ja.slice(ja.index(jo),ja.index(jm.next())).wrapAll('<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">');
+        $('<input id="movieResizeChkA" type="checkbox">').prependTo('#movieResizeContainer')
+            .after(':映像リサイズ (ウィンドウに合わせます。映像がウィンドウの外にハミ出なくなり、コメ欄などを開いても映像の大きさは変わらず、コメ欄などは映像の上に重なります。)<br>　映像の上下位置<br>')
+            .change(movieResizeChkChanged)
+        ;
+        $('#isResizeScreen').css("display","none")
+            .before('<input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:上に詰める (空き無し)')
+        ;
+        $('#isResizeSpacing').css("display","none")
+            .before('<input type="radio" name="movieResizeType" value=1 style="margin-left:16px;">:上に詰めるが、上の黒帯の分だけ空ける')
+        ;
+        $('#isMovieMaximize').css("display","none")
+            .before('<input type="radio" name="movieResizeType" value=2 style="margin-left:16px;">:画面中央')
+        ;
+        var jc=$('#movieResizeContainer').contents();
+        jc.eq(jc.index($('#isResizeScreen'))+1)
+            .add(jc.eq(jc.index($('#isResizeSpacing'))+1))
+            .add(jc.eq(jc.index($('#isMovieMaximize'))+1))
+            .remove()
+        ;
+        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').change(movieResizeTypeChanged);
+    }
 console.log("createSettingWindow ok");
+}
+function movieResizeTypeChanged(){
+    switch(+$('#movieResizeContainer input[type="radio"][name="movieResizeType"]:checked').val()){
+        case 0:
+            $('#isResizeScreen').prop("checked",true);
+            $('#isResizeSpacing').prop("checked",false);
+            $('#isMovieMaximize').prop("checked",false);
+            break;
+        case 1:
+            $('#isResizeScreen').prop("checked",true);
+            $('#isResizeSpacing').prop("checked",true);
+            $('#isMovieMaximize').prop("checked",false);
+            break;
+        case 2:
+            $('#isResizeScreen').prop("checked",false);
+            $('#isResizeSpacing').prop("checked",false);
+            $('#isMovieMaximize').prop("checked",true);
+            break;
+        default:
+    }
+}
+function movieResizeChkChanged(){
+    if($('#movieResizeChkA').prop("checked")){
+        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",false);
+        movieResizeTypeChanged();
+    }else{
+        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",true);
+        $('#isResizeScreen').prop("checked",false);
+        $('#isResizeSpacing').prop("checked",false);
+        $('#isMovieMaximize').prop("checked",false);
+    }
 }
 function epcountchange(){
     var c=parseInt($('#epnumedit input[type="number"][name="epcount"]').val());
@@ -4082,7 +4166,18 @@ $(window).on('load', function () {
         if(comeMovingAreaTrim){
             var jo=$("object,video").parent();
             if(jo.length>0){
-                $('#moveContainer').css("width",(jo.width()+jo.offset().left)+"px");
+                var er=jo[0].getBoundingClientRect();
+                var movieRightEdge;
+                if(isMovieMaximize){
+                    if(jo.width()>jo.height()*16/9){ //横長
+                        movieRightEdge=jo.width()/2+jo.height()*8/9; //画面半分+映像横長さ/2
+                    }else{ //縦長
+                        movieRightEdge=jo.width();
+                    }
+                }else{
+                    movieRightEdge=er.left+er.width/2+jo.width()/2;
+                }
+                $('#moveContainer').css("width",movieRightEdge+"px");
             }
         }
 
