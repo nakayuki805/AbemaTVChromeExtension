@@ -420,6 +420,8 @@ $(function(){
             location.reload();
         });
     });
+    //通知登録番組一覧リンク書き換え
+    $("#prognotifiesLink").attr("href", chrome.extension.getURL("prognotifies.html"));
 });
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";
