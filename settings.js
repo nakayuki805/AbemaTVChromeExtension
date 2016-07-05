@@ -4,7 +4,8 @@ var settingsList = [
         "settings": [
             {
                 "name": "isResizeScreen",
-                "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
+                //        "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
+                "description": "映像をウィンドウに合わせてリサイズ、映像の位置を上に詰める (映像がウィンドウ外にはみ出なくなり、コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -19,7 +20,8 @@ var settingsList = [
                 "name": "isMovieMaximize",
                 //        "description": "映像を枠に合わせて縮小する",
                 //        "description": "映像の横長さを最大に固定する",
-                "description": "映像の縦横長さを最大で固定する",
+                //        "description": "映像の縦横長さを最大で固定する",
+                "description": "映像をウィンドウに合わせてリサイズ、映像の位置は画面中央 (〃)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
