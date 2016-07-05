@@ -9,7 +9,8 @@
 	"applications": {
 		"gecko": {
 			"id": "abematvextension@nakayuki.net",
-			"strict_min_version": "45.0"
+			"strict_min_version": "45.0",
+			"update_url": "https://www.nakayuki.net/abema-ext/update.json"
 		}
 	},
 	"permissions": [
