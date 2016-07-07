@@ -4227,13 +4227,13 @@ function checkUrlPattern(url){
 
 //通知機能
 function putNotifyButton(url){
-    if($('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__time___"]').text()==""){setTimeout(function(){putNotifyButton(url)},1000);console.log("putNotifyButton wait");return;}
+    if($('[class*="BroadcastingFrameContainer__right-contents___"] [class*="styles__time___"]').text()==""){setTimeout(function(){putNotifyButton(url)},1000);console.log("putNotifyButton wait");return;}
     var urlarray = url.substring(17).split("/");
     var channel = urlarray[1];
     var channelName = channel;//目標はチャンネル名取得
     var programID = urlarray[3];
-    var programTitle = $('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__heading___"]').text();
-    var programTimeStr = $('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__time___"]').text();
+    var programTitle = $('[class*="BroadcastingFrameContainer__right-contents___"] [class*="styles__heading___"]').text();
+    var programTimeStr = $('[class*="BroadcastingFrameContainer__right-contents___"] [class*="styles__time___"]').text();
     //console.log(programTimeStr, urlarray)
     var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
     var programTime = new Date();
@@ -4249,7 +4249,7 @@ function putNotifyButton(url){
     if (notifyTime > now){
         var progNotifyName = "progNotify_"+channel+"_"+programID;
         var notifyButton = $('<input type="button" id="addNotify">');
-        notifyButton.appendTo('[class*="BroadcastingFrameContainer__program-heading___"] [class*="styles__checkbox-button-area___"]');
+        notifyButton.appendTo('[class*="BroadcastingFrameContainer__left-contents___"] > div');
         getStorage(progNotifyName, function(notifyData) {
             console.log(notifyData,progNotifyName)
            if(!notifyData[progNotifyName]){
