@@ -75,12 +75,12 @@ Firefox対応のため、拡張機能を読み込んだときにオレンジの�
 
 ## Firefox対応
 Firefoxへの対応を目指して実験的にfirefoxでも読み込めるようにしています。そのためWebExtensionに対応したfirefoxでも一応使用できます。  
-WebExtensionに対応するFirefoxは2016年8月に公開されるバージョン48以降です。FirefoxのDeveloper Edition, Nightly, Betaではすでに48以降なので現在使用できます。  
 Firefoxではオプション画面へのアクセス手段がないのでAbemaTVのページの黒帯右上のその他のメニューか一時設定画面にあるリンクからオプション画面を開いてください。  
 この拡張機能はChrome前提で作られているのでFirefoxではうまく動かない可能性が大きいです。コメント流しなど主要な機能を簡単に確認しただけなのでバグが多いと思われます。  
 Firefox版は署名済みのものが[このページ](https://www.nakayuki.net/abema-ext/)からダウンロードできます。WebExtension非対応のFirefoxでは壊れたアドオンとみなされるので注意してください。Mozillaの公式アドオンサイトには審査に時間がかかるので掲載しない予定です。  
-firefoxでabout:debuggingを開けば一時的に拡張機能を読み込むことができます。(このフォルダのmanifest.jsonを選択)firefoxを起動している間だけ使用できます。(一旦閉じると拡張が消えてしまいます。)  
-Firefox Developer Edition と Firefox Nightlyでは野良拡張の読み込みも可能です。about:configを開きxpinstall.signatures.requiredをfalseに設定の上で、この拡張機能のファイル一式をzipで固め、拡張子を.xpiに変更しアドオンページからインストールできます。
+firefoxで読み込む際は元からあるChrome用のmanigest.jsonは使用せず、manifest-fx.jsonをmanifest.jsonにリネームして使用してください。  
+firefoxでabout:debuggingを開けば一時的に拡張機能を読み込むことができます。(このフォルダの(↑でリネームした)manifest.jsonを選択)firefoxを起動している間だけ使用できます。(一旦閉じると拡張が消えてしまいます。)  
+Firefox Developer Edition と Firefox Nightlyでは野良拡張の読み込みも可能です。about:configを開きxpinstall.signatures.requiredをfalseに設定の上で、manifest.jsonをfirefox用のに置き換えた上でこの拡張機能のファイル一式をzipで固め、拡張子を.xpiに変更しアドオンページからインストールできます。
 
 ## アップデート方法
 ウェブストアから入れた場合はある程度更新がまとまったらウェブストア版も更新されますが、ウェブストアに最新版が公開されてから手元の拡張機能が最新になるまで時間がかかります。その場合は、Chromeの拡張機能の画面でデベロッパーモードにして「拡張機能を今すぐ更新」をクリックすればすぐ最新版になります。
