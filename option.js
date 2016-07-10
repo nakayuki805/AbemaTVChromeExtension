@@ -223,6 +223,7 @@ $(function(){
         var isHideButtons=value.hideButtons||false;
         var isResizeSpacing=value.resizeSpacing||false;
         var isDeleteStrangeCaps=value.deleteStrangeCaps||false;
+        var isHighlightNewCome=value.highlightNewCome||false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -313,6 +314,7 @@ $(function(){
         $('#isHideButtons').prop("checked",isHideButtons);
         $('#isResizeSpacing').prop("checked",isResizeSpacing);
         $('#isDeleteStrangeCaps').prop("checked",isDeleteStrangeCaps);
+        $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -381,7 +383,8 @@ $(function(){
             "comeMovingAreaTrim":$('#comeMovingAreaTrim').prop("checked"),
             "hideButtons":$('#isHideButtons').prop("checked"),
             "resizeSpacing":$('#isResizeSpacing').prop("checked"),
-            "deleteStrangeCaps":$('#isDeleteStrangeCaps').prop("checked")
+            "deleteStrangeCaps":$('#isDeleteStrangeCaps').prop("checked"),
+            "highlightNewCome":$('#isHighlightNewCome').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
