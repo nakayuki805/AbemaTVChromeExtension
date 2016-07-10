@@ -63,7 +63,8 @@ var useEyecatch=false; //左上に出るロゴのタイミングを利用する
 var comeMovingAreaTrim=false; //false:ウィンドウ全体 true:映像でない右側では流さない
 var isHideButtons=false; //全画面と音量ボタンの非表示
 var isResizeSpacing=false; //リサイズ時に上ヘッダ分の余白を入れるかどうか
-var isDeleteStrangeCaps=false;
+var isDeleteStrangeCaps=false; //流れるコメントの規定NGに文字コード基準のフィルターを適用する
+var isHighlightNewCome=false;
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -160,6 +161,7 @@ getStorage(null, function (value) {
     isHideButtons=value.hideButtons||false;
     isResizeSpacing=value.resizeSpacing||false;
     isDeleteStrangeCaps=value.deleteStrangeCaps||false;
+    isHighlightNewCome=value.highlightNewCome||false;
 });
 
 var currentLocation = window.location.href;
@@ -744,6 +746,7 @@ function openOption(sw){
     $('#isHideButtons').prop("checked",isHideButtons);
     $('#isResizeSpacing').prop("checked",isResizeSpacing);
     $('#isDeleteStrangeCaps').prop("checked",isDeleteStrangeCaps);
+    $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -1534,6 +1537,7 @@ function setSaveClicked(){
     isHideButtons=$('#isHideButtons').prop("checked");
     isResizeSpacing=$('#isResizeSpacing').prop("checked");
     isDeleteStrangeCaps=$('#isDeleteStrangeCaps').prop("checked");
+    isHighlightNewCome=$('#isHighlightNewCome').prop("checked");
 
     onresize();
     setOptionHead();
@@ -1622,7 +1626,8 @@ function setProSamePosiChanged(pophide,bigtext){
     setTimePosition(timeprop,titleprop,sameprop,bigtext);
     setProtitlePosition(timeprop,titleprop,sameprop,bigtext);
     proSamePositionFix(timeprop,titleprop,sameprop,bigtext);
-    setTimeout(comemarginfix,(pophide?110:0),(pophide?1:0),timeprop,titleprop,sameprop,bigtext);
+//    setTimeout(comemarginfix,(pophide?110:0),(pophide?1:0),timeprop,titleprop,sameprop,bigtext);
+    setTimeout(comemarginfix,110,1,timeprop,titleprop,sameprop,bigtext);
 }
 function setProtitlePosiChanged(){
     //選択肢の表示切替だけして本体はsetProSamePosiChangedで行う
@@ -3876,6 +3881,20 @@ $(window).on('load', function () {
 //                    commentNum=0;
                     $('[class^="style__overlap___"]').trigger("click");
                     fastRefreshing();
+                }
+                if(isHighlightNewCome){
+                    var jo=$(EXcomelist).children().slice(0,d);
+                    jo.css("padding-left",((isCommentWide?8:15)-3)+"px")
+                        .css("border-left","3px solid rgba(255,255,0,0.6)")
+                        .css("transition","")
+                    ;
+                    setTimeout(function(jo){
+                        for(var i=jo.length-1,j=0;i>=0;i--,j++){
+                            jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
+                                .css("transition","border-left-color 1.5s linear "+(0.8+0.05*j)+"s")
+                            ;
+                        }
+                    },0,jo);
                 }
             }else if(comeListLen<commentNum){
                 commentNum=0;
