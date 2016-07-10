@@ -128,6 +128,12 @@ var settingsList = [
                 "description": "コメントを横にほんの少し広げる",
                 "type": "boolean",
                 "isInstantChangable": true
+            },
+            {
+                "name": "isHighlightNewCome",
+                "description": "新着コメントを少し目立たせる",
+                "type": "boolean",
+                "isInstantChangable": true
             }
         ]
     },
