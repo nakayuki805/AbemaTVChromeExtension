@@ -909,6 +909,7 @@ function closeOption(){
     $(EXcomelist).children('div').css("background-color","") //基本色、新着強調
         .css("color","") //基本色
         .css("border-left","") //新着強調
+        .css("padding-left","") //新着強調
         .css("border-top","") //区切り線
         .css("transition","") //新着強調
         .children('[class^="styles__message___"]').css("color","") //基本色
