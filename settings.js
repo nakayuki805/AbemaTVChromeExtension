@@ -128,12 +128,12 @@ var settingsList = [
                 "description": "コメントを横にほんの少し広げる",
                 "type": "boolean",
                 "isInstantChangable": true
-            },
-            {
-                "name": "isHighlightNewCome",
-                "description": "新着コメントを少し目立たせる",
-                "type": "boolean",
-                "isInstantChangable": true
+//            },
+//            {
+//                "name": "isHighlightNewCome",
+//                "description": "新着コメントを少し目立たせる",
+//                "type": "boolean",
+//                "isInstantChangable": true
             }
         ]
     },
@@ -243,6 +243,17 @@ var settingsList = [
                 "isInstantChangable": false
             }
         ]
+    },
+    {
+        "description": "その他",
+        "settings": [
+            {
+                "name": "isChTimetableExpand",
+                "description": "チャンネル別番組表ページにて、番組タイトルが隠れないように縦に広げる(各時刻の長さが一定でなくバラバラになります)",
+                "type": "boolean",
+                "isInstantChangable": false
+            }
+        ]
     }
     ];
 var ComeColorSettingList = [
@@ -317,6 +328,14 @@ var RadioSettingList = [
     },{
         "name": "panelopenset",
         "list":[[["111000000000","デフォルト"],["222222222222","常に表示"],["333333333333","カスタム"]]]
+    },{
+        "name": "highlightNewCome",
+        "list":[[
+                [0,"なし"],
+                [1,"先頭マーク"],
+                [2,"背景着色"],
+                [3,"両方"]
+        ]]
     }
     ];
 var CMSettingList = [
