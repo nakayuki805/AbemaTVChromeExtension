@@ -161,6 +161,15 @@ $(function(){
         ;
         $('#panelcustomTable td:first-child').css("text-align","center");
     }
+    $("#ihighlightNewCome").insertBefore("#isCommentWide")
+        .css("border","black solid 1px")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .css("padding-left","8px")
+        .children().css("margin-left","4px")
+        .first().before("新着コメントを少し強調する")
+    ;
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -223,7 +232,8 @@ $(function(){
         var isHideButtons=value.hideButtons||false;
         var isResizeSpacing=value.resizeSpacing||false;
         var isDeleteStrangeCaps=value.deleteStrangeCaps||false;
-        var isHighlightNewCome=value.highlightNewCome||false;
+        var highlightNewCome=(value.highlightNewCome!==undefined)?Number(value.highlightNewCome):0;
+        var isChTimetableExpand=value.chTimetableExpand||false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -314,7 +324,9 @@ $(function(){
         $('#isHideButtons').prop("checked",isHideButtons);
         $('#isResizeSpacing').prop("checked",isResizeSpacing);
         $('#isDeleteStrangeCaps').prop("checked",isDeleteStrangeCaps);
-        $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
+//        $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
+        $('#ihighlightNewCome [type="radio"][name="highlightNewCome"]').val([highlightNewCome]);
+        $('#isChTimetableExpand').prop("checked",isChTimetableExpand);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -384,7 +396,9 @@ $(function(){
             "hideButtons":$('#isHideButtons').prop("checked"),
             "resizeSpacing":$('#isResizeSpacing').prop("checked"),
             "deleteStrangeCaps":$('#isDeleteStrangeCaps').prop("checked"),
-            "highlightNewCome":$('#isHighlightNewCome').prop("checked")
+//            "highlightNewCome":$('#isHighlightNewCome').prop("checked"),
+            "highlightNewCome":$('#ihighlightNewCome [name="highlightNewCome"]:checked').val(),
+            "chTimetableExpand":$('#isChTimetableExpand').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

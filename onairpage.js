@@ -64,7 +64,8 @@ var comeMovingAreaTrim=false; //false:ウィンドウ全体 true:映像でない
 var isHideButtons=false; //全画面と音量ボタンの非表示
 var isResizeSpacing=false; //リサイズ時に上ヘッダ分の余白を入れるかどうか
 var isDeleteStrangeCaps=false; //流れるコメントの規定NGに文字コード基準のフィルターを適用する
-var isHighlightNewCome=false;
+var highlightNewCome=0; //新着コメントの強調
+var isChTimetableExpand=false; //チャンネル別番組表でタイトルが隠れないように縦に広げる
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -161,7 +162,8 @@ getStorage(null, function (value) {
     isHideButtons=value.hideButtons||false;
     isResizeSpacing=value.resizeSpacing||false;
     isDeleteStrangeCaps=value.deleteStrangeCaps||false;
-    isHighlightNewCome=value.highlightNewCome||false;
+    highlightNewCome=(value.highlightNewCome!==undefined)?Number(value.highlightNewCome):highlightNewCome;
+    isChTimetableExpand=value.chTimetableExpand||false;
 });
 
 var currentLocation = window.location.href;
@@ -236,6 +238,112 @@ var eyecatcheck=false; //eyecatch利用時の高速チェックの多重起動�
 var popCodes="39"+",39".repeat(50); //黒帯パネルを全て非表示にした時の脱出コマンド(右矢印を51回連打)
 var popinput=[];
 var popacti=false; //脱出コマンドを受け付けるかどうか
+
+if(currentLocation.indexOf("https://abema.tv/timetable/channels/")==0){ //isChTimetableExpandのチェックはここでやらない(未読込)
+    setTimeout(waitforloadtimetable,1000);
+}
+function waitforloadtimetable(){
+    if(!isChTimetableExpand||currentLocation.indexOf("https://abema.tv/timetable/channels/")!=0){return;}
+    if($('[class^="TimeTableContainer__container___"]').children().is('[class*="TimeTableContainer__time-table___"]')){
+        setTimeout(timetablechfix,1000);
+    }else{
+console.log("retry waitforloadtimetable");
+        setTimeout(waitforloadtimetable,1000);
+    }
+}
+function timetablechfix(){
+console.log("timetablechfix");
+    var c=$('[class*="styles__col___"]'); //日付の列
+    var t=$('[class^="styles__title___"]'); //タイトル
+    for(var i=0,ci,ct;i<c.length;i++){
+        ci=c.eq(i);
+        ct=ci.find(t);
+        for(var j=ct.length-1,ctj,ctjh,ctjp,ctjph,ctjpot,ctjpob,ctja,ctjah,hd;j>=0;j--){
+            ctj=ct.eq(j);
+            ctjh=ctj.height();
+            ctjp=ci.children().has(ctj);
+            ctjpot=ctjp.offset().top;
+            ctjph=ctjp.height();
+            ctjpob=ctjpot+ctjph;
+            ctja=ctj.parents('article');
+            if(ctja.prev().is('[class^="styles__suspension-item___"]')){
+                ctjpot=ctja.offset().top;
+            }
+            if(ctja.next().is('[class^="styles__suspension-item___"]')){
+                ctjpob=ctja.next('[class^="styles__suspension-item___"]').offset().top-1;
+            }
+            ctjph=ctjpob-ctjpot;
+            var ctjah=parseInt(ctja.css("height"));
+            var hd=ctjh+24-ctjah;
+            if(hd<=0){continue;}
+            var a=$('[class^="styles__time-axis-item___"]');
+            for(var v=0,av,avh,avob;v<a.length;v++){
+                av=a.eq(v);
+                avh=parseInt(av.css("height"));
+                avob=av.offset().top+avh+1;
+                if(avob>=ctjpob){
+                    av.css("padding-top",(parseInt(av.css("padding-top"))+Math.floor(hd/2))+"px")
+                        .css("height",(avh+hd)+"px")
+                    ;
+                    break;
+                }
+            }
+            for(var u=0,cuc,ihd,ictjph;u<c.length;u++){
+                cuc=c.eq(u).children();
+                ihd=hd;
+                ictjph=ctjph;
+                for(var v=cuc.length-1,cucv,cucvc;v>=0;v--){
+                    cucv=cuc.eq(v);
+                    cucvc=cucv.children();
+                    for(var w=cucvc.length-1,hm,cucvot,cucvob,cucva;w>=0;w--){
+                        if(cucvc.length>1){
+                            cucvot=cucvc.eq(w).offset().top;
+                            if(w==cucvc.length-1){
+                                cucvob=cucv.offset().top+cucv.height();
+                            }else{
+                                cucvob=cucvot+parseInt(cucvc.eq(w).css("height"));
+                            }
+                        }else{
+                            cucvot=cucv.offset().top;
+                            cucvob=cucvot+cucv.height();
+                        }
+                        hm=Math.min(ctjpob,cucvob)-Math.max(ctjpot,cucvot);
+//console.log("i="+i+",j="+j+",u="+u+",v="+v+",w="+w+",text="+cucv.find(t).text()+",cucvot="+cucvot+",cucvob="+cucvob+",hm="+hm);
+                        if(hm>0){
+                            if(w<cucvc.length-1){
+                                cucva=cucvc.eq(w);
+                            }else{
+                                cucva=cucv.children('article');
+                            }
+                            var hn=Math.round(hd*hm/ctjph);
+                            ictjph-=hm;
+                            if(ictjph<=0){
+                                hn=ihd
+                            }else{
+                                ihd-=hn;
+                            }
+                            cucva.css("height",(parseInt(cucva.css("height"))+hn)+"px");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    var nd=new Date;
+    var nh=nd.getHours();
+    $('body').scrollTop($('[class^="styles__time-axis-item___"]').eq(nh).offset().top-160);
+    datebarfix();
+}
+function datebarfix(){
+    if(!isChTimetableExpand||currentLocation.indexOf("https://abema.tv/timetable/channels/")!=0){return;}
+    var nd=new Date;
+    var nh=nd.getHours();
+    var nm=nd.getMinutes();
+    var jo=$('[class^="styles__time-axis-item___"]').eq(nh);
+    var jh=parseInt(jo.css("height"));
+    $('[class^="TimeTableContainer__date-bar___"]').css("top",(jo.offset().top-170+jh*(nm/60))+"px");
+    setTimeout(datebarfix,1000);
+}
 
 function onresize() {
     if (settings.isResizeScreen) {
@@ -746,7 +854,9 @@ function openOption(sw){
     $('#isHideButtons').prop("checked",isHideButtons);
     $('#isResizeSpacing').prop("checked",isResizeSpacing);
     $('#isDeleteStrangeCaps').prop("checked",isDeleteStrangeCaps);
-    $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
+//    $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
+    $('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]').val([highlightNewCome]);
+    $('#isChTimetableExpand').prop("checked",isChTimetableExpand);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -796,9 +906,13 @@ function closeOption(){
     ;
     $(".rightshift").css("display","none");
     $(".leftshift").css("display","");
-    $(EXcomelist).children('div').css("background-color","")
-        .css("color","")
-        .children('[class^="styles__message___"]').css("color","")
+    $(EXcomelist).children('div').css("background-color","") //基本色、新着強調
+        .css("color","") //基本色
+        .css("border-left","") //新着強調
+        .css("padding-left","") //新着強調
+        .css("border-top","") //区切り線
+        .css("transition","") //新着強調
+        .children('[class^="styles__message___"]').css("color","") //基本色
     ;
     setOptionElement();
     optionStatsUpdated=false;
@@ -859,7 +973,22 @@ console.log("delayset retry");
     EXcomments = $(EXcomelist).contents().find('[class^="styles__message___"]');
     //映像のリサイズ
     onresize();
+    volumecheck(); //1秒ごとに実行していた最大音量チェックを初回読込時の1回だけに変更
 console.log("delayset ok");
+}
+function volumecheck(){
+//console.log("volumecheck");
+    var v=$('[class^="styles__highlighter___"]').height();
+    if(v!==null&&0<=v&&v<=92){
+        if(v==92&&changeMaxVolume<100){
+            if($(EXvolume).contents().find('svg').css("fill")=="rgb(255, 255, 255)"){
+               otoColor();
+            }
+            otosageru();
+        }
+    }else{
+        setTimeout(volumecheck,1000);
+    }
 }
 function optionStatsUpdate(outflg){
 //console.log("optionStatusUpdate("+(outflg?"true":"false"));
@@ -1344,6 +1473,17 @@ console.log("createSettingWindow retry");
         ;
         $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').change(movieResizeTypeChanged);
     }
+    if($('#highlightdesc').length==0){
+        $("#ihighlightNewCome").insertBefore("#isCommentWide")
+            .css("border","black solid 1px")
+            .children().css("display","flex")
+            .css("flex-direction","row")
+            .css("margin","1px 0px")
+            .css("padding-left","8px")
+            .children().css("margin-left","4px")
+            .first().before('<span id="highlightdesc">新着コメントを少し強調する</span>')
+        ;
+    }
 console.log("createSettingWindow ok");
 }
 function movieResizeTypeChanged(){
@@ -1537,7 +1677,9 @@ function setSaveClicked(){
     isHideButtons=$('#isHideButtons').prop("checked");
     isResizeSpacing=$('#isResizeSpacing').prop("checked");
     isDeleteStrangeCaps=$('#isDeleteStrangeCaps').prop("checked");
-    isHighlightNewCome=$('#isHighlightNewCome').prop("checked");
+//    isHighlightNewCome=$('#isHighlightNewCome').prop("checked");
+    highlightNewCome=parseInt($('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked').val());
+//    isChTimetableExpand=$('#isChTimetableExpand').prop("checked");
 
     onresize();
     setOptionHead();
@@ -1750,10 +1892,15 @@ function setComeColorChanged(){
     }
     var bc="rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")";
     var tc="rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")";
-    $(EXcomelist).children().slice(0,10).css("background-color",bc)
+    var js=$(EXcomelist).children().slice(0,10);
+    js.css("background-color",bc)
         .css("color",tc)
         .children('[class^="styles__message___"]').css("color",tc)
     ;
+    if(isCommentTBorder){
+        var vc="rgba("+p[2]+","+p[2]+","+p[2]+","+(0.3)+")";
+        js.css("border-top","1px solid "+vc);
+    }
 }
 function toggleCommentList(){
 //console.log("comevisiset toggleCommentList");
@@ -2522,7 +2669,7 @@ function moVol(d){
     var teka=document.createEvent("MouseEvents");
     var teki=$(EXvolume).contents().find('[class^="styles__slider-container___"]').children();
     var orivol=parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]').css("height"));
-    var targetvolume=Math.min(91,Math.max(0,orivol+d));
+    var targetvolume=Math.min(92,Math.max(0,orivol+d));
     var teku=teki.offset().top+106-targetvolume;
     teka.initMouseEvent("mousedown",true,true,window,0,0,0,teki.offset().left+15,teku);
     setTimeout(otomouseup,100,teku);
@@ -2564,7 +2711,7 @@ function volbar(){
         jo.prop("class","");
         var orivol=parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]').css("height"));
         var v=Math.min(92,Math.max(0,orivol));
-        var p=Math.min(99,Math.round(100*v/92));
+        var p=Math.min(100,Math.round(100*v/92));
         var q=(v==0)?"mute":(p+"%");
         var w=1+Math.round(309*v/92);
         jo.text("vol "+q);
@@ -3841,13 +3988,14 @@ $(window).on('load', function () {
 //                popHeader();
 //            }
 //        }
-        //音量が最大なら設定値へ自動変更
-        if(changeMaxVolume<100&&$('[class^="styles__highlighter___"]').css("height")=="92px"){
-            if($(EXvolume).contents().find('svg').css("fill")=="rgb(255, 255, 255)"){
-                otoColor();
-            }
-            otosageru();
-        }
+//初回読込時のみ実行するためにdelayset内へ移動
+//        //音量が最大なら設定値へ自動変更
+//        if(changeMaxVolume<100&&$('[class^="styles__highlighter___"]').css("height")=="92px"){
+//            if($(EXvolume).contents().find('svg').css("fill")=="rgb(255, 255, 255)"){
+//                otoColor();
+//            }
+//            otosageru();
+//        }
         //コメント取得
         var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
         if(EXcomelist&&isComeOpen()){
@@ -3882,17 +4030,58 @@ $(window).on('load', function () {
                     $('[class^="style__overlap___"]').trigger("click");
                     fastRefreshing();
                 }
-                if(isHighlightNewCome){
+                //新着コメント強調 一時試用できるように、一時保存画面が開いている場合を考慮
+                var hlsw=$('#settcont').css("display")=="none"?highlightNewCome:parseInt($('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked').val());
+                if(hlsw>0){
                     var jo=$(EXcomelist).children().slice(0,d);
-                    jo.css("padding-left",((isCommentWide?8:15)-3)+"px")
-                        .css("border-left","3px solid rgba(255,255,0,0.6)")
-                        .css("transition","")
-                    ;
+                    var hlbc=$('#settcont').css("display")=="none"?commentBackColor:parseInt($("#commentBackColor").val());
+                    var hlbt=$('#settcont').css("display")=="none"?commentBackTrans:parseInt($("#commentBackTrans").val());
+                    switch(hlsw){
+                        case 1:
+                            jo.css("padding-left",((isCommentWide?8:15)-4)+"px")
+                                .css("border-left","4px solid rgba(255,255,0,0.6)")
+                                .css("transition","")
+                            ;
+                            break;
+                        case 3:
+                            jo.css("padding-left",((isCommentWide?8:15)-4)+"px")
+                                .css("border-left","4px solid rgba(255,255,0,0.8)")
+                                .css("transition","")
+                            ;
+                        case 2:
+                            var p=0.3; //bの割合
+                            var c=[255,255,0,255]; //yellow
+                            var r=hlbc+Math.floor((c[0]-hlbc)*p);
+                            var g=hlbc+Math.floor((c[1]-hlbc)*p);
+                            var b=hlbc+Math.floor((c[2]-hlbc)*p);
+                            var a=hlbt+Math.floor((c[3]-hlbt)*p);
+                            jo.css("background-color","rgba("+r+","+g+","+b+","+(a/255)+")")
+                                .css("transition","")
+                            ;
+                            break;
+                        default:
+                    }
                     setTimeout(function(jo){
                         for(var i=jo.length-1,j=0;i>=0;i--,j++){
-                            jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
-                                .css("transition","border-left-color 1.5s linear "+(0.8+0.05*j)+"s")
-                            ;
+                            switch(hlsw){
+                                case 1:
+                                    jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
+                                        .css("transition","border-left-color 1s linear "+(3+0.02*j)+"s")
+                                    ;
+                                    break;
+                                case 2:
+                                    jo.eq(i).css("background-color","rgba("+hlbc+","+hlbc+","+hlbc+","+(hlbt/255)+")")
+                                        .css("transition","background-color 1s linear "+(3+0.02*j)+"s")
+                                    ;
+                                    break;
+                                case 3:
+                                    jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
+                                        .css("background-color","rgba("+hlbc+","+hlbc+","+hlbc+","+(hlbt/255)+")")
+                                        .css("transition","border-left-color 1s linear "+(3+0.02*j)+"s,background-color 1s linear "+(2+0.02*j)+"s")
+                                    ;
+                                    break;
+                                default:
+                            }
                         }
                     },0,jo);
                 }
@@ -4240,6 +4429,9 @@ function chkurl() {
         proEnd=new Date();
         proTitle="未取得";
         $('#tProtitle').text(proTitle);
+        if(isChTimetableExpand&&currentLocation.indexOf("https://abema.tv/timetable/channels/")==0){
+            waitforloadtimetable();
+        }
     }
 }
 //onloadからも呼ばれる
