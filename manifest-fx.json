@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "abematv ext",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "abematvを視聴しやすくする非公式の拡張機能(通知機能実装につき権限追加)",
 	"icons": {
 		"128": "abemaexticon.png"
@@ -9,7 +9,7 @@
 	"applications": {
 		"gecko": {
 			"id": "abematvextension@nakayuki.net",
-			"strict_min_version": "45.0",
+			"strict_min_version": "47.0",
 			"update_url": "https://www.nakayuki.net/abema-ext/update.json"
 		}
 	},
