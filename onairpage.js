@@ -1153,8 +1153,8 @@ console.log("createSettingWindow retry");
     if($(EXside).children('#optionbutton').length==0){
         var optionbutton = document.createElement("div");
         optionbutton.id = "optionbutton";
-        optionbutton.setAttribute("style","width:40px;height:60px;background-color:gray;opacity:0.5;");
-        optionbutton.innerHTML = "&nbsp;";
+        optionbutton.setAttribute("style","width:40px;height:40px;position:relative;background-color:#ddd;opacity:0.5;cursor:pointer;");
+        optionbutton.innerHTML = "<img src='"+chrome.extension.getURL("icon/gear.svg")+"' alt='拡張設定' style='margin: auto;position: absolute;left: 0;top: 0;right: 0;bottom: 0;height:20px;width:20px;'>";
         slidecont.appendChild(optionbutton);
         $("#optionbutton").on("click",function(){
             if($("#settcont").css("display")=="none"){
@@ -1168,7 +1168,7 @@ console.log("createSettingWindow retry");
         var settcont = document.createElement("div");
         settcont.id = "settcont";
         //設定ウィンドウの中身
-        settcont.innerHTML = "<input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><a href='"+chrome.extension.getURL("option.html")+"' target='_blank'>永久設定オプション画面</a><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
+        settcont.innerHTML = "<span style='font-weight:bold;'>拡張機能一時設定画面</span><br><input type=button class=closeBtn value=閉じる style='position:absolute;top:10px;right:10px;'><a href='"+chrome.extension.getURL("option.html")+"' target='_blank'>永久設定オプション画面はこちら</a><br>"+generateOptionHTML(false) + "<br><input type=button id=saveBtn value=一時保存> <input type=button class=closeBtn value=閉じる><br>※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr><input type='button' id='clearLocalStorage' value='localStorageクリア'>";
 //        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:12;";//コメ欄10より上の番組情報等11より上
 //        settcont.style = "width:640px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;";//head11より上の残り時間12,13,14より上の番組情報等15より上
         settcont.style = "width:670px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;";//head11より上の残り時間12,13,14より上の番組情報等15より上
