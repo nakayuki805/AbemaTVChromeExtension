@@ -1144,8 +1144,10 @@ function optionStatsUpdate(outflg){
 }
 function createSettingWindow(){
     if(!EXside){
-console.log("createSettingWindow retry");
-        setTimeout(createSettingWindow,1000);
+        if(currentLocation.indexOf("now-on-air")>0){
+            console.log("createSettingWindow retry");
+            setTimeout(createSettingWindow,1000);
+        }
         return;
     }
     var slidecont = EXside
@@ -2553,7 +2555,7 @@ console.log("setEXs ok");
         if(!eventAdded){
             setOptionEvent();   //各オプションによるイベントを作成
         }
-    }else{
+    }else if(currentLocation.indexOf("now-on-air")>0){
 console.log("setEXs retry");
         setTimeout(setEXs,1000);
     }
@@ -2568,8 +2570,8 @@ function setEX2(){
     }
     if(b==true){
 console.log("setEX2 ok");
-    }else{
-console.log("setEX2 retry");
+    }else if (currentLocation.indexOf("now-on-air")>0) {
+        console.log("setEX2 retry");
         setTimeout(setEX2,1000);
     }
 }
@@ -3494,8 +3496,10 @@ console.log("setOptionHead ok");
 }
 function setOptionElement(){
     if(!EXcomesendinp){
-console.log("setOptionElement retry");
-        setTimeout(setOptionElement,1000);
+        if(currentLocation.indexOf("now-on-air")>0){
+            console.log("setOptionElement retry");
+            setTimeout(setOptionElement,1000);
+        }
         return;
     }
     if(isCustomPostWin){
@@ -3961,6 +3965,9 @@ $(window).on('load', function () {
     var jquerypath = chrome.extension.getURL("jquery-2.2.3.min.js");
     $("<script src='"+jquerypath+"'></script>").appendTo("head");
     //URLパターンチェック
+    setTimeout(function(){
+        checkUrlPattern(location.href);
+    },2000);
     checkUrlPattern(location.href);
     //ウィンドウをリサイズ
     setTimeout(onresize, 1000);
@@ -4440,6 +4447,26 @@ function checkUrlPattern(url){
     if (url.match(/https:\/\/abema.tv\/channels\/[-a-z0-9]+\/slots\/[a-zA-Z]+/)) {
         //番組個別ページ
         putNotifyButton(url);
+        //放送画面へのリンク追加
+        var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z]+/)[1];
+        var channelUrl = "https://abema.tv/now-on-air/" + channel;
+        $('<br><a href="'+channelUrl+'">放送画面</a>').appendTo('[class*="BroadcastingFrameContainer__left-contents___"] > div');
+    } else if (url.indexOf("https://abema.tv/timetable/")==0 && url.indexOf("channel")==-1){
+        //番組表(チャンネル個別ではない)のとき
+        var chBanners = $('[class*="styles__channel-icon-header-inner___"] > div');
+        chBanners.each(function(){
+            var chBanner = $(this);
+            var chBannerPos = chBanner.offset();
+            var chTableUrl = chBanner.children("a").attr("href");
+            var channel = chTableUrl.match(/\/timetable\/channels\/([-a-z0-9]+)/)[1];
+            var channelUrl = "https://abema.tv/now-on-air/" + channel;
+            console.log(channelUrl)
+            var onairpageLink = $('<div style="border:solid 1px black;background-color:white;position:absolute;display:none;" class="onairpageLink"><a href="'+channelUrl+'">放送画面</a></div>').appendTo(chBanner);
+            //chBannerPos.top += chBanner.height();
+            //chBannerPos.left += (chBanner.width()+onairpageLink.width())/2;
+            //onairpageLink.offset(chBannerPos);
+            
+        });
     }
 }
 
