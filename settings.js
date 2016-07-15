@@ -264,7 +264,7 @@ var settingsList = [
                 "isInstantChangable": false
             },{
                 "name": "isChTimetablePlaybutton",
-                "description": "チャンネル別または日付別の番組表ページにて、放送中の番組枠にリンクを設置する",
+                "description": "標準の(日付別)番組表とチャンネル別番組表ページ内に、放送中画面への直接リンクを設置する(現在、丸い再生ボタン型のリンクにおいては、shiftクリック等は普通の左クリックとして扱っています)",
                 "type": "boolean",
                 "isInstantChangable": false
             }
