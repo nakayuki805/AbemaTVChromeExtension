@@ -252,6 +252,21 @@ var settingsList = [
                 "description": "チャンネル別番組表ページにて、番組タイトルが隠れないように縦に広げる(各時刻の長さが一定でなくバラバラになります)",
                 "type": "boolean",
                 "isInstantChangable": false
+            },{
+                "name": "isChTimetableBreak",
+                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する(2桁話数が改行で数字1字ずつに分かれたりするのを防止)",
+                "type": "boolean",
+                "isInstantChangable": false
+            },{
+                "name": "isChTimetableWeekend",
+                "description": "チャンネル別番組表ページにて、土曜日を青、日曜日を赤に着色する",
+                "type": "boolean",
+                "isInstantChangable": false
+            },{
+                "name": "isChTimetablePlaybutton",
+                "description": "チャンネル別または日付別の番組表ページにて、放送中の番組枠にリンクを設置する",
+                "type": "boolean",
+                "isInstantChangable": false
             }
         ]
     }
@@ -434,6 +449,12 @@ var CMSettingList = [
         {
             "name": "isHidePopBL",
             "description": "左下に出てくる通知を非表示",
+            "type": "boolean",
+            "isInstantChangable": true
+        },
+        {
+            "name": "isHidePopFresh",
+            "description": "左下に出てくるFresh告知を非表示",
             "type": "boolean",
             "isInstantChangable": true
         }
