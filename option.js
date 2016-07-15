@@ -120,7 +120,8 @@ $(function(){
         ;
         $('#useEyecatch').appendTo('#ComeMukouN').after("左上ロゴのタイミングも利用する<br>");
         $('#isHidePopTL').appendTo('#ComeMukouN').after("左上ロゴを非表示<br>");
-        $('#isHidePopBL').appendTo('#ComeMukouN').after("左下の通知を非表示");
+        $('#isHidePopBL').appendTo('#ComeMukouN').after("左下の通知を非表示<br>");
+        $('#isHidePopFresh').appendTo('#ComeMukouN').after("左下のFreshの通知を非表示");
         $('#ComeMukouD').remove();
     }
     if($('#panelCustom').length==0){
@@ -234,6 +235,10 @@ $(function(){
         var isDeleteStrangeCaps=value.deleteStrangeCaps||false;
         var highlightNewCome=(value.highlightNewCome!==undefined)?Number(value.highlightNewCome):0;
         var isChTimetableExpand=value.chTimetableExpand||false;
+        var isHidePopFresh = value.hidePopFresh||false;
+        var isChTimetableBreak=value.chTimetableBreak||false;
+        var isChTimetableWeekend=value.chTimetableWeekend||false;
+        var isChTimetablePlaybutton=value.chTimetablePlaybutton||false;
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -327,6 +332,10 @@ $(function(){
 //        $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
         $('#ihighlightNewCome [type="radio"][name="highlightNewCome"]').val([highlightNewCome]);
         $('#isChTimetableExpand').prop("checked",isChTimetableExpand);
+        $('#isHidePopFresh').prop("checked",isHidePopFresh);
+        $('#isChTimetableBreak').prop("checked",isChTimetableBreak);
+        $('#isChTimetableWeekend').prop("checked",isChTimetableWeekend);
+        $('#isChTimetablePlaybutton').prop("checked",isChTimetablePlaybutton);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -398,7 +407,11 @@ $(function(){
             "deleteStrangeCaps":$('#isDeleteStrangeCaps').prop("checked"),
 //            "highlightNewCome":$('#isHighlightNewCome').prop("checked"),
             "highlightNewCome":$('#ihighlightNewCome [name="highlightNewCome"]:checked').val(),
-            "chTimetableExpand":$('#isChTimetableExpand').prop("checked")
+            "chTimetableExpand":$('#isChTimetableExpand').prop("checked"),
+            "hidePopFresh":$('#isHidePopFresh').prop("checked"),
+            "chTimetableBreak":$('#isChTimetableBreak').prop("checked"),
+            "chTimetableWeekend":$('#isChTimetableWeekend').prop("checked"),
+            "chTimetablePlaybutton":$('#isChTimetablePlaybutton').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
