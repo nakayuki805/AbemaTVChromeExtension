@@ -491,20 +491,22 @@ function PlaybuttonEditor(){
             //緑枠にボタンがなければ設置
             q.find('[class*="style__title___"]').css("width","130px");
             a='<a href="https://abema.tv'+u+'">';
-//a='<a>';
             a+='<div class="playbutton" style="position:absolute;right:4px;top:4px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">';
             a+='<svg width="10" height="14" style="fill:#6fb900;transform:translate(7px,3px)">';
             a+='<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--playback">';
             a+='</use></svg></div>';
             a+='</a>';
             $(a).insertAfter(q);
-$('.playbutton').on("click",function(e){
+            $('.playbutton').on("click",function(e){
+                //普通の左クリックのみ移動、特殊クリックの場合はその操作に従う(移動しない)
 //console.log(e);
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    clickPlaybuttonBack(e.currentTarget);
-    waitformakelink(50);
-});
+                if(e.which==1&&e.altKey==false&&e.ctrlKey==false&&e.shiftKey==false){
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    clickPlaybuttonBack(e.currentTarget);
+                    waitformakelink(50);
+                }
+            });
         }
     }
 }
