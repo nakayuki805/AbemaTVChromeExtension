@@ -1301,7 +1301,7 @@ console.log("createSettingWindow retry");
         settcont += '<input type="button" class="closeBtn" value="閉じる" style="position:absolute;top:10px;right:10px;">';
         settcont += '<a href="'+chrome.extension.getURL('option.html')+'" target="_blank">永久設定オプション画面はこちら</a><br>';
         settcont += generateOptionHTML(false) + '<br>';
-        settcont += '<input type="button" id="saveBtn" value="一時保存">';
+        settcont += '<input type="button" id="saveBtn" value="一時保存"> ';
         settcont += '<input type="button" class="closeBtn" value="閉じる"><br>';
         settcont += '※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr>';
         settcont += '<input type="button" id="clearLocalStorage" value="localStorageクリア">';
@@ -1526,6 +1526,7 @@ console.log("createSettingWindow retry");
         $('#useEyecatch').appendTo('#ComeMukouN').after("左上ロゴのタイミングを利用(キー/カーソルでの実行待機中は効きません)<br>");
         $('#isHidePopTL').appendTo('#ComeMukouN').after("左上ロゴを非表示<br>");
         $('#isHidePopBL').appendTo('#ComeMukouN').after("左下の通知を非表示");
+        $('#isHidePopFresh').appendTo('#ComeMukouN').after("左下のFreshの通知を非表示");
         $('#ComeMukouD').remove();
     }
     if($('#epnumedit').length==0){
