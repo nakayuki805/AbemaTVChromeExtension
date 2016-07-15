@@ -249,22 +249,22 @@ var settingsList = [
         "settings": [
             {
                 "name": "isChTimetableExpand",
-                "description": "チャンネル別番組表ページにて、番組タイトルが隠れないように縦に広げる(各時刻の長さが一定でなくバラバラになります)",
+                "description": "チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (各時刻の縦の長さが一定でなくバラバラになります)",
                 "type": "boolean",
                 "isInstantChangable": false
             },{
                 "name": "isChTimetableBreak",
-                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する(2桁話数が改行で数字1字ずつに分かれたりするのを防止)",
+                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
                 "type": "boolean",
                 "isInstantChangable": false
             },{
                 "name": "isChTimetableWeekend",
-                "description": "チャンネル別番組表ページにて、土曜日を青、日曜日を赤に着色する",
+                "description": "チャンネル別番組表ページにて、土曜を青、日曜を赤に着色する",
                 "type": "boolean",
                 "isInstantChangable": false
             },{
                 "name": "isChTimetablePlaybutton",
-                "description": "標準の(日付別)番組表とチャンネル別番組表ページ内に、放送中画面への直接リンクを設置する(丸型の再生ボタンの場合、番組詳細画面が一瞬だけ表示されます)",
+                "description": "各番組表ページに、放送中画面への直接リンクを設置する (丸型の再生ボタンの場合、番組詳細画面が一瞬だけ表示されます)",
                 "type": "boolean",
                 "isInstantChangable": false
             }
