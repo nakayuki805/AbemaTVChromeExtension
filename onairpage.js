@@ -246,10 +246,13 @@ var eyecatcheck=false; //eyecatch利用時の高速チェックの多重起動�
 var popCodes="39"+",39".repeat(50); //黒帯パネルを全て非表示にした時の脱出コマンド(右矢印を51回連打)
 var popinput=[];
 var popacti=false; //脱出コマンドを受け付けるかどうか
+var isAutoReload=true; //読込済コメントを自動反映するかどうか
 
 function onairCleaner(){
+//console.log("onairCleaner");
     //onairfunc以降に作成した要素を削除
     $('.usermade').remove();
+    pophideElement({allreset:true});
 }
 function waitforloadtimetable(){
     if(checkUrlPattern(true)!=1&&checkUrlPattern(true)!=2){return;}
@@ -320,17 +323,35 @@ function timetablechfix(){
         for(var i=0;i<h.length;i++){
             if(/[(（]土[)）]/.test(h.eq(i).text())){
                 sat=i;
+                if(i<h.length-1){
+                    sun=i+1;
+                    break;
+                }
             }else if(/[(（]日[)）]/.test(h.eq(i).text())){
                 sun=i;
+                if(i>0){
+                    sat=i-1;
+                    break;
+                }
+            }else if(/[(（]月[)）]/.test(h.eq(i).text())){
+                if(i>0){
+                    sun=i-1;
+                    if(i-1==0){
+                        break;
+                    }else if(i>1){
+                        sat=i-2;
+                        break;
+                    }
+                }
             }
         }
         if(sat>=0){
-            t+='[class*="styles__col___"]:nth-child('+(sat+1)+') [class*="style__status-future___"]{background-color:#e3eeff;}';
-            t+='[class*="styles__col___"]:nth-child('+(sat+1)+') [class*="style__status-future___"]:hover{background-color:#dee9fa;}';
+            t+='[class*="styles__col___"]:nth-child('+(sat+1)+') [class*="style__status-future___"]{background-color:rgba(227,238,255,0.7);}';
+            t+='[class*="styles__col___"]:nth-child('+(sat+1)+') [class*="style__status-future___"]:hover{background-color:rgba(222,233,250,0.7);}';
         }
         if(sun>=0){
-            t+='[class*="styles__col___"]:nth-child('+(sun+1)+') [class*="style__status-future___"]{background-color:#ffe3ee;}';
-            t+='[class*="styles__col___"]:nth-child('+(sun+1)+') [class*="style__status-future___"]:hover{background-color:#fadee9;}';
+            t+='[class*="styles__col___"]:nth-child('+(sun+1)+') [class*="style__status-future___"]{background-color:rgba(255,227,238,0.7);}';
+            t+='[class*="styles__col___"]:nth-child('+(sun+1)+') [class*="style__status-future___"]:hover{background-color:rgba(250,222,233,0.7);}';
         }
     }
     if(isChTimetablePlaybutton){
@@ -490,7 +511,7 @@ function PlaybuttonEditor(){
         if(!q.siblings().children().is('.playbutton')){
             //緑枠にボタンがなければ設置
             q.find('[class*="style__title___"]').css("width","130px");
-            a='<a href="https://abema.tv'+u+'">';
+            a='<a href="https://abema.tv'+u+'" title="放送中画面へ移動">';
             a+='<div class="playbutton" style="position:absolute;right:4px;top:4px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">';
             a+='<svg width="10" height="14" style="fill:#6fb900;transform:translate(7px,3px)">';
             a+='<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--playback">';
@@ -2053,6 +2074,7 @@ function pophideElement(inp){
 //console.log(inp);
 //inpを1(pop),-1(hide),0(除去)で受け取る
 //除去前の中身はチェックせずに除去する
+    if(EXfoot===undefined){return;} //未setEXs：now-on-air未表示：pophideする必要が無い
     if(inp.allreset==true){
         inp.head=0;
         inp.foot=0;
@@ -2525,27 +2547,32 @@ function faintcheck(fcd,sw){
         faintcheck2(5,Math.min(0,fcd),sw);
     }
 }
-function comeColor(inp){
+function comeColor(jo,inp){
     if(checkUrlPattern(true)!=3){return;}
 //console.log("comeColor:"+inp);
     if(!EXfootcountcome){return;}
 //console.log($(EXfootcountcome).css("color"));
-    if(inp==-1){
-        $(EXfootcountcome).css("color","");
-        $(EXfootcountcome).prev('svg').css("fill","");
+    if(inp===undefined){
+        jo.css("display","none");
+        setTimeout(comeColor,800,jo,-2);
+    }else if(inp==-2){
+        jo.css("display","");
+    }else if(inp==-1){
+        jo.css("color","");
+        jo.prev('svg').css("fill","");
     }else{
        var lim=[90,60,30];
        if(inp>lim[0]){
-            $(EXfootcountcome).css("color","");
+            jo.css("color","");
         }else if(inp>lim[1]){
-            $(EXfootcountcome).css("color","rgb(255, 255, "+Math.round(255*(inp-lim[1])/(lim[0]-lim[1]))+")");
+            jo.css("color","rgb(255, 255, "+Math.round(255*(inp-lim[1])/(lim[0]-lim[1]))+")");
         }else if(inp>lim[2]){
-            $(EXfootcountcome).css("color","rgb(255, "+Math.round(255*(inp-lim[2])/(lim[2]-lim[1]))+", 0)");
+            jo.css("color","rgb(255, "+Math.round(255*(inp-lim[2])/(lim[2]-lim[1]))+", 0)");
         }else{
-            $(EXfootcountcome).css("color","rgb(255, 0, 0)");
+            jo.css("color","rgb(255, 0, 0)");
         }
-        $(EXfootcountcome).prev('svg').css("fill","black");
-        setTimeout(comeColor,800,-1);
+        jo.prev('svg').css("fill","black");
+        setTimeout(comeColor,800,jo,-1);
     }
 }
 function chkcomelist(retrycount){
@@ -2558,7 +2585,7 @@ console.log("comeRefreshed "+commentNum+"->"+comeListLen);
         comeFastOpen=false;
         commentNum=comeListLen;
         comeHealth=Math.min(100,Math.max(0,commentNum));
-        comeColor(comeHealth);
+        comeColor($(EXfootcountcome),comeHealth);
     }else if(retrycount>0){
         setTimeout(chkcomelist,200,retrycount-1);
     }else{
@@ -3141,10 +3168,10 @@ function setOptionHead(){
             t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
         }
     }
-    if(isCustomPostWin){ //1行化
-        t+='[class^="TVContainer__right-comment-area___"] textarea{height:18px!important;}';
-        t+='[class^="TVContainer__right-comment-area___"] textarea+*{height:18px!important;}';
-    }
+//    if(isCustomPostWin){ //1行化
+//        t+='[class^="TVContainer__right-comment-area___"] textarea{height:18px!important;}';
+//        t+='[class^="TVContainer__right-comment-area___"] textarea+div{height:18px!important;}';
+//    }
     if(isCommentPadZero){ //コメ間隔詰め
         t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
     }
@@ -3208,6 +3235,14 @@ function setOptionHead(){
         t+='[class^="TVContainer__footer___"]>[class^="styles__full-screen___"]{opacity:0;visibility:hidden;}';
         t+='[class^="TVContainer__footer___"]>[class^="styles__volume___"]{opacity:0;visibility:hidden;}';
     }
+    //自動更新停止アイコン用
+    t+='.reloadicon{fill:rgba(255,255,255,0.5);position:absolute;right:0;top:9px;}';
+    t+='#reloadon{transform:rotate3d(3,-2,0,180deg);}';
+    t+='#reloadoff{pointer-events:none;display:none;}';
+    t+='[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]{padding-right:0;}';
+    t+='[class^="TVContainer__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{padding-right:23px;}';
+    t+='[class^="TVContainer__right-comment-area___"] textarea{width:calc(100% - 8px * 2 - 15px);}';
+
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
 console.log("setOptionHead ok");
 }
@@ -3224,6 +3259,23 @@ console.log("setOptionElement retry");
         $(EXcomesendinp).prop("wrap","");
     }
     setProSamePosiChanged();
+
+//コメントアイコン付近にリロードアイコン作成
+    if($('#reloadon').length==0){
+        var ri='<a title="コメ自動更新は現在 ON です">';
+        ri+='<svg id="reloadon" class="usermade reloadicon" width="16" height="16">';
+        ri+='<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--return"></use></svg>';
+        ri+='<svg id="reloadoff" class="usermade reloadicon" width="16" height="16" style="display:none;">';
+        ri+='<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--close"></use></svg>';
+        ri+='</a>';
+        $(ri).appendTo(EXcomesendinp.parentElement);
+        $('#reloadon').on("click",function(){
+            isAutoReload=!isAutoReload;
+            $('#reloadoff').css("display",isAutoReload?"none":"block");
+            $('#reloadoff').parent('a').prop("title","コメ自動更新は現在 "+(isAutoReload?"ON":"OFF")+" です");
+        });
+    }
+
     $(EXfootcome).css("pointer-events","auto");
 console.log("setOptionElement ok");
 }
@@ -3441,6 +3493,31 @@ function usereventWindowclick(){
         setTimeout(openInfo,50,false);
     }
 }
+function usereventSendInpKeyinput(){
+//console.log("usereventSendInpKeyinput");
+    if(EXcomesendinp&&parseInt(EXcomesendinp.style.height)>18){
+        $(EXcomesendinp).parent().css("padding-top","5px")
+            .css("padding-bottom","5px")
+        ;
+        $(EXcomesendinp).css("height","24px")
+            .css("overflow-y","scroll")
+            .siblings('[class^="styles__print-text___"]').css("height","24px")
+            .css("visibility","hidden")
+        ;
+    }else{
+        $(EXcomesendinp).parent().css("padding-top","")
+            .css("padding-bottom","")
+        ;
+        $(EXcomesendinp).css("height","18px")
+            .css("overflow-y","")
+            .siblings('[class^="styles__print-text___"]').css("height","18px")
+            .css("visibility","")
+        ;
+    }
+    var s=-6+18*Math.round($(EXcomesendinp).scrollTop()/18);
+//console.log($(EXcomesendinp).scrollTop()+"->"+s);
+    $(EXcomesendinp).scrollTop(s);
+}
 function setOptionEvent(){
     if(checkUrlPattern(true)!=3){return;}
 //自作要素のイベントは自作部分で対応
@@ -3595,6 +3672,7 @@ console.log("dblclick");
     //投稿ボタンを押した時
     $(EXcomesend).on("click",'[class*="styles__post-button___"]',usereventSendButClick);//コメント欄に入るまで投稿ボタンが存在しないためクリック時に探す
 //    $(EXcomesend).contents().find('[class*="styles__post-button___"]').on("click",usereventSendButClick);
+    $(EXcomesendinp).on("keydown keyup",usereventSendInpKeyinput);
 console.log("setOptionEvent ok");
 }
 function startCM(){
@@ -3654,11 +3732,13 @@ function onairfunc(){
     setInterval(function () {
         if(checkUrlPattern(true)!=3){return;}
         // 1秒ごとに実行
-        if(EXcome){
-            var btn = $(EXcome).contents().find('[class^="styles__continue-btn___"]'); //新着コメのボタン
+        if(EXcome&&isAutoReload){
+//            var btn = $(EXcome).contents().find('[class^="styles__continue-btn___"]'); //新着コメのボタン
+            var btn=$(EXcomesend).siblings('[class^="styles__continue-btn___"]');
             if (btn.length>0) {
                 //var newCommentNum = parseInt(btn.text().match("^[0-9]+"));
                 btn.trigger("click");// 1秒毎にコメントの読み込みボタンを自動クリック
+                comeColor($('#reloadon'));
             }
         }
         //映像のtopが変更したらonresize()実行
@@ -3703,7 +3783,7 @@ function onairfunc(){
 //                }
                 if(commentNum==0){
                     comeHealth=Math.min(100,Math.max(0,comeListLen));
-                    comeColor(comeHealth);
+                    comeColor($(EXfootcountcome),comeHealth);
                 }
                 commentNum=comeListLen;
 //                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0&&$(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==0){
