@@ -98,7 +98,7 @@ var settingsList = [
             {
                 "name": "isSureReadComment",
                 //        "description": "常にコメント欄を表示する",
-                "description": "常にコメント欄を開こうとする(開閉が制限されている時は開けません)",
+                "description": "常にコメント欄を開こうとする(開閉が制限されている時は開けません)(設定時に右下のコメント数クリックで入力欄を残してコメント欄を閉じれます)",
                 "type": "boolean",
                 //        "isInstantChangable": false
                 "isInstantChangable": true
@@ -142,7 +142,7 @@ var settingsList = [
         "settings": [
             {
                 "name": "isMovingComment",
-                "description": "新着コメントをあの動画サイトのように横に流す(コメント欄を開いているときのみ有効、コメント欄関連設定の常にコメント欄を開こうとするを同時に有効にすると常にコメントが流れます)",
+                "description": "新着コメントをあの動画サイトのように横に流す(コメント欄を開いているときのみ有効、コメント欄関連設定の常にコメント欄を開こうとするを同時に有効にすると常にコメントが流れるのでおすすめです)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -245,7 +245,7 @@ var settingsList = [
         ]
     },
     {
-        "description": "その他",
+        "description": "番組表関連機能",
         "settings": [
             {
                 "name": "isChTimetableExpand",
