@@ -1553,13 +1553,21 @@ console.log("createSettingWindow retry");
         $('#ComeMukouD').remove();
     }
     if($('#epnumedit').length==0){
-        $('<div id="epnumedit" style="border:1px solid black;padding:8px;margin-left:16px;display:flex;flex-direction:row;"><div>背景区切り数<input type="number" name="epcount" min=1 max=26></div><div style="margin-left:16px;">1番目の数字<input type="number" name="epfirst" min=1 max=26>(区切り数7以上の場合のみ表示)</div></div>').insertBefore("#isTimeVisible+*");
+        var s='<div id="epnumedit" style="border:1px solid black;padding:8px;margin-left:16px;display:flex;flex-direction:row;">';
+        s+='<div>背景区切り数<input type="number" name="epcount" min=1 max=31></div>';
+        s+='<div style="margin-left:16px;">1番目の数字<input type="number" name="epfirst" min=1 max=69 disabled>(区切り数7以上で表示)</div>';
+        s+='<div style="margin-left:16px;">末尾調整(分)<input type="number" name="epfix" min=0 max=60 disabled></div>';
+        s+='</div>';
+        $(s).insertBefore("#isTimeVisible+*");
         var epnume=$('#epnumedit').contents().find('input[type="number"]');
         epnume.filter('[name="epcount"]').val(2)
             .change(epcountchange)
         ;
         epnume.filter('[name="epfirst"]').val(1)
             .change(epfirstchange)
+        ;
+        epnume.filter('[name="epfix"]').val(0)
+            .change(epfixchange)
         ;
     }
     if($('#panelCustom').length==0){
@@ -1679,12 +1687,30 @@ function epcountchange(){
     var proLength=0;
     var oneLength=0;
     if(c>6){
+        $('#epnumedit input[type="number"][name="epfirst"]').prop("disabled",false);
+        $('#epnumedit input[type="number"][name="epfix"]').prop("disabled",false);
         proLength = proEnd.getTime() - proStart.getTime(); //番組の全体長さms
+        var x=60000*parseInt($('#epnumedit input[type="number"][name="epfix"]').val());
+        if(x>0){
+            var y=Math.floor(310*proLength/(proLength+x));
+            $('#proTimeEpNum').css("right",(310-y)+"px")
+                .css("width",y+"px")
+                .css("border-right","1px solid rgba(255,255,255,0.2)")
+            ;
+            proLength-=x;
+        }else{
+            $('#proTimeEpNum').css("right",0)
+                .css("width","310px")
+                .css("border-right","")
+            ;
+        }
         if(proLength>0){
             oneLength=Math.floor(proLength/c); //1話あたりの長さms
         }
         $('#forProEndTxt').css("background-color","rgba(0,0,0,0.4)");
     }else{
+        $('#epnumedit input[type="number"][name="epfirst"]').prop("disabled",true);
+        $('#epnumedit input[type="number"][name="epfix"]').prop("disabled",true);
         $('#forProEndTxt').css("background-color","transparent");
     }
     var f=parseInt($('#epnumedit input[type="number"][name="epfirst"]').val());
@@ -1713,6 +1739,9 @@ function epfirstchange(){
     if(parseInt($('#epnumedit input[type="number"][name="epcount"]').val())>6){
         epcountchange();
     }
+}
+function epfixchange(){
+    epcountchange();
 }
 function setClearStorageClicked(){
     window.localStorage.clear();
@@ -3027,10 +3056,36 @@ function createTime(sw,bt){
 //            EXcome.insertBefore(eproTimeEpNum,EXcome.firstChild);
             $(eproTimeEpNum).prependTo(EXcome);
             $('#proTimeEpNum').children().html("&nbsp;");
+            $("#proTimeEpNum").on("mousemove",proepMousemove)
+                .on("mouseleave",proepMouseleave)
+            ;
         }
     }else if(sw==1){
         $(".forpros").remove();
     }
+}
+function proepMousemove(){
+    var c=parseInt($('#epnumedit input[type="number"][name="epcount"]').val());
+    if(c<=6){return;}
+    var jo=$('#forProEndTxt');
+    if(jo.css("display")=="none"){return;}
+    var t=parseFloat(jo.css("opacity"));
+    if(t==0){
+        jo.css("display","none")
+            .css("transition","")
+            .css("opacity","")
+        ;
+    }else if(t==1){
+        jo.css("transition","opacity 0.5s linear")
+            .css("opacity",0)
+        ;
+    }
+}
+function proepMouseleave(){
+    $('#forProEndTxt').css("display","")
+        .css("transition","")
+        .css("opacity","")
+    ;
 }
 function setTimePosition(timepar,titlepar,samepar,bigpar){
     var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
@@ -3663,7 +3718,6 @@ console.log("dblclick");
         }
     },true);
     $(EXfootcome).on("mousemove",usereventFCMousemove);
-//    $(EXfootcome).on("mouseout",usereventFCMouseout);
     $(EXfootcome).on("mouseleave",usereventFCMouseleave);
     //放送中番組一覧を開く
     $(EXside).contents().find('button').eq(1).on("click",usereventSideChliButClick);
