@@ -3873,7 +3873,7 @@ function onairfunc(){
 }
 //    setInterval(function () {
 function onairBasefunc(){
-console.log("1s");
+//console.log("1s");
     try{
         if(checkUrlPattern(true)!=3){onairRunning=false;return;}
         // 1秒ごとに実行
