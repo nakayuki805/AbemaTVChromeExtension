@@ -3673,7 +3673,8 @@ console.log("dblclick");
     var mousewheelEvtName = isFirefox?'DOMMouseScroll':'mousewheel';
     window.addEventListener(mousewheelEvtName,function(e){
         //console.log("onmousewheel",e)
-        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+//        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+        if (isVolumeWheel&&e.target.id=="ComeMukouMask"){
             if(EXvolume&&$(EXvolume).contents().find('svg').css("zoom")=="1"){
                 otoSize(e.wheelDelta<0?0.8:1.2);
             }
