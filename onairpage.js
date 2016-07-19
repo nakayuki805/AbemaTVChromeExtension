@@ -247,6 +247,7 @@ var popCodes="39"+",39".repeat(50); //黒帯パネルを全て非表示にした
 var popinput=[];
 var popacti=false; //脱出コマンドを受け付けるかどうか
 var isAutoReload=true; //読込済コメントを自動反映するかどうか
+var onairRunning=false; //映像ページの定期実行のやつの複数起動防止用
 
 function onairCleaner(){
 //console.log("onairCleaner");
@@ -857,6 +858,7 @@ function screenBlackSet(type) {
 //    var pwaku = $('[class^="style__overlap___"]'); //動画枠
     var pwaku=$('#ComeMukouMask');
     if(pwaku.length==0){ //delaysetから移動してきた
+        if($(overlapSelector).length==0){return;}
         $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
         pwaku=$('#ComeMukouMask');
         pwaku[0].addEventListener("click",comemukouClick);
@@ -3673,7 +3675,8 @@ console.log("dblclick");
     var mousewheelEvtName = isFirefox?'DOMMouseScroll':'mousewheel';
     window.addEventListener(mousewheelEvtName,function(e){
         //console.log("onmousewheel",e)
-        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+//        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+        if (isVolumeWheel&&e.target.id=="ComeMukouMask"){
             if(EXvolume&&$(EXvolume).contents().find('svg').css("zoom")=="1"){
                 otoSize(e.wheelDelta<0?0.8:1.2);
             }
@@ -3862,8 +3865,17 @@ function onairfunc(){
     //要素チェック
     setEXs();
     delayset();
-    setInterval(function () {
-        if(checkUrlPattern(true)!=3){return;}
+    if(!onairRunning){
+        onairRunning=true;
+        setInterval(onairBasefunc,1000);
+    }
+    setTimeout(onresize,5000);
+}
+//    setInterval(function () {
+function onairBasefunc(){
+console.log("1s");
+    try{
+        if(checkUrlPattern(true)!=3){onairRunning=false;return;}
         // 1秒ごとに実行
         if(EXcome&&isAutoReload){
 //            var btn = $(EXcome).contents().find('[class^="styles__continue-btn___"]'); //新着コメのボタン
@@ -4193,10 +4205,10 @@ function onairfunc(){
                 $('#moveContainer').css("width",movieRightEdge+"px");
             }
         }
-
-    }, 1000);
-
-    setTimeout(onresize,5000);
+//    }, 1000);
+    }catch(e){
+        onairRunning=false;
+    }
 }
 $(window).on("resize", onresize);
 
@@ -4369,14 +4381,7 @@ chrome.runtime.onMessage.addListener(function(r){
             if(bginfo[1].length>0&&bginfo[1][2]-bginfo[1][1]>5){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 3");
                 bginfo[2]=3;
-//                if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
-//                    $(EXfootcome).next('#timerthird').text('CM>');
-//                }
             }
-        }else{
-//            if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0&&bginfo[0]>0){
-//                $(EXfootcome).next('#timerthird').html('&nbsp;');
-//            }
         }
     }else if(r.type==1){
 //console.log("nowcm#"+r.value[0]+","+r.value[1]+"/"+r.value[2]);
@@ -4397,9 +4402,6 @@ chrome.runtime.onMessage.addListener(function(r){
             if(bginfo[2]<=1){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 2");
                 bginfo[2]=2;
-//                if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
-//                    $(EXfootcome).next('#timerthird').text('CM');
-//                }
                 if(cmblockcd*100%10!=3){
                     cmblockcd=0;
                     startCM();
@@ -4413,9 +4415,6 @@ chrome.runtime.onMessage.addListener(function(r){
                 if(bginfo[2]==3){
 //console.log("bginfo[2]= 3 -> 0");
                     bginfo[2]=0;
-//                    if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0&&bginfo[0]>0){
-//                        $(EXfootcome).next('#timerthird').html('&nbsp;');
-//                    }
                     if(cmblockcd*100%10!=-3){
                         cmblockcd=0;
                         endCM();
@@ -4431,9 +4430,6 @@ chrome.runtime.onMessage.addListener(function(r){
         if(bginfo[1].length==0){
 //console.log("bginfo[2]= "+bginfo[2]+" -> 1");
             bginfo[2]=1;
-//            if(EXfootcome&&$(EXfootcome).next('#timerthird').length>0){
-//                $(EXfootcome).next('#timerthird').text('>CM');
-//            }
         }
     }
 });
