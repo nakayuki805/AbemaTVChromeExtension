@@ -857,8 +857,9 @@ function screenBlackSet(type) {
 //    var pwaku = $('[class^="style__overlap___"]'); //動画枠
     var pwaku=$('#ComeMukouMask');
     if(pwaku.length==0){ //delaysetから移動してきた
-        $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter('[class^="style__overlap___"]');
+        $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
         pwaku=$('#ComeMukouMask');
+        pwaku[0].addEventListener("click",comemukouClick);
     }
     if (type == 0) {
         setBlacked[0]=false;
@@ -1120,6 +1121,10 @@ console.log("delayset retry");
     volumecheck(); //1秒ごとに実行していた最大音量チェックを初回読込時の1回だけに変更
     if($('#moveContainer').length==0){
         $('<div id="moveContainer" class="usermade">').appendTo('body');
+    }
+    if($('#ComeMukouMask').length==0){ //delaysetにも設置
+        $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
+        document.getElementById('ComeMukouMask').addEventListener("click",comemukouClick);
     }
 console.log("delayset ok");
 }
@@ -1714,7 +1719,7 @@ function epcountchange(){
         $('#forProEndTxt').css("background-color","transparent");
     }
     var f=parseInt($('#epnumedit input[type="number"][name="epfirst"]').val());
-    var eo='<div style="border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;">';
+    var eo='<div>';
     var ea='';
     for(var i=0;i<c;i++){
         ea+=eo;
@@ -1899,6 +1904,7 @@ function setProTextSizeChanged(){
     setProSamePosiChanged(false,$('#isProTextLarge').prop("checked"));
 }
 function setProSamePosiChanged(pophide,bigtext){
+//console.log("setProSamePosiChanged pophide="+(pophide?"true":"false")+",bigtext="+(bigtext?"true":"false"));
 //ref:
 //setTimePosiChanged
 //setProtitlePosiChanged
@@ -2548,32 +2554,34 @@ function volbar(){
         setTimeout(volbar,800);
     }
 }
-function faintcheck2(retrycount,fcd,sw){
+function faintcheck2(retrycount,sw,fcd,bgi){
 //console.log("faintcheck#"+retrycount+",fcd="+fcd);
     if(EXfootcountcome){
         if(sw<0){
             if(isNaN(parseInt($(EXfootcountcome).text()))){
 //console.log("faintcheck cmblockcd="+cmblockcd+"->"+fcd);
                 cmblockcd=fcd;
+                bginfo[3]=bgi;
                 return;
             }
         }else if(sw>0){
             if(!isNaN(parseInt($(EXfootcountcome).text()))){
 //console.log("faintcheck cmblockcd="+cmblockcd+"->"+fcd);
                 cmblockcd=fcd;
+                bginfo[3]=bgi;
                 return;
             }
         }
     }
     if(retrycount>0){
-        setTimeout(faintcheck2,150,retrycount-1,fcd);
+        setTimeout(faintcheck2,150,retrycount-1,sw,fcd,bgi);
     }
 }
-function faintcheck(fcd,sw){
+function faintcheck(sw,fcd,bgi){
     if(sw>0){
-        faintcheck2(5,Math.max(0,fcd),sw);
+        faintcheck2(5,sw,Math.max(0,fcd),bgi);
     }else if(sw<0){
-        faintcheck2(5,Math.min(0,fcd),sw);
+        faintcheck2(5,sw,Math.min(0,fcd),bgi);
     }
 }
 function comeColor(jo,inp){
@@ -2679,19 +2687,19 @@ function proPositionAllReset(bigtext){
     var parexfootcount=$(EXfootcount).parent();
     var footlogo=$(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
     var forpros=$(".forpros");
-//    var bsize=(bigtext!==undefined)?bigtext:isProTextLarge;
-//    var fsize=bsize?"medium":"x-small";
+    var bsize=(bigtext!==undefined)?bigtext:isProTextLarge;
+    var fsize=bsize?"medium":"x-small";
     var tpro=$("#tProtitle");
     tpro.css("transform","")
         .css("left","")
         .css("right","")
         .css("top","")
         .css("bottom","")
-//        .css("font-size",fsize)
+        .css("font-size",fsize)
     ;
     forpros.css("top","")
         .css("bottom","")
-//        .css("font-size",fsize)
+        .css("font-size",fsize)
     ;
     prehoverContents.css("margin-top","")
         .css("margin-right","")
@@ -2868,7 +2876,8 @@ function createProtitle(sw,bt){
     if(sw==0){
         if($("#tProtitle").length==0){
            var eProtitle = '<span id="tProtitle" class="usermade" style="';
-            eProtitle+='position:absolute;right:0;font-size:'+(bt?"medium":"x-small")+';padding:4px 8px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;top:0px;';
+//            eProtitle+='position:absolute;right:0;font-size:'+(bt?"medium":"x-small")+';padding:4px 8px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;top:0px;';
+            eProtitle+='font-size:'+(bt?"medium":"x-small")+';position:absolute;top:0px;right:0';
             eProtitle+='">未取得</span>';
 //            EXcome.insertBefore(eProtitle,EXcome.firstChild);
             $(eProtitle).prependTo(EXcome);
@@ -3024,7 +3033,8 @@ function createTime(sw,bt){
         var fsize=bt?"medium":"x-small";
         if($("#forProEndBk").length==0){
             var eForProEndBk = '<span id="forProEndBk" class="usermade forpros" style="';
-            eForProEndBk+='position:absolute;right:0;font-size:'+fsize+';padding:0px 0px;margin:4px 0px;background-color:rgba(255,255,255,0.2);z-index:12;width:310px;top:0px;';
+//            eForProEndBk+='position:absolute;right:0;font-size:'+fsize+';padding:0px 0px;margin:4px 0px;background-color:rgba(255,255,255,0.2);z-index:12;width:310px;top:0px;';
+            eForProEndBk+='font-size:'+fsize+';position:absolute;top:0px;right:0;width:310px;';
             eForProEndBk+='"></span>';
 //            EXcome.insertBefore(eForProEndBk,EXcome.firstChild);
             $(eForProEndBk).prependTo(EXcome);
@@ -3032,7 +3042,8 @@ function createTime(sw,bt){
         }
         if($("#forProEndTxt").length==0){
             var eForProEndTxt = '<span id="forProEndTxt" class="usermade forpros" style="';
-            eForProEndTxt+='position:absolute;right:0;font-size:'+fsize+';padding:4px 5px 4px 11px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;top:0px;';
+//            eForProEndTxt+='position:absolute;right:0;font-size:'+fsize+';padding:4px 5px 4px 11px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;top:0px;';
+            eForProEndTxt+='font-size:'+fsize+';position:absolute;top:0px;right:0;';
             eForProEndTxt+='"></span>';
 //            EXcome.insertBefore(eForProEndTxt,EXcome.firstChild);
             $(eForProEndTxt).prependTo(EXcome);
@@ -3050,7 +3061,8 @@ function createTime(sw,bt){
         if($("#proTimeEpNum").length==0){
             var eproTimeEpNum = '<div id="proTimeEpNum" class="usermade forpros" style="';
 //            eproTimeEpNum.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:4px 0px;background-color:transparent;z-index:13;width:310px;top:0px;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;");
-            eproTimeEpNum+='position:absolute;right:0;font-size:'+fsize+';padding:4px 0px;background-color:transparent;z-index:13;width:310px;top:0px;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;';
+//            eproTimeEpNum+='position:absolute;right:0;font-size:'+fsize+';padding:4px 0px;background-color:transparent;z-index:13;width:310px;top:0px;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;';
+            eproTimeEpNum+='font-size:'+fsize+';position:absolute;top:0px;right:0;width:310px;';
             eproTimeEpNum+='">';
             eproTimeEpNum+='<div style="border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;">&nbsp;</div>'.repeat(2);
 //            EXcome.insertBefore(eproTimeEpNum,EXcome.firstChild);
@@ -3151,10 +3163,12 @@ function setTimePosition(timepar,titlepar,samepar,bigpar){
             if(!$(EXhead).children().is(forpros)){
                 forpros.prependTo(EXhead);
             }
+            break;
         case "footer":
             if(!$(EXfoot).children().is(forpros)){
                 forpros.prependTo(EXfoot);
             }
+            break;
         default:
     }
 }
@@ -3263,7 +3277,7 @@ function setOptionHead(){
         t+='position:absolute;top:0;left:0;overflow:hidden;height:100%;';
     }
     t+='}';
-    t+='[class^="style__overlap___"]{z-index:8;}';
+    t+=overlapSelector+'{z-index:8;}';
     t+='#ComeMukouMask{z-index:6;}';
     t+='[class^="TVContainer__ad-reserve-button___"]{z-index:9;}'; //元はoverlapと同じ3
     t+='[class^="TVContainer__fresh-panel___"]{z-index:10;}'; //元は4
@@ -3297,6 +3311,16 @@ function setOptionHead(){
     t+='[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]{padding-right:0;}';
     t+='[class^="TVContainer__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{padding-right:23px;}';
     t+='[class^="TVContainer__right-comment-area___"] textarea{width:calc(100% - 8px * 2 - 15px);}';
+    //残り時間用
+    t+='#forProEndBk{padding:0px 0px;margin:4px 0px;background-color:rgba(255,255,255,0.2);z-index:12;}';
+    t+='#forProEndTxt{padding:4px 5px 4px 11px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;}';
+    t+='#proTimeEpNum{padding:4px 0px;background-color:transparent;z-index:13;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;align-items:center;}';
+    t+='#tProtitle{padding:4px 8px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;}';
+    t+='#proTimeEpNum>div{border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;}';
+    //画面クリック調整
+    t+='#moveContainer{pointer-events:none;}';
+    t+=overlapSelector+'{pointer-events:none;}';
+    t+='[class^="TVContainer__footer-container___"] [class*="styles__right-container"]{pointer-events:auto;}';
 
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
 console.log("setOptionHead ok");
@@ -3331,7 +3355,7 @@ console.log("setOptionElement retry");
         });
     }
 
-    $(EXfootcome).css("pointer-events","auto");
+//    $(EXfootcome).css("pointer-events","auto");
 console.log("setOptionElement ok");
 }
 function pophideSelector(sv,sw){
@@ -3359,7 +3383,9 @@ function pophideSelector(sv,sw){
         }
     }
 //console.log(st);
-    pophideElement({head:(st[0]>sw?1:-1),foot:(st[1]>sw?1:-1),side:(st[2]>sw?1:-1)});
+    if(st!==undefined){
+        pophideElement({head:(st[0]>sw?1:-1),foot:(st[1]>sw?1:-1),side:(st[2]>sw?1:-1)});
+    }
 }
 function usereventMouseover(){
     if(forElementClose<4){
@@ -3367,19 +3393,46 @@ function usereventMouseover(){
         pophideSelector(-1,0);
     }
 }
+function comemukouClick(){
+//console.log("comemukouClick");
+    if(isSureReadComment&&$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')){
+        //常にコメ欄開だけど開けない状態ならoverlapはクリックさせず直接wakuclickへ移行
+        usereventWakuclick();
+    }else{
+        //overlapをクリックしても良さそうならtrigger経由でwakuclickへ移行
+        $(overlapSelector).css("pointer-events","auto")
+            .trigger("click")
+        ;
+    }
+}
 function usereventWakuclick(){
+    $(overlapSelector).css("pointer-events","none");
+//overlapは常時pointer-events:noneにしておき、その下のcomemukoumaskをclickさせる
+//その時にoverlapをクリックしても良さそうならクリックさせてすぐ塞ぐ
 //console.log("wakuclick");
+//ComeMukou時はそれぞれ解除・再適用スイッチ
     if(bginfo[2]>=2||bginfo[3]==2){
         if(isCMBlack&&isCMBkR){screenBlackSet(setBlacked[0]?0:(isCMBkTrans?1:3));}
         if(isCMsoundoff&&isCMsoundR){soundSet(setBlacked[1]);}
         if(CMsmall<100&&isCMsmlR){movieZoomOut(setBlacked[2]?0:1);}
     }
     if(isSureReadComment){
-//        comeclickcd=2;
-        if(!comeFastOpen&&!comeRefreshing){
-            comeFastOpen=true;
-            waitforCloseSlide(5);
+        if($(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')){
+        }else{
+            //overlapのclickにより閉じられるので早く開き直す
+            if(!comeFastOpen&&!comeRefreshing){
+                comeFastOpen=true;
+                waitforCloseSlide(5);
+            }
         }
+    }
+//旧windowclick
+    if(forElementClose<5){
+        forElementClose=5;
+    }
+//番組タイトルのクリックにより番組情報欄を開いた(ように見せた)後ならそれを閉じる(ように見せる)
+    if(proinfoOpened){
+        setTimeout(openInfo,50,false);
     }
 }
 function usereventVolMousemove(){
@@ -3471,13 +3524,31 @@ function usereventFCMousemove(){
 }
 
 function overlapTriggerClick(){
-    $('[class^="style__overlap___"]').trigger("click");
+    $(overlapSelector).trigger("click");
+}
+function waitforComemukouEnd(url){
+//コメ欄常時開でComeMukou中に放送中一覧を閉じた場合、overlapをクリックしないために映像縮小が解除されない
+//そのままだとComeMukouが終わっても縮小が解除されないので、ComeMukouが終わるのを待つ
+//長時間になるので無限再試行が適切に終了されるようにする
+    if(checkUrlPattern(true)!=3){return;}
+    if(url!=currentLocation){return;}
+    if(isSureReadComment&&!$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')){
+        setTimeout(overlapTriggerClick,20);
+    }else{
+        setTimeout(waitforComemukouEnd,500,url);
+    }
 }
 function usereventSideChliButClick(){
     if(isChliOpen(3)){
-        //放送中番組一覧が既に見えていたら閉じる
-        pophideElement({allreset:true});
-        setTimeout(overlapTriggerClick,20);
+        if(isSureReadComment&&$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')){
+            //コメ常時開で開けない状態の場合は見た目だけ閉じてoverlapクリックは後回し
+            pophideElement({channellist:-1});
+            waitforComemukouEnd(currentLocation);
+        }else{
+            //放送中番組一覧が既に見えていたら閉じる
+            pophideElement({allreset:true});
+            setTimeout(overlapTriggerClick,20);
+        }
     }else{
         //番組情報枠と被らないようにする
         pophideSelector(1,0);
@@ -3490,9 +3561,14 @@ function usereventSideChliButClick(){
 }
 function usereventFootInfoButClick(){
     if(isInfoOpen(3)){
-        //番組情報枠が既に見えていたら閉じる
-        pophideElement({allreset:true});
-        setTimeout(overlapTriggerClick,20);
+        if(isSureReadComment&&$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')){
+            pophideElement({programinfo:-1});
+            waitforComemukouEnd(currentLocation);
+        }else{
+            //番組情報枠が既に見えていたら閉じる
+            pophideElement({allreset:true});
+            setTimeout(overlapTriggerClick,20);
+        }
     }else{
         pophideSelector(2,0);
         var phi={programinfo:0};
@@ -3539,15 +3615,15 @@ function usereventFCclick(){
         }
     }
 }
-function usereventWindowclick(){
+//function usereventWindowclick(){
 //console.log("usereventWindowclick");
-    if(forElementClose<5){
-        forElementClose=5;
-    }
-    if(proinfoOpened){
-        setTimeout(openInfo,50,false);
-    }
-}
+//    if(forElementClose<5){
+//        forElementClose=5;
+//    }
+//    if(proinfoOpened){
+//        setTimeout(openInfo,50,false);
+//    }
+//}
 function usereventSendInpKeyinput(){
 //console.log("usereventSendInpKeyinput");
     if(EXcomesendinp&&parseInt(EXcomesendinp.style.height)>18){
@@ -3579,7 +3655,7 @@ function setOptionEvent(){
     if(eventAdded){return;}
     var butfs;
     var pwaku;
-    if(((butfs=$('button[class*="styles__full-screen___"]')[0])==null)||((pwaku=$('[class^="style__overlap___"]')[0])==null)||!EXcome){
+    if(((butfs=$('button[class*="styles__full-screen___"]')[0])==null)||((pwaku=$(overlapSelector)[0])==null)||!EXcome){
 console.log("setOptionEvent retry");
         setTimeout(setOptionEvent,1000);
         return;
@@ -3592,7 +3668,7 @@ console.log("dblclick");
             toggleFullscreen();
         }
     });
-    $(window).on("click",usereventWindowclick);
+//    $(window).on("click",usereventWindowclick);
     //マウスホイール無効か音量操作
     var mousewheelEvtName = isFirefox?'DOMMouseScroll':'mousewheel';
     window.addEventListener(mousewheelEvtName,function(e){
@@ -3631,9 +3707,11 @@ console.log("dblclick");
         }
     });
     window.addEventListener("mousemove",usereventMouseover,true);
-    pwaku.addEventListener("click",usereventWakuclick,false);
-    $(EXvolume).on("mousemove",usereventVolMousemove);
-    $(EXvolume).on("mouseout",usereventVolMouseout);
+    pwaku.addEventListener("click",usereventWakuclick);
+//pwakuと同じイベントを#ComeMukouMaskにも設置
+    $(EXvolume).on("mousemove",usereventVolMousemove)
+        .on("mouseout",usereventVolMouseout)
+    ;
     window.addEventListener("keydown",function(e){
 //console.log(e);
         if(e.keyCode==13||e.keyCode==229){ //enter
@@ -3717,8 +3795,9 @@ console.log("dblclick");
             $('body').css("overflow-y","");
         }
     },true);
-    $(EXfootcome).on("mousemove",usereventFCMousemove);
-    $(EXfootcome).on("mouseleave",usereventFCMouseleave);
+    $(EXfootcome).on("mousemove",usereventFCMousemove)
+        .on("mouseleave",usereventFCMouseleave)
+    ;
     //放送中番組一覧を開く
     $(EXside).contents().find('button').eq(1).on("click",usereventSideChliButClick);
     //番組情報を開く
@@ -3846,7 +3925,7 @@ function onairfunc(){
 //console.log("comeRefreshing start");
                     comeRefreshing=true;
 //                    commentNum=0;
-                    $('[class^="style__overlap___"]').trigger("click");
+                    $('#ComeMukouMask').trigger("click");
                     fastRefreshing();
                 }
                 //新着コメント強調 一時試用できるように、一時保存画面が開いている場合を考慮
@@ -3934,14 +4013,16 @@ function onairfunc(){
                 if(commentCount<0&&comeLatestCount>=0){
                     //今コメント数無効で直前がコメント数有効(=コメント数無効開始?)
                     if(cmblockcd<=0){
-                        faintcheck(cmblockcd,1);
+                        faintcheck(1,cmblockcd,bginfo[3]);
                         cmblockcd=cmblockia;
+                        bginfo[3]=1;
                     }
                 }else if(commentCount>=0&&comeLatestCount<0){
                     //今コメント数有効で直前がコメント数無効(=コメント数無効終了?)
                     if(cmblockcd>=0){
-                        faintcheck(cmblockcd,-1);
+                        faintcheck(-1,cmblockcd,bginfo[3]);
                         cmblockcd=cmblockib;
+                        bginfo[3]=3;
                     }
                 }
             }else{
