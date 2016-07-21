@@ -78,7 +78,7 @@ var settingsList = [
             },
             {
                 "name": "isHideTodayHighlight",
-                "description": "右上の「今日のみどころ」を放送中画面で非表示(トップページで出現を確認、放送中画面にも出現するかは不明)",
+                "description": "右上の「今日のみどころ」を放送中画面で非表示(このオプションはトップページには効きません)",
                 "type": "boolean",
                 "isInstantChangable": true
             }
