@@ -70,6 +70,8 @@ var isHidePopFresh=false; //左下に出るFresh宣伝
 var isChTimetableBreak=false; //チャンネル別番組表でタイトルの改行位置を変更する
 var isChTimetableWeekend=false; //土日を着色する
 var isChTimetablePlaybutton=false; //番組表からnow-on-airに直接移動するためのリンク設置
+var isShowTwitterPanel=false; //「twitterで番組情報を受け取ろう」な左下パネル表示
+var isHideTodayHighlight=false; //ヘッダメニューの今日のみどころのポップアップ
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -172,6 +174,8 @@ getStorage(null, function (value) {
     isChTimetableBreak=value.chTimetableBreak||false;
     isChTimetableWeekend=value.chTimetableWeekend||false;
     isChTimetablePlaybutton=value.chTimetablePlaybutton||false;
+    isHideTwitterPanel=value.hideTwitterPanel||false;
+    isHideTodayHighlight=value.hideTodayHighlight||false;
 });
 
 var currentLocation = window.location.href;
@@ -1025,6 +1029,8 @@ function openOption(){
     $('#isChTimetableBreak').prop("checked",isChTimetableBreak);
     $('#isChTimetableWeekend').prop("checked",isChTimetableWeekend);
     $('#isChTimetablePlaybutton').prop("checked",isChTimetablePlaybutton);
+    $('#isHideTwitterPanel').prop("checked",isHideTwitterPanel);
+    $('#isHideTodayHighlitht').prop("checked",isHideTodayHighlight);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -1877,6 +1883,8 @@ function setSaveClicked(){
 //    isChTimetableBreak=$('#isChTimetableBreak').prop("checked");
 //    isChTimetableWeekend=$('#isChTimetableWeekend').prop("checked");
 //    isChTimetablePlaybutton=$('#isChTimetablePlaybutton').prop("checked");
+    isHideTwitterPanel=$('#isHideTwitterPanel').prop("checked");
+    isHideTodayHighlight=$('#isHideTodayHighlight').prop("checked");
 
     onresize();
     setOptionHead();
@@ -3281,8 +3289,12 @@ function setOptionHead(){
     t+='}';
     t+=overlapSelector+'{z-index:8;}';
     t+='#ComeMukouMask{z-index:6;}';
-    t+='[class^="TVContainer__ad-reserve-button___"]{z-index:9;}'; //元はoverlapと同じ3
-    t+='[class^="TVContainer__fresh-panel___"]{z-index:10;}'; //元は4
+    t+='[class^="TVContainer__ad-reserve-button___"]{z-index:8;}'; //元はoverlapと同じ3
+    t+='[class*="TVContainer__fresh-panel___"]{z-index:9;'; //元は4
+    if(isHidePopFresh){
+        t+='transform:translateX(-20px) translateX(-100%);';
+    }
+    t+='}';
 //変更後のz-index(これを書いてる時点)
 //20 side 右のボタン
 //16 #settcont 一時設定画面
@@ -3293,13 +3305,14 @@ function setOptionHead(){
 //12 #forProEndBk 残り時間の背景
 //11 right-comment-area コメント一覧・入力欄
 //11 header ヘッダー
-//10 balloon 右のボタンの吹き出しポップ
+//10 balloon 右のボタンの吹き出しポップ(常時非表示)
 //10 footer フッター 全画面・音量ボタン
-//10 fresh-panel fresh用の左下ポップ
-//9 ad-reserve-button 番宣中の左下ポップ
-//8 overlap 映像クリック受付
-//7 #moveContainer 流れるコメント
-//6 #ComeMukouMask 画面装飾用
+//9 twitter-panel twitter通知受取ポップ 元4
+//9 fresh-panel fresh用の左下ポップ 元4
+//8 ad-reserve-button 番宣中の左下ポップ 元3
+//8 overlap 映像クリック受付(クリックイベントは常時無効) 元3
+//7 #moveContainer 流れるコメント(クリックイベントは常時無効)
+//6 #ComeMukouMask 画面装飾、映像クリック受付(クリックはここで受ける)
 
     //全画面・音量ボタン非表示 display:noneだとホイール音量操作でスタック
     if(isHideButtons){
@@ -3323,6 +3336,16 @@ function setOptionHead(){
     t+='#moveContainer{pointer-events:none;}';
     t+=overlapSelector+'{pointer-events:none;}';
     t+='[class^="TVContainer__footer-container___"] [class*="styles__right-container"]{pointer-events:auto;}';
+    //twitter通知パネル
+    t+='[class^="TVContainer__twitter-panel___"]{z-index:9;'; //元が4(overlapは元3)なのでoverlapよりは上に置く
+    if(isHideTwitterPanel){
+        t+='transform:translateX(-20px) translateX(-100%);';
+    }
+    t+='}';
+    //今日のみどころポップアップ(トップページで出現確認、放送画面にまで出るかは不明だけど念のため)
+    if(isHideTodayHighlight){
+        t+='[class^="styles__highlights-balloon___"]{display:none;}';
+    }
 
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
 console.log("setOptionHead ok");
