@@ -239,6 +239,9 @@ $(function(){
         var isChTimetableBreak=value.chTimetableBreak||false;
         var isChTimetableWeekend=value.chTimetableWeekend||false;
         var isChTimetablePlaybutton=value.chTimetablePlaybutton||false;
+        var isHideTwitterPanel=value.hideTwitterPanel||false;
+        var isHideTodayHighlight=value.hideTodayHighlight||false;
+
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
         $("#isEnterSubmit").prop("checked", isEnterSubmit);
@@ -336,6 +339,8 @@ $(function(){
         $('#isChTimetableBreak').prop("checked",isChTimetableBreak);
         $('#isChTimetableWeekend').prop("checked",isChTimetableWeekend);
         $('#isChTimetablePlaybutton').prop("checked",isChTimetablePlaybutton);
+        $('#isHideTwitterPanel').prop("checked",isHideTwitterPanel);
+        $('#isHideTodayHighlight').prop("checked",isHideTodayHighlight);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -411,7 +416,9 @@ $(function(){
             "hidePopFresh":$('#isHidePopFresh').prop("checked"),
             "chTimetableBreak":$('#isChTimetableBreak').prop("checked"),
             "chTimetableWeekend":$('#isChTimetableWeekend').prop("checked"),
-            "chTimetablePlaybutton":$('#isChTimetablePlaybutton').prop("checked")
+            "chTimetablePlaybutton":$('#isChTimetablePlaybutton').prop("checked"),
+            "hideTwitterPanel":$('#isHideTwitterPanel').prop("checked"),
+            "hideTodayHighlight":$('#isHideTodayHighlight').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
