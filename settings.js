@@ -69,6 +69,18 @@ var settingsList = [
                 "description": "コメント欄を開いていても黒帯パネル等を表示できるようにする※下の黒帯パネル開閉設定で設定",
                 "type": "boolean",
                 "isInstantChangable": true
+            },
+            {
+                "name": "isHideTwitterPanel",
+                "description": "パネル「twitterで通知を受け取る」を非表示",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isHideTodayHighlight",
+                "description": "右上の「今日のみどころ」を放送中画面で非表示(トップページで出現を確認、放送中画面にも出現するかは不明)",
+                "type": "boolean",
+                "isInstantChangable": true
             }
         ]
     },
