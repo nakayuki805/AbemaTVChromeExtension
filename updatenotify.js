@@ -2,9 +2,9 @@
 //webストア公開版のmanifest.jsonにはcontent_scriptsのjsの最後にこのファイルが加えられる
 //github版では不使用
 
-var currentUpdateNotifyVersion = 4;//4は0.1.2の時
+var currentUpdateNotifyVersion = 5;//4は0.2.1の時
 var optionUrl = chrome.extension.getURL("option.html");
-var notifyContent = "最近追加された機能(要設定):番組表の表示改善<br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。<br>再掲:CM開始直前に画面が小さくなってしまう場合はこの拡張機能の<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>の下のある「コメント無効時関連リセット」ボタンを試してください。";
+var notifyContent = "最近追加された機能(デフォルト無効):「Twitterで通知を受け取る」放送画面の「今日のみどころ」をの非表示オプション、番組表の表示改善<br>必要に応じて有効にしてください→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a><br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。";
 
 function updateInfo(message) {
     var toastElem = $("<div class='toast' id='updateInfo'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");

@@ -154,7 +154,7 @@ var settingsList = [
         "settings": [
             {
                 "name": "isMovingComment",
-                "description": "新着コメントをあの動画サイトのように横に流す(コメント欄を開いているときのみ有効、コメント欄関連設定の常にコメント欄を開こうとするを同時に有効にすると常にコメントが流れるのでおすすめです)",
+                "description": "新着コメントをあの動画サイトのように横に流す(コメント欄を開いているときのみ有効、コメント欄関連設定の「常にコメント欄を開こうとする」を同時に有効にすると常にコメントが流れるのでおすすめです。)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -257,7 +257,7 @@ var settingsList = [
         ]
     },
     {
-        "description": "番組表関連機能",
+        "description": "番組表関連設定",
         "settings": [
             {
                 "name": "isChTimetableExpand",
