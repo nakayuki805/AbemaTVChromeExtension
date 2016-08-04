@@ -1,3 +1,8 @@
+// edge等ブラウザ対応
+if (typeof chrome === "undefined" || !chrome.extension) {
+    var chrome = browser;
+}
+
 var settings = {};
 /*設定
 拡張機能のオプション画面から設定できます。

@@ -1,3 +1,8 @@
+// edge等ブラウザ対応
+if (typeof chrome === "undefined" || !chrome.extension) {
+    var chrome = browser;
+}
+
 function dateToStr(date){
     date = new Date(date);
     return (date.getMonth()+1)+"月"+date.getDate()+"日 "+date.getHours()+"時"+date.getMinutes()+"分";

@@ -1,3 +1,8 @@
+// edge等ブラウザ対応
+if (typeof chrome === "undefined" || !chrome.extension) {
+    var chrome = browser;
+}
+
 var settingsList = [
     {
         "description" : "映像・表示・操作関連設定",

@@ -1,3 +1,8 @@
+// edge等ブラウザ対応
+if (typeof chrome === "undefined" || !chrome.extension) {
+    var chrome = browser;
+}
+
 $(function(){
     $("#settingsArea").html(generateOptionHTML(true));
     $("#CommentMukouSettings").hide();
@@ -175,7 +180,6 @@ $(function(){
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
         var isDblFullscreen = value.dblFullscreen || false;
-        var isEnterSubmit = value.enterSubmit || false;
         var isHideOldComment = value.hideOldComment || false;
         var isCMBlack = value.CMBlack || false;
         var isCMBkTrans = value.CMBkTrans || false;
@@ -244,7 +248,6 @@ $(function(){
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
-        $("#isEnterSubmit").prop("checked", isEnterSubmit);
         $("#isHideOldComment").prop("checked", isHideOldComment);
         $("#isCMBlack").prop("checked", isCMBlack);
         $("#isCMBkTrans").prop("checked", isCMBkTrans);
@@ -352,7 +355,6 @@ $(function(){
         chrome.storage.local.set({
             "resizeScreen": $("#isResizeScreen").prop("checked"), 
             "dblFullscreen": $("#isDblFullscreen").prop("checked"),
-            "enterSubmit": $("#isEnterSubmit").prop("checked"),
             "hideOldComment": $("#isHideOldComment").prop("checked"),
             "CMBlack": $("#isCMBlack").prop("checked"),
             "CMBkTrans": $("#isCMBkTrans").prop("checked"),

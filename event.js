@@ -9,6 +9,11 @@ chrome.runtime.sendMessage(req, function(response) {
 time=(new Date());req = {type:"addProgramNotifyAlarm",channel:"abema-news", channelName:"AbemaNews", programID: "P2Z4XVYyzAo", programTitle: "AbemaNews夜①／芸能もういっちょ", programTime: time.setMinutes(time.getMinutes()+3), notifyTime: time.setMinutes(time.getMinutes()-4)};
 chrome.runtime.sendMessage(req, function(response) {console.log(response);})
 */
+// edge等ブラウザ対応
+if (typeof chrome === "undefined" || !chrome.extension) {
+    var chrome = browser;
+}
+
 //通知
 chrome.alarms.onAlarm.addListener(function(alarm) {
     if (alarm.name.indexOf("progNotify_") === 0){

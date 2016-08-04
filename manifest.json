@@ -3,6 +3,7 @@
 	"name": "abematv ext",
 	"version": "0.2.2",
 	"description": "abematvを視聴しやすくする非公式の拡張機能",
+	"author": "AbemaTVChromeExtension on github",
 	"icons": {
 		"128": "abemaexticon.png"
 	},
