@@ -151,6 +151,12 @@ var settingsList = [
 //                "description": "新着コメントを少し目立たせる",
 //                "type": "boolean",
 //                "isInstantChangable": true
+            },
+            {
+                "name": "isComelistNG",
+                "description": "NG設定をコメント一覧にも適用する(一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示)",
+                "type": "boolean",
+                "isInstantChangable": true
             }
         ]
     },
