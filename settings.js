@@ -189,7 +189,7 @@ var settingsList = [
             },
             {
                 "name": "isComeDel",
-                "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/、//コメント)(流れるコメントにのみ有効)",
+                "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/、//コメント)(流れるコメントにのみ有効、右のコメ欄には反映されません)",
                 "type": "boolean",
                 "isInstantChangable": true
             },

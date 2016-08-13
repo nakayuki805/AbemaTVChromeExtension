@@ -521,7 +521,7 @@ function PlaybuttonEditor(){
         if(!q.siblings().children().is('.playbutton')){
             //緑枠にボタンがなければ設置
             q.find('[class*="style__title___"]').css("width","130px");
-            a='<a href="https://abema.tv'+u+'" title="放送中画面へ移動">';
+            a='<a href="javascript:location.href=\'https://abema.tv'+u+'\';" title="放送中画面へ移動">';
             a+='<div class="playbutton" style="position:absolute;right:4px;top:4px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">';
             a+='<svg width="10" height="14" style="fill:#6fb900;transform:translate(7px,3px)">';
             a+='<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--playback">';
