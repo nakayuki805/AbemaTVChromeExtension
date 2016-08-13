@@ -255,7 +255,7 @@ var eyecatcheck=false; //eyecatch利用時の高速チェックの多重起動�
 var popCodes="39"+",39".repeat(50); //黒帯パネルを全て非表示にした時の脱出コマンド(右矢印を51回連打)
 var popinput=[];
 var popacti=false; //脱出コマンドを受け付けるかどうか
-var isAutoReload=true; //読込済コメントを自動反映するかどうか
+var isAutoReload=false; //コメ欄スクロール時に読込済コメントを自動反映するかどうか
 var onairRunning=false; //映像ページの定期実行のやつの複数起動防止用 setintervalの格納
 
 function onairCleaner(){
@@ -3327,7 +3327,7 @@ function setOptionHead(){
     //自動更新停止アイコン用
     t+='.reloadicon{fill:rgba(255,255,255,0.5);position:absolute;right:0;top:9px;}';
     t+='#reloadon{transform:rotate3d(3,-2,0,180deg);}';
-    t+='#reloadoff{pointer-events:none;display:none;}';
+    t+='#reloadoff{pointer-events:none;}';
     t+='[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]{padding-right:0;}';
     t+='[class^="TVContainer__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{padding-right:23px;}';
     t+='[class^="TVContainer__right-comment-area___"] textarea{width:calc(100% - 8px * 2 - 15px);}';
@@ -3371,17 +3371,17 @@ console.log("setOptionElement retry");
 
 //コメントアイコン付近にリロードアイコン作成
     if($('#reloadon').length==0){
-        var ri='<a title="コメ自動更新は現在 ON です">';
+        var ri='<a title="スクロール時コメ自動更新は現在 OFF です">';
         ri+='<svg id="reloadon" class="usermade reloadicon" width="16" height="16">';
         ri+='<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--return"></use></svg>';
-        ri+='<svg id="reloadoff" class="usermade reloadicon" width="16" height="16" style="display:none;">';
+        ri+='<svg id="reloadoff" class="usermade reloadicon" width="16" height="16" style="">';
         ri+='<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--close"></use></svg>';
         ri+='</a>';
         $(ri).appendTo(EXcomesendinp.parentElement);
         $('#reloadon').on("click",function(){
             isAutoReload=!isAutoReload;
             $('#reloadoff').css("display",isAutoReload?"none":"block");
-            $('#reloadoff').parent('a').prop("title","コメ自動更新は現在 "+(isAutoReload?"ON":"OFF")+" です");
+            $('#reloadoff').parent('a').prop("title","スクロール時コメ自動更新は現在 "+(isAutoReload?"ON":"OFF")+" です");
         });
     }
 

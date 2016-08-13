@@ -81,7 +81,8 @@ body{
     overflow-x: hidden;/*コメント流したときにスクロールバーが出るのを防止*/
 }
 [class^="styles__continue-btn___"] { /* 新着コメのボタン */
-    display:none;
+/*    display:none;*/
+    opacity: 0.5;
 }
 [class^="TVContainer__side___"] button{ /* 画面右の番組表ボタンと番組移動ボタン */
     opacity:0.5;
