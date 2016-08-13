@@ -4271,14 +4271,14 @@ function checkUrlPattern(url){
     if(url===true){url=currentLocation;output=true;}else{
     console.log("cup", url)
     ;}
-    if (url.match(/https:\/\/abema.tv\/channels\/[-a-z0-9]+\/slots\/[a-zA-Z]+/)) {
+    if (url.match(/https:\/\/abema.tv\/channels\/[-a-z0-9]+\/slots\/[a-zA-Z\d]+/)) {
         //番組個別ページ
         if(output){
             return 0;
         }else{
         putNotifyButton(url);
         //放送画面へのリンク追加
-        var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z]+/)[1];
+        var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z\d]+/)[1];
         var channelUrl = "https://abema.tv/now-on-air/" + channel;
         $('<br><a href="'+channelUrl+'">放送画面</a>').appendTo('[class*="BroadcastingFrameContainer__left-contents___"] > div');
         }
@@ -4333,7 +4333,7 @@ function putNotifyButton(url){
     var programID = urlarray[3];
     var programTitle = $('[class*="BroadcastingFrameContainer__right-contents___"] [class*="styles__heading___"]').text();
     var programTimeStr = $('[class*="BroadcastingFrameContainer__right-contents___"] [class*="styles__time___"]').text();
-    //console.log(programTimeStr, urlarray)
+    console.log(programTimeStr, urlarray)
     var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
     var programTime = new Date();
     var now = new Date();
