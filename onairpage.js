@@ -77,7 +77,8 @@ var isChTimetableWeekend=false; //土日を着色する
 var isChTimetablePlaybutton=false; //番組表からnow-on-airに直接移動するためのリンク設置
 var isShowTwitterPanel=false; //「twitterで番組情報を受け取ろう」な左下パネル表示
 var isHideTodayHighlight=false; //ヘッダメニューの今日のみどころのポップアップ
-var isComelistNG=false;
+var isComelistNG=false; //コメント一覧の代わりにNG適用済一覧を表示する
+var isComelistClickNG=false; //コメント一覧のコメントクリックでNG一時追加用の入力欄を表示
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -183,6 +184,7 @@ getStorage(null, function (value) {
     isHideTwitterPanel=value.hideTwitterPanel||false;
     isHideTodayHighlight=value.hideTodayHighlight||false;
     isComelistNG=value.comelistNG||false;
+    isComelistClickNG=value.comelistClickNG||false;
 });
 
 var currentLocation = window.location.href;
@@ -785,21 +787,29 @@ function putComment(commentText,index,inmax) {
         }
         kakikomitxt="";
     }
+    var ngedCommentText=commentText;
+    if (isComeNg&&commentText.length>0) {
+        ngedCommentText = comeNG(commentText);
+    }
     if (isComeDel&&commentText.length>0) {
         //arFullNgがマッチしたコメントは流さない
         for(var ngi=0;ngi<arFullNg.length;ngi++){
 //console.log("commentText="+commentText+",ngi="+ngi+",arFullNg["+ngi+"]="+arFullNg[ngi]);
 //            if(commentText.match(arFullNg[ngi])){
             if(arFullNg[ngi].test(commentText)){
-                console.log("userNG matched text:" + commentText  + "ngword:" + arFullNg[ngi].toString())
+                console.log("userNG matched text:" + commentText + " ngword:" + arFullNg[ngi].toString())
 //                return "";
+                commentText="";
+                break;
+            }else if(arFullNg[ngi].test(ngedCommentText)){
+                console.log("userNG matched text:" + ngedCommentText +"(ori:" + commentText+") ngword:" + arFullNg[ngi].toString())
                 commentText="";
                 break;
             }
         }
     }
     if (isComeNg&&commentText.length>0) {
-        commentText = comeNG(commentText);
+        commentText = ngedCommentText;
     }
     var commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
     if(commentText.length>0){
@@ -1039,6 +1049,7 @@ function openOption(){
     $('#isHideTwitterPanel').prop("checked",isHideTwitterPanel);
     $('#isHideTodayHighlitht').prop("checked",isHideTodayHighlight);
     $('#isComelistNG').prop("checked",isComelistNG);
+    $('#isComelistClickNG').prop("checked",isComelistClickNG);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -1898,6 +1909,7 @@ function setSaveClicked(){
     isHideTwitterPanel=$('#isHideTwitterPanel').prop("checked");
     isHideTodayHighlight=$('#isHideTodayHighlight').prop("checked");
     isComelistNG=$('#isComelistNG').prop("checked");
+    isComelistClickNG=$('#isComelistClickNG').prop("checked");
 
     arrayFullNgMaker();
     onresize();
@@ -2110,7 +2122,8 @@ function setComeColorChanged(){
 }
 function toggleCommentList(){
 //console.log("comevisiset toggleCommentList");
-    var jo=$(EXcomelist).parent();
+//    var jo=$(EXcomelist).parent();
+    var jo=$(EXcomelist).parent().parent().children('[class^="styles__comment-list-wrapper___"]');
 //display:noneだと崩れるので変更
 //重なっていて下にあるfooterの音量ボタン等を使用できるようにpointer-eventsを利用
     var jv=jo.css("visibility");
@@ -3252,6 +3265,7 @@ function setOptionHead(){
     //コメント見た目
     var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
     var cc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(0.2)+")";
+    var rc="rgba("+Math.floor(255-(255-commentTextColor)*0.8)+","+Math.floor(commentTextColor*0.8)+","+Math.floor(commentTextColor*0.8)+","+(commentTextTrans/255)+")";
     var tc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(commentTextTrans/255)+")";
     var uc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(0.2)+")";
     var vc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(0.3)+")";
@@ -3406,7 +3420,10 @@ function setOptionHead(){
     if(isHideTodayHighlight){
         t+='[class^="styles__highlights-balloon___"]{display:none;}';
     }
-
+    //コメント一覧クリックNG時はマウスオーバーで文字色を赤系にする
+    if(isComelistClickNG){
+        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]:hover{color:'+rc+';}';
+    }
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
 console.log("setOptionHead ok");
 }
@@ -3893,6 +3910,8 @@ console.log("dblclick");
     $(EXcomesend).on("click",'[class*="styles__post-button___"]',usereventSendButClick);//コメント欄に入るまで投稿ボタンが存在しないためクリック時に探す
 //    $(EXcomesend).contents().find('[class*="styles__post-button___"]').on("click",usereventSendButClick);
     $(EXcomesendinp).on("keydown keyup",usereventSendInpKeyinput);
+    //コメ一覧をクリック時
+    $(EXcome).on("click",'[class*="styles__comment-list-wrapper___"]',comecopy);
 console.log("setOptionEvent ok");
 }
 function startCM(){
@@ -3993,7 +4012,7 @@ function copycome(d,hlsw){
     var eo=EXcomelist;
     var jo=$(eo);
     if($('#copycome').length==0){
-        var t='<div id="copycome" class="'+jo.parent().attr("class")+'"><div id="copycomec">';
+        var t='<div id="copycome" class="'+jo.parent().attr("class")+' usermade"><div id="copycomec">';
         var eo=EXcomelist.firstElementChild;
         if($(eo).is('[class^="styles__no-contents-text___"]')){return;}
         var eco=$(eo).prop("class");
@@ -4019,20 +4038,28 @@ function copycome(d,hlsw){
     }else if(d>0){
         //d件をNG処理して追加した後にcomehl
         ma=[];
-        for(var i=0,e,m,t;i<d;i++){
+        for(var i=0,e,m,n,t;i<d;i++){
             e=EXcomelist.children[i];
             m=e.children[0].textContent;
+            n=m;
+            if (isComeNg&&m.length>0) {
+                n = comeNG(m);
+            }
             if (isComeDel&&m.length>0) {
                 for(var ngi=0;ngi<arFullNg.length;ngi++){
                     if(arFullNg[ngi].test(m)){
-                    console.log("userNG matched(Comelist) text:" + m  + "ngword:" + arFullNg[ngi].toString())
+                        console.log("userNG matched(Comelist) text:" + m + " ngword:" + arFullNg[ngi].toString())
+                        m="";
+                        break;
+                    }else if(arFullNg[ngi].test(n)){
+                        console.log("userNG matched(Comelist) text:" + n +"(ori:" + m + ") ngword:" + arFullNg[ngi].toString())
                         m="";
                         break;
                     }
                 }
             }
             if (isComeNg&&m.length>0) {
-                m = comeNG(m);
+                m = n;
             }
             if(m.length>0){
                 t=e.children[1].textContent;
@@ -4090,6 +4117,94 @@ function copycome(d,hlsw){
             }
         }
     }
+}
+function comecopy(){
+    if(!isComelistClickNG){return;}
+    var jo=$('#copycomec');
+    if(jo.length==0){
+        jo=$(EXcomelist);
+    }
+    var eo=jo[0];
+    var r=/rgba\((\d+), (\d+), (\d+), \d?(?:\.\d+)?\)/;
+    var s="";
+    for(var i=0,e,c,t;(e=eo.children[i]);i++){
+        c=$(e.children[0]).css("color");
+        if(r.test(c)){
+            t=r.exec(c);
+            if(t[2]==t[3]&&+t[1]>+t[2]){
+                s=e.children[0].textContent;
+                break;
+            }
+        }
+    }
+    if(s.length>0){
+        if($('#copyotw').length==0){
+            var t='<div id="copyotw" class="'+$(EXcomesendinp.parentElement).attr("class")+' usermade" style="padding:5px 28px 5px 18px;">';
+            t+='<a style="position:absolute;top:10px;left:1px;cursor:pointer;"><svg id="closecopyotw" class="usermade" width="16" height="16" style="fill:rgba(255,255,255,0.5);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--close"></use></svg></a>';
+            t+='<textarea id="copyot" class="'+$(EXcomesendinp).attr("class")+'" rows="1" maxlength="100" wrap="soft" style="height:24px;width:264px;padding-left:4px;"></textarea>';
+            t+='<div style="height:24px;pointer-events:none;">　</div>';
+            t+='<a id="textNG" style="position:absolute;top:6px;right:1px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.5);padding:0px 1px;letter-spacing:1px;cursor:pointer;">NG</a>';
+            t+='</div>';
+            $(t).insertAfter(EXcomesendinp.parentElement);
+            $('#closecopyotw').parent('a').on("click",closecotwclick);
+            $('#textNG').on("click",appendTextNG);
+        }else{
+            $('#copyotw').css("display","");
+        }
+        $(EXcomesendinp.parentElement).css("display","none");
+        $(EXcomesend).css("padding-left","0px");
+        $('#copyot').val(s);
+    }
+}
+function appendTextNG(){
+    $('#textNG').css("pointer-events","none")
+        .css("background-color","rgba(255,255,255,0.5)")
+    ;
+    var s=$('#copyot').val();
+    var b=true;
+    if(s.length>0){
+        var spfullng = fullNg.split(/\r|\n|\r\n/);
+        for(var ngi=0;ngi<spfullng.length;ngi++){
+            if(spfullng[ngi].length==0||spfullng[ngi].match(/^\/\//)){
+                continue;
+            }
+            spfullng[ngi]=spfullng[ngi].replace(/\/\/.*$/,""); //文中コメントを除去
+            if(s==spfullng[ngi]){
+                b=false;
+                break;
+            }
+        }
+        if(b){ //既存のfullNgに無い場合のみ追加
+            if(/\r|\n/.test(fullNg[fullNg.length-1])){
+                fullNg+=s;
+            }else{
+                fullNg+="\n"+s;
+            }
+            arrayFullNgMaker();
+            copycome();
+        }
+    }
+    var r=/rgba\((\d+), (\d+), (\d+), (\d?(?:\.\d+)?)\)/;
+    var c=$('#copyot').css("color");
+    if(r.test(c)){
+        var t=r.exec(c);
+        var d=b?0:255; //追加したら赤、追加しなかったら黄色
+        $('#copyot').css("color","rgba("+Math.floor(255-(255-(+t[1]))*0.4)+","+Math.floor(d-(d-(+t[2]))*0.4)+","+Math.floor((+t[3])*0.4)+","+t[4]+")");
+    }
+    setTimeout(copyotuncolor,800);
+}
+function copyotuncolor(){
+    $('#copyot').css("color","")
+        .val("");
+    ;
+    $('#textNG').css("background-color","")
+        .css("pointer-events","")
+    ;
+}
+function closecotwclick(){
+    $('#copyotw').css("display","none");
+    $(EXcomesendinp.parentElement).css("display","");
+    $(EXcomesend).css("padding-left","");
 }
 $(window).on('load', mainfunc);
 //URLによって実行内容を変更すべく各部を分離
