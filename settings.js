@@ -154,7 +154,13 @@ var settingsList = [
             },
             {
                 "name": "isComelistNG",
-                "description": "NG設定をコメント一覧にも適用する(一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示)",
+                "description": "NG設定をコメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isComelistClickNG",
+                "description": "コメント一覧クリックでNG追加欄を表示(このNG追加欄による保存は一時的です。永久保存は設定画面へ。)",
                 "type": "boolean",
                 "isInstantChangable": true
             }
@@ -195,7 +201,7 @@ var settingsList = [
             },
             {
                 "name": "isComeDel",
-                "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/、//コメント)(流れるコメントにのみ有効、右のコメ欄には反映されません)",
+                "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/も可、//コメント)(<s>流れるコメントにのみ有効、右のコメ欄には反映されません</s> 上の設定で適用可能になりました)",
                 "type": "boolean",
                 "isInstantChangable": true
             },

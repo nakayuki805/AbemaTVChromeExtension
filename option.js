@@ -246,6 +246,7 @@ $(function(){
         var isHideTwitterPanel=value.hideTwitterPanel||false;
         var isHideTodayHighlight=value.hideTodayHighlight||false;
         var isComelistNG=value.comelistNG||false;
+        var isComelistClickNG=value.comelistClickNG||false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -346,6 +347,7 @@ $(function(){
         $('#isHideTwitterPanel').prop("checked",isHideTwitterPanel);
         $('#isHideTodayHighlight').prop("checked",isHideTodayHighlight);
         $('#isComelistNG').prop("checked",isComelistNG);
+        $('#isComelistClickNG').prop("checked",isComelistClickNG);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -423,7 +425,8 @@ $(function(){
             "chTimetablePlaybutton":$('#isChTimetablePlaybutton').prop("checked"),
             "hideTwitterPanel":$('#isHideTwitterPanel').prop("checked"),
             "hideTodayHighlight":$('#isHideTodayHighlight').prop("checked"),
-            "comelistNG":$('#isComelistNG').prop("checked")
+            "comelistNG":$('#isComelistNG').prop("checked"),
+            "comelistClickNG":$('#isComelistClickNG').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
