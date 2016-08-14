@@ -77,6 +77,7 @@ var isChTimetableWeekend=false; //土日を着色する
 var isChTimetablePlaybutton=false; //番組表からnow-on-airに直接移動するためのリンク設置
 var isShowTwitterPanel=false; //「twitterで番組情報を受け取ろう」な左下パネル表示
 var isHideTodayHighlight=false; //ヘッダメニューの今日のみどころのポップアップ
+var isComelistNG=false;
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -181,6 +182,7 @@ getStorage(null, function (value) {
     isChTimetablePlaybutton=value.chTimetablePlaybutton||false;
     isHideTwitterPanel=value.hideTwitterPanel||false;
     isHideTodayHighlight=value.hideTodayHighlight||false;
+    isComelistNG=value.comelistNG||false;
 });
 
 var currentLocation = window.location.href;
@@ -1036,6 +1038,7 @@ function openOption(){
     $('#isChTimetablePlaybutton').prop("checked",isChTimetablePlaybutton);
     $('#isHideTwitterPanel').prop("checked",isHideTwitterPanel);
     $('#isHideTodayHighlitht').prop("checked",isHideTodayHighlight);
+    $('#isComelistNG').prop("checked",isComelistNG);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -1139,6 +1142,7 @@ console.log("delayset retry");
         $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
         document.getElementById('ComeMukouMask').addEventListener("click",comemukouClick);
     }
+    setTimeout(copycome,1000);
 console.log("delayset ok");
 }
 function volumecheck(){
@@ -1783,6 +1787,9 @@ function setSaveDisable(){
 function setPSaveNG(){
     fullNg = $("#fullNg").val();
     arrayFullNgMaker();
+    if(isComelistNG){
+        copycome();
+    }
     setStorage({
         "fullNg": fullNg
     },function(){
@@ -1890,11 +1897,12 @@ function setSaveClicked(){
 //    isChTimetablePlaybutton=$('#isChTimetablePlaybutton').prop("checked");
     isHideTwitterPanel=$('#isHideTwitterPanel').prop("checked");
     isHideTodayHighlight=$('#isHideTodayHighlight').prop("checked");
+    isComelistNG=$('#isComelistNG').prop("checked");
 
+    arrayFullNgMaker();
     onresize();
     setOptionHead();
     setOptionElement();
-    arrayFullNgMaker();
     pophideSelector(-1,0);
     optionHeightFix();
     var sm=parseInt($('#movieheight input[type="radio"][name="movieheight"]:checked').val());
@@ -2443,15 +2451,32 @@ console.log("setEX2 retry");
 }
 function isComeOpen(sw){
     if(sw===undefined){sw=0;}
+    var eo=EXcome;
+    var jo=$(eo);
+    var bs=jo.attr("aria-hidden");
+    var bb;
+    if(bs=="true"||bs=="false"){
+        bb=(bs=="false");
+    }else{
+        bb=jo.is('[class*="TVContainer__right-slide--shown___"]');
+    }
+    var bc=(eo.style.transform=="translateX(0px)");
+    var bd=(jo.offset().left<window.innerWidth);
     switch(sw){
         case 0:
-            return $(EXcome).is('[class*="TVContainer__right-slide--shown___"]');
+//            return $(EXcome).is('[class*="TVContainer__right-slide--shown___"]');
+            return bb;
             break;
         case 1:
-            return (EXcome.style.transform=="translateX(0px)");
+//            return (EXcome.style.transform=="translateX(0px)");
+            return bc;
             break;
         case 2:
-            return $(EXcome).is('[class*="TVContainer__right-slide--shown___"]')||(EXcome.style.transform=="translateX(0px)");
+//            return $(EXcome).is('[class*="TVContainer__right-slide--shown___"]')||(EXcome.style.transform=="translateX(0px)");
+            return bb||bc;
+            break;
+        case 3:
+            return bd;
             break;
         default:
     }
@@ -2464,18 +2489,33 @@ function isSlideOpen(){
 function isInfoOpen(sw){
 //sw 0:内部の開閉状態 1:cssの開閉 2:0or1 3:見た目の開閉
     if(sw===undefined){sw=0;}
+    var eo=EXinfo;
+    var jo=$(eo);
+    var bs=jo.attr("aria-hidden");
+    var bb;
+    if(bs=="true"||bs=="false"){
+        bb=(bs=="false");
+    }else{
+        bb=jo.is('[class*="TVContainer__right-slide--shown___"]');
+    }
+    var bc=(eo.style.transform=="translateX(0px)");
+    var bd=(jo.offset().left<window.innerWidth);
     switch(sw){
         case 0:
-            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]');
+//            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]');
+            return bb;
             break;
         case 1:
-            return (EXinfo.style.transform=="translateX(0px)");
+//            return (EXinfo.style.transform=="translateX(0px)");
+            return bc;
             break;
         case 2:
-            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')||(EXinfo.style.transform=="translateX(0px)");
+//            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')||(EXinfo.style.transform=="translateX(0px)");
+            return bb||bc;
             break;
         case 3:
-            return ($(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')&&EXinfo.style.transform!="translateX(100%)")||(EXinfo.style.transform=="translateX(0px)");
+//            return ($(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')&&EXinfo.style.transform!="translateX(100%)")||(EXinfo.style.transform=="translateX(0px)");
+            return bd;
             break;
         default:
     }
@@ -2483,18 +2523,33 @@ function isInfoOpen(sw){
 function isChliOpen(sw){
 //sw 0:shown 1:transform 2:両方
     if(sw===undefined){sw=0;}
+    var eo=EXchli.parentElement;
+    var jo=$(eo);
+    var bs=jo.attr("aria-hidden");
+    var bb;
+    if(bs=="true"||bs=="false"){
+        bb=(bs=="false");
+    }else{
+        bb=jo.is('[class*="TVContainer__right-slide--shown___"]');
+    }
+    var bc=(eo.style.transform=="translateX(0px)");
+    var bd=(jo.offset().left<window.innerWidth);
     switch(sw){
         case 0:
-            return $(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]');
+//            return $(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]');
+            return bb;
             break;
         case 1:
-            return (EXchli.parentElement.style.transform=="translateX(0px)");
+//            return (EXchli.parentElement.style.transform=="translateX(0px)");
+            return bc;
             break;
         case 2:
-            return $(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]')||(EXchli.parentElement.style.transform=="translateX(0px)");
+//            return $(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]')||(EXchli.parentElement.style.transform=="translateX(0px)");
+            return bb||bc;
             break;
         case 3:
-            return ($(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]')&&EXchli.parentElement.style.transform!="translateX(100%)")||(EXchli.parentElement.style.transform=="translateX(0px)");
+//            return ($(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]')&&EXchli.parentElement.style.transform!="translateX(100%)")||(EXchli.parentElement.style.transform=="translateX(0px)");
+            return bd;
             break;
         default:
     }
@@ -3386,6 +3441,7 @@ console.log("setOptionElement retry");
     }
 
 //    $(EXfootcome).css("pointer-events","auto");
+    copycome();
 console.log("setOptionElement ok");
 }
 function pophideSelector(sv,sw){
@@ -3875,6 +3931,166 @@ function fastEyecatching(retrycount){
         }
     }
 }
+function comehl(jo,hlsw){
+    var hlbc=$('#settcont').css("display")=="none"?commentBackColor:parseInt($("#commentBackColor").val());
+    var hlbt=$('#settcont').css("display")=="none"?commentBackTrans:parseInt($("#commentBackTrans").val());
+    switch(hlsw){
+        case 1:
+            jo.css("padding-left",((isCommentWide?8:15)-4)+"px")
+                .css("border-left","4px solid rgba(255,255,0,0.6)")
+                .css("transition","")
+            ;
+            break;
+        case 3:
+            jo.css("padding-left",((isCommentWide?8:15)-4)+"px")
+                .css("border-left","4px solid rgba(255,255,0,0.8)")
+                .css("transition","")
+            ;
+       case 2:
+            var p=0.3; //bの割合
+            var c=[255,255,0,255]; //yellow
+            var r=hlbc+Math.floor((c[0]-hlbc)*p);
+            var g=hlbc+Math.floor((c[1]-hlbc)*p);
+            var b=hlbc+Math.floor((c[2]-hlbc)*p);
+            var a=hlbt+Math.floor((c[3]-hlbt)*p);
+            jo.css("background-color","rgba("+r+","+g+","+b+","+(a/255)+")")
+                .css("transition","")
+            ;
+            break;
+        default:
+    }
+    setTimeout(function(jo){
+        for(var i=jo.length-1,j=0;i>=0;i--,j++){
+            switch(hlsw){
+                case 1:
+                    jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
+                        .css("transition","border-left-color 1s linear "+(3+0.02*j)+"s")
+                    ;
+                    break;
+                case 2:
+                    jo.eq(i).css("background-color","rgba("+hlbc+","+hlbc+","+hlbc+","+(hlbt/255)+")")
+                        .css("transition","background-color 1s linear "+(3+0.02*j)+"s")
+                    ;
+                    break;
+                case 3:
+                    jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
+                        .css("background-color","rgba("+hlbc+","+hlbc+","+hlbc+","+(hlbt/255)+")")
+                        .css("transition","border-left-color 1s linear "+(3+0.02*j)+"s,background-color 1s linear "+(2+0.02*j)+"s")
+                    ;
+                    break;
+                default:
+            }
+        }
+    },0,jo);
+}
+function copycome(d,hlsw){
+    if(EXcomelist===undefined){return;}
+    if(!isComelistNG){
+        $('#copycome').remove();
+        $(EXcomelist).parent().css("display","");
+        return;
+    }
+    var eo=EXcomelist;
+    var jo=$(eo);
+    if($('#copycome').length==0){
+        var t='<div id="copycome" class="'+jo.parent().attr("class")+'"><div id="copycomec">';
+        var eo=EXcomelist.firstElementChild;
+        if($(eo).is('[class^="styles__no-contents-text___"]')){return;}
+        var eco=$(eo).prop("class");
+        var em=eo.children[0];
+        var ecm=$(em).prop("class");
+        var et=eo.children[1];
+        var ect=$(et).prop("class");
+        for(var i=0;i<100;i++){
+            t+='<div class="'+eco+'"><p class="'+ecm+'"></p><p class="'+ect+'"></p></div>';
+        }
+        t+='</div></div>';
+        $(t).insertAfter(jo.parent());
+//EXcomelistをコピーしてそのすぐ後ろに追加した場合、copycomeをスクロールするとEXcomelistに既存コメントが重複して追加されていってしまう
+//なのでその親ごとコピーして回避した
+//空のdivがあるので今後の仕様変更がある可能性は高い
+        $(EXcomelist).parent().css("display","none");
+        d=undefined; //新規作成した場合は全コピー
+    }
+    var jc=$('#copycomec').children();
+    var ec=$('#copycomec')[0];
+    if(d<0||jo.children().is('[class^="styles__no-contents-text___"]')){ //全消去
+        jc.children().text("");
+    }else if(d>0){
+        //d件をNG処理して追加した後にcomehl
+        ma=[];
+        for(var i=0,e,m,t;i<d;i++){
+            e=EXcomelist.children[i];
+            m=e.children[0].textContent;
+            if (isComeDel&&m.length>0) {
+                for(var ngi=0;ngi<arFullNg.length;ngi++){
+                    if(arFullNg[ngi].test(m)){
+                    console.log("userNG matched(Comelist) text:" + m  + "ngword:" + arFullNg[ngi].toString())
+                        m="";
+                        break;
+                    }
+                }
+            }
+            if (isComeNg&&m.length>0) {
+                m = comeNG(m);
+            }
+            if(m.length>0){
+                t=e.children[1].textContent;
+                ma.push([m,t]);
+            }
+        }
+        if(ma.length>0){
+            for(var i=ec.childElementCount-1,e;(e=ec.children[i-ma.length]);i--){
+                m=e.children[0].textContent;
+//                t=e.children[1].textContent;
+                t="";
+                jc.eq(i).children().first().text(m)
+                    .css("width","100%")
+                    .next().text(t)
+                ;
+//全件コピーでない(毎度毎度同じNG処理をしたくない)ので投稿時刻が反映できない
+//なのでいっそ消して新着分のみを時刻表示とした
+            }
+            for(var i=0;i<ma.length;i++){
+                m=ma[i][0];
+                t=ma[i][1];
+                jc.eq(i).children().first().text(m)
+                    .css("width","")
+                    .next().text(t)
+                ;
+            }
+            if(hlsw>0){
+                comehl(jc.slice(0,ma.length),hlsw);
+            }
+        }
+    }else if(d===undefined){
+        //100件全てを上書き
+        for(var i=0,j=0,e,m,t;(e=EXcomelist.children[i]);i++){
+            m=e.children[0].textContent;
+            if (isComeDel&&m.length>0) {
+                for(var ngi=0;ngi<arFullNg.length;ngi++){
+                    if(arFullNg[ngi].test(m)){
+                    console.log("userNG matched(Comelist) text:" + m  + "ngword:" + arFullNg[ngi].toString())
+                        m="";
+                        break;
+                    }
+                }
+            }
+            if (isComeNg&&m.length>0) {
+                m = comeNG(m);
+            }
+            if(m.length>0){
+                t=e.children[1].textContent;
+                jc.eq(j).children().first().text(m)
+                    .css("width","")
+                    .next().text(t)
+                ;
+                j+=1;
+                if(j>=100){break;}
+            }
+        }
+    }
+}
 $(window).on('load', mainfunc);
 //URLによって実行内容を変更すべく各部を分離
 function mainfunc(){ //初回に一度実行しておけば後でURL部分が変わっても大丈夫なやつ
@@ -3969,58 +4185,10 @@ function onairBasefunc(){
                 }
                 //新着コメント強調 一時試用できるように、一時保存画面が開いている場合を考慮
                 var hlsw=$('#settcont').css("display")=="none"?highlightNewCome:parseInt($('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked').val());
-                if(hlsw>0){
-                    var jo=$(EXcomelist).children().slice(0,d);
-                    var hlbc=$('#settcont').css("display")=="none"?commentBackColor:parseInt($("#commentBackColor").val());
-                    var hlbt=$('#settcont').css("display")=="none"?commentBackTrans:parseInt($("#commentBackTrans").val());
-                    switch(hlsw){
-                        case 1:
-                            jo.css("padding-left",((isCommentWide?8:15)-4)+"px")
-                                .css("border-left","4px solid rgba(255,255,0,0.6)")
-                                .css("transition","")
-                            ;
-                            break;
-                        case 3:
-                            jo.css("padding-left",((isCommentWide?8:15)-4)+"px")
-                                .css("border-left","4px solid rgba(255,255,0,0.8)")
-                                .css("transition","")
-                            ;
-                        case 2:
-                            var p=0.3; //bの割合
-                            var c=[255,255,0,255]; //yellow
-                            var r=hlbc+Math.floor((c[0]-hlbc)*p);
-                            var g=hlbc+Math.floor((c[1]-hlbc)*p);
-                            var b=hlbc+Math.floor((c[2]-hlbc)*p);
-                            var a=hlbt+Math.floor((c[3]-hlbt)*p);
-                            jo.css("background-color","rgba("+r+","+g+","+b+","+(a/255)+")")
-                                .css("transition","")
-                            ;
-                            break;
-                        default:
-                    }
-                    setTimeout(function(jo){
-                        for(var i=jo.length-1,j=0;i>=0;i--,j++){
-                            switch(hlsw){
-                                case 1:
-                                    jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
-                                        .css("transition","border-left-color 1s linear "+(3+0.02*j)+"s")
-                                    ;
-                                    break;
-                                case 2:
-                                    jo.eq(i).css("background-color","rgba("+hlbc+","+hlbc+","+hlbc+","+(hlbt/255)+")")
-                                        .css("transition","background-color 1s linear "+(3+0.02*j)+"s")
-                                    ;
-                                    break;
-                                case 3:
-                                    jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
-                                        .css("background-color","rgba("+hlbc+","+hlbc+","+hlbc+","+(hlbt/255)+")")
-                                        .css("transition","border-left-color 1s linear "+(3+0.02*j)+"s,background-color 1s linear "+(2+0.02*j)+"s")
-                                    ;
-                                    break;
-                                default:
-                            }
-                        }
-                    },0,jo);
+                if(isComelistNG){
+                    copycome(d,hlsw); //copycome内からcomehlを実行
+                }else if(hlsw>0){
+                    comehl($(EXcomelist).children().slice(0,d),hlsw);
                 }
             }else if(comeListLen<commentNum){
                 commentNum=0;
@@ -4260,6 +4428,7 @@ function chkurl() {
         proEnd=new Date();
         proTitle="未取得";
         $('#tProtitle').text(proTitle);
+        $('#copycome').remove();
 
         checkUrlPattern(currentLocation);
     }
