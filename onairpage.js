@@ -4149,7 +4149,9 @@ function comecopy(){
             $('#closecopyotw').parent('a').on("click",closecotwclick);
             $('#textNG').on("click",appendTextNG);
         }else{
-            $('#copyotw').css("display","");
+            $('#copyotw').insertAfter(EXcomesendinp.parentElement) //#copyotw作成後に投稿ボタン等が生成された場合の順序修正
+                .css("display","")
+            ;
         }
         $(EXcomesendinp.parentElement).css("display","none");
         $(EXcomesend).css("padding-left","0px");
