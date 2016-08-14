@@ -8,13 +8,13 @@ if (typeof chrome === "undefined" || !chrome.extension) {
 
 var currentUpdateNotifyVersion = 6;//6は0.3.0の時
 var optionUrl = chrome.extension.getURL("option.html");
-var notifyContent = "最近追加された機能(デフォルト無効):NG設定を流れるコメントだけではなく右のコメント欄にも反映させられるようになりました。<br>必要に応じて有効にしてください→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a><br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。";
+var notifyContent = "最近追加された機能(デフォルト無効):<br>NG設定を流れるコメントだけではなく右のコメント欄にも反映させることも可能になりました。またコメント欄をクリックすると一時NGワードに簡単追加もできます。<br><b>両機能とも設定を変更しないと使えません</b>ので必要に応じて有効にしてください。(コメント欄関連設定にあります)→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a><br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。";
 
 function updateInfo(message) {
     var toastElem = $("<div class='toast' id='updateInfo'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
     setTimeout(function(){
         toastElem.fadeOut(10000);
-    },20000);
+    },30000);
 }
 chrome.storage.local.get("updateNotifyVer", function (value) {
     if (value.updateNotifyVer == undefined || value.updateNotifyVer < currentUpdateNotifyVersion) {
