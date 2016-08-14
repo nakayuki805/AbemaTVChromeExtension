@@ -4125,7 +4125,7 @@ function comecopy(){
         jo=$(EXcomelist);
     }
     var eo=jo[0];
-    var r=/rgba\((\d+), (\d+), (\d+), \d?(?:\.\d+)?\)/;
+    var r=/rgba?\((\d+), (\d+), (\d+)(, \d?(?:\.\d+)?)?\)/;
     var s="";
     for(var i=0,e,c,t;(e=eo.children[i]);i++){
         c=$(e.children[0]).css("color");
