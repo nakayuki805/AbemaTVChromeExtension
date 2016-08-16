@@ -701,6 +701,30 @@ function comeNG(prengcome){
     ngedcome = ngedcome.replace(/(...*?)\1*(...*?)(\1|\2){2,}/g,"$1$2");
     return ngedcome;
 }
+function comefilter(m){
+//putComeArrayとcopycomeで同じNG処理を実行するので分離
+    var n=m;
+    if (isComeNg&&m.length>0) {
+        n = comeNG(m);
+    }
+    if (isComeDel&&m.length>0) {
+        for(var ngi=0;ngi<arFullNg.length;ngi++){
+            if(arFullNg[ngi].test(m)){
+                console.log("userNG matched text:" + m + " ngword:" + arFullNg[ngi].toString())
+                m="";
+                break;
+            }else if(arFullNg[ngi].test(n)){
+                console.log("userNG matched text:" + n +"(ori:" + m + ") ngword:" + arFullNg[ngi].toString())
+                m="";
+                break;
+            }
+        }
+    }
+    if (isComeNg&&m.length>0) {
+        m = n;
+    }
+    return m;
+}
 function putComeArray(inp){
 //console.log("putComeArray");
 //console.log(inp);
@@ -787,30 +811,7 @@ function putComment(commentText,index,inmax) {
         }
         kakikomitxt="";
     }
-    var ngedCommentText=commentText;
-    if (isComeNg&&commentText.length>0) {
-        ngedCommentText = comeNG(commentText);
-    }
-    if (isComeDel&&commentText.length>0) {
-        //arFullNgがマッチしたコメントは流さない
-        for(var ngi=0;ngi<arFullNg.length;ngi++){
-//console.log("commentText="+commentText+",ngi="+ngi+",arFullNg["+ngi+"]="+arFullNg[ngi]);
-//            if(commentText.match(arFullNg[ngi])){
-            if(arFullNg[ngi].test(commentText)){
-                console.log("userNG matched text:" + commentText + " ngword:" + arFullNg[ngi].toString())
-//                return "";
-                commentText="";
-                break;
-            }else if(arFullNg[ngi].test(ngedCommentText)){
-                console.log("userNG matched text:" + ngedCommentText +"(ori:" + commentText+") ngword:" + arFullNg[ngi].toString())
-                commentText="";
-                break;
-            }
-        }
-    }
-    if (isComeNg&&commentText.length>0) {
-        commentText = ngedCommentText;
-    }
+    commentText=comefilter(commentText);
     var commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
     if(commentText.length>0){
         i=0;
@@ -1099,7 +1100,7 @@ function closeOption(){
     ;
     $(".rightshift").css("display","none");
     $(".leftshift").css("display","");
-    $(EXcomelist).children('div').css("background-color","") //基本色、新着強調
+    $(EXcomelist).add('#copycomec').children('div').css("background-color","") //基本色、新着強調
         .css("color","") //基本色
         .css("border-left","") //新着強調
         .css("padding-left","") //新着強調
@@ -4034,51 +4035,36 @@ function copycome(d,hlsw){
     var jc=$('#copycomec').children();
     var ec=$('#copycomec')[0];
     if(d<0||jo.children().is('[class^="styles__no-contents-text___"]')){ //全消去
+console.log("copycome allerase");
         jc.children().text("");
     }else if(d>0){
+//console.log("copycome append:"+d);
         //d件をNG処理して追加した後にcomehl
         ma=[];
         for(var i=0,e,m,n,t;i<d;i++){
             e=EXcomelist.children[i];
-            m=e.children[0].textContent;
-            n=m;
-            if (isComeNg&&m.length>0) {
-                n = comeNG(m);
-            }
-            if (isComeDel&&m.length>0) {
-                for(var ngi=0;ngi<arFullNg.length;ngi++){
-                    if(arFullNg[ngi].test(m)){
-                        console.log("userNG matched(Comelist) text:" + m + " ngword:" + arFullNg[ngi].toString())
-                        m="";
-                        break;
-                    }else if(arFullNg[ngi].test(n)){
-                        console.log("userNG matched(Comelist) text:" + n +"(ori:" + m + ") ngword:" + arFullNg[ngi].toString())
-                        m="";
-                        break;
-                    }
-                }
-            }
-            if (isComeNg&&m.length>0) {
-                m = n;
-            }
+            m=comefilter(e.children[0].textContent);
             if(m.length>0){
                 t=e.children[1].textContent;
                 ma.push([m,t]);
             }
         }
         if(ma.length>0){
-            for(var i=ec.childElementCount-1,e;(e=ec.children[i-ma.length]);i--){
-                m=e.children[0].textContent;
+            if(ma.length<=100){
+                for(var i=ec.childElementCount-1,e;(e=ec.children[i-ma.length]);i--){
+                    m=e.children[0].textContent;
 //                t=e.children[1].textContent;
-                t="";
-                jc.eq(i).children().first().text(m)
-                    .css("width","100%")
-                    .next().text(t)
-                ;
+                    t="";
+                    jc.eq(i).children().first().text(m)
+                        .css("width","100%")
+                        .next().text(t)
+                    ;
+                }
 //全件コピーでない(毎度毎度同じNG処理をしたくない)ので投稿時刻が反映できない
 //なのでいっそ消して新着分のみを時刻表示とした
             }
-            for(var i=0;i<ma.length;i++){
+            var malen=Math.min(ma.length,100);
+            for(var i=0;i<malen;i++){
                 m=ma[i][0];
                 t=ma[i][1];
                 jc.eq(i).children().first().text(m)
@@ -4091,6 +4077,7 @@ function copycome(d,hlsw){
             }
         }
     }else if(d===undefined){
+console.log("copycome fullcopy");
         //100件全てを上書き
         for(var i=0,j=0,e,m,t;(e=EXcomelist.children[i]);i++){
             m=e.children[0].textContent;
@@ -4156,13 +4143,25 @@ function comecopy(){
         $(EXcomesendinp.parentElement).css("display","none");
         $(EXcomesend).css("padding-left","0px");
         $('#copyot').val(s);
+        var c=$('#copyot').css("color");
+        $('#textNG').css("color",c)
+            .css("border-color",c)
+        ;
+        $('#closecopyotw').css("fill",c);
     }
 }
-function appendTextNG(){
-    $('#textNG').css("pointer-events","none")
-        .css("background-color","rgba(255,255,255,0.5)")
-    ;
-    var s=$('#copyot').val();
+function appendTextNG(ev,inpstr){
+//ev #textNGのclickの場合イベントが渡される
+//inpstr これ以外からNG追加する場合こっちに渡すようにする
+    var s;
+    if(inpstr===undefined){
+        $('#textNG').css("pointer-events","none")
+            .css("background-color",$('#textNG').css("color"))
+        ;
+        s=$('#copyot').val();
+    }else{
+        s=inpstr;
+    }
     var b=true;
     if(s.length>0){
         var spfullng = fullNg.split(/\r|\n|\r\n/);
@@ -4186,14 +4185,16 @@ function appendTextNG(){
             copycome();
         }
     }
-    var r=/rgba\((\d+), (\d+), (\d+), (\d?(?:\.\d+)?)\)/;
-    var c=$('#copyot').css("color");
-    if(r.test(c)){
-        var t=r.exec(c);
-        var d=b?0:255; //追加したら赤、追加しなかったら黄色
-        $('#copyot').css("color","rgba("+Math.floor(255-(255-(+t[1]))*0.4)+","+Math.floor(d-(d-(+t[2]))*0.4)+","+Math.floor((+t[3])*0.4)+","+t[4]+")");
+    if(inpstr===undefined){
+        var r=/rgba\((\d+), (\d+), (\d+), (\d?(?:\.\d+)?)\)/;
+        var c=$('#copyot').css("color");
+        if(r.test(c)){
+            var t=r.exec(c);
+            var d=b?0:255; //追加したら赤、追加しなかったら黄色
+            $('#copyot').css("color","rgba("+Math.floor(255-(255-(+t[1]))*0.4)+","+Math.floor(d-(d-(+t[2]))*0.4)+","+Math.floor((+t[3])*0.4)+","+t[4]+")");
+        }
+        setTimeout(copyotuncolor,800);
     }
-    setTimeout(copyotuncolor,800);
 }
 function copyotuncolor(){
     $('#copyot').css("color","")
@@ -4310,6 +4311,22 @@ function onairBasefunc(){
             }else if(comeListLen<commentNum){
                 commentNum=0;
                 comeHealth=100;
+            }
+        }
+        if(isComelistNG){
+            //copycomeできていない場合はここで全copyする
+            var b=true;
+            if($('#copycome').length>0){
+                //番組切替直後などでcopycomeはある場合は中身があるか数件チェックする
+                for(var i=0,c=$('#copycomec').children(),j;i<5;i++){
+                    if(c.eq(i).children().first().text().length>0){
+                        b=false;
+                        break;
+                    }
+                }
+            }
+            if(b){
+                copycome();
             }
         }
 
