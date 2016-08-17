@@ -177,7 +177,7 @@ var settingsList = [
             },
             {
                 "name": "movingCommentSecond",
-                "description": "↑のコメントの速さ(コメントが画面を流れる秒数)",
+                "description": "↑のコメントの速さ(コメントが画面を流れる秒数、小さいほど速い)",
                 "type": "number",
                 "isInstantChangable": true
             },
