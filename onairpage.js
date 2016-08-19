@@ -3996,6 +3996,12 @@ function comehl(jo,hlsw){
         case 7:
             c=[0,255,0,255]; //green+V
             break;
+        case 8:
+            c=[255,255,255,255]; //white
+            break;
+        case 9:
+            c=[0,0,0,255]; //black
+            break;
         default:
     }
     switch(hlsw){
