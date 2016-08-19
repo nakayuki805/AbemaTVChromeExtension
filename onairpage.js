@@ -79,6 +79,7 @@ var isShowTwitterPanel=false; //「twitterで番組情報を受け取ろう」�
 var isHideTodayHighlight=false; //ヘッダメニューの今日のみどころのポップアップ
 var isComelistNG=false; //コメント一覧の代わりにNG適用済一覧を表示する
 var isComelistClickNG=false; //コメント一覧のコメントクリックでNG一時追加用の入力欄を表示
+var highlightComeColor=0; //新着コメント強調色(黄)
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -185,6 +186,7 @@ getStorage(null, function (value) {
     isHideTodayHighlight=value.hideTodayHighlight||false;
     isComelistNG=value.comelistNG||false;
     isComelistClickNG=value.comelistClickNG||false;
+    highlightComeColor=(value.highlightComeColor!==undefined)?Number(value.highlightComeColor):highlightComeColor;
 });
 
 var currentLocation = window.location.href;
@@ -1051,6 +1053,7 @@ function openOption(){
     $('#isHideTodayHighlitht').prop("checked",isHideTodayHighlight);
     $('#isComelistNG').prop("checked",isComelistNG);
     $('#isComelistClickNG').prop("checked",isComelistClickNG);
+    $('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]').val([highlightComeColor]);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -1683,6 +1686,17 @@ console.log("createSettingWindow retry");
             .first().before('<span id="highlightdesc">新着コメントを少し強調する</span>')
         ;
     }
+    if($('#highlightCdesc').length==0){
+        $("#ihighlightComeColor").insertBefore("#isCommentWide")
+            .css("border","black solid 1px")
+            .children().css("display","flex")
+            .css("flex-direction","row")
+            .css("margin","1px 0px")
+            .css("padding-left","8px")
+            .children().css("margin-left","4px")
+            .first().before('<span id="highlightCdesc">↑で使用する色</span>')
+        ;
+    }
 console.log("createSettingWindow ok");
 }
 function movieResizeTypeChanged(){
@@ -1911,6 +1925,7 @@ function setSaveClicked(){
     isHideTodayHighlight=$('#isHideTodayHighlight').prop("checked");
     isComelistNG=$('#isComelistNG').prop("checked");
     isComelistClickNG=$('#isComelistClickNG').prop("checked");
+    highlightComeColor=parseInt($('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]:checked').val());
 
     arrayFullNgMaker();
     onresize();
@@ -3954,21 +3969,56 @@ function fastEyecatching(retrycount){
 function comehl(jo,hlsw){
     var hlbc=$('#settcont').css("display")=="none"?commentBackColor:parseInt($("#commentBackColor").val());
     var hlbt=$('#settcont').css("display")=="none"?commentBackTrans:parseInt($("#commentBackTrans").val());
+    var hlc=$('#settcont').css("display")=="none"?highlightComeColor:parseInt($('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]:checked').val());
+    var c;
+    switch(hlc){
+        case 0:
+            c=[255,255,0,255]; //yellow
+            break;
+        case 1:
+            c=[255,165,0,255]; //orange
+            break;
+        case 2:
+            c=[255,0,0,255]; //red
+            break;
+        case 3:
+            c=[255,192,203,255]; //pink
+            break;
+        case 4:
+            c=[255,0,255,255]; //purple+V
+            break;
+        case 5:
+            c=[0,0,255,255]; //blue
+            break;
+        case 6:
+            c=[0,255,255,255]; //aqua
+            break;
+        case 7:
+            c=[0,255,0,255]; //green+V
+            break;
+        case 8:
+            c=[255,255,255,255]; //white
+            break;
+        case 9:
+            c=[0,0,0,255]; //black
+            break;
+        default:
+    }
     switch(hlsw){
         case 1:
             jo.css("padding-left",((isCommentWide?8:15)-4)+"px")
-                .css("border-left","4px solid rgba(255,255,0,0.6)")
+                .css("border-left","4px solid rgba("+c[0]+","+c[1]+","+c[2]+",0.6)")
                 .css("transition","")
             ;
             break;
         case 3:
             jo.css("padding-left",((isCommentWide?8:15)-4)+"px")
-                .css("border-left","4px solid rgba(255,255,0,0.8)")
+                .css("border-left","4px solid rgba("+c[0]+","+c[1]+","+c[2]+",0.8)")
                 .css("transition","")
             ;
        case 2:
             var p=0.3; //bの割合
-            var c=[255,255,0,255]; //yellow
+//            var c=[255,255,0,255]; //yellow
             var r=hlbc+Math.floor((c[0]-hlbc)*p);
             var g=hlbc+Math.floor((c[1]-hlbc)*p);
             var b=hlbc+Math.floor((c[2]-hlbc)*p);
@@ -3983,7 +4033,7 @@ function comehl(jo,hlsw){
         for(var i=jo.length-1,j=0;i>=0;i--,j++){
             switch(hlsw){
                 case 1:
-                    jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
+                    jo.eq(i).css("border-left-color","rgba("+c[0]+","+c[1]+","+c[2]+",0)")
                         .css("transition","border-left-color 1s linear "+(3+0.02*j)+"s")
                     ;
                     break;
@@ -3993,7 +4043,7 @@ function comehl(jo,hlsw){
                     ;
                     break;
                 case 3:
-                    jo.eq(i).css("border-left-color","rgba(255,255,0,0)")
+                    jo.eq(i).css("border-left-color","rgba("+c[0]+","+c[1]+","+c[2]+",0)")
                         .css("background-color","rgba("+hlbc+","+hlbc+","+hlbc+","+(hlbt/255)+")")
                         .css("transition","border-left-color 1s linear "+(3+0.02*j)+"s,background-color 1s linear "+(2+0.02*j)+"s")
                     ;

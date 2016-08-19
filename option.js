@@ -176,6 +176,15 @@ $(function(){
         .children().css("margin-left","4px")
         .first().before("新着コメントを少し強調する")
     ;
+    $("#ihighlightComeColor").insertBefore("#isCommentWide")
+        .css("border","black solid 1px")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .css("padding-left","8px")
+        .children().css("margin-left","4px")
+        .first().before("↑で使用する色")
+    ;
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -247,6 +256,7 @@ $(function(){
         var isHideTodayHighlight=value.hideTodayHighlight||false;
         var isComelistNG=value.comelistNG||false;
         var isComelistClickNG=value.comelistClickNG||false;
+        var highlightComeColor=(value.highlightComeColor!==undefined)?Number(value.highlightComeColor):0;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -348,6 +358,7 @@ $(function(){
         $('#isHideTodayHighlight').prop("checked",isHideTodayHighlight);
         $('#isComelistNG').prop("checked",isComelistNG);
         $('#isComelistClickNG').prop("checked",isComelistClickNG);
+        $('#ihighlightComeColor [type="radio"][name="highlightComeColor"]').val([highlightComeColor]);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -426,7 +437,8 @@ $(function(){
             "hideTwitterPanel":$('#isHideTwitterPanel').prop("checked"),
             "hideTodayHighlight":$('#isHideTodayHighlight').prop("checked"),
             "comelistNG":$('#isComelistNG').prop("checked"),
-            "comelistClickNG":$('#isComelistClickNG').prop("checked")
+            "comelistClickNG":$('#isComelistClickNG').prop("checked"),
+            "highlightComeColor":$('#ihighlightComeColor [name="highlightComeColor"]:checked').val()
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
