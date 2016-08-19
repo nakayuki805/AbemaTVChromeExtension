@@ -380,6 +380,18 @@ var RadioSettingList = [
                 [2,"背景着色"],
                 [3,"両方"]
         ]]
+    },{
+        "name": "highlightComeColor",
+        "list":[[
+                [0,"黄"],
+                [1,"橙"],
+                [2,"赤"],
+                [3,"桃"],
+                [4,"紫"],
+                [5,"青"],
+                [6,"水"],
+                [7,"緑"]
+        ]]
     }
     ];
 var CMSettingList = [
