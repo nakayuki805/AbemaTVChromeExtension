@@ -176,6 +176,22 @@ $(function(){
         .children().css("margin-left","4px")
         .first().before("新着コメントを少し強調する")
     ;
+    $("#ihighlightComeColor").insertBefore("#isCommentWide")
+        .css("border","black solid 1px")
+        .children().css("display","flex")
+        .css("flex-direction","row")
+        .css("margin","1px 0px")
+        .css("padding-left","8px")
+        .children().css("margin-left","4px")
+        .first().before("↑の色")
+    ;
+    $('#highlightComePower').appendTo($("#ihighlightComeColor").children().first())
+        .prop("type","range")
+        .prop("max","100")
+        .prop("min","0")
+    ;
+    $('<span id="highlightPdesc" style="margin-right:4px;margin-left:12px;">背景濃さ: </span>').insertBefore("#highlightComePower");
+
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
         console.log(value.movingCommentLimit)
@@ -247,6 +263,8 @@ $(function(){
         var isHideTodayHighlight=value.hideTodayHighlight||false;
         var isComelistNG=value.comelistNG||false;
         var isComelistClickNG=value.comelistClickNG||false;
+        var highlightComeColor=(value.highlightComeColor!==undefined)?Number(value.highlightComeColor):0;
+        var highlightComePower=(value.highlightComePower!==undefined)?Number(value.highlightComePower):30;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -348,6 +366,9 @@ $(function(){
         $('#isHideTodayHighlight').prop("checked",isHideTodayHighlight);
         $('#isComelistNG').prop("checked",isComelistNG);
         $('#isComelistClickNG').prop("checked",isComelistClickNG);
+        $('#ihighlightComeColor [type="radio"][name="highlightComeColor"]').val([highlightComeColor]);
+        $("#highlightComePower").val(highlightComePower);
+        $('#highlightPdesc').text("背景濃さ:"+highlightComePower);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -426,7 +447,9 @@ $(function(){
             "hideTwitterPanel":$('#isHideTwitterPanel').prop("checked"),
             "hideTodayHighlight":$('#isHideTodayHighlight').prop("checked"),
             "comelistNG":$('#isComelistNG').prop("checked"),
-            "comelistClickNG":$('#isComelistClickNG').prop("checked")
+            "comelistClickNG":$('#isComelistClickNG').prop("checked"),
+            "highlightComeColor":$('#ihighlightComeColor [name="highlightComeColor"]:checked').val(),
+            "highlightComePower":$('#highlightComePower').val()
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
@@ -445,6 +468,9 @@ $(function(){
         $('#CommentColorSettings>div>span.desc').css("background-color","rgba("+p[0]+","+p[0]+","+p[0]+","+(p[1]/255)+")")
             .css("color","rgba("+p[2]+","+p[2]+","+p[2]+","+(p[3]/255)+")")
         ;
+    });
+    $('#highlightComePower').change(function(){
+        $('#highlightPdesc').text("背景濃さ"+$('#highlightComePower').val());
     });
     $('#alwaysShowPanelB').on("click",panelTableUpdateA);
     $('#openPanelwComeB').on("click",panelTableUpdateO);
