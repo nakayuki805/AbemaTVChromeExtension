@@ -3984,7 +3984,7 @@ function comehl(jo,hlsw){
     var hlbc=$('#settcont').css("display")=="none"?commentBackColor:parseInt($("#commentBackColor").val());
     var hlbt=$('#settcont').css("display")=="none"?commentBackTrans:parseInt($("#commentBackTrans").val());
     var hlc=$('#settcont').css("display")=="none"?highlightComeColor:parseInt($('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]:checked').val());
-    var hlp=parseInt($('#highlightComePower').val());
+    var hlp=$('#settcont').css("display")=="none"?highlightComePower:parseInt($("#highlightComePower").val());
     var c;
     switch(hlc){
         case 0:
