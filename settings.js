@@ -163,6 +163,12 @@ var settingsList = [
                 "description": "コメント一覧クリックでNG追加欄を表示(このNG追加欄による保存は一時的です。永久保存は設定画面へ。)",
                 "type": "boolean",
                 "isInstantChangable": true
+            },
+            {
+                "name": "highlightComePower",
+                "description": "新着コメント強調の強度",
+                "type": "number",
+                "isInstantChangable": true
             }
         ]
     },
@@ -379,6 +385,20 @@ var RadioSettingList = [
                 [1,"先頭マーク"],
                 [2,"背景着色"],
                 [3,"両方"]
+        ]]
+    },{
+        "name": "highlightComeColor",
+        "list":[[
+                [0,"黄"],
+                [1,"橙"],
+                [2,"赤"],
+                [3,"桃"],
+                [4,"紫"],
+                [5,"青"],
+                [6,"水"],
+                [7,"緑"],
+                [8,"白"],
+                [9,"黒"]
         ]]
     }
     ];
