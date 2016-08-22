@@ -185,7 +185,11 @@ $(function(){
         .children().css("margin-left","4px")
         .first().before("↑の色")
     ;
-    $('#highlightComePower').appendTo($("#ihighlightComeColor").children().first())
+    var c=$('#highlightComePower').parent().contents();
+    var jo=$('#highlightComePower');
+    var i=c.index(jo);
+    c.slice(i-2,i).remove();
+     $('#highlightComePower').appendTo($("#ihighlightComeColor").children().first())
         .prop("type","range")
         .prop("max","100")
         .prop("min","0")
@@ -265,6 +269,7 @@ $(function(){
         var isComelistClickNG=value.comelistClickNG||false;
         var highlightComeColor=(value.highlightComeColor!==undefined)?Number(value.highlightComeColor):0;
         var highlightComePower=(value.highlightComePower!==undefined)?Number(value.highlightComePower):30;
+        var isComeClickNGautoClose=value.comeClickNGautoClose||false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -369,6 +374,7 @@ $(function(){
         $('#ihighlightComeColor [type="radio"][name="highlightComeColor"]').val([highlightComeColor]);
         $("#highlightComePower").val(highlightComePower);
         $('#highlightPdesc').text("背景濃さ:"+highlightComePower);
+        $('#isComeClickNGautoClose').prop("checked",isComeClickNGautoClose);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -449,7 +455,8 @@ $(function(){
             "comelistNG":$('#isComelistNG').prop("checked"),
             "comelistClickNG":$('#isComelistClickNG').prop("checked"),
             "highlightComeColor":$('#ihighlightComeColor [name="highlightComeColor"]:checked').val(),
-            "highlightComePower":$('#highlightComePower').val()
+            "highlightComePower":$('#highlightComePower').val(),
+            "comeClickNGautoClose":$('#isComeClickNGautoClose').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
