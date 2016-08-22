@@ -81,6 +81,7 @@ var isComelistNG=false; //コメント一覧の代わりにNG適用済一覧を�
 var isComelistClickNG=false; //コメント一覧のコメントクリックでNG一時追加用の入力欄を表示
 var highlightComeColor=0; //新着コメント強調色 0:黄色
 var highlightComePower=30; //新着コメント強調の強度(不透明度)
+var isComeClickNGautoClose=false; //NG追加したらNG入力欄を自動的に閉じる
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -189,6 +190,7 @@ getStorage(null, function (value) {
     isComelistClickNG=value.comelistClickNG||false;
     highlightComeColor=(value.highlightComeColor!==undefined)?Number(value.highlightComeColor):highlightComeColor;
     highlightComePower=(value.highlightComePower!==undefined)?Number(value.highlightComePower):highlightComePower;
+    isComeClickNGautoClose=value.comeClickNGautoClose||false;
 });
 
 var currentLocation = window.location.href;
@@ -265,6 +267,7 @@ var popinput=[];
 var popacti=false; //脱出コマンドを受け付けるかどうか
 var isAutoReload=false; //コメ欄スクロール時に読込済コメントを自動反映するかどうか
 var onairRunning=false; //映像ページの定期実行のやつの複数起動防止用 setintervalの格納
+var comeNGmode=0; //NG追加先の分岐用
 
 function onairCleaner(){
 //console.log("onairCleaner");
@@ -1057,6 +1060,7 @@ function openOption(){
     $('#isComelistClickNG').prop("checked",isComelistClickNG);
     $('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]').val([highlightComeColor]);
     $('#highlightComePower').val(highlightComePower);
+    $('#isComeClickNGautoClose').prop("checked",isComeClickNGautoClose);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -1700,6 +1704,10 @@ console.log("createSettingWindow retry");
             .children().css("margin-left","4px")
             .first().before('<span id="highlightCdesc">↑の色</span>')
         ;
+        var c=$('#highlightComePower').parent().contents();
+        var jo=$('#highlightComePower');
+        var i=c.index(jo);
+        c.slice(i-2,i).remove();
         $('#highlightComePower').appendTo($("#ihighlightComeColor").children().first())
             .prop("type","range")
             .prop("max","100")
@@ -1940,6 +1948,7 @@ function setSaveClicked(){
     isComelistClickNG=$('#isComelistClickNG').prop("checked");
     highlightComeColor=parseInt($('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]:checked').val());
     highlightComePower=parseInt($('#highlightComePower').val());
+    isComeClickNGautoClose=$('#isComeClickNGautoClose').prop("checked");
 
     arrayFullNgMaker();
     onresize();
@@ -3797,6 +3806,7 @@ console.log("setOptionEvent retry");
     //ダブルクリックでフルスクリーン
     $(window).on("dblclick",function(){
 console.log("dblclick");
+        if(comeNGmode==2){return;}
         if(settings.isDblFullscreen){
             toggleFullscreen();
         }
@@ -4214,66 +4224,187 @@ function comecopy(){
         $(EXcomesendinp.parentElement).css("display","none");
         $(EXcomesend).css("padding-left","0px");
         $('#copyot').val(s);
-        var c=$('#copyot').css("color");
-        $('#textNG').css("color",c)
-            .css("border-color",c)
+        var co=$(EXcomesendinp).css("color");
+        $('#textNG').css("color",co)
+            .css("border-color",co)
         ;
-        $('#closecopyotw').css("fill",c);
+        $('#closecopyotw').css("fill",co);
+        paintcopyot(1);
+        paintcopyotw(1);
+    }
+    comeNGmode=0;
+}
+function paintcopyot(mode){
+//mode 0:色除去 1:青 2:黄 3:赤
+    if($('#copyot').length==0){return;}
+    if(mode==0){
+        $('#copyot').css("color","");
+        return;
+    }
+    var a=[0,0,0];
+    var p=1;
+    switch(mode){
+        case 1:
+            a=[0,0,255];
+            p=0.9;
+            break;
+        case 2:
+            a=[255,255,0];
+            p=0.6;
+            break;
+        case 3:
+            a=[255,0,0];
+            p=0.6;
+            break;
+        default:
+    }
+    var r=/rgba\( *(\d+), *(\d+), *(\d+), *(\d?(?:\.\d+)?) *\)/;
+    var c=$(EXcomesendinp).css("color");
+    if(r.test(c)){
+        var t=r.exec(c);
+        $('#copyot').css("color","rgba("+Math.floor(a[0]-(a[0]-(+t[1]))*p)+","+Math.floor(a[1]-(a[1]-(+t[2]))*p)+","+Math.floor(a[2]-(a[2]-(+t[3]))*p)+","+t[4]+")");
+    }
+}
+function paintcopyotw(mode){
+//mode 0:色除去 1:青 2:黄 3:赤
+    if($('#copyotw').length==0){return;}
+    if(mode==0){
+        $('#copyotw').css("background-color","");
+        return;
+    }
+    var a=[0,0,0];
+    var p=1;
+    switch(mode){
+        case 1:
+            a=[0,0,255];
+            p=0.8;
+            break;
+        case 2:
+            a=[255,255,0];
+            p=0.6;
+            break;
+        case 3:
+            a=[255,0,0];
+            p=0.6;
+            break;
+        default:
+    }
+    var r=/rgba\( *(\d+), *(\d+), *(\d+), *(\d?(?:\.\d+)?) *\)/;
+    var b=$(EXcomesendinp.parentElement).css("background-color");
+    if(r.test(b)){
+        var t=r.exec(b);
+        $('#copyotw').css("background-color","rgba("+Math.floor(a[0]-(a[0]-(+t[1]))*p)+","+Math.floor(a[1]-(a[1]-(+t[2]))*p)+","+Math.floor(a[2]-(a[2]-(+t[3]))*p)+","+t[4]+")");
     }
 }
 function appendTextNG(ev,inpstr){
 //ev #textNGのclickの場合イベントが渡される
 //inpstr これ以外からNG追加する場合こっちに渡すようにする
+    if(comeNGmode>0){
+        appendNGpermanent();
+        return;
+    }
+    comeNGmode=1;
     var s;
     if(inpstr===undefined){
-        $('#textNG').css("pointer-events","none")
-            .css("background-color",$('#textNG').css("color"))
-        ;
         s=$('#copyot').val();
     }else{
         s=inpstr;
     }
+    if(s.length==0){
+//空欄のままNGボタン押下時は何もしないように直ちに終了する
+        comeNGmode=0;
+        return;
+    }
     var b=true;
-    if(s.length>0){
-        var spfullng = fullNg.split(/\r|\n|\r\n/);
-        for(var ngi=0;ngi<spfullng.length;ngi++){
-            if(spfullng[ngi].length==0||spfullng[ngi].match(/^\/\//)){
+    var spfullng = fullNg.split(/\r|\n|\r\n/);
+    for(var ngi=0;ngi<spfullng.length;ngi++){
+        if(spfullng[ngi].length==0||spfullng[ngi].match(/^\/\//)){
+            continue;
+        }
+        spfullng[ngi]=spfullng[ngi].replace(/\/\/.*$/,""); //文中コメントを除去
+        if(s==spfullng[ngi]){
+            b=false;
+            break;
+        }
+    }
+    if(b){ //既存のfullNgに無い場合のみ追加
+        if(/\r|\n/.test(fullNg[fullNg.length-1])){
+            fullNg+=s;
+        }else{
+            fullNg+="\n"+s;
+        }
+        arrayFullNgMaker();
+        copycome();
+    }
+    if(inpstr===undefined){
+        if(isComeClickNGautoClose){
+            $('#closecopyotw').parent('a').css("pointer-events","none")
+                .css("visibility","hidden")
+            ;
+        }
+//NGボタン押下1回目(一時登録)は黄色
+        paintcopyot(2);
+        paintcopyotw(2);
+        setTimeout(copyotuncolor,800,1);
+    }
+}
+function appendNGpermanent(){
+console.log("appendNGpermanent");
+    comeNGmode=2;
+    $('#textNG').css("pointer-events","none");
+    var s=$('#copyot').val();
+    var b=true;
+    if(s.length==0){
+        comeNGmode=0;
+        return;
+    }
+//既存の(一時保存済の)fullNgをそのままsetStorageすると、一時保存したが永久保存しなかった単語まで永久保存されてしまうので、
+//storageから持ってきて追加、setStorageする
+    var PfullNg;
+    getStorage(null, function (value) {
+        PfullNg = value.fullNg || fullNg;
+        var spPfullng = PfullNg.split(/\r|\n|\r\n/);
+        for(var ngi=0;ngi<spPfullng.length;ngi++){
+            if(spPfullng[ngi].length==0||spPfullng[ngi].match(/^\/\//)){
                 continue;
             }
-            spfullng[ngi]=spfullng[ngi].replace(/\/\/.*$/,""); //文中コメントを除去
-            if(s==spfullng[ngi]){
+            spPfullng[ngi]=spPfullng[ngi].replace(/\/\/.*$/,""); //文中コメントを除去
+            if(s==spPfullng[ngi]){
                 b=false;
                 break;
             }
         }
-        if(b){ //既存のfullNgに無い場合のみ追加
-            if(/\r|\n/.test(fullNg[fullNg.length-1])){
-                fullNg+=s;
+        if(b){ //storage内のfullNgに無い場合のみ追加
+            if(/\r|\n/.test(PfullNg[fullNg.length-1])){
+                PfullNg+=s;
             }else{
-                fullNg+="\n"+s;
+                PfullNg+="\n"+s;
             }
-            arrayFullNgMaker();
-            copycome();
+            setStorage({
+                "fullNg": PfullNg
+            });
         }
-    }
-    if(inpstr===undefined){
-        var r=/rgba\((\d+), (\d+), (\d+), (\d?(?:\.\d+)?)\)/;
-        var c=$('#copyot').css("color");
-        if(r.test(c)){
-            var t=r.exec(c);
-            var d=b?0:255; //追加したら赤、追加しなかったら黄色
-            $('#copyot').css("color","rgba("+Math.floor(255-(255-(+t[1]))*0.4)+","+Math.floor(d-(d-(+t[2]))*0.4)+","+Math.floor((+t[3])*0.4)+","+t[4]+")");
-        }
-        setTimeout(copyotuncolor,800);
-    }
+    });
+//NGボタン押下2回目は赤
+    paintcopyot(3);
+    paintcopyotw(3);
+    setTimeout(copyotuncolor,800,2)
 }
-function copyotuncolor(){
-    $('#copyot').css("color","")
-        .val("");
-    ;
-    $('#textNG').css("background-color","")
-        .css("pointer-events","")
-    ;
+function copyotuncolor(mode){
+//mode 1:一時登録 2:permanent
+//一時登録から呼んだ時(mode=1)にcomeNGmodeが1でない場合、NGボタンを2度押したのでmode=1での実行は中止する
+    if(mode==1&&comeNGmode==2){return;}
+    comeNGmode=0;
+    $('#copyot').val("");
+    $('#textNG').css("pointer-events","");
+    paintcopyot(1);
+    paintcopyotw(1);
+    if(isComeClickNGautoClose){
+        $('#closecopyotw').parent('a').css("pointer-events","")
+            .css("visibility","")
+        ;
+        closecotwclick();
+    }
 }
 function closecotwclick(){
     $('#copyotw').css("display","none");
