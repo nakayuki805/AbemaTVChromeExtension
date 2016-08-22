@@ -270,6 +270,7 @@ $(function(){
         var highlightComeColor=(value.highlightComeColor!==undefined)?Number(value.highlightComeColor):0;
         var highlightComePower=(value.highlightComePower!==undefined)?Number(value.highlightComePower):30;
         var isComeClickNGautoClose=value.comeClickNGautoClose||false;
+        var isShareNGword=value.isShareNGword||false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -375,6 +376,7 @@ $(function(){
         $("#highlightComePower").val(highlightComePower);
         $('#highlightPdesc').text("背景濃さ:"+highlightComePower);
         $('#isComeClickNGautoClose').prop("checked",isComeClickNGautoClose);
+        $('#isShareNGword').prop("checked",isShareNGword);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -456,7 +458,8 @@ $(function(){
             "comelistClickNG":$('#isComelistClickNG').prop("checked"),
             "highlightComeColor":$('#ihighlightComeColor [name="highlightComeColor"]:checked').val(),
             "highlightComePower":$('#highlightComePower').val(),
-            "comeClickNGautoClose":$('#isComeClickNGautoClose').prop("checked")
+            "comeClickNGautoClose":$('#isComeClickNGautoClose').prop("checked"),
+            "isShareNGword":$('#isShareNGword').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

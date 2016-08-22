@@ -225,6 +225,12 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isShareNGword",
+                "description": "<a href='https://abema.nakayuki.net/ngshare/' target='_blank'>共有NGワード</a>を有効にする(現在実験的)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
                 "name": "kakikomiwait",
                 "description": "自分のコメントを流すまでの待ち時間(秒)マイナスだと流れない",
                 "type": "number",

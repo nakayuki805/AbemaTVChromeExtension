@@ -75,13 +75,14 @@ var isHidePopFresh=false; //左下に出るFresh宣伝
 var isChTimetableBreak=false; //チャンネル別番組表でタイトルの改行位置を変更する
 var isChTimetableWeekend=false; //土日を着色する
 var isChTimetablePlaybutton=false; //番組表からnow-on-airに直接移動するためのリンク設置
-var isShowTwitterPanel=false; //「twitterで番組情報を受け取ろう」な左下パネル表示
+var isHideTwitterPanel=false; //「twitterで番組情報を受け取ろう」な左下パネル非表示
 var isHideTodayHighlight=false; //ヘッダメニューの今日のみどころのポップアップ
 var isComelistNG=false; //コメント一覧の代わりにNG適用済一覧を表示する
 var isComelistClickNG=false; //コメント一覧のコメントクリックでNG一時追加用の入力欄を表示
 var highlightComeColor=0; //新着コメント強調色 0:黄色
 var highlightComePower=30; //新着コメント強調の強度(不透明度)
 var isComeClickNGautoClose=false; //NG追加したらNG入力欄を自動的に閉じる
+settings.isShareNGword=false;//共有NGワード
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -191,6 +192,7 @@ getStorage(null, function (value) {
     highlightComeColor=(value.highlightComeColor!==undefined)?Number(value.highlightComeColor):highlightComeColor;
     highlightComePower=(value.highlightComePower!==undefined)?Number(value.highlightComePower):highlightComePower;
     isComeClickNGautoClose=value.comeClickNGautoClose||false;
+    settings.isShareNGword=value.isShareNGword||false;
 });
 
 var currentLocation = window.location.href;
@@ -268,6 +270,20 @@ var popacti=false; //脱出コマンドを受け付けるかどうか
 var isAutoReload=false; //コメ欄スクロール時に読込済コメントを自動反映するかどうか
 var onairRunning=false; //映像ページの定期実行のやつの複数起動防止用 setintervalの格納
 var comeNGmode=0; //NG追加先の分岐用
+var NGshareURLbase = "https://abema.nakayuki.net/ngshare/v1/"; //共有NGワードAPI
+var APIclientName = "AbemaTVChromeExtension"; //↑のクライアント名
+var isNGwordShareInterval = false; //applySharedNGwordがinterval状態か
+var postedNGwords = []; //送信済みNGワード
+
+function hasArray(array, item){//配列arrayにitemが含まれているか
+    var hasFlg = false;
+    for(var hai=0; hai<array.length; hai++){
+        if(array[hai]===item){
+            hasFlg = true;
+        }
+    }
+    return hasFlg;
+}
 
 function onairCleaner(){
 //console.log("onairCleaner");
@@ -607,7 +623,7 @@ function onresize() {
             newwd = wd;
             newhg = wd*9/16;
         }
-        newleft=(wd-newwd)/2;
+        var newleft=(wd-newwd)/2;
         if(setBlacked[2]){
             newleft+=Math.floor(obj.width()*(100-CMsmall)/200);
         }
@@ -644,6 +660,43 @@ function toggleFullscreen() {
         fullscTarget.msRequestFullscreen && fullscTarget.msRequestFullscreen();
     }
 }
+function getChannelByURL(){
+    return (location.href.match(/https:\/\/abema\.tv\/now-on-air\/([-\w]+)/) || [null,null])[1];
+}
+function postShareNGword(word, channel){
+    word = word.toString();
+    if(!hasArray(postedNGwords,word)){
+        $.post(NGshareURLbase+"add.php",{
+            "client": APIclientName,
+            "channel": channel,
+            "word": word
+        }, function(result){
+            if(result.status=="success"){
+                console.log("postShareNGword success", word, channel);
+                postedNGwords.push(word);
+            }else{
+                console.log("postShareNGword failed", result);
+            }
+        });
+    }
+}
+function applySharedNGword(){
+    var channel = getChannelByURL();
+    isNGwordShareInterval = true;
+    $.get(NGshareURLbase+"sharedng/"+channel+".json",{"client": APIclientName}, function(data){
+        var sharedNGwords = data.ngword;
+        console.log("got shared NG words ", sharedNGwords);
+        for(var asni=0; asni<sharedNGwords.length; asni++){
+            appendTextNG(null,sharedNGwords[asni].word);
+            postedNGwords.push(sharedNGwords[asni].word);
+        }
+    })
+    if(channel){
+        setTimeout(applySharedNGword, 300000); //5分毎
+    }else{
+        isNGwordShareInterval = false;
+    }
+}
 function arrayFullNgMaker(){
     //自由入力欄からNG正規表現を生成
     arFullNg=[];
@@ -668,6 +721,9 @@ function arrayFullNgMaker(){
             spfullng[ngi]=new RegExp(spfullng[ngi].replace(/([.*+?^=!:${}()|[\]\/\\])/g,"\\$1"));
         }
         console.log(spfullng[ngi]);
+        if(settings.isShareNGword){
+            postShareNGword(spfullng[ngi], getChannelByURL());
+        }
         arFullNg.push(spfullng[ngi]);
     }
 }
@@ -1061,6 +1117,7 @@ function openOption(){
     $('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]').val([highlightComeColor]);
     $('#highlightComePower').val(highlightComePower);
     $('#isComeClickNGautoClose').prop("checked",isComeClickNGautoClose);
+    $('#isShareNGword').prop("checked",settings.isShareNGword);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -1949,12 +2006,14 @@ function setSaveClicked(){
     highlightComeColor=parseInt($('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]:checked').val());
     highlightComePower=parseInt($('#highlightComePower').val());
     isComeClickNGautoClose=$('#isComeClickNGautoClose').prop("checked");
+    settings.isShareNGword=$('#isShareNGword').prop("checked");
 
     arrayFullNgMaker();
     onresize();
     setOptionHead();
     setOptionElement();
     pophideSelector(-1,0);
+    if(settings.isShareNGword&&!isNGwordShareInterval){applySharedNGword();}
     optionHeightFix();
     var sm=parseInt($('#movieheight input[type="radio"][name="movieheight"]:checked').val());
     var sw=parseInt($('#windowheight input[type="radio"][name="windowheight"]:checked').val());
@@ -4121,7 +4180,7 @@ console.log("copycome allerase");
     }else if(d>0){
 //console.log("copycome append:"+d);
         //d件をNG処理して追加した後にcomehl
-        ma=[];
+        var ma=[];
         for(var i=0,e,m,n,t;i<d;i++){
             e=EXcomelist.children[i];
             m=comefilter(e.children[0].textContent);
@@ -4299,7 +4358,7 @@ function paintcopyotw(mode){
 function appendTextNG(ev,inpstr){
 //ev #textNGのclickの場合イベントが渡される
 //inpstr これ以外からNG追加する場合こっちに渡すようにする
-    if(comeNGmode>0){
+    if(ev && comeNGmode>0){
         appendNGpermanent();
         return;
     }
@@ -4433,6 +4492,9 @@ function onairfunc(){
         onairRunning=setInterval(onairBasefunc,1000);
     }
     setTimeout(onresize,5000);
+    if(settings.isShareNGword && !isNGwordShareInterval){
+        setTimeout(applySharedNGword, 1000);
+    }
 }
 //    setInterval(function () {
 function onairBasefunc(){
