@@ -271,6 +271,7 @@ $(function(){
         var highlightComePower=(value.highlightComePower!==undefined)?Number(value.highlightComePower):30;
         var isComeClickNGautoClose=value.comeClickNGautoClose||false;
         var isShareNGword=value.isShareNGword||false;
+        var isDelOldTime=value.delOldTime||false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -377,6 +378,7 @@ $(function(){
         $('#highlightPdesc').text("背景濃さ:"+highlightComePower);
         $('#isComeClickNGautoClose').prop("checked",isComeClickNGautoClose);
         $('#isShareNGword').prop("checked",isShareNGword);
+        $('#isDelOldTime').prop("checked",isDelOldTime);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -459,7 +461,8 @@ $(function(){
             "highlightComeColor":$('#ihighlightComeColor [name="highlightComeColor"]:checked').val(),
             "highlightComePower":$('#highlightComePower').val(),
             "comeClickNGautoClose":$('#isComeClickNGautoClose').prop("checked"),
-            "isShareNGword":$('#isShareNGword').prop("checked")
+            "isShareNGword":$('#isShareNGword').prop("checked"),
+            "delOldTime":$('#isDelOldTime').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
