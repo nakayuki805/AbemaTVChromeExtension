@@ -4166,7 +4166,7 @@ function copycome(d,hlsw){
         var et=eo.children[1];
         var ect=$(et).prop("class");
         for(var i=0;i<100;i++){
-            t+='<div class="'+eco+'"><p class="'+ecm+'"></p><p class="'+ect+'"></p><p style="display:none;"></p></div>';
+            t+='<div class="'+eco+'"><p class="'+ecm+'"></p><p class="'+ect+'"></p><p class="comeposttime usermade" style="display:none;"></p></div>';
         }
         t+='</div></div>';
         $(t).insertAfter(jo.parent());
@@ -4185,6 +4185,7 @@ function copycome(d,hlsw){
     if(d<0||jo.children().is('[class^="styles__no-contents-text___"]')){ //全消去
 console.log("copycome allerase");
         jc.children().text("");
+        $('.comeposttime').attr("name","");
     }else if(d>0){
 //console.log("copycome append:"+d);
         //d件をNG処理して追加した後にcomehl
