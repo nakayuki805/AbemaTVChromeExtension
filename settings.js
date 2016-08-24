@@ -154,7 +154,14 @@ var settingsList = [
             },
             {
                 "name": "isComelistNG",
-                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
+//                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
+                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで<s>、投稿時刻は新着のみ表示</s>となります。)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isDelOldTime",
+                "description": "↑で各コメントの投稿時刻の表示を新着のみとし、古いコメントの投稿時刻は非表示にする。",
                 "type": "boolean",
                 "isInstantChangable": true
             },

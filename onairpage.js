@@ -83,6 +83,7 @@ var highlightComeColor=0; //新着コメント強調色 0:黄色
 var highlightComePower=30; //新着コメント強調の強度(不透明度)
 var isComeClickNGautoClose=false; //NG追加したらNG入力欄を自動的に閉じる
 settings.isShareNGword=false;//共有NGワード
+var isDelOldTime=false; //NG適用コメ一覧から古いコメの書込時刻を削除する
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -193,6 +194,7 @@ getStorage(null, function (value) {
     highlightComePower=(value.highlightComePower!==undefined)?Number(value.highlightComePower):highlightComePower;
     isComeClickNGautoClose=value.comeClickNGautoClose||false;
     settings.isShareNGword=value.isShareNGword||false;
+    isDelOldTime=value.delOldTime||false;
 });
 
 var currentLocation = window.location.href;
@@ -1118,6 +1120,7 @@ function openOption(){
     $('#highlightComePower').val(highlightComePower);
     $('#isComeClickNGautoClose').prop("checked",isComeClickNGautoClose);
     $('#isShareNGword').prop("checked",settings.isShareNGword);
+    $('#isDelOldTime').prop("checked",isDelOldTime);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -2007,6 +2010,7 @@ function setSaveClicked(){
     highlightComePower=parseInt($('#highlightComePower').val());
     isComeClickNGautoClose=$('#isComeClickNGautoClose').prop("checked");
     settings.isShareNGword=$('#isShareNGword').prop("checked");
+    isDelOldTime=$('#isDelOldTime').prop("checked");
 
     arrayFullNgMaker();
     onresize();
@@ -4162,7 +4166,7 @@ function copycome(d,hlsw){
         var et=eo.children[1];
         var ect=$(et).prop("class");
         for(var i=0;i<100;i++){
-            t+='<div class="'+eco+'"><p class="'+ecm+'"></p><p class="'+ect+'"></p></div>';
+            t+='<div class="'+eco+'"><p class="'+ecm+'"></p><p class="'+ect+'"></p><p class="comeposttime usermade" style="display:none;"></p></div>';
         }
         t+='</div></div>';
         $(t).insertAfter(jo.parent());
@@ -4174,9 +4178,14 @@ function copycome(d,hlsw){
     }
     var jc=$('#copycomec').children();
     var ec=$('#copycomec')[0];
+    var nt=Date.now();
+    var rn=/^今$/;
+    var rs=/^(\d+) *秒前$/;
+    var rm=/^(\d+) *分前$/;
     if(d<0||jo.children().is('[class^="styles__no-contents-text___"]')){ //全消去
 console.log("copycome allerase");
         jc.children().text("");
+        $('.comeposttime').attr("name","");
     }else if(d>0){
 //console.log("copycome append:"+d);
         //d件をNG処理して追加した後にcomehl
@@ -4191,25 +4200,49 @@ console.log("copycome allerase");
         }
         if(ma.length>0){
             if(ma.length<=100){
-                for(var i=ec.childElementCount-1,e;(e=ec.children[i-ma.length]);i--){
+                for(var i=ec.childElementCount-1,e,m,t,n,d,s;(e=ec.children[i-ma.length]);i--){
                     m=e.children[0].textContent;
-//                t=e.children[1].textContent;
-                    t="";
-                    jc.eq(i).children().first().text(m)
-                        .css("width","100%")
-                        .next().text(t)
-                    ;
+                    if(isDelOldTime){
+                        t="";
+                        jc.eq(i).children().first().text(m)
+                            .css("width","100%")
+                            .next().text(t)
+                        ;
+                    }else{
+                        jc.eq(i).children().first().text(m)
+                            .css("width","")
+                        ;
+                        n=e.children[2].getAttribute("name");
+                        if(/^t\d+$/.test(n)){
+                            d=+(n.substr(1));
+                            s=Math.floor((nt-d)/1000);
+                            if(s<60){
+                                t=s+"秒前";
+                            }else if(s>=60){
+                                t=Math.floor(s/60)+"分前";
+                            }
+                            jc.eq(i).children().eq(1).text(t)
+                                .next().attr("name",n);
+                            ;
+                        }
+                    }
                 }
-//全件コピーでない(毎度毎度同じNG処理をしたくない)ので投稿時刻が反映できない
-//なのでいっそ消して新着分のみを時刻表示とした
             }
             var malen=Math.min(ma.length,100);
-            for(var i=0;i<malen;i++){
+            for(var i=0,m,t,d;i<malen;i++){
                 m=ma[i][0];
                 t=ma[i][1];
+                if(rn.test(t)){
+                    d=nt;
+                }else if(rs.test(t)){
+                    d=nt-(+rs.exec(t)[1])*1000;
+                }else if(rm.test(t)){
+                    d=nt-(+rm.exec(t)[1])*60000;
+                }
                 jc.eq(i).children().first().text(m)
                     .css("width","")
                     .next().text(t)
+                    .next().attr("name","t"+d)
                 ;
             }
             if(hlsw>0){
@@ -4219,25 +4252,21 @@ console.log("copycome allerase");
     }else if(d===undefined){
 console.log("copycome fullcopy");
         //100件全てを上書き
-        for(var i=0,j=0,e,m,t;(e=EXcomelist.children[i]);i++){
-            m=e.children[0].textContent;
-            if (isComeDel&&m.length>0) {
-                for(var ngi=0;ngi<arFullNg.length;ngi++){
-                    if(arFullNg[ngi].test(m)){
-                    console.log("userNG matched(Comelist) text:" + m  + "ngword:" + arFullNg[ngi].toString())
-                        m="";
-                        break;
-                    }
-                }
-            }
-            if (isComeNg&&m.length>0) {
-                m = comeNG(m);
-            }
+        for(var i=0,j=0,e,m,t,d;(e=EXcomelist.children[i]);i++){
+            m=comefilter(e.children[0].textContent);
             if(m.length>0){
                 t=e.children[1].textContent;
+                if(rn.test(t)){
+                    d=nt;
+                }else if(rs.test(t)){
+                    d=nt-(+rs.exec(t)[1])*1000;
+                }else if(rm.test(t)){
+                    d=nt-(+rm.exec(t)[1])*60000;
+                }
                 jc.eq(j).children().first().text(m)
                     .css("width","")
                     .next().text(t)
+                    .next().attr("name","t"+d)
                 ;
                 j+=1;
                 if(j>=100){break;}
