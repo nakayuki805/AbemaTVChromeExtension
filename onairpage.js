@@ -689,8 +689,8 @@ function applySharedNGword(){
         var sharedNGwords = data.ngword;
         console.log("got shared NG words ", sharedNGwords);
         for(var asni=0; asni<sharedNGwords.length; asni++){
-            appendTextNG(null,sharedNGwords[asni].word);
             postedNGwords.push(sharedNGwords[asni].word);
+            appendTextNG(null,sharedNGwords[asni].word);
         }
     })
     if(channel){
