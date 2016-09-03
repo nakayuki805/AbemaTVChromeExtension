@@ -1277,8 +1277,10 @@ function optionStatsUpdate(outflg){
         var oww=window.innerWidth;
         var owh=window.innerHeight;
         var opw=oww-omw;
-        var opb=Math.floor((owh-omh)/2);
-        var opt=owh-omh-opb;
+//        var opb=Math.floor((owh-omh)/2);
+//        var opt=owh-omh-opb;
+        var opt=jp.offset().top;
+        var opb=owh-omh-opt;
         var odes="";
         var ndes="";
 //resized
@@ -1342,8 +1344,10 @@ function optionStatsUpdate(outflg){
                         rnpw=0;
                     }
                 }else{
-                    npb=Math.floor((owh-nmh)/2);
-                    npt=owh-nmh-npb;
+//                    npb=Math.floor((owh-nmh)/2);
+//                    npt=owh-nmh-npb;
+                    npt=opt;
+                    npb=owh-nmh-npt;
                 }
                 break;
             case 1: //映像の縦長さに合わせる
@@ -1366,8 +1370,8 @@ function optionStatsUpdate(outflg){
 //                    rnpb=64;
 //                    rnpt=64;
                 }else{
-                    npb=64;
-                    npt=64;
+                    npb=61;
+                    npt=44;
                 }
                 break;
             case 3: //現在の空きを維持
