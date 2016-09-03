@@ -10,26 +10,33 @@ var settingsList = [
             {
                 "name": "isResizeScreen",
                 //        "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
-                "description": "映像をウィンドウに合わせてリサイズ、映像の位置を上に詰める (映像がウィンドウ外にはみ出なくなり、コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
+//                "description": "映像をウィンドウに合わせてリサイズ、映像の位置を上に詰める (映像がウィンドウ外にはみ出なくなり、コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
+                "description": "映像をウィンドウに合わせてリサイズ (映像がウィンドウ外にはみ出なくなり、コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isMovieSpacingZeroTop",
+                "description": "映像の上下位置を上に詰める",
                 "type": "boolean",
                 "isInstantChangable": true
             },
             {
                 "name": "isResizeSpacing",
-                "description": "↑で映像の上側の余白をメニュー分だけ空ける",
+                "description": "映像の上下位置を上に詰めるが、メニューの分だけ少し空ける",
                 "type": "boolean",
                 "isInstantChangable": true
             },
-            {
-                //        "name": "isMovieResize",
-                "name": "isMovieMaximize",
-                //        "description": "映像を枠に合わせて縮小する",
-                //        "description": "映像の横長さを最大に固定する",
-                //        "description": "映像の縦横長さを最大で固定する",
-                "description": "映像をウィンドウに合わせてリサイズ、映像の位置は画面中央 (〃)",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
+//            {
+//                //        "name": "isMovieResize",
+//                "name": "isMovieMaximize",
+//                //        "description": "映像を枠に合わせて縮小する",
+//                //        "description": "映像の横長さを最大に固定する",
+//                //        "description": "映像の縦横長さを最大で固定する",
+//                "description": "映像をウィンドウに合わせてリサイズ、映像の位置は画面中央 (〃)",
+//                "type": "boolean",
+//                "isInstantChangable": true
+//            },
             {
                 "name": "isDblFullscreen",
                 "description": "<s>ダブルクリックで全画面表示に切り替え＆全画面ボタンをF11相当のフルスクリーンに割り当て(コメント欄を表示したまま全画面にできます。)</s>※現在うまくフルスクリーン表示できません。かわりにF11キーを使用してください>",
@@ -247,6 +254,12 @@ var settingsList = [
                 "name": "comeMovingAreaTrim",
                 "description": "コメントを流す領域の横幅を、ウィンドウ全体でなく映像の横幅に合わせる",
                 "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "comeFontsize",
+                "description": "流れるコメントの文字の大きさ(px)",
+                "type": "number",
                 "isInstantChangable": true
             }
         ]
