@@ -13,6 +13,7 @@ chrome.runtime.sendMessage(req, function(response) {console.log(response);})
 if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
+var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
 
 //通知
 chrome.alarms.onAlarm.addListener(function(alarm) {
@@ -186,3 +187,43 @@ chrome.runtime.onMessageExternal.addListener(function(r){
  if(r.name!="bgsend"){return;}
  chrome.tabs.sendMessage(r.tab,{name:r.name,type:r.type,value:r.value});
 });
+
+//コンテキストメニュー
+function putContextMenu(){
+    chrome.contextMenus.create({
+        "title": "「%s」をコメントNGワードに追加",
+        "type": "normal",
+        "contexts": ["selection"],
+        "documentUrlPatterns": ["https://abema.tv/now-on-air/*"],
+        "id": "addNGwordMenu"
+    });
+    chrome.contextMenus.create({
+        "title": "一時追加",
+        "type": "normal",
+        "contexts": ["selection"],
+        "documentUrlPatterns": ["https://abema.tv/now-on-air/*"],
+        "parentId": "addNGwordMenu",
+        "id": "addNGwordMenuTemporary"
+    });
+    chrome.contextMenus.create({
+        "title": "永久追加",
+        "type": "normal",
+        "contexts": ["selection"],
+        "documentUrlPatterns": ["https://abema.tv/now-on-air/*"],
+        "parentId": "addNGwordMenu",
+        "id": "addNGwordMenuPermanent"
+    });
+}
+function onContextMenuClick(info, tab){
+    if(info.menuItemId.indexOf("addNGwordMenu")===0){
+        var word = info.selectionText;
+        var isPermanent = info.menuItemId=="addNGwordMenuPermanent";
+        chrome.tabs.sendMessage(tab.id,{"name": "addNGword", "word": word, "isPermanent": isPermanent});
+    }
+}
+chrome.contextMenus.onClicked.addListener(onContextMenuClick);
+if(isFirefox){
+    putContextMenu();
+}else{
+    chrome.runtime.onInstalled.addListener(putContextMenu);
+}

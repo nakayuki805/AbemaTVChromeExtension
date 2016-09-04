@@ -280,6 +280,7 @@ var NGshareURLbase = "https://abema.nakayuki.net/ngshare/v1/"; //共有NGワー�
 var APIclientName = "AbemaTVChromeExtension"; //↑のクライアント名
 var isNGwordShareInterval = false; //applySharedNGwordがinterval状態か
 var postedNGwords = []; //送信済みNGワード
+var isComelistMouseDown = false;
 
 function hasArray(array, item){//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -4194,6 +4195,7 @@ function comehl(jo,hlsw){
     },0,jo);
 }
 function copycome(d,hlsw){
+    if(isComelistMouseDown){return;}//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
     if(EXcomelist===undefined){return;}
     if(!isComelistNG){
         $('#copycome').remove();
@@ -4221,6 +4223,9 @@ function copycome(d,hlsw){
 //空のdivがあるので今後の仕様変更がある可能性は高い
         $(EXcomelist).parent().css("display","none");
         d=undefined; //新規作成した場合は全コピー
+        //コメ欄でマウスが押されているか
+        $('#copycome').mousedown(function(e){if(e.button!=2){isComelistMouseDown=true;}});//右クリックには反応しない
+        $('#copycome').mouseup(function(){setTimeout(function(){isComelistMouseDown=false;},3000)});//選択し終わってから右クリまで3秒の猶予
     }
     var jc=$('#copycomec').children();
     var ec=$('#copycomec')[0];
@@ -4322,6 +4327,7 @@ console.log("copycome fullcopy");
         commentNum = EXcomelist.childElementCount;
     }
 }
+// コメ欄クリック時に呼び出され、NGワード追加画面表示
 function comecopy(){
     if(!isComelistClickNG){return;}
     var jo=$('#copycomec');
@@ -4484,19 +4490,11 @@ function appendTextNG(ev,inpstr){
         setTimeout(copyotuncolor,800,1);
     }
 }
-function appendNGpermanent(){
-console.log("appendNGpermanent");
-    comeNGmode=2;
-    $('#textNG').css("pointer-events","none");
-    var s=$('#copyot').val();
-    var b=true;
-    if(s.length==0){
-        comeNGmode=0;
-        return;
-    }
-//既存の(一時保存済の)fullNgをそのままsetStorageすると、一時保存したが永久保存しなかった単語まで永久保存されてしまうので、
-//storageから持ってきて追加、setStorageする
+function addPermanentNG(word){
+    //既存の(一時保存済の)fullNgをそのままsetStorageすると、一時保存したが永久保存しなかった単語まで永久保存されてしまうので、
+    //storageから持ってきて追加、setStorageする
     var PfullNg;
+    var b=true;
     getStorage(null, function (value) {
         PfullNg = value.fullNg || fullNg;
         var spPfullng = PfullNg.split(/\r|\n|\r\n/);
@@ -4505,22 +4503,35 @@ console.log("appendNGpermanent");
                 continue;
             }
             spPfullng[ngi]=spPfullng[ngi].replace(/\/\/.*$/,""); //文中コメントを除去
-            if(s==spPfullng[ngi]){
+            if(word==spPfullng[ngi]){
                 b=false;
                 break;
             }
         }
         if(b){ //storage内のfullNgに無い場合のみ追加
             if(/\r|\n/.test(PfullNg[fullNg.length-1])){
-                PfullNg+=s;
+                PfullNg+=word;
             }else{
-                PfullNg+="\n"+s;
+                PfullNg+="\n"+word;
             }
             setStorage({
                 "fullNg": PfullNg
             });
         }
     });
+}
+function appendNGpermanent(){
+console.log("appendNGpermanent");
+    comeNGmode=2;
+    $('#textNG').css("pointer-events","none");
+    var s=$('#copyot').val();
+    if(s.length==0){
+        comeNGmode=0;
+        return;
+    }
+    //storageへの追加部を外部関数へ
+    addPermanentNG(s);
+
 //NGボタン押下2回目は赤
     paintcopyot(3);
     paintcopyotw(3);
@@ -5042,67 +5053,75 @@ function putNotifyButton(url){
 
 chrome.runtime.onMessage.addListener(function(r){
 //console.log(r);
-    if(r.name!="bgsend"){return;}
-    if(r.type==0){
-//console.log("ts,"+r.value+"p");
-        bginfo[0]=r.value;
-        if(bginfo[2]!=0){
-            if(bginfo[2]==-1){
-//console.log("tryCM bginfo[2]= -1");
-                setTimeout(tryCM,500);
-            }
-            if(bginfo[1].length>0&&bginfo[1][2]-bginfo[1][1]>5){
-//console.log("bginfo[2]= "+bginfo[2]+" -> 3");
-                bginfo[2]=3;
-            }
-        }
-    }else if(r.type==1){
-//console.log("nowcm#"+r.value[0]+","+r.value[1]+"/"+r.value[2]);
-        if(r.value[1]<r.value[2]){
-            var b=false;
-            if(bginfo[1].length==0){
-                b=true;
-            }else{
-                if(r.value[0]==bginfo[1][0]&&r.value[1]>bginfo[1][1]){
-                    b=true;
-                }else if(r.value[0]>bginfo[1][0]){
-                    b=true;
-                }
-            }
-            if(b){
-                bginfo[1]=[r.value[0],r.value[1],r.value[2]];
-            }
-            if(bginfo[2]<=1){
-//console.log("bginfo[2]= "+bginfo[2]+" -> 2");
-                bginfo[2]=2;
-                if(cmblockcd*100%10!=3){
-                    cmblockcd=0;
-                    startCM();
-                }
-            }
-        }else if(r.value[1]==r.value[2]){
-            if(bginfo[1].length>0&&r.value[0]==bginfo[1][0]){
-                bginfo[1]=[];
-            }
-            if(bginfo[1].length==0){
-                if(bginfo[2]==3){
-//console.log("bginfo[2]= 3 -> 0");
-                    bginfo[2]=0;
-                    if(cmblockcd*100%10!=-3){
-                        cmblockcd=0;
-                        endCM();
-                    }
-                }else{
-//console.log("tryCM bginfo[2]= "+bginfo[2]);
+    if(r.name=="bgsend"){
+        if(r.type==0){
+    //console.log("ts,"+r.value+"p");
+            bginfo[0]=r.value;
+            if(bginfo[2]!=0){
+                if(bginfo[2]==-1){
+    //console.log("tryCM bginfo[2]= -1");
                     setTimeout(tryCM,500);
                 }
+                if(bginfo[1].length>0&&bginfo[1][2]-bginfo[1][1]>5){
+    //console.log("bginfo[2]= "+bginfo[2]+" -> 3");
+                    bginfo[2]=3;
+                }
+            }
+        }else if(r.type==1){
+    //console.log("nowcm#"+r.value[0]+","+r.value[1]+"/"+r.value[2]);
+            if(r.value[1]<r.value[2]){
+                var b=false;
+                if(bginfo[1].length==0){
+                    b=true;
+                }else{
+                    if(r.value[0]==bginfo[1][0]&&r.value[1]>bginfo[1][1]){
+                        b=true;
+                    }else if(r.value[0]>bginfo[1][0]){
+                        b=true;
+                    }
+                }
+                if(b){
+                    bginfo[1]=[r.value[0],r.value[1],r.value[2]];
+                }
+                if(bginfo[2]<=1){
+    //console.log("bginfo[2]= "+bginfo[2]+" -> 2");
+                    bginfo[2]=2;
+                    if(cmblockcd*100%10!=3){
+                        cmblockcd=0;
+                        startCM();
+                    }
+                }
+            }else if(r.value[1]==r.value[2]){
+                if(bginfo[1].length>0&&r.value[0]==bginfo[1][0]){
+                    bginfo[1]=[];
+                }
+                if(bginfo[1].length==0){
+                    if(bginfo[2]==3){
+    //console.log("bginfo[2]= 3 -> 0");
+                        bginfo[2]=0;
+                        if(cmblockcd*100%10!=-3){
+                            cmblockcd=0;
+                            endCM();
+                        }
+                    }else{
+    //console.log("tryCM bginfo[2]= "+bginfo[2]);
+                        setTimeout(tryCM,500);
+                    }
+                }
+            }
+        }else if(r.type==2){
+    //console.log("precm");
+            if(bginfo[1].length==0){
+    //console.log("bginfo[2]= "+bginfo[2]+" -> 1");
+                bginfo[2]=1;
             }
         }
-    }else if(r.type==2){
-//console.log("precm");
-        if(bginfo[1].length==0){
-//console.log("bginfo[2]= "+bginfo[2]+" -> 1");
-            bginfo[2]=1;
+    }else if(r.name=="addNGword"){
+        appendTextNG(null,r.word);
+        if(r.isPermanent){
+            addPermanentNG(r.word);
         }
+    }else{
+        console.warn("message not match")
     }
 });
