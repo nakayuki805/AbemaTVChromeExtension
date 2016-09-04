@@ -8,13 +8,13 @@ if (typeof chrome === "undefined" || !chrome.extension) {
 
 var currentUpdateNotifyVersion = 6;//6は0.3.0の時
 var optionUrl = chrome.extension.getURL("option.html");
-var notifyContent = "最近追加された機能(デフォルト無効):<br>共有NGワード機能追加(実験的に共有開始)<br>右コメント欄のクリック追加で永久保存や自動で追加欄を閉じれるようになりました。<br>v0.3.0よりNG設定を流れるコメントだけではなく右のコメント欄にも反映させることも可能になりました。<br><b>設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a><br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。";
+var notifyContent = "最近追加された機能(※デフォルト無効):<br>右コメ欄NG反映時、コメントを選択して右クリックでNGワード追加できるようになりました。<br>流れるコメントのフォントサイズを変えれるようになりました。<br>映像リサイズオプションが変更されました。<br>v0.4.0より共有NGワードに対応しました。※<br>v0.3.0よりNG設定を流れるコメントだけではなく右のコメント欄にも反映させることも可能になりました。※<br><b>設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a><br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。";
 
 function updateInfo(message) {
     var toastElem = $("<div class='toast' id='updateInfo'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
     setTimeout(function(){
         toastElem.fadeOut(10000);
-    },30000);
+    },50000);
 }
 chrome.storage.local.get("updateNotifyVer", function (value) {
     if (value.updateNotifyVer == undefined || value.updateNotifyVer < currentUpdateNotifyVersion) {

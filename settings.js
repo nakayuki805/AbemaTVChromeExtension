@@ -240,7 +240,7 @@ var settingsList = [
             },
             {
                 "name": "isShareNGword",
-                "description": "<a href='https://abema.nakayuki.net/ngshare/' target='_blank'>共有NGワード</a>を有効にする(現在実験的)",
+                "description": "<a href='https://abema.nakayuki.net/ngshare/' target='_blank'>共有NGワード</a>を有効にする(現在実験的)(追加したNGワードがサーバーに送信され、追加数の多いワードが自動で一時的なNGワードに設定されます。)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
