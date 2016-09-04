@@ -829,8 +829,12 @@ function putComeArray(inp){
 //    }
     var winwidth=comeMovingAreaTrim?movieRightEdge:window.innerWidth;
     var outxt='';
+    var setfont='';
+    if($('#settcont').css("display")!="none"){
+        setfont='font-size:'+parseInt($('#comeFontsize').val())+'px;';
+    }
     for(var i=0;i<inplen;i++){
-        outxt+='<span class="movingComment" style="position:absolute;top:'+inp[i][1]+'px;left:'+(inp[i][2]+winwidth)+'px;">'+inp[i][0]+'</span>';
+        outxt+='<span class="movingComment" style="position:absolute;top:'+inp[i][1]+'px;left:'+(inp[i][2]+winwidth)+'px;'+setfont+'">'+inp[i][0]+'</span>';
     }
     $(outxt).appendTo(mci);
 //    mclen+=inplen;
@@ -1188,6 +1192,7 @@ function closeOption(){
         .css("transition","") //新着強調
         .children('[class^="styles__message___"]').css("color","") //基本色
     ;
+    $('.movingComment').css("font-size","");
     setOptionElement();
     optionStatsUpdated=false;
 }
@@ -1462,6 +1467,7 @@ console.log("createSettingWindow retry");
         $('#iproSamePosition').change(setProSamePosiChanged);
         $('#isProTextLarge').change(setProTextSizeChanged);
         $('#highlightComePower').change(setHighlightComePowerChanged);
+        $('#comeFontsize').change(setComeFontsizeChanged);
     }
     $("#CommentMukouSettings").hide();
     $("#CommentColorSettings").css("width","600px")
@@ -1805,6 +1811,11 @@ console.log("createSettingWindow retry");
     $('#afterCMWait').prop("min","0");
 console.log("createSettingWindow ok");
 }
+function setComeFontsizeChanged(){
+    var nf=parseInt($('#comeFontsize').val());
+    var jo=$('.movingComment');
+    jo.css("font-size",nf+"px");
+}
 function setHighlightComePowerChanged(){
     $('#highlightPdesc').text("背景濃さ:"+$('#highlightComePower').val());
 }
@@ -2040,11 +2051,6 @@ function setSaveClicked(){
     settings.isShareNGword=$('#isShareNGword').prop("checked");
     isDelOldTime=$('#isDelOldTime').prop("checked");
     isMovieSpacingZeroTop=$('#isMovieSpacingZeroTop').prop("checked");
-    if(comeFontsize<parseInt($('#comeFontsize').val())){
-//文字サイズが大きくなると右に伸びて消滅判定に失敗するので消す
-//同じ理由で一時試用も現状不可。流す長さを長距離長時間にすれば可能か
-        $('.movingComment').remove();
-    }
     comeFontsize=Math.min(99,Math.max(1,parseInt($('#comeFontsize').val())));
 
     arrayFullNgMaker();
@@ -4289,6 +4295,7 @@ console.log("copycome allerase");
                 comehl(jc.slice(0,ma.length),hlsw);
             }
         }
+        commentNum = EXcomelist.childElementCount;
     }else if(d===undefined){
 console.log("copycome fullcopy");
         //100件全てを上書き
@@ -4312,6 +4319,7 @@ console.log("copycome fullcopy");
                 if(j>=100){break;}
             }
         }
+        commentNum = EXcomelist.childElementCount;
     }
 }
 function comecopy(){
@@ -4668,7 +4676,8 @@ function onairBasefunc(){
         if(isMovingComment){
             var arMovingComment = $('.movingComment');
             for (var j = arMovingComment.length-1;j>=0;j--){
-                if(arMovingComment.eq(j).offset().left + arMovingComment.eq(j).width()<=0){
+//                if(arMovingComment.eq(j).offset().left + arMovingComment.eq(j).width()<=0){
+                if(arMovingComment.eq(j).offset().left - parseInt(arMovingComment.eq(j)[0].style.left)<1){
                     arMovingComment[j].remove();
                 }
             }
