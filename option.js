@@ -195,6 +195,15 @@ $(function(){
         .prop("min","0")
     ;
     $('<span id="highlightPdesc" style="margin-right:4px;margin-left:12px;">背景濃さ: </span>').insertBefore("#highlightComePower");
+    $('#changeMaxVolume').prop("max","100").prop("min","0");
+    $('#sureReadRefreshx').prop("min","101");
+    $('#movingCommentSecond').prop("min","1");
+    $('#movingCommentLimit').prop("min","0");
+    $('#comeFontsize').prop("max","99").prop("min","1");
+    $('#notifySeconds').prop("min","0");
+    $('#CMsmall').prop("max","100").prop("min","5");
+    $('#beforeCMWait').prop("min","0");
+    $('#afterCMWait').prop("min","0");
 
     chrome.storage.local.get(function (value) {
         var isResizeScreen = value.resizeScreen || false;
@@ -206,8 +215,8 @@ $(function(){
         var isCMsoundoff = value.CMsoundoff || false;
         var CMsmall = Math.min(100,Math.max(5,((value.CMsmall!==undefined)?value.CMsmall : 100)));
         var isMovingComment = value.movingComment || false;
-        var movingCommentSecond = (value.movingCommentSecond!==undefined)?value.movingCommentSecond : 10;
-        var movingCommentLimit = (value.movingCommentLimit!==undefined)?value.movingCommentLimit : 30;
+        var movingCommentSecond = Math.max(1,((value.movingCommentSecond!==undefined)?value.movingCommentSecond : 10));
+        var movingCommentLimit = Math.max(0,((value.movingCommentLimit!==undefined)?value.movingCommentLimit : 30));
 //        var isMoveByCSS =　value.moveByCSS || false;
         var isComeNg = value.comeNg || false;
         var isComeDel = value.comeDel || false;
@@ -222,7 +231,7 @@ $(function(){
         var sureReadRefreshx = Math.max(101,((value.sureReadRefreshx!==undefined)?value.sureReadRefreshx : 2000000));
         var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
 //        var isMovieResize = value.movieResize || false;
-        var isMovieMaximize = value.movieMaximize || false;
+//        var isMovieMaximize = value.movieMaximize || false;
         var commentBackColor = (value.commentBackColor!==undefined)?value.commentBackColor : 255;
         var commentBackTrans = (value.commentBackTrans!==undefined)?value.commentBackTrans : 127;
         var commentTextColor = (value.commentTextColor!==undefined)?value.commentTextColor : 0;
@@ -230,7 +239,7 @@ $(function(){
         var isCommentPadZero = value.commentPadZero || false;
         var isCommentTBorder = value.commentTBorder || false;
         var timePosition = value.timePosition || "windowtop";
-        var notifySeconds = (value.notifySeconds!==undefined)?value.notifySeconds : 60;
+        var notifySeconds = Math.max(0,((value.notifySeconds!==undefined)?value.notifySeconds : 60));
         var isNotifyAndOpen = value.isNotifyAndOpen || false;
         var isNaOinActive = value.isNaOinActive || false;
         var beforeCMWait = Math.max(0,((value.beforeCMWait!==undefined)?value.beforeCMWait : 0));
@@ -272,6 +281,9 @@ $(function(){
         var isComeClickNGautoClose=value.comeClickNGautoClose||false;
         var isShareNGword=value.isShareNGword||false;
         var isDelOldTime=value.delOldTime||false;
+        var isMovieSpacingZeroTop=value.movieSpacingZeroTop||false;
+        var isMovieSpacingZeroLeft=value.movieSpacingZeroLeft||false;
+        var comeFontsize=Math.min(99,Math.max(1,((value.comeFontsize!==undefined)?Number(value.comeFontsize):32)));
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -297,7 +309,7 @@ $(function(){
         $("#sureReadRefreshx").val(sureReadRefreshx);
         $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
 //        $("#isMovieResize").prop("checked", isMovieResize);
-        $("#isMovieMaximize").prop("checked", isMovieMaximize);
+//        $("#isMovieMaximize").prop("checked", isMovieMaximize);
         var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
         var tc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(commentTextTrans/255)+")";
         $("#CommentColorSettings>div>span.desc").css("background-color",bc)
@@ -379,6 +391,8 @@ $(function(){
         $('#isComeClickNGautoClose').prop("checked",isComeClickNGautoClose);
         $('#isShareNGword').prop("checked",isShareNGword);
         $('#isDelOldTime').prop("checked",isDelOldTime);
+        $('#isMovieSpacingZeroTop').prop("checked",isMovieSpacingZeroTop);
+        $('#comeFontsize').val(comeFontsize);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -412,7 +426,7 @@ $(function(){
             "sureReadRefreshx": Math.max(101,parseInt($("#sureReadRefreshx").val())),
             "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked"),
 //            "movieResize": $("#isMovieResize").prop("checked")
-            "movieMaximize": $("#isMovieMaximize").prop("checked"),
+//            "movieMaximize": $("#isMovieMaximize").prop("checked"),
             "commentBackColor": parseInt($("#commentBackColor").val()),
             "commentBackTrans": parseInt($("#commentBackTrans").val()),
             "commentTextColor": parseInt($("#commentTextColor").val()),
@@ -420,7 +434,7 @@ $(function(){
             "commentPadZero": $("#isCommentPadZero").prop("checked"),
             "commentTBorder": $("#isCommentTBorder").prop("checked"),
             "timePosition": $('#itimePosition [name="timePosition"]:checked').val(),
-            "notifySeconds": parseInt($("#notifySeconds").val()),
+            "notifySeconds": Math.max(0,parseInt($("#notifySeconds").val())),
             "isNotifyAndOpen": $("#isNotifyAndOpen").prop("checked"),
             "isNaOinActive": $("#isNaOinActive").prop("checked"),
             "beforeCMWait": Math.max(0,parseInt($("#beforeCMWait").val())),
@@ -462,7 +476,9 @@ $(function(){
             "highlightComePower":$('#highlightComePower').val(),
             "comeClickNGautoClose":$('#isComeClickNGautoClose').prop("checked"),
             "isShareNGword":$('#isShareNGword').prop("checked"),
-            "delOldTime":$('#isDelOldTime').prop("checked")
+            "delOldTime":$('#isDelOldTime').prop("checked"),
+            "movieSpacingZeroTop":$('#isMovieSpacingZeroTop').prop("checked"),
+            "comeFontsize":Math.min(99,Math.max(1,parseInt($('#comeFontsize').val())))
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
