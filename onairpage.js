@@ -85,6 +85,7 @@ var isComeClickNGautoClose=false; //NG追加したらNG入力欄を自動的に�
 settings.isShareNGword=false;//共有NGワード
 var isDelOldTime=false; //NG適用コメ一覧から古いコメの書込時刻を削除する
 var isMovieSpacingZeroTop=false; //映像位置を上に詰める
+var isMovieSpacingZeroLeft=false; //映像位置を左に詰める
 var comeFontsize=32; //流れるコメントのfont-size xx-large
 
 console.log("script loaded");
@@ -198,6 +199,7 @@ getStorage(null, function (value) {
     settings.isShareNGword=value.isShareNGword||false;
     isDelOldTime=value.delOldTime||false;
     isMovieSpacingZeroTop=value.movieSpacingZeroTop||false;
+    isMovieSpacingZeroLeft=value.movieSpacingZeroLeft||false;
     comeFontsize=Math.min(99,Math.max(1,((value.comeFontsize!==undefined)?Number(value.comeFontsize):comeFontsize)));
 });
 
@@ -610,47 +612,87 @@ console.log("waitformakelink#"+retrycount);
     }
 }
 function onresize() {
+    var resizeType=settings.isResizeScreen?1:0;
+    var posiVType=isMovieSpacingZeroTop?1:(isResizeSpacing?2:0);
+    var posiHType=isMovieSpacingZeroLeft?1:0;
+    if($('#settcont').css("display")!="none"){
+        resizeType=+$('#movieResizeContainer input[type="radio"][name="movieResizeType"]:checked').val();
+        posiVType=+$('#moviePositionContainer input[type="radio"][name="moviePositionVType"]:checked').val();
+        posiHType=+$('#moviePositionContainer input[type="radio"][name="moviePositionHType"]:checked').val();
+    }
+
     var obj = $("object,video").parent(),
-        wd = window.innerWidth,
-        hg = window.innerHeight-(isResizeSpacing?44:0),
-        wdbyhg = hg*16/9,
+        wd,
+        hg,
+        wdbyhg,
         newwd,
         newhg;
     if(obj.length==0){return;}
+    if(resizeType==0&&posiVType==0&&posiHType==0){
+        obj.css("top","")
+            .css("left","")
+            .css("width","")
+            .css("height","")
+        ;
+        return;
+    }
+
+    //映像を最大化する先の大きさ設定
+    if(resizeType==1){
+        //リサイズする場合、ウィンドウ内で最大化
+        wd = window.innerWidth;
+        hg = window.innerHeight;
+    }else{
+        var waku = obj.parent();
+        //リサイズしない場合、waku内で最大化
+        wd = waku.width();
+        hg = window.innerHeight;
+    }
+    if(posiVType==2){
+        hg-=44;
+    }
+
+    //映像サイズ設定
+    wdbyhg = Math.ceil(hg*16/9); //480*16/9=853.333->854
     if (wd > wdbyhg) {
+        //横に余裕がある場合、wdbyhgを適用
         newwd = wdbyhg;
         newhg = hg;
     } else {
+        //横に余裕が無い場合、wdbyhgをやめる
         newwd = wd;
-        newhg = wd*9/16;
+        newhg = Math.floor(wd*9/16); //854*9/16=480.375->480
     }
-    if(settings.isResizeScreen){
-        obj.css("width", newwd + "px")
-            .css("height", newhg + "px")
-        ;
-    }else{
-        obj.css("width","100%")
-            .css("height","100%")
-        ;
-    }
-    console.log("screen resized");
 
-    if(isResizeSpacing){
+    //newtop設定
+    if(posiVType==2){
         newtop=44;
-    }else if(isMovieSpacingZeroTop){
+    }else if(posiVType==1){
         newtop=0;
-    }else{
-        newtop=(hg-obj.height())/2;
+    }else{ //中央合わせ
+        newtop=Math.floor((hg-newhg)/2);
     }
     if(setBlacked[2]){
-        newtop+=Math.floor(obj.height()*(100-CMsmall)/200);
+        newtop+=Math.floor(newhg*(100-CMsmall)/200);
     }
-    var newleft=0;
+
+    //newleft設定
+    var newleft;
+    if(posiHType==1){
+        newleft=0;
+    }else{ //中央合わせ
+        newleft=Math.floor((wd-newwd)/2);
+    }
     if(setBlacked[2]){
-        newleft+=Math.floor(obj.width()*(100-CMsmall)/200);
+        newleft+=Math.floor(newwd*(100-CMsmall)/200);
     }
-    obj.offset({"top": newtop, "left": newleft})
+
+    obj.css("width", newwd + "px")
+        .css("height", newhg + "px")
+        .offset({"top": newtop, "left": newleft})
+    ;
     newtop=obj.offset().top;
+    console.log("screen resized");
 }
 function toggleFullscreen() {
     var fullscElem = document.fullscreenElement || document.webkitFullscreenElement|| document.mozFullscreenElement|| document.msFullscreenElement;
@@ -1134,6 +1176,7 @@ function openOption(){
     $('#isShareNGword').prop("checked",settings.isShareNGword);
     $('#isDelOldTime').prop("checked",isDelOldTime);
     $('#isMovieSpacingZeroTop').prop("checked",isMovieSpacingZeroTop);
+    $('#isMovieSpacingZeroLeft').prop("checked",isMovieSpacingZeroLeft);
     $('#comeFontsize').val(comeFontsize);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
@@ -1162,17 +1205,20 @@ function openOption(){
     }
 
 //    if(settings.isResizeScreen||isMovieMaximize){
-    if(settings.isResizeScreen){
-        $('#movieResizeChkA').prop("checked",true);
-        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",false)
-            .val([settings.isResizeScreen?(isResizeSpacing?1:0):2])
-        ;
-    }else{
-        $('#movieResizeChkA').prop("checked",false);
-        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').val([0])
-            .prop("disabled",true)
-        ;
-    }
+//    if(settings.isResizeScreen){
+//        $('#movieResizeChkA').prop("checked",true);
+//        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",false)
+//            .val([settings.isResizeScreen?(isResizeSpacing?1:0):2])
+//        ;
+//    }else{
+//        $('#movieResizeChkA').prop("checked",false);
+//        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').val([0])
+//            .prop("disabled",true)
+//        ;
+//    }
+    $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').val([settings.isResizeScreen?1:0]);
+    $('#moviePositionContainer input[type="radio"][name="moviePositionVType"]').val([isMovieSpacingZeroTop?1:(isResizeSpacing?2:0)]);
+    $('#moviePositionContainer input[type="radio"][name="moviePositionHType"]').val([isMovieSpacingZeroLeft?1:0]);
 
     if(!optionStatsUpdated){
         optionStatsUpdated=true;
@@ -1194,6 +1240,7 @@ function closeOption(){
         .children('[class^="styles__message___"]').css("color","") //基本色
     ;
     $('.movingComment').css("font-size","");
+    onresize();
     setOptionElement();
     optionStatsUpdated=false;
 }
@@ -1743,32 +1790,68 @@ console.log("createSettingWindow retry");
         $('#ipanelopenset').change(panelTableUpdateS);
         $('#panelcustomTable').change(panelTableUpdateT);
     }
-//    if($('#movieResizeContainer').length==0){
-//        var jo=$('#isResizeScreen');
-//        var ja=jo.parent().contents();
+    if($('#movieResizeContainer').length==0){
+        var jo=$('#isResizeScreen');
+        var ja=jo.parent().contents();
 //        var jm=$('#isMovieMaximize');
-//        ja.slice(ja.index(jo),ja.index(jm.next())).wrapAll('<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">');
+        var jm=jo;
+        ja.slice(ja.index(jo),ja.index(jm.next())).wrapAll('<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">');
 //        $('<input id="movieResizeChkA" type="checkbox">').prependTo('#movieResizeContainer')
 //            .after(':映像リサイズ (ウィンドウに合わせます。映像がウィンドウの外にハミ出なくなり、コメ欄などを開いても映像の大きさは変わらず、コメ欄などは映像の上に重なります。)<br>　映像の上下位置<br>')
 //            .change(movieResizeChkChanged)
 //        ;
-//        $('#isResizeScreen').css("display","none")
+        var tres='映像の大きさ';
+        tres+='<br><input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:デフォルト';
+        tres+='<br><input type="radio" name="movieResizeType" value=1 style="margin-left:16px;">:ウィンドウ全体に最大化';
+        $('#isResizeScreen').css("display","none")
 //            .before('<input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:上に詰める (空き無し)')
-//        ;
+            .before(tres)
+        ;
 //        $('#isResizeSpacing').css("display","none")
 //            .before('<input type="radio" name="movieResizeType" value=1 style="margin-left:16px;">:上に詰めるが、上の黒帯の分だけ空ける')
 //        ;
 //        $('#isMovieMaximize').css("display","none")
 //            .before('<input type="radio" name="movieResizeType" value=2 style="margin-left:16px;">:画面中央')
 //        ;
-//        var jc=$('#movieResizeContainer').contents();
-//        jc.eq(jc.index($('#isResizeScreen'))+1)
+        var jc=$('#movieResizeContainer').contents();
+        jc.eq(jc.index($('#isResizeScreen'))+1)
 //            .add(jc.eq(jc.index($('#isResizeSpacing'))+1))
 //            .add(jc.eq(jc.index($('#isMovieMaximize'))+1))
-//            .remove()
-//        ;
-//        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').change(movieResizeTypeChanged);
-//    }
+            .remove()
+        ;
+        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').change(movieResizeTypeChanged);
+    }
+    if($('#moviePositionContainer').length==0){
+        var jo=$('#isMovieSpacingZeroTop');
+        var ja=jo.parent().contents();
+        var jm=$('#isMovieSpacingZeroLeft');
+        ja.slice(ja.index(jo),ja.index(jm.next())).wrapAll('<div id="moviePositionContainer" style="margin:8px;padding:8px;border:1px solid black;">');
+        var tres='映像の上下位置';
+        tres+='<br><input type="radio" name="moviePositionVType" value=0 style="margin-left:16px;">:デフォルト (中央)';
+        tres+='<br><input type="radio" name="moviePositionVType" value=1 style="margin-left:16px;">:上に詰める (空き無し) ※額縁は詰まりません';
+        $('#isMovieSpacingZeroTop').css("display","none")
+            .before(tres)
+        ;
+        $('#isResizeSpacing').css("display","none")
+            .before('<input type="radio" name="moviePositionVType" value=2 style="margin-left:16px;">:上に詰めるが、上の黒帯の分だけ空ける ※額縁は詰まりません')
+        ;
+        tres='映像の左右位置';
+        tres+='<br><input type="radio" name="moviePositionHType" value=0 style="margin-left:16px;">:デフォルト <span id="moviePosiHDesc"></span>';
+        tres+='<br><input type="radio" name="moviePositionHType" value=1 style="margin-left:16px;">:左に詰める (空き無し) ※額縁は詰まりません';
+        $('#isMovieSpacingZeroLeft').css("display","none")
+            .before(tres)
+        ;
+        $('#moviePosiHDesc').text(settings.isResizeScreen?"(ウィンドウ全体の中央)":"(ウィンドウ左側内の中央)");
+        var jc=$('#moviePositionContainer').contents();
+        jc.eq(jc.index($('#isMovieSpacingZeroTop'))+1)
+            .add(jc.eq(jc.index($('#isResizeSpacing'))+1))
+            .add(jc.eq(jc.index($('#isMovieSpacingZeroLeft'))+1))
+            .remove()
+        ;
+        $('#moviePositionContainer input[type="radio"][name="moviePositionVType"]').change(moviePositionVTypeChanged);
+        $('#moviePositionContainer input[type="radio"][name="moviePositionHType"]').change(moviePositionHTypeChanged);
+        $('#moviePositionContainer').prev("br").remove();
+    }
     if($('#highlightdesc').length==0){
         $("#ihighlightNewCome").insertBefore("#isCommentWide")
             .css("border","black solid 1px")
@@ -1820,37 +1903,70 @@ function setComeFontsizeChanged(){
 function setHighlightComePowerChanged(){
     $('#highlightPdesc').text("背景濃さ:"+$('#highlightComePower').val());
 }
-function movieResizeTypeChanged(){
-    switch(+$('#movieResizeContainer input[type="radio"][name="movieResizeType"]:checked').val()){
+function moviePositionVTypeChanged(){
+    switch(+$('#moviePositionContainer input[type="radio"][name="moviePositionVType"]:checked').val()){
         case 0:
-            $('#isResizeScreen').prop("checked",true);
+            $('#isMovieSpacingZeroTop').prop("checked",false);
             $('#isResizeSpacing').prop("checked",false);
-//            $('#isMovieMaximize').prop("checked",false);
             break;
         case 1:
-            $('#isResizeScreen').prop("checked",true);
-            $('#isResizeSpacing').prop("checked",true);
-            $('#isMovieMaximize').prop("checked",false);
+            $('#isMovieSpacingZeroTop').prop("checked",true);
+            $('#isResizeSpacing').prop("checked",false);
             break;
         case 2:
-            $('#isResizeScreen').prop("checked",false);
-            $('#isResizeSpacing').prop("checked",false);
-//            $('#isMovieMaximize').prop("checked",true);
+            $('#isMovieSpacingZeroTop').prop("checked",false);
+            $('#isResizeSpacing').prop("checked",true);
             break;
         default:
     }
+    onresize();
 }
-function movieResizeChkChanged(){
-    if($('#movieResizeChkA').prop("checked")){
-        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",false);
-        movieResizeTypeChanged();
-    }else{
-        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",true);
-        $('#isResizeScreen').prop("checked",false);
-        $('#isResizeSpacing').prop("checked",false);
-//        $('#isMovieMaximize').prop("checked",false);
+function moviePositionHTypeChanged(){
+    switch(+$('#moviePositionContainer input[type="radio"][name="moviePositionHType"]:checked').val()){
+        case 0:
+            $('#isMovieSpacingZeroLeft').prop("checked",false);
+            break;
+        case 1:
+            $('#isMovieSpacingZeroLeft').prop("checked",true);
+            break;
+        default:
     }
+    onresize();
 }
+function movieResizeTypeChanged(){
+    switch(+$('#movieResizeContainer input[type="radio"][name="movieResizeType"]:checked').val()){
+        case 0:
+            $('#isResizeScreen').prop("checked",false);
+//            $('#isResizeSpacing').prop("checked",false);
+//            $('#isMovieMaximize').prop("checked",false);
+            $('#moviePosiHDesc').text("(ウィンドウ左側内の中央)");
+            break;
+        case 1:
+            $('#isResizeScreen').prop("checked",true);
+//            $('#isResizeSpacing').prop("checked",true);
+//            $('#isMovieMaximize').prop("checked",false);
+            $('#moviePosiHDesc').text("(ウィンドウ全体の中央)");
+            break;
+//        case 2:
+//            $('#isResizeScreen').prop("checked",false);
+//            $('#isResizeSpacing').prop("checked",false);
+//            $('#isMovieMaximize').prop("checked",true);
+//            break;
+        default:
+    }
+    onresize();
+}
+//function movieResizeChkChanged(){
+//    if($('#movieResizeChkA').prop("checked")){
+//        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",false);
+//        movieResizeTypeChanged();
+//    }else{
+//        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",true);
+//        $('#isResizeScreen').prop("checked",false);
+//        $('#isResizeSpacing').prop("checked",false);
+//        $('#isMovieMaximize').prop("checked",false);
+//    }
+//}
 function epcountchange(){
     var c=parseInt($('#epnumedit input[type="number"][name="epcount"]').val());
     var proLength=0;
@@ -2052,6 +2168,7 @@ function setSaveClicked(){
     settings.isShareNGword=$('#isShareNGword').prop("checked");
     isDelOldTime=$('#isDelOldTime').prop("checked");
     isMovieSpacingZeroTop=$('#isMovieSpacingZeroTop').prop("checked");
+    isMovieSpacingZeroLeft=$('#isMovieSpacingZeroLeft').prop("checked");
     comeFontsize=Math.min(99,Math.max(1,parseInt($('#comeFontsize').val())));
 
     arrayFullNgMaker();
@@ -4599,7 +4716,7 @@ function onairBasefunc(){
                 comeColor($('#reloadon'));
             }
         }
-        //映像のtopかleftが変更したらonresize()実行
+        //映像のtopが変更したらonresize()実行
 //        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
         if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
             onresize();

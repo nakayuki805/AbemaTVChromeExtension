@@ -392,6 +392,7 @@ $(function(){
         $('#isShareNGword').prop("checked",isShareNGword);
         $('#isDelOldTime').prop("checked",isDelOldTime);
         $('#isMovieSpacingZeroTop').prop("checked",isMovieSpacingZeroTop);
+        $('#isMovieSpacingZeroLeft').prop("checked",isMovieSpacingZeroLeft);
         $('#comeFontsize').val(comeFontsize);
     });
     $("#saveBtn").click(function () {
@@ -478,6 +479,7 @@ $(function(){
             "isShareNGword":$('#isShareNGword').prop("checked"),
             "delOldTime":$('#isDelOldTime').prop("checked"),
             "movieSpacingZeroTop":$('#isMovieSpacingZeroTop').prop("checked"),
+            "movieSpacingZeroLeft":$('#isMovieSpacingZeroLeft').prop("checked"),
             "comeFontsize":Math.min(99,Math.max(1,parseInt($('#comeFontsize').val())))
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
