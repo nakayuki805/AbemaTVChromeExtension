@@ -257,7 +257,7 @@ var comeclickcd=2; //コメント欄を早く開きすぎないためのウェ�
 var cmblockcd=0; //カウント用
 var comeRefreshing=false; //コメ欄自動開閉中はソートを実行したいのでコメント更新しない用
 var comeFastOpen=false;
-var newtop = 0;//映像位置のtop
+//var newtop = 0;//映像位置のtop
 var comeHealth=100; //コメント欄を開く時の初期読込時に読み込まれたコメント数（公式NGがあると100未満になる）
 var bginfo=[0,[],-1,-1]; //ソースの縦長さなど主にwebrequestメッセージ入れ
 var eventAdded=false; //各イベントを1回だけ作成する用
@@ -283,6 +283,8 @@ var APIclientName = "AbemaTVChromeExtension"; //↑のクライアント名
 var isNGwordShareInterval = false; //applySharedNGwordがinterval状態か
 var postedNGwords = []; //送信済みNGワード
 var isComelistMouseDown = false;
+var movieWidth=0; //.TVContainer__resize-screenの大きさ(onresize発火用)
+var movieHeight=0;
 
 function hasArray(array, item){//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -629,13 +631,23 @@ function onresize() {
         newhg;
     if(obj.length==0){return;}
     if(resizeType==0&&posiVType==0&&posiHType==0){
-        obj.css("top","")
-            .css("left","")
+//        obj.css("top","")
+//            .css("left","")
+        obj.css("transition","")
             .css("width","")
             .css("height","")
         ;
+        obj.parents('[class*="TVContainer__resize-screen___"]').parent().css("transition","")
+            .css("transform","")
+            .css("top","")
+            .css("left","")
+        ;
         return;
     }
+    //元の枠 ウィンドウが縦長の場合は映像サイズと同じ、横長の場合は横が長い
+    var objr=obj.parents('[class*="TVContainer__resize-screen___"]');
+    var oldwd=parseInt(objr[0].style.width);
+    var oldhg=parseInt(objr[0].style.height);
 
     //映像を最大化する先の大きさ設定
     if(resizeType==1){
@@ -644,12 +656,12 @@ function onresize() {
         hg = window.innerHeight;
     }else{
         var waku = obj.parent();
-        //リサイズしない場合、waku内で最大化
-        wd = waku.width();
-        hg = window.innerHeight;
+        //リサイズしない場合、元のサイズ
+        wd = oldwd;
+        hg = oldhg;
     }
-    if(posiVType==2){
-        hg-=44;
+    if(posiVType==2&&hg+44>window.innerHeight){
+        hg=window.innerHeight-44;
     }
 
     //映像サイズ設定
@@ -665,12 +677,13 @@ function onresize() {
     }
 
     //newtop設定
+    var newtop;
     if(posiVType==2){
         newtop=44;
     }else if(posiVType==1){
         newtop=0;
     }else{ //中央合わせ
-        newtop=Math.floor((hg-newhg)/2);
+        newtop=Math.floor((window.innerHeight-newhg)/2);
     }
     if(setBlacked[2]){
         newtop+=Math.floor(newhg*(100-CMsmall)/200);
@@ -687,11 +700,29 @@ function onresize() {
         newleft+=Math.floor(newwd*(100-CMsmall)/200);
     }
 
+    //transition設定
+    if(obj[0].style.transition.length==0){
+        var objt=' 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) 0s';
+        obj.css("transition","width"+objt+", height"+objt);
+        objr.parent().css("transition","top"+objt+", left"+objt);
+    }
+
+    setTimeout(onresize2,0,obj,objr,newwd,newhg,newtop,newleft);
+}
+function onresize2(obj,objr,newwd,newhg,newtop,newleft){
     obj.css("width", newwd + "px")
         .css("height", newhg + "px")
-        .offset({"top": newtop, "left": newleft})
+//        .offset({"top": newtop, "left": newleft})
     ;
-    newtop=obj.offset().top;
+
+    objr.parent().css("transform","translateY(0)")
+        .css("top",newtop)
+        .css("left",newleft)
+    ;
+//    newtop=obj.offset().top;
+    movieWidth=parseInt(objr[0].style.width);
+    movieHeight=parseInt(objr[0].style.height);
+
     console.log("screen resized");
 }
 function toggleFullscreen() {
@@ -3538,23 +3569,23 @@ function setOptionHead(){
     t+='[class^="TVContainer__right-comment-area___"] textarea+*{background-color:'+cc+';color:'+tc+';}';
     t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:'+bc+';color:'+tc+';}';
     t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
-    //映像最大化
-//    if(isMovieMaximize||isSureReadComment){
-    if(isSureReadComment){
-        t+='[class*="TVContainer__tv-container___"]{width:100%;';
-//        if(isMovieMaximize){
-//            t+='height:100%;';
+//    //映像最大化
+////    if(isMovieMaximize||isSureReadComment){
+//    if(isSureReadComment){
+//        t+='[class*="TVContainer__tv-container___"]{width:100%;';
+////        if(isMovieMaximize){
+////            t+='height:100%;';
+////        }
+//        t+='}';
+//        t+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{';
+////        if(isMovieMaximize){
+////            t+='width:100%!important;height:100%!important;';
+////        }else if(isSureReadComment){
+//        if(isSureReadComment){
+//            t+='max-width:calc(100% - 310px);';
 //        }
-        t+='}';
-        t+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{';
-//        if(isMovieMaximize){
-//            t+='width:100%!important;height:100%!important;';
-//        }else if(isSureReadComment){
-        if(isSureReadComment){
-            t+='max-width:calc(100% - 310px);';
-        }
-        t+='}';
-    }
+//        t+='}';
+//    }
 
     //コメ欄スクロールバー非表示
     if(isInpWinBottom){//コメ逆順の時は対象が逆になる
@@ -3803,6 +3834,17 @@ function usereventWakuclick(){
     if(proinfoOpened){
         setTimeout(openInfo,50,false);
     }
+    waitforResize(10);
+}
+function waitforResize(retrycount){
+//console.log("waitforResize#"+retrycount);
+    var jo=$('[class*="TVContainer__resize-screen___"]');
+    if(jo.length==0){return;}
+    if(movieWidth!=parseInt(jo[0].style.width)||movieHeight!=parseInt(jo[0].style.height)){
+        onresize();
+    }else if(retrycount>0){
+        setTimeout(waitforResize,50,retrycount-1);
+    }
 }
 function usereventVolMousemove(){
     if(!EXside){return;}
@@ -3927,6 +3969,7 @@ function usereventSideChliButClick(){
         }
         pophideElement(phi);
     }
+    waitforResize(10);
 }
 function usereventFootInfoButClick(){
     if(isInfoOpen(3)){
@@ -3946,6 +3989,7 @@ function usereventFootInfoButClick(){
         }
         pophideElement(phi);
     }
+    waitforResize(10);
 }
 function delkakikomitxt(inptxt){
     if(kakikomitxt==inptxt){
@@ -3983,6 +4027,7 @@ function usereventFCclick(){
             pophideSelector(3,0);
         }
     }
+    waitforResize(10);
 }
 //function usereventWindowclick(){
 //console.log("usereventWindowclick");
@@ -4716,11 +4761,15 @@ function onairBasefunc(){
                 comeColor($('#reloadon'));
             }
         }
-        //映像のtopが変更したらonresize()実行
+//        //映像のtopが変更したらonresize()実行
 //        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
-        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
+//        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
+        var jo=$('[class*="TVContainer__resize-screen___"]');
+        //.resize-screenに設定されるwidth,heightをトリガーにする
+        if(jo.length>0&&(movieWidth!=parseInt(jo[0].style.width)||movieHeight!=parseInt(jo[0].style.height))){
             onresize();
         }
+
 //        //黒帯パネル表示のためマウスを動かすイベント発火
 //        if (settings.isAlwaysShowPanel) {
 //            triggerMouseMoving();
