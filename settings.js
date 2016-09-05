@@ -27,6 +27,12 @@ var settingsList = [
                 "type": "boolean",
                 "isInstantChangable": true
             },
+            {
+                "name": "isMovieSpacingZeroLeft",
+                "description": "映像の左右位置を左に詰める",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
 //            {
 //                //        "name": "isMovieResize",
 //                "name": "isMovieMaximize",
