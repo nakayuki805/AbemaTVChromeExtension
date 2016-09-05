@@ -628,6 +628,14 @@ function onresize() {
         newwd,
         newhg;
     if(obj.length==0){return;}
+    if(resizeType==0&&posiVType==0&&posiHType==0){
+        obj.css("top","")
+            .css("left","")
+            .css("width","")
+            .css("height","")
+        ;
+        return;
+    }
 
     //映像を最大化する先の大きさ設定
     if(resizeType==1){
