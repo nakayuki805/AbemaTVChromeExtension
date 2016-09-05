@@ -3834,16 +3834,19 @@ function usereventWakuclick(){
     if(proinfoOpened){
         setTimeout(openInfo,50,false);
     }
-    waitforResize(10);
+    var jo=$('[class*="TVContainer__resize-screen___"]');
+    if(jo.length>0){
+        waitforResize(10,parseInt(jo[0].style.width),parseInt(jo[0].style.height));
+    }
 }
-function waitforResize(retrycount){
+function waitforResize(retrycount,w,h){
 //console.log("waitforResize#"+retrycount);
     var jo=$('[class*="TVContainer__resize-screen___"]');
     if(jo.length==0){return;}
-    if(movieWidth!=parseInt(jo[0].style.width)||movieHeight!=parseInt(jo[0].style.height)){
+    if(w!=parseInt(jo[0].style.width)||h!=parseInt(jo[0].style.height)){
         onresize();
     }else if(retrycount>0){
-        setTimeout(waitforResize,50,retrycount-1);
+        setTimeout(waitforResize,50,retrycount-1,w,h);
     }
 }
 function usereventVolMousemove(){
@@ -3969,7 +3972,10 @@ function usereventSideChliButClick(){
         }
         pophideElement(phi);
     }
-    waitforResize(10);
+    var jo=$('[class*="TVContainer__resize-screen___"]');
+    if(jo.length>0){
+        waitforResize(10,parseInt(jo[0].style.width),parseInt(jo[0].style.height));
+    }
 }
 function usereventFootInfoButClick(){
     if(isInfoOpen(3)){
@@ -3989,7 +3995,10 @@ function usereventFootInfoButClick(){
         }
         pophideElement(phi);
     }
-    waitforResize(10);
+    var jo=$('[class*="TVContainer__resize-screen___"]');
+    if(jo.length>0){
+        waitforResize(10,parseInt(jo[0].style.width),parseInt(jo[0].style.height));
+    }
 }
 function delkakikomitxt(inptxt){
     if(kakikomitxt==inptxt){
@@ -4027,7 +4036,10 @@ function usereventFCclick(){
             pophideSelector(3,0);
         }
     }
-    waitforResize(10);
+    var jo=$('[class*="TVContainer__resize-screen___"]');
+    if(jo.length>0){
+        waitforResize(10,parseInt(jo[0].style.width),parseInt(jo[0].style.height));
+    }
 }
 //function usereventWindowclick(){
 //console.log("usereventWindowclick");
