@@ -285,6 +285,7 @@ var postedNGwords = []; //送信済みNGワード
 var isComelistMouseDown = false;
 var movieWidth=0; //.TVContainer__resize-screenの大きさ(onresize発火用)
 var movieHeight=0;
+var waitingforResize=false; //waitforresizeの複数起動防止用
 
 function hasArray(array, item){//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -655,7 +656,6 @@ function onresize() {
         wd = window.innerWidth;
         hg = window.innerHeight;
     }else{
-        var waku = obj.parent();
         //リサイズしない場合、元のサイズ
         wd = oldwd;
         hg = oldhg;
@@ -685,9 +685,9 @@ function onresize() {
     }else{ //中央合わせ
         newtop=Math.floor((window.innerHeight-newhg)/2);
     }
-    if(setBlacked[2]){
-        newtop+=Math.floor(newhg*(100-CMsmall)/200);
-    }
+//    if(setBlacked[2]){
+//        newtop+=Math.floor(newhg*(100-CMsmall)/200);
+//}
 
     //newleft設定
     var newleft;
@@ -696,9 +696,9 @@ function onresize() {
     }else{ //中央合わせ
         newleft=Math.floor((wd-newwd)/2);
     }
-    if(setBlacked[2]){
-        newleft+=Math.floor(newwd*(100-CMsmall)/200);
-    }
+//    if(setBlacked[2]){
+//        newleft+=Math.floor(newwd*(100-CMsmall)/200);
+//}
 
     //transition設定
     if(obj[0].style.transition.length==0){
@@ -3835,18 +3835,21 @@ function usereventWakuclick(){
         setTimeout(openInfo,50,false);
     }
     var jo=$('[class*="TVContainer__resize-screen___"]');
-    if(jo.length>0){
-        waitforResize(10,parseInt(jo[0].style.width),parseInt(jo[0].style.height));
+    if(jo.length>0&&!waitingforResize){
+        waitingforResize=true;
+        waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
     }
 }
-function waitforResize(retrycount,w,h){
-//console.log("waitforResize#"+retrycount);
-    var jo=$('[class*="TVContainer__resize-screen___"]');
-    if(jo.length==0){return;}
-    if(w!=parseInt(jo[0].style.width)||h!=parseInt(jo[0].style.height)){
-        onresize();
+function waitforResize(retrycount,eo,w,h){
+    var jw=parseInt(eo.style.width);
+    var jh=parseInt(eo.style.height);
+    if(w!=jw||h!=jh){
+        waitingforResize=false;
+        if(jw!=movieWidth||jh!=movieHeight){
+            onresize();
+        }
     }else if(retrycount>0){
-        setTimeout(waitforResize,50,retrycount-1,w,h);
+        setTimeout(waitforResize,50,retrycount-1,eo,w,h);
     }
 }
 function usereventVolMousemove(){
@@ -3973,8 +3976,9 @@ function usereventSideChliButClick(){
         pophideElement(phi);
     }
     var jo=$('[class*="TVContainer__resize-screen___"]');
-    if(jo.length>0){
-        waitforResize(10,parseInt(jo[0].style.width),parseInt(jo[0].style.height));
+    if(jo.length>0&&!waitingforResize){
+        waitingforResize=true;
+        waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
     }
 }
 function usereventFootInfoButClick(){
@@ -3996,8 +4000,9 @@ function usereventFootInfoButClick(){
         pophideElement(phi);
     }
     var jo=$('[class*="TVContainer__resize-screen___"]');
-    if(jo.length>0){
-        waitforResize(10,parseInt(jo[0].style.width),parseInt(jo[0].style.height));
+    if(jo.length>0&&!waitingforResize){
+        waitingforResize=true;
+        waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
     }
 }
 function delkakikomitxt(inptxt){
@@ -4037,8 +4042,9 @@ function usereventFCclick(){
         }
     }
     var jo=$('[class*="TVContainer__resize-screen___"]');
-    if(jo.length>0){
-        waitforResize(10,parseInt(jo[0].style.width),parseInt(jo[0].style.height));
+    if(jo.length>0&&!waitingforResize){
+        waitingforResize=true;
+        waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
     }
 }
 //function usereventWindowclick(){
