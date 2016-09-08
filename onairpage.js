@@ -286,6 +286,7 @@ var isComelistMouseDown = false;
 var movieWidth=0; //.TVContainer__resize-screenの大きさ(onresize発火用)
 var movieHeight=0;
 var waitingforResize=false; //waitforresizeの複数起動防止用
+var copycomecount=2; //番組移動直後にcopycomeをfullcopyする回数
 
 function hasArray(array, item){//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -707,9 +708,9 @@ function onresize() {
         objr.parent().css("transition","top"+objt+", left"+objt);
     }
 
-    setTimeout(onresize2,0,obj,objr,newwd,newhg,newtop,newleft);
+    setTimeout(onresize2,0,obj,objr,newwd,newhg,newtop,newleft,oldwd,oldhg);
 }
-function onresize2(obj,objr,newwd,newhg,newtop,newleft){
+function onresize2(obj,objr,newwd,newhg,newtop,newleft,oldwd,oldhg){
     obj.css("width", newwd + "px")
         .css("height", newhg + "px")
 //        .offset({"top": newtop, "left": newleft})
@@ -720,8 +721,9 @@ function onresize2(obj,objr,newwd,newhg,newtop,newleft){
         .css("left",newleft)
     ;
 //    newtop=obj.offset().top;
-    movieWidth=parseInt(objr[0].style.width);
-    movieHeight=parseInt(objr[0].style.height);
+//ここでobjr(.resize-screen)のwidth,heightを取得するとonresize時から変化している場合があるので引数で持ってくる
+    movieWidth=oldwd;
+    movieHeight=oldhg;
 
     console.log("screen resized");
 }
@@ -2998,6 +3000,9 @@ console.log("comeRefreshed "+commentNum+"->"+comeListLen);
         commentNum=comeListLen;
         comeHealth=Math.min(100,Math.max(0,commentNum));
         comeColor($(EXfootcountcome),comeHealth);
+        if(isComelistNG){
+            copycome();
+        }
     }else if(retrycount>0){
         setTimeout(chkcomelist,200,retrycount-1);
     }else{
@@ -3850,6 +3855,8 @@ function waitforResize(retrycount,eo,w,h){
         }
     }else if(retrycount>0){
         setTimeout(waitforResize,50,retrycount-1,eo,w,h);
+    }else{
+        waitingforResize=false;
     }
 }
 function usereventVolMousemove(){
@@ -4386,22 +4393,22 @@ function copycome(d,hlsw){
     var jo=$(eo);
     if($('#copycome').length==0){
         var t='<div id="copycome" class="'+jo.parent().attr("class")+' usermade"><div id="copycomec">';
-        var eo=EXcomelist.firstElementChild;
-        if($(eo).is('[class^="styles__no-contents-text___"]')){return;}
-        var eco=$(eo).prop("class");
-        var em=eo.children[0];
+        var eofc=eo.firstElementChild;
+        if($(eofc).is('[class^="styles__no-contents-text___"]')){return;}
+        var eofcc=$(eofc).prop("class");
+        var em=eofc.children[0];
         var ecm=$(em).prop("class");
-        var et=eo.children[1];
+        var et=eofc.children[1];
         var ect=$(et).prop("class");
         for(var i=0;i<100;i++){
-            t+='<div class="'+eco+'"><p class="'+ecm+'"></p><p class="'+ect+'"></p><p class="comeposttime usermade" style="display:none;"></p></div>';
+            t+='<div class="'+eofcc+'"><p class="'+ecm+'"></p><p class="'+ect+'"></p><p class="comeposttime usermade" style="display:none;"></p></div>';
         }
         t+='</div></div>';
         $(t).insertAfter(jo.parent());
 //EXcomelistをコピーしてそのすぐ後ろに追加した場合、copycomeをスクロールするとEXcomelistに既存コメントが重複して追加されていってしまう
 //なのでその親ごとコピーして回避した
 //空のdivがあるので今後の仕様変更がある可能性は高い
-        $(EXcomelist).parent().css("display","none");
+        jo.parent().css("display","none");
         d=undefined; //新規作成した場合は全コピー
         //コメ欄でマウスが押されているか
         $('#copycome').mousedown(function(e){if(e.button!=2){isComelistMouseDown=true;}});//右クリックには反応しない
@@ -4417,12 +4424,12 @@ function copycome(d,hlsw){
 console.log("copycome allerase");
         jc.children().text("");
         $('.comeposttime').attr("name","");
-    }else if(d>0){
+    }else if(d>0&&copycomecount<=0){
 //console.log("copycome append:"+d);
         //d件をNG処理して追加した後にcomehl
         var ma=[];
         for(var i=0,e,m,n,t;i<d;i++){
-            e=EXcomelist.children[i];
+            e=eo.children[i];
             m=comefilter(e.children[0].textContent);
             if(m.length>0){
                 t=e.children[1].textContent;
@@ -4476,35 +4483,46 @@ console.log("copycome allerase");
                     .next().attr("name","t"+d)
                 ;
             }
+//            if(eo.childElementCount<100){
+//                jc.slice(eo.childElementCount,100).children().text("")
+//                    .filter('.comeposttime').attr("name","")
+//                ;
+//            }
             if(hlsw>0){
                 comehl(jc.slice(0,ma.length),hlsw);
             }
         }
         commentNum = EXcomelist.childElementCount;
-    }else if(d===undefined){
+    }else if(d===undefined||copycomecount>0){
 console.log("copycome fullcopy");
         //100件全てを上書き
-        for(var i=0,j=0,e,m,t,d;(e=EXcomelist.children[i]);i++){
+        jc.children().text("");
+        $('.comeposttime').attr("name","");
+        for(var i=0,j=0,e,m,t,dt;(e=EXcomelist.children[i]);i++){
             m=comefilter(e.children[0].textContent);
             if(m.length>0){
                 t=e.children[1].textContent;
                 if(rn.test(t)){
-                    d=nt;
+                    dt=nt;
                 }else if(rs.test(t)){
-                    d=nt-(+rs.exec(t)[1])*1000;
+                    dt=nt-(+rs.exec(t)[1])*1000;
                 }else if(rm.test(t)){
-                    d=nt-(+rm.exec(t)[1])*60000;
+                    dt=nt-(+rm.exec(t)[1])*60000;
                 }
                 jc.eq(j).children().first().text(m)
                     .css("width","")
                     .next().text(t)
-                    .next().attr("name","t"+d)
+                    .next().attr("name","t"+dt)
                 ;
                 j+=1;
                 if(j>=100){break;}
             }
         }
         commentNum = EXcomelist.childElementCount;
+        if(--copycomecount>0){
+            //番組ページ読込直後か番組開始直後でcopycomeに残ったままのコメントをfullcopyで上書き消去する
+            setTimeout(copycome,800);
+        }
     }
 }
 // コメ欄クリック時に呼び出され、NGワード追加画面表示
@@ -4763,6 +4781,7 @@ function onairfunc(){
     if(settings.isShareNGword && !isNGwordShareInterval){
         setTimeout(applySharedNGword, 1000);
     }
+    copycomecount=2;
 }
 //    setInterval(function () {
 function onairBasefunc(){
@@ -5052,6 +5071,8 @@ function onairBasefunc(){
                 if($('#tProtitle').text()!=jo.first().text()){
                     proTitle=jo.first().text();
                     $('#tProtitle').text(proTitle);
+                    copycomecount=2;
+                    setTimeout(copycome,300);
                 }
             }
         }
