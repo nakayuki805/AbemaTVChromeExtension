@@ -5183,7 +5183,7 @@ function putNotifyButton(url){
     programTime.setHours(parseInt(programTimeArray[3]));
     programTime.setMinutes(parseInt(programTimeArray[4]));
     programTime.setSeconds(0);
-    if (now.getMonth === 11 && programTime.getMonth === 0) {programTime.setFullYear(now.getFullYear+1);} //現在12月なら1月は来年とする
+    if (now.getMonth() === 11 && programTime.getMonth() === 0) {programTime.setFullYear(now.getFullYear+1);} //現在12月なら1月は来年とする
     console.log(programTime)
     var notifyTime = programTime - notifySeconds*1000;
     if (notifyTime > now){
