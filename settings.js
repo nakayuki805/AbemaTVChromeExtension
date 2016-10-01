@@ -11,7 +11,7 @@ var settingsList = [
                 "name": "isResizeScreen",
                 //        "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
 //                "description": "映像をウィンドウに合わせてリサイズ、映像の位置を上に詰める (映像がウィンドウ外にはみ出なくなり、コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
-                "description": "映像をウィンドウに合わせてリサイズ (映像がウィンドウ外にはみ出なくなり、コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
+                "description": "映像をウィンドウに合わせてリサイズ (コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -45,7 +45,7 @@ var settingsList = [
 //            },
             {
                 "name": "isDblFullscreen",
-                "description": "<s>ダブルクリックで全画面表示に切り替え＆全画面ボタンをF11相当のフルスクリーンに割り当て(コメント欄を表示したまま全画面にできます。)</s>※現在うまくフルスクリーン表示できません。かわりにF11キーを使用してください>",
+                "description": "<s>ダブルクリックで全画面表示に切り替え＆全画面ボタンをF11相当のフルスクリーンに割り当て(コメント欄を表示したまま全画面にできます。)</s>※現在うまくフルスクリーン表示できません。かわりにF11キーを使用してください",
                 "instantDescription": "ダブルクリックで全画面表示に切り替え　※プレーヤーの全画面ボタンの割り当てには反映されません※現在不具合があります",
                 "type": "boolean",
                 "isInstantChangable": true
@@ -112,8 +112,8 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
-                "name": "isInpWinBottom",
-                "description": "コメント入力欄を下へ(コメント一覧は逆順・下スクロール)",
+                "name": "isInpWinBottom",//onairoage.jsで読み込み時にfalse代入して強制無効中
+                "description": "<s>コメント入力欄を下へ(コメント一覧は逆順・下スクロール)</s>AbemaTVの仕様変更に対応できていないので現在無効にしています。",
                 "type": "boolean",
                 "isInstantChangable": true
             },

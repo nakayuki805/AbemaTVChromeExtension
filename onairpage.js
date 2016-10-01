@@ -201,6 +201,8 @@ getStorage(null, function (value) {
     isMovieSpacingZeroTop=value.movieSpacingZeroTop||false;
     isMovieSpacingZeroLeft=value.movieSpacingZeroLeft||false;
     comeFontsize=Math.min(99,Math.max(1,((value.comeFontsize!==undefined)?Number(value.comeFontsize):comeFontsize)));
+    //仮追加
+    isInpWinBottom=false;//仕様変更で正常動作しなくなったので強制無効
 });
 
 var currentLocation = window.location.href;
@@ -813,6 +815,7 @@ function arrayFullNgMaker(){
         arFullNg.push(spfullng[ngi]);
     }
 }
+
 function comeNG(prengcome){
     //規定のNG処理
     var ngedcome = prengcome;
@@ -2993,6 +2996,7 @@ function comeColor(jo,inp){
 function chkcomelist(retrycount){
 //console.log("chkcomelist#"+retrycount);
     var comeListLen = EXcomelist.childElementCount;
+    if(EXcomelist.firstElementChild.className.indexOf('styles__animation___')>=0){comeListLen--;}//冒頭のanimationは数から除外
 //console.log("chkcomelist#"+retrycount+",comelistlen="+comeListLen);
     if(comeListLen<=sureReadRefreshx&&(comeListLen>1||retrycount==0)){
 console.log("comeRefreshed "+commentNum+"->"+comeListLen);
@@ -4391,11 +4395,15 @@ function copycome(d,hlsw){
         return;
     }
     var eo=EXcomelist;
+    var isAnimationIncluded = EXcomelist.children[0].className.indexOf('styles__animation___')>=0;
+    var EXcomelistChildren = $(EXcomelist).children('div'+(isAnimationIncluded?':gt(1)':''));
+    //console.log("EXCLChi",EXcomelistChildren)
     var jo=$(eo);
     if($('#copycome').length==0){
         var t='<div id="copycome" class="'+jo.parent().attr("class")+' usermade"><div id="copycomec">';
-        var eofc=eo.firstElementChild;
-        if($(eofc).is('[class^="styles__no-contents-text___"]')){return;}
+        var eofc=EXcomelistChildren[0];
+        if($(eo.firstElementChild).is('[class^="styles__no-contents-text___"]')){return;}
+        //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
         var eofcc=$(eofc).prop("class");
         var em=eofc.children[0];
         var ecm=$(em).prop("class");
@@ -4430,16 +4438,19 @@ console.log("copycome allerase");
         //d件をNG処理して追加した後にcomehl
         var ma=[];
         for(var i=0,e,m,n,t;i<d;i++){
-            e=eo.children[i];
+            //console.log("ma loop")
+            e=EXcomelistChildren[i];//eo.children[i];
             m=comefilter(e.children[0].textContent);
             if(m.length>0){
                 t=e.children[1].textContent;
                 ma.push([m,t]);
             }
         }
+        //console.log("ma:",ma)
         if(ma.length>0){
             if(ma.length<=100){
                 for(var i=ec.childElementCount-1,e,m,t,n,d,s;(e=ec.children[i-ma.length]);i--){
+                    //console.log("loop ma<100")
                     m=e.children[0].textContent;
                     if(isDelOldTime){
                         t="";
@@ -4469,6 +4480,7 @@ console.log("copycome allerase");
             }
             var malen=Math.min(ma.length,100);
             for(var i=0,m,t,d;i<malen;i++){
+                //console.log("loop after malen")
                 m=ma[i][0];
                 t=ma[i][1];
                 if(rn.test(t)){
@@ -4493,7 +4505,7 @@ console.log("copycome allerase");
                 comehl(jc.slice(0,ma.length),hlsw);
             }
         }
-        commentNum = EXcomelist.childElementCount;
+        commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
     }else if(d===undefined||copycomecount>0){
 console.log("copycome fullcopy");
         //100件全てを上書き
@@ -4519,7 +4531,7 @@ console.log("copycome fullcopy");
                 if(j>=100){break;}
             }
         }
-        commentNum = EXcomelist.childElementCount;
+        commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
         if(--copycomecount>0){
             //番組ページ読込直後か番組開始直後でcopycomeに残ったままのコメントをfullcopyで上書き消去する
             setTimeout(copycome,800);
@@ -4825,19 +4837,25 @@ function onairBasefunc(){
 //            otosageru();
 //        }
         //コメント取得
-        var comments = $('[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]');
+        var commentDivParent = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
+        var isAnimationIncluded = commentDivParent[0].children[0].className.indexOf('styles__animation___')>=0;
+        //console.log("isA",isAnimationIncluded,commentDivParent.children('div')[0])
+        var comments = commentDivParent.children('div'+(isAnimationIncluded?':gt(1)':'')).find(' [class^="styles__message___"]');//新着animetionも除外
+        //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
         if(EXcomelist&&isComeOpen()){
-            var comeListLen = EXcomelist.childElementCount;
+            var comeListLen = comments.length;//EXcomelist.childElementCount;
             var d=comeListLen-commentNum;
-            //console.log(comments.length,comeListLen,d)
+            //console.log(comments.length,comeListLen,commentNum,d)
 //            if(comeListLen>commentNum){ //コメ増加あり
 //                if(!comeRefreshing||!isSureReadComment){
             if(d>0){ //コメ増加あり
+                //console.log("cmts",comments,commentDivParent,d,comeListLen,commentNum)
 //                if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
                     if(isMovingComment&&commentNum>0){
 //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
 //                            putComment(comments[i].innerHTML);
                         for(var i=0;i<d;i++){
+                            //console.log("pc",d-i-1,comments[d-i-1].innerHTML)
                             putComment(comments[d-i-1].innerHTML,i,d);
                         }
                     }
@@ -4865,7 +4883,7 @@ function onairBasefunc(){
                 }else if(hlsw>0){
                     comehl($(EXcomelist).children().slice(0,d),hlsw);
                 }
-            }else if(comeListLen<commentNum){
+            }else if(comeListLen<commentNum && !isAnimationIncluded){
                 commentNum=0;
                 comeHealth=100;
             }
