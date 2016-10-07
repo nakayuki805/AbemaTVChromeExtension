@@ -231,7 +231,7 @@ var forElementClose = 0; //コメント表示中でも各要素を表示させ�
 var EXcomelist;
 var EXcomments;
 
-var commentsSelector = '[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]';
+//var commentsSelector = '[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]';
 var commentListParentSelector = '[class*="styles__comment-list-wrapper___"] > div';
 var overlapSelector = '[class^="style__overlap___"]';
 
@@ -642,7 +642,7 @@ function onresize() {
             .css("width","")
             .css("height","")
         ;
-        obj.parents('[class*="TVContainer__resize-screen___"]').parent().css("transition","")
+        obj.parents('[class*="styles__resize-screen___"]').parent().css("transition","")
             .css("transform","")
             .css("top","")
             .css("left","")
@@ -650,7 +650,7 @@ function onresize() {
         return;
     }
     //元の枠 ウィンドウが縦長の場合は映像サイズと同じ、横長の場合は横が長い
-    var objr=obj.parents('[class*="TVContainer__resize-screen___"]');
+    var objr=obj.parents('[class*="styles__resize-screen___"]');
     var oldwd=parseInt(objr[0].style.width);
     var oldhg=parseInt(objr[0].style.height);
 
@@ -2715,22 +2715,22 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
 function setEXs(){
     if(checkUrlPattern(true)!=3){return;}
     var b=true;
-    if((EXmain=$('#main')[0])==null){b=false;}
-    else if((EXhead=$('[class^="AppContainer__header-container___"]')[0])==null){b=false;}
-    else if((EXfoot=$('[class^="TVContainer__footer-container___"]')[0])==null){b=false;console.log("foot");}
+    if((EXmain=$('#main')[0])==null){b=false;console.log("#main");}
+    else if((EXhead=$('[class*="styles__header-container___"]')[0])==null){b=false;console.log("head");}//AppContainer__header-container___
+    else if((EXfoot=$('[class^="styles__footer___"]')[0])==null){b=false;console.log("foot");}//TVContainer__footer-container___
     else if((EXfootcome=$(EXfoot).contents().find('[class*="styles__right-container"]')[0])==null){b=false;console.log("footcome");}
     else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
     else if((EXfootcountview=EXfootcount[0])==null){b=false;console.log("footcountview");}
     else if((EXfootcountcome=EXfootcount[1])==null){b=false;console.log("footcountcome");}
-    else if((EXside=$('[class^="TVContainer__side___"]')[0])==null){b=false;console.log("side");}
-    else if((EXchli=$('[class*="TVContainer__right-v-channel-list___"]')[0])==null){b=false;console.log("chli");}
-    else if((EXinfo=$('[class^="TVContainer__right-slide___"]')[0])==null){b=false;console.log("info");}
-    else if((EXcome=$('[class^="TVContainer__right-comment-area___"]')[0])==null){b=false;console.log("come");}
+    else if((EXside=$('[class^="styles__side___"]')[0])==null){b=false;console.log("side");}//TVContainer__side___
+    else if((EXchli=$('[class*="styles__right-v-channel-list___"]')[0])==null){b=false;console.log("chli");}
+    else if((EXinfo=$('[class*="styles__right-slide___"]')[0])==null){b=false;console.log("info");}//TVContainer__right-slide___
+    else if((EXcome=$('[class*="styles__right-comment-area___"]')[0])==null){b=false;console.log("come");}//TVContainer__right-comment-area___
     else if((EXcomesend=$(EXcome).contents().find('[class*="styles__comment-form___"]')[0])==null){b=false;console.log("comesend");}
     else if((EXcomesendinp=$(EXcomesend).contents().find('textarea')[0])==null){b=false;console.log("comesendinp");}
 //    else if((EXcomelist0=$($(EXcome).contents().find('[class^="styles__no-contents-text___"]:first')[0]).parent()[0])==null){b=false;console.log("comelist");}
     else if((EXvolume=$('[class^="styles__volume___"]')[0])==null){b=false;console.log("vol");}
-    else if((EXobli=$('[class*="TVContainer__tv-container___"]')[0])==null){b=false;console.log("obli");}
+    else if((EXobli=$('[class*="styles__tv-container___"]')[0])==null){b=false;console.log("obli");}//TVContainer__tv-container___
     if(b==true){
 console.log("setEXs ok");
         setEX2();
@@ -2769,7 +2769,7 @@ function isComeOpen(sw){
     if(bs=="true"||bs=="false"){
         bb=(bs=="false");
     }else{
-        bb=jo.is('[class*="TVContainer__right-slide--shown___"]');
+        bb=jo.is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
     }
     var bc=(eo.style.transform=="translateX(0px)");
     var bd=(jo.offset().left<window.innerWidth);
@@ -2795,7 +2795,7 @@ function isComeOpen(sw){
 function isSlideOpen(){
 //    return ($(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==1)?true:false;
 //    return ($(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length>0)?true:false;
-    return $(EXfoot).nextAll().is('[class*="TVContainer__right-slide--shown___"]');
+    return $(EXfoot).nextAll().is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
 }
 function isInfoOpen(sw){
 //sw 0:内部の開閉状態 1:cssの開閉 2:0or1 3:見た目の開閉
@@ -2807,7 +2807,7 @@ function isInfoOpen(sw){
     if(bs=="true"||bs=="false"){
         bb=(bs=="false");
     }else{
-        bb=jo.is('[class*="TVContainer__right-slide--shown___"]');
+        bb=jo.is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
     }
     var bc=(eo.style.transform=="translateX(0px)");
     var bd=(jo.offset().left<window.innerWidth);
@@ -2841,7 +2841,7 @@ function isChliOpen(sw){
     if(bs=="true"||bs=="false"){
         bb=(bs=="false");
     }else{
-        bb=jo.is('[class*="TVContainer__right-slide--shown___"]');
+        bb=jo.is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
     }
     var bc=(eo.style.transform=="translateX(0px)");
     var bd=(jo.offset().left<window.innerWidth);
@@ -3561,9 +3561,9 @@ function setOptionHead(){
     $('head>link[title="usermade"]').remove();
     var t="";
     //投稿ボタン削除（入力欄1行化はこの下のコメ見た目のほうとoptionElementでやる）
-    if(isCustomPostWin){
-        t+='[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]>[class*="styles__etc-modules___"]{display:none;}';
-    }
+    /*if(isCustomPostWin){
+        t+='[class^="styles__right-comment-area___"] [class*="styles__comment-form___"]>[class*="styles__etc-modules___"]{display:none;}';//公式から投稿ボタン等が消えたので現在不要
+    }*/
     //コメント見た目
     var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
     var cc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(0.2)+")";
@@ -3571,14 +3571,14 @@ function setOptionHead(){
     var tc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(commentTextTrans/255)+")";
     var uc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(0.2)+")";
     var vc="rgba("+commentTextColor+","+commentTextColor+","+commentTextColor+","+(0.3)+")";
-    t+='[class^="TVContainer__right-comment-area___"]{background-color:transparent;}';
-    t+='[class^="TVContainer__right-comment-area___"]>*{background-color:transparent;}';
-    t+='[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]{background-color:'+bc+';}';
-    t+='[class^="TVContainer__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{background-color:'+uc+';}';
-    t+='[class^="TVContainer__right-comment-area___"] textarea{background-color:'+uc+';color:'+tc+';}';
-    t+='[class^="TVContainer__right-comment-area___"] textarea+*{background-color:'+cc+';color:'+tc+';}';
-    t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:'+bc+';color:'+tc+';}';
-    t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
+    t+='[class^="styles__right-comment-area___"]{background-color:transparent;}';
+    t+='[class^="styles__right-comment-area___"]>*{background-color:transparent;}';
+    t+='[class^="styles__right-comment-area___"] [class*="styles__comment-form___"]{background-color:'+bc+';}';
+    t+='[class^="styles__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{background-color:'+uc+';}';
+    t+='[class^="styles__right-comment-area___"] textarea{background-color:'+uc+';color:'+tc+';}';
+    t+='[class^="styles__right-comment-area___"] textarea+*{background-color:'+cc+';color:'+tc+';}';
+    t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:'+bc+';color:'+tc+';}';
+    t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
 //    //映像最大化
 ////    if(isMovieMaximize||isSureReadComment){
 //    if(isSureReadComment){
@@ -3599,11 +3599,11 @@ function setOptionHead(){
 
     //コメ欄スクロールバー非表示
     if(isInpWinBottom){//コメ逆順の時は対象が逆になる
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{overflow:hidden;}';
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{overflow:hidden;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{';
     }else{
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{overflow:hidden;}';
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{overflow:hidden;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{';
     }
     if(isHideOldComment){
         t+='overflow:hidden;';
@@ -3614,15 +3614,15 @@ function setOptionHead(){
     //ユーザースクリプトのngconfigのz-index変更
     t+='#NGConfig{z-index:20;}';
     if(isInpWinBottom){ //コメ入力欄を下
-        t+='[class^="TVContainer__right-comment-area___"]>*{display:flex;flex-direction:column-reverse;}';
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid '+vc+';border-bottom:1px solid '+vc+';}';
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{display:flex;flex-direction:column-reverse;}';
+        t+='[class^="styles__right-comment-area___"]>*{display:flex;flex-direction:column-reverse;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid '+vc+';border-bottom:1px solid '+vc+';}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{display:flex;flex-direction:column-reverse;}';
         //↑の構成そのままだと各コメントのデフォ間隔padding:15px 15px 0;のtop,bottomがうまく効かなくなってしまう
         //2つめのflex(下スクロール、コメント少数時の下詰め)を解除すれば有効になるけど、下スクロールを解除したくない
         //各コメントの中身(本文、投稿時刻)にpadding設定したらうまくいった
         if(!isCommentPadZero){
-            t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
-            t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
+            t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
+            t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
         }
     }
 //    if(isCustomPostWin){ //1行化
@@ -3630,30 +3630,30 @@ function setOptionHead(){
 //        t+='[class^="TVContainer__right-comment-area___"] textarea+div{height:18px!important;}';
 //    }
     if(isCommentPadZero){ //コメ間隔詰め
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
     }
     if(isCommentTBorder){ //コメ区切り線
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{border-top:1px solid '+vc+';}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{border-top:1px solid '+vc+';}';
         if(isInpWinBottom){ //先頭コメ(一番下)の下にも線を引く
-            t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div:first{border-bottom:1px solid '+vc+';}';
+            t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div:first{border-bottom:1px solid '+vc+';}';
         }
     }
     if(isCommentWide){ //コメント部分をほんの少し広く
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-right:4px;padding-left:8px;}';
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{width:'+(isHideOldComment?260:244)+'px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-right:4px;padding-left:8px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{width:'+(isHideOldComment?260:244)+'px;}';
     }
     //各パネルの常時表示 隠す場合は積極的にelement.cssに隠す旨を記述する(fade-out等に任せたり単にcss除去で済まさない)
     //もしくは常時隠して表示する場合に記述する、つまり表示切替の一切を自力でやる
     //（コメ欄常時表示で黒帯パネルの表示切替が発生した時のレイアウト崩れを防ぐため）
-    t+='[class^="AppContainer__header-container___"]{visibility:visible;opacity:1;}';
-    t+='[class^="TVContainer__footer-container___"]{visibility:visible;opacity:1;}';
-    t+='[class^="TVContainer__side___"]{transform:translateY(-50%);}';
-    t+='[class^="TVContainer__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
-    t+='[class^="TVContainer__right-slide___"]{z-index:15;}';
-    t+='[class^="TVContainer__right-comment-area___"] *{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
+    t+='[class^=""styles__header-container___"]{visibility:visible;opacity:1;}';
+    t+='[class^="styles__footer-container___"]{visibility:visible;opacity:1;}';
+    t+='[class^="styles__side___"]{transform:translateY(-50%);}';
+    t+='[class^=styles__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
+    t+='[class^="styles__right-slide___"]{z-index:15;}';
+    t+='[class^="styles__right-comment-area___"] *{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
     //左上・左下の非表示
     if(isHidePopBL){
-        t+='[class^="TVContainer__ad-reserve-button___"]{transform:translateX(-170px);}';
+        t+='[class^="styles__ad-reserve-button___"]{transform:translateX(-170px);}';
     }
     if(isHidePopTL){
         t+='[class*="styles__eyecatch___"]{display:none;}';
@@ -3667,8 +3667,8 @@ function setOptionHead(){
     t+='}';
     t+=overlapSelector+'{z-index:8;}';
     t+='#ComeMukouMask{z-index:6;}';
-    t+='[class^="TVContainer__ad-reserve-button___"]{z-index:8;}'; //元はoverlapと同じ3
-    t+='[class*="TVContainer__fresh-panel___"]{z-index:9;'; //元は4
+    t+='[class^="styles__ad-reserve-button___"]{z-index:8;}'; //元はoverlapと同じ3
+    t+='[class*="styles__fresh-panel___"]{z-index:9;'; //元は4
     if(isHidePopFresh){
         t+='transform:translateX(-20px) translateX(-100%);';
     }
@@ -3694,16 +3694,16 @@ function setOptionHead(){
 
     //全画面・音量ボタン非表示 display:noneだとホイール音量操作でスタック
     if(isHideButtons){
-        t+='[class^="TVContainer__footer___"]>[class^="styles__full-screen___"]{opacity:0;visibility:hidden;}';
-        t+='[class^="TVContainer__footer___"]>[class^="styles__volume___"]{opacity:0;visibility:hidden;}';
+        t+='[class^="styles__footer___"]>[class^="styles__full-screen___"]{opacity:0;visibility:hidden;}';
+        t+='[class^="styles__footer___"]>[class^="styles__volume___"]{opacity:0;visibility:hidden;}';
     }
     //自動更新停止アイコン用
     t+='.reloadicon{fill:rgba(255,255,255,0.5);position:absolute;right:0;top:9px;}';
     t+='#reloadon{transform:rotate3d(3,-2,0,180deg);}';
     t+='#reloadoff{pointer-events:none;}';
-    t+='[class^="TVContainer__right-comment-area___"] [class*="styles__comment-form___"]{padding-right:0;}';
-    t+='[class^="TVContainer__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{padding-right:23px;}';
-    t+='[class^="TVContainer__right-comment-area___"] textarea{width:calc(100% - 8px * 2 - 15px);}';
+    t+='[class^="styles__right-comment-area___"] [class*="styles__comment-form___"]{padding-right:0;}';
+    t+='[class^="styles__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{padding-right:23px;}';
+    t+='[class^="styles__right-comment-area___"] textarea{width:calc(100% - 8px * 2 - 15px);}';
     //残り時間用
     t+='#forProEndBk{padding:0px 0px;margin:4px 0px;background-color:rgba(255,255,255,0.2);z-index:12;}';
     t+='#forProEndTxt{padding:4px 5px 4px 11px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;}';
@@ -3713,9 +3713,9 @@ function setOptionHead(){
     //画面クリック調整
     t+='#moveContainer{pointer-events:none;}';
     t+=overlapSelector+'{pointer-events:none;}';
-    t+='[class^="TVContainer__footer-container___"] [class*="styles__right-container"]{pointer-events:auto;}';
+    t+='[class^="styles__footer-container___"] [class*="styles__right-container"]{pointer-events:auto;}';
     //twitter通知パネル
-    t+='[class^="TVContainer__twitter-panel___"]{z-index:9;'; //元が4(overlapは元3)なのでoverlapよりは上に置く
+    t+='[class^="styles__twitter-panel___"]{z-index:9;'; //元が4(overlapは元3)なのでoverlapよりは上に置く
     if(isHideTwitterPanel){
         t+='transform:translateX(-20px) translateX(-100%);';
     }
@@ -3726,7 +3726,7 @@ function setOptionHead(){
     }
     //コメント一覧クリックNG時はマウスオーバーで文字色を赤系にする
     if(isComelistClickNG){
-        t+='[class^="TVContainer__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]:hover{color:'+rc+';}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]:hover{color:'+rc+';}';
     }
     //流れるコメントのフォントサイズ
     t+='.movingComment{font-size:'+comeFontsize+'px;}';
@@ -3777,7 +3777,7 @@ function pophideSelector(sv,sw){
     if(sv>=0){
         st=panelopenset[sv];
     }else{
-        var jo=$(EXfoot).nextAll('[class*="TVContainer__right-slide--shown___"]');
+        var jo=$(EXfoot).nextAll('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
         if(jo.length==0){
 //console.log("panel none");
             st=panelopenset[0];
@@ -3844,7 +3844,7 @@ function usereventWakuclick(){
     if(proinfoOpened){
         setTimeout(openInfo,50,false);
     }
-    var jo=$('[class*="TVContainer__resize-screen___"]');
+    var jo=$('[class*="styles__resize-screen___"]');
     if(jo.length>0&&!waitingforResize){
         waitingforResize=true;
         waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
@@ -3987,7 +3987,7 @@ function usereventSideChliButClick(){
         }
         pophideElement(phi);
     }
-    var jo=$('[class*="TVContainer__resize-screen___"]');
+    var jo=$('[class*="styles__resize-screen___"]');
     if(jo.length>0&&!waitingforResize){
         waitingforResize=true;
         waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
@@ -4011,7 +4011,7 @@ function usereventFootInfoButClick(){
         }
         pophideElement(phi);
     }
-    var jo=$('[class*="TVContainer__resize-screen___"]');
+    var jo=$('[class*="styles__resize-screen___"]');
     if(jo.length>0&&!waitingforResize){
         waitingforResize=true;
         waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
@@ -4053,7 +4053,7 @@ function usereventFCclick(){
             pophideSelector(3,0);
         }
     }
-    var jo=$('[class*="TVContainer__resize-screen___"]');
+    var jo=$('[class*="styles__resize-screen___"]');
     if(jo.length>0&&!waitingforResize){
         waitingforResize=true;
         waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
@@ -4814,7 +4814,7 @@ function onairBasefunc(){
 //        //映像のtopが変更したらonresize()実行
 //        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
 //        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
-        var jo=$('[class*="TVContainer__resize-screen___"]');
+        var jo=$('[class*="styles__resize-screen___"]');
         //.resize-screenに設定されるwidth,heightをトリガーにする
         if(jo.length>0&&(movieWidth!=parseInt(jo[0].style.width)||movieHeight!=parseInt(jo[0].style.height))){
             onresize();
@@ -4868,7 +4868,7 @@ function onairBasefunc(){
                 }
                 commentNum=comeListLen;
 //                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0&&$(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==0){
-                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&!$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')&&$(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==0){
+                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&!$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')&&$(EXcome).siblings('[class*="styles__right-slide--shown___"]').length==0){
                     //コメ常時表示 & コメ数>設定値 & コメ開可 & 他枠非表示
 //console.log("comeRefreshing start");
                     comeRefreshing=true;
@@ -5270,13 +5270,13 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
 }
 function putNotifyButton(url){
     if(checkUrlPattern(true)!=0){return;}
-    if($('[class*="BroadcastingFrameContainer__right-contents___"] [class*="styles__time___"]').text()==""){setTimeout(function(){putNotifyButton(url)},1000);console.log("putNotifyButton wait");return;}
+    if($('[class*=styles__right-contents___] [class*=styles__time___]').text()==""){setTimeout(function(){putNotifyButton(url)},1000);console.log("putNotifyButton wait");return;}
     var urlarray = url.substring(17).split("/");
     var channel = urlarray[1];
     var channelName = channel;//目標はチャンネル名取得
     var programID = urlarray[3];
-    var programTitle = $('[class*="BroadcastingFrameContainer__right-contents___"] [class*="styles__heading___"]').text();
-    var programTimeStr = $('[class*="BroadcastingFrameContainer__right-contents___"] [class*="styles__time___"]').text();
+    var programTitle = $('[class*=styles__right-contents___] [class*=styles__title___]').text();
+    var programTimeStr = $('[class*=styles__right-contents___] [class*=styles__time___]').text();
     console.log(programTimeStr, urlarray)
     var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
     var programTime = new Date();
@@ -5288,12 +5288,12 @@ function putNotifyButton(url){
     programTime.setSeconds(0);
     if (now.getMonth() === 11 && programTime.getMonth() === 0) {programTime.setFullYear(now.getFullYear+1);} //現在12月なら1月は来年とする
     console.log(programTime)
-    putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, $('[class*="BroadcastingFrameContainer__left-contents___"] > div'));
+    putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, $("[class*=styles__left-contents___] > div"));
 }
 function putSerachNotifyButtons(){
     if(checkUrlPattern(true)!=4){return;}
-    if($('[class*=SearchResultsContainer__container___]  [class*=styles__link-area___]').length == 0 && $('[class*=SearchResultsContainer__no-contents___]').length == 0){setTimeout(function(){putSerachNotifyButtons()},1000);console.log("putSerachNotifyButtons wait");return;}
-    $('[class*=SearchResultsContainer__container___]  [class*=styles__link-area___]').each(function(i,elem){
+    if($('[class*=styles__link-area___]').length == 0 && $("[class*=styles__no-contents___]").length == 0){setTimeout(function(){putSerachNotifyButtons()},1000);console.log("putSerachNotifyButtons wait");return;}
+    $('[class*=styles__link-area___]').each(function(i,elem){
         var linkArea = $(elem);
         var progUrl = linkArea.attr('href');
         var urlarray = progUrl.substring(1).split("/");
