@@ -3641,6 +3641,8 @@ function setOptionHead(){
 //    }
     if(isCommentPadZero){ //コメ間隔詰め
         t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{margin-top:0px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__time__"]{margin-top:0px;}';
     }
     if(isCommentTBorder){ //コメ区切り線
         t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{border-top:1px solid '+vc+';}';
@@ -3650,7 +3652,8 @@ function setOptionHead(){
     }
     if(isCommentWide){ //コメント部分をほんの少し広く
         t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-right:4px;padding-left:8px;}';
-        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{width:'+(isHideOldComment?260:244)+'px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{width:'+(isHideOldComment?258:242)+'px;}';
+        //フォントによるがそれぞれ259,243でギリギリなので1だけ余裕をみる
     }
     //各パネルの常時表示 隠す場合は積極的にelement.cssに隠す旨を記述する(fade-out等に任せたり単にcss除去で済まさない)
     //もしくは常時隠して表示する場合に記述する、つまり表示切替の一切を自力でやる
@@ -4415,6 +4418,7 @@ function copycome(d,hlsw){
         if($(eo.firstElementChild).is('[class^="styles__no-contents-text___"]')){return;}
         //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
         var eofcc=$(eofc).prop("class");
+        if(eofc===undefined || !eofc.hasChildNodes()){return;}
         var em=eofc.children[0];
         var ecm=$(em).prop("class");
         var et=eofc.children[1];
@@ -4522,23 +4526,25 @@ console.log("copycome fullcopy");
         jc.children().text("");
         $('.comeposttime').attr("name","");
         for(var i=0,j=0,e,m,t,dt;(e=EXcomelist.children[i]);i++){
-            m=comefilter(e.children[0].textContent);
-            if(m.length>0){
-                t=e.children[1].textContent;
-                if(rn.test(t)){
-                    dt=nt;
-                }else if(rs.test(t)){
-                    dt=nt-(+rs.exec(t)[1])*1000;
-                }else if(rm.test(t)){
-                    dt=nt-(+rm.exec(t)[1])*60000;
+            if(e.hasChildNodes() && e.childElementCount>1){
+                m=comefilter(e.children[0].textContent);
+                if(m.length>0){
+                    t=e.children[1].textContent;
+                    if(rn.test(t)){
+                        dt=nt;
+                    }else if(rs.test(t)){
+                        dt=nt-(+rs.exec(t)[1])*1000;
+                    }else if(rm.test(t)){
+                        dt=nt-(+rm.exec(t)[1])*60000;
+                    }
+                    jc.eq(j).children().first().text(m)
+                        .css("width","")
+                        .next().text(t)
+                        .next().attr("name","t"+dt)
+                    ;
+                    j+=1;
+                    if(j>=100){break;}
                 }
-                jc.eq(j).children().first().text(m)
-                    .css("width","")
-                    .next().text(t)
-                    .next().attr("name","t"+dt)
-                ;
-                j+=1;
-                if(j>=100){break;}
             }
         }
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
