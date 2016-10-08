@@ -306,11 +306,13 @@ function onairCleaner(){
     $('.usermade').remove();
     pophideElement({allreset:true});
 }
-function waitforloadtimetable(){
+function waitforloadtimetable(url){
     if(checkUrlPattern(true)!=1&&checkUrlPattern(true)!=2){return;}
+    if(url!=currentLocation)return;
     if(!isChTimetableExpand&&!isChTimetableBreak&&!isChTimetableWeekend&&!isChTimetablePlaybutton){return;}
     var b=false;
-    if($('[class^="TimeTableContainer__container___"]').children().is('[class*="TimeTableContainer__time-table___"]')){
+//    if($('[class^="TimeTableContainer__container___"]').children().is('[class*="TimeTableContainer__time-table___"]')){
+    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
         var c=$('[class*="styles__col___"]'); //日付の列
         var t=$('[class^="styles__title___"]'); //タイトル
         if(c.length>0&&t.length>0){
@@ -325,7 +327,7 @@ function waitforloadtimetable(){
         }
     }else{
 console.log("retry waitforloadtimetable");
-        setTimeout(waitforloadtimetable,500);
+        setTimeout(waitforloadtimetable,500,url);
     }
 }
 function timetabledtfix(){
@@ -601,7 +603,7 @@ function clickOnairLink(jo){
 }
 function waitformakelink(retrycount){
 console.log("waitformakelink#"+retrycount);
-    var jo=$('[class*="BroadcastingFrameContainer__contents___"]').find('[class^="styles__link___"]');
+    var jo=$('[class*="styles__contents___"]').find('[class^="styles__link___"]');
     if(jo.length>0&&/^https:\/\/abema.tv\/now-on-air\//.test(jo.prop("href"))){
 //console.log("jo.len="+jo.length+",jo.href="+jo.prop("href"));
         clickOnairLink(jo);
@@ -3639,6 +3641,8 @@ function setOptionHead(){
 //    }
     if(isCommentPadZero){ //コメ間隔詰め
         t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{margin-top:0px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__time__"]{margin-top:0px;}';
     }
     if(isCommentTBorder){ //コメ区切り線
         t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{border-top:1px solid '+vc+';}';
@@ -3648,12 +3652,13 @@ function setOptionHead(){
     }
     if(isCommentWide){ //コメント部分をほんの少し広く
         t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-right:4px;padding-left:8px;}';
-        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{width:'+(isHideOldComment?260:244)+'px;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{width:'+(isHideOldComment?258:242)+'px;}';
+        //フォントによるがそれぞれ259,243でギリギリなので1だけ余裕をみる
     }
     //各パネルの常時表示 隠す場合は積極的にelement.cssに隠す旨を記述する(fade-out等に任せたり単にcss除去で済まさない)
     //もしくは常時隠して表示する場合に記述する、つまり表示切替の一切を自力でやる
     //（コメ欄常時表示で黒帯パネルの表示切替が発生した時のレイアウト崩れを防ぐため）
-    t+='[class^=""styles__header-container___"]{visibility:visible;opacity:1;}';
+    t+='[class^="styles__header-container___"]{visibility:visible;opacity:1;}';
     t+='[class^="styles__footer-container___"]{visibility:visible;opacity:1;}';
     t+='[class^="styles__side___"]{transform:translateY(-50%);}';
     t+='[class^="styles__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
@@ -4413,6 +4418,7 @@ function copycome(d,hlsw){
         if($(eo.firstElementChild).is('[class^="styles__no-contents-text___"]')){return;}
         //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
         var eofcc=$(eofc).prop("class");
+        if(eofc===undefined || !eofc.hasChildNodes()){return;}
         var em=eofc.children[0];
         var ecm=$(em).prop("class");
         var et=eofc.children[1];
@@ -4520,23 +4526,25 @@ console.log("copycome fullcopy");
         jc.children().text("");
         $('.comeposttime').attr("name","");
         for(var i=0,j=0,e,m,t,dt;(e=EXcomelist.children[i]);i++){
-            m=comefilter(e.children[0].textContent);
-            if(m.length>0){
-                t=e.children[1].textContent;
-                if(rn.test(t)){
-                    dt=nt;
-                }else if(rs.test(t)){
-                    dt=nt-(+rs.exec(t)[1])*1000;
-                }else if(rm.test(t)){
-                    dt=nt-(+rm.exec(t)[1])*60000;
+            if(e.hasChildNodes() && e.childElementCount>1){
+                m=comefilter(e.children[0].textContent);
+                if(m.length>0){
+                    t=e.children[1].textContent;
+                    if(rn.test(t)){
+                        dt=nt;
+                    }else if(rs.test(t)){
+                        dt=nt-(+rs.exec(t)[1])*1000;
+                    }else if(rm.test(t)){
+                        dt=nt-(+rm.exec(t)[1])*60000;
+                    }
+                    jc.eq(j).children().first().text(m)
+                        .css("width","")
+                        .next().text(t)
+                        .next().attr("name","t"+dt)
+                    ;
+                    j+=1;
+                    if(j>=100){break;}
                 }
-                jc.eq(j).children().first().text(m)
-                    .css("width","")
-                    .next().text(t)
-                    .next().attr("name","t"+dt)
-                ;
-                j+=1;
-                if(j>=100){break;}
             }
         }
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
@@ -5192,7 +5200,7 @@ function checkUrlPattern(url){
             
         });
             onairCleaner();
-            waitforloadtimetable();
+            waitforloadtimetable(url);
         }
     }else if(/^https:\/\/abema.tv\/timetable\/channels\/.*/.test(url)){
         //チャンネル別番組表
@@ -5200,7 +5208,7 @@ function checkUrlPattern(url){
             return 2;
         }else{
             onairCleaner();
-            waitforloadtimetable();
+            waitforloadtimetable(url);
         }
     }else if(/^https:\/\/abema.tv\/now-on-air\/.*/.test(url)){
         //放送ページ
