@@ -201,8 +201,7 @@ getStorage(null, function (value) {
     isMovieSpacingZeroTop=value.movieSpacingZeroTop||false;
     isMovieSpacingZeroLeft=value.movieSpacingZeroLeft||false;
     comeFontsize=Math.min(99,Math.max(1,((value.comeFontsize!==undefined)?Number(value.comeFontsize):comeFontsize)));
-    //仮追加
-    isInpWinBottom=false;//仕様変更で正常動作しなくなったので強制無効
+
 });
 
 var currentLocation = window.location.href;
@@ -2440,7 +2439,7 @@ function toggleCommentList(){
     }
 }
 function pophideElement(inp){
-//console.log(inp);
+console.log(inp);
 //inpを1(pop),-1(hide),0(除去)で受け取る
 //除去前の中身はチェックせずに除去する
     if(EXfoot===undefined){return;} //未setEXs：now-on-air未表示：pophideする必要が無い
@@ -3617,6 +3616,7 @@ function setOptionHead(){
         t+='[class^="styles__right-comment-area___"]>*{display:flex;flex-direction:column-reverse;}';
         t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid '+vc+';border-bottom:1px solid '+vc+';}';
         t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{display:flex;flex-direction:column-reverse;}';
+        t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{overflow:visible;}';
         //↑の構成そのままだと各コメントのデフォ間隔padding:15px 15px 0;のtop,bottomがうまく効かなくなってしまう
         //2つめのflex(下スクロール、コメント少数時の下詰め)を解除すれば有効になるけど、下スクロールを解除したくない
         //各コメントの中身(本文、投稿時刻)にpadding設定したらうまくいった

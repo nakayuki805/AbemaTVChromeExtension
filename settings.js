@@ -113,7 +113,7 @@ var settingsList = [
             },
             {
                 "name": "isInpWinBottom",//onairoage.jsで読み込み時にfalse代入して強制無効中
-                "description": "<s>コメント入力欄を下へ(コメント一覧は逆順・下スクロール)</s>AbemaTVの仕様変更に対応できていないので現在無効にしています。",
+                "description": "コメント入力欄を下へ(コメント一覧は逆順・下スクロール)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -144,6 +144,7 @@ var settingsList = [
             {
                 "name": "isCommentPadZero",
                 "description": "コメントの縦の隙間を詰める",
+                "instantDescription": "コメントの縦の隙間を詰める(一時適応すると今までのコメントが消えます)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
