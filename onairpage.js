@@ -2716,7 +2716,7 @@ function setEXs(){
     var b=true;
     if((EXmain=$('#main')[0])==null){b=false;console.log("#main");}
     else if((EXhead=$('[class*="styles__header-container___"]')[0])==null){b=false;console.log("head");}//AppContainer__header-container___
-    else if((EXfoot=$('[class^="styles__footer___"]')[0])==null){b=false;console.log("foot");}//TVContainer__footer-container___
+    else if((EXfoot=$('[class*="styles__footer-container___"]')[0])==null){b=false;console.log("foot");}//TVContainer__footer-container___
     else if((EXfootcome=$(EXfoot).contents().find('[class*="styles__right-container"]')[0])==null){b=false;console.log("footcome");}
     else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
     else if((EXfootcountview=EXfootcount[0])==null){b=false;console.log("footcountview");}

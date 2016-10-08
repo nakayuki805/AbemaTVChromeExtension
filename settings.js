@@ -112,7 +112,7 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
-                "name": "isInpWinBottom",//onairoage.jsで読み込み時にfalse代入して強制無効中
+                "name": "isInpWinBottom",
                 "description": "コメント入力欄を下へ(コメント一覧は逆順・下スクロール)",
                 "type": "boolean",
                 "isInstantChangable": true
