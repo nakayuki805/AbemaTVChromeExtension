@@ -967,7 +967,15 @@ function putComment(commentText,index,inmax) {
         kakikomitxt="";
     }
     commentText=comefilter(commentText);
-    var commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
+    var commentTopMargin = 50;
+    var commentBottomMargin = 150;
+    if(EXhead.style.visibility=="hidden"){
+        commentTopMargin = 10;
+    }
+    if(EXfoot.style.visibility=="hidden"){
+        commentBottomMargin = 100;
+    }
+    var commentTop = Math.floor(Math.random()*(window.innerHeight-(commentTopMargin+commentBottomMargin)))+commentTopMargin;
     if(commentText.length>0){
         i=0;
         var k=false;
@@ -979,7 +987,7 @@ function putComment(commentText,index,inmax) {
                 }
             }
             if(k){
-                commentTop = Math.floor(Math.random()*(window.innerHeight-200))+50;
+                commentTop = Math.floor(Math.random()*(window.innerHeight-(commentTopMargin+commentBottomMargin)))+commentTopMargin;
             }else{
                 break;
             }
@@ -2439,7 +2447,7 @@ function toggleCommentList(){
     }
 }
 function pophideElement(inp){
-console.log(inp);
+//console.log(inp);
 //inpを1(pop),-1(hide),0(除去)で受け取る
 //除去前の中身はチェックせずに除去する
     if(EXfoot===undefined){return;} //未setEXs：now-on-air未表示：pophideする必要が無い
@@ -3560,9 +3568,9 @@ function setOptionHead(){
     $('head>link[title="usermade"]').remove();
     var t="";
     //投稿ボタン削除（入力欄1行化はこの下のコメ見た目のほうとoptionElementでやる）
-    /*if(isCustomPostWin){
-        t+='[class^="styles__right-comment-area___"] [class*="styles__comment-form___"]>[class*="styles__etc-modules___"]{display:none;}';//公式から投稿ボタン等が消えたので現在不要
-    }*/
+    if(isCustomPostWin){
+        t+='[class^="styles__right-comment-area___"] [class*="styles__comment-form___"]>[class*="styles__etc-modules___"]{display:none;}';
+    }
     //コメント見た目
     var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
     var cc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(0.2)+")";
@@ -3648,7 +3656,7 @@ function setOptionHead(){
     t+='[class^=""styles__header-container___"]{visibility:visible;opacity:1;}';
     t+='[class^="styles__footer-container___"]{visibility:visible;opacity:1;}';
     t+='[class^="styles__side___"]{transform:translateY(-50%);}';
-    t+='[class^=styles__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
+    t+='[class^="styles__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
     t+='[class^="styles__right-slide___"]{z-index:15;}';
     t+='[class^="styles__right-comment-area___"] *{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
     //左上・左下の非表示
