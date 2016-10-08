@@ -306,11 +306,13 @@ function onairCleaner(){
     $('.usermade').remove();
     pophideElement({allreset:true});
 }
-function waitforloadtimetable(){
+function waitforloadtimetable(url){
     if(checkUrlPattern(true)!=1&&checkUrlPattern(true)!=2){return;}
+    if(url!=currentLocation)return;
     if(!isChTimetableExpand&&!isChTimetableBreak&&!isChTimetableWeekend&&!isChTimetablePlaybutton){return;}
     var b=false;
-    if($('[class^="TimeTableContainer__container___"]').children().is('[class*="TimeTableContainer__time-table___"]')){
+//    if($('[class^="TimeTableContainer__container___"]').children().is('[class*="TimeTableContainer__time-table___"]')){
+    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
         var c=$('[class*="styles__col___"]'); //日付の列
         var t=$('[class^="styles__title___"]'); //タイトル
         if(c.length>0&&t.length>0){
@@ -325,7 +327,7 @@ function waitforloadtimetable(){
         }
     }else{
 console.log("retry waitforloadtimetable");
-        setTimeout(waitforloadtimetable,500);
+        setTimeout(waitforloadtimetable,500,url);
     }
 }
 function timetabledtfix(){
@@ -601,7 +603,7 @@ function clickOnairLink(jo){
 }
 function waitformakelink(retrycount){
 console.log("waitformakelink#"+retrycount);
-    var jo=$('[class*="BroadcastingFrameContainer__contents___"]').find('[class^="styles__link___"]');
+    var jo=$('[class*="styles__contents___"]').find('[class^="styles__link___"]');
     if(jo.length>0&&/^https:\/\/abema.tv\/now-on-air\//.test(jo.prop("href"))){
 //console.log("jo.len="+jo.length+",jo.href="+jo.prop("href"));
         clickOnairLink(jo);
@@ -3653,7 +3655,7 @@ function setOptionHead(){
     //各パネルの常時表示 隠す場合は積極的にelement.cssに隠す旨を記述する(fade-out等に任せたり単にcss除去で済まさない)
     //もしくは常時隠して表示する場合に記述する、つまり表示切替の一切を自力でやる
     //（コメ欄常時表示で黒帯パネルの表示切替が発生した時のレイアウト崩れを防ぐため）
-    t+='[class^=""styles__header-container___"]{visibility:visible;opacity:1;}';
+    t+='[class^="styles__header-container___"]{visibility:visible;opacity:1;}';
     t+='[class^="styles__footer-container___"]{visibility:visible;opacity:1;}';
     t+='[class^="styles__side___"]{transform:translateY(-50%);}';
     t+='[class^="styles__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
@@ -5192,7 +5194,7 @@ function checkUrlPattern(url){
             
         });
             onairCleaner();
-            waitforloadtimetable();
+            waitforloadtimetable(url);
         }
     }else if(/^https:\/\/abema.tv\/timetable\/channels\/.*/.test(url)){
         //チャンネル別番組表
@@ -5200,7 +5202,7 @@ function checkUrlPattern(url){
             return 2;
         }else{
             onairCleaner();
-            waitforloadtimetable();
+            waitforloadtimetable(url);
         }
     }else if(/^https:\/\/abema.tv\/now-on-air\/.*/.test(url)){
         //放送ページ
