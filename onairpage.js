@@ -87,6 +87,7 @@ var isDelOldTime=false; //NG適用コメ一覧から古いコメの書込時刻�
 var isMovieSpacingZeroTop=false; //映像位置を上に詰める
 var isMovieSpacingZeroLeft=false; //映像位置を左に詰める
 var comeFontsize=32; //流れるコメントのfont-size xx-large
+var isHideVoting=false; //アンケート機能の非表示
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -201,7 +202,7 @@ getStorage(null, function (value) {
     isMovieSpacingZeroTop=value.movieSpacingZeroTop||false;
     isMovieSpacingZeroLeft=value.movieSpacingZeroLeft||false;
     comeFontsize=Math.min(99,Math.max(1,((value.comeFontsize!==undefined)?Number(value.comeFontsize):comeFontsize)));
-
+    isHideVoting=value.hideVoting||false;
 });
 
 var currentLocation = window.location.href;
@@ -1224,6 +1225,7 @@ function openOption(){
     $('#isMovieSpacingZeroTop').prop("checked",isMovieSpacingZeroTop);
     $('#isMovieSpacingZeroLeft').prop("checked",isMovieSpacingZeroLeft);
     $('#comeFontsize').val(comeFontsize);
+    $('#isHideVoting').prop("checked",isHideVoting);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -1604,7 +1606,7 @@ console.log("createSettingWindow retry");
         $('<span id="prosamedesc" style="margin-left:4px;">↑と↓が同じ位置の場合: </span>').prependTo("#iproSamePosition>*");
     }
     if($('.leftshift').length==0){
-        $('<input type="button" class="leftshift" value="←この画面を少し左へ" style="float:right;margin-top:10px;padding:0px 3px;">').appendTo('#CommentColorSettings');
+        $('<input type="button" class="leftshift" value="←この設定画面を少し左へ" style="float:right;margin-top:10px;padding:0px 3px;">').appendTo('#CommentColorSettings');
         $(".leftshift").on("click",function(){
             $("#settcont").css("right","320px");
             $(".leftshift").css("display","none");
@@ -1612,7 +1614,7 @@ console.log("createSettingWindow retry");
         });
     }
     if($('.rightshift').length==0){
-        $('<input type="button" class="rightshift" value="この画面を右へ→" style="float:right;margin-top:10px;display:none;padding:0px 3px;">').appendTo('#CommentColorSettings');
+        $('<input type="button" class="rightshift" value="この設定画面を右へ→" style="float:right;margin-top:10px;display:none;padding:0px 3px;">').appendTo('#CommentColorSettings');
         $(".rightshift").on("click",function(){
             $("#settcont").css("right","40px");
             $(".rightshift").css("display","none");
@@ -1779,15 +1781,17 @@ console.log("createSettingWindow retry");
     if($('#epnumedit').length==0){
         var s='<div id="epnumedit" style="border:1px solid black;padding:8px;margin-left:16px;display:flex;flex-direction:row;">';
         s+='<div>背景区切り数<input type="number" name="epcount" min=1 max=31></div>';
-        s+='<div style="margin-left:16px;">1番目の数字<input type="number" name="epfirst" min=1 max=69 disabled>(区切り数7以上で表示)</div>';
-        s+='<div style="margin-left:16px;">末尾調整(分)<input type="number" name="epfix" min=0 max=60 disabled></div>';
+//        s+='<div style="margin-left:16px;">1番目の数字<input type="number" name="epfirst" min=1 max=69 disabled>(区切り数7以上で表示)</div>';
+        s+='<div style="margin-left:16px;">1番目の数字<input type="number" name="epfirst" min=0 max=69></div>(0で非表示)';
+//        s+='<div style="margin-left:16px;">末尾調整(分)<input type="number" name="epfix" min=0 max=60 disabled></div>';
+        s+='<div style="margin-left:16px;">末尾調整(分)<input type="number" name="epfix" min=0 max=60></div>';
         s+='</div>';
         $(s).insertBefore("#isTimeVisible+*");
         var epnume=$('#epnumedit').contents().find('input[type="number"]');
         epnume.filter('[name="epcount"]').val(2)
             .change(epcountchange)
         ;
-        epnume.filter('[name="epfirst"]').val(1)
+        epnume.filter('[name="epfirst"]').val(0)
             .change(epfirstchange)
         ;
         epnume.filter('[name="epfix"]').val(0)
@@ -2015,9 +2019,11 @@ function movieResizeTypeChanged(){
 //}
 function epcountchange(){
     var c=parseInt($('#epnumedit input[type="number"][name="epcount"]').val());
+    var f=parseInt($('#epnumedit input[type="number"][name="epfirst"]').val());
     var proLength=0;
     var oneLength=0;
-    if(c>6){
+//    if(c>6){
+    if(f>0){
         $('#epnumedit input[type="number"][name="epfirst"]').prop("disabled",false);
         $('#epnumedit input[type="number"][name="epfix"]').prop("disabled",false);
         proLength = proEnd.getTime() - proStart.getTime(); //番組の全体長さms
@@ -2040,16 +2046,16 @@ function epcountchange(){
         }
         $('#forProEndTxt').css("background-color","rgba(0,0,0,0.4)");
     }else{
-        $('#epnumedit input[type="number"][name="epfirst"]').prop("disabled",true);
-        $('#epnumedit input[type="number"][name="epfix"]').prop("disabled",true);
+//        $('#epnumedit input[type="number"][name="epfirst"]').prop("disabled",true);
+//        $('#epnumedit input[type="number"][name="epfix"]').prop("disabled",true);
         $('#forProEndTxt').css("background-color","transparent");
     }
-    var f=parseInt($('#epnumedit input[type="number"][name="epfirst"]').val());
     var eo='<div>';
     var ea='';
     for(var i=0;i<c;i++){
         ea+=eo;
-        if(c>6){
+//        if(c>6){
+        if(f>0){
             var sprost=new Date(proStart);
             var eprost=new Date(proStart);
             sprost.setSeconds(Math.floor(i*oneLength/1000));
@@ -2067,9 +2073,9 @@ function epcountchange(){
     $('#proTimeEpNum').html(ea);
 }
 function epfirstchange(){
-    if(parseInt($('#epnumedit input[type="number"][name="epcount"]').val())>6){
+//    if(parseInt($('#epnumedit input[type="number"][name="epcount"]').val())>6){
         epcountchange();
-    }
+//    }
 }
 function epfixchange(){
     epcountchange();
@@ -2216,6 +2222,7 @@ function setSaveClicked(){
     isMovieSpacingZeroTop=$('#isMovieSpacingZeroTop').prop("checked");
     isMovieSpacingZeroLeft=$('#isMovieSpacingZeroLeft').prop("checked");
     comeFontsize=Math.min(99,Math.max(1,parseInt($('#comeFontsize').val())));
+    isHideVoting=$('#isHideVoting').prop("checked");
 
     arrayFullNgMaker();
     onresize();
@@ -3471,8 +3478,10 @@ function createTime(sw,bt){
     }
 }
 function proepMousemove(){
-    var c=parseInt($('#epnumedit input[type="number"][name="epcount"]').val());
-    if(c<=6){return;}
+//    var c=parseInt($('#epnumedit input[type="number"][name="epcount"]').val());
+//    if(c<=6){return;}
+    var c=parseInt($('#epnumedit input[type="number"][name="epfirst"]').val());
+    if(c<=0){return;}
     var jo=$('#forProEndTxt');
     if(jo.css("display")=="none"){return;}
     var t=parseFloat(jo.css("opacity"));
@@ -3701,6 +3710,7 @@ function setOptionHead(){
 //9 twitter-panel twitter通知受取ポップ 元4
 //9 fresh-panel fresh用の左下ポップ 元4
 //8 ad-reserve-button 番宣中の左下ポップ 元3
+//8 vote 投票機能 元3
 //8 overlap 映像クリック受付(クリックイベントは常時無効) 元3
 //7 #moveContainer 流れるコメント(クリックイベントは常時無効)
 //6 #ComeMukouMask 画面装飾、映像クリック受付(クリックはここで受ける)
@@ -3743,6 +3753,12 @@ function setOptionHead(){
     }
     //流れるコメントのフォントサイズ
     t+='.movingComment{font-size:'+comeFontsize+'px;}';
+    //投票機能
+    t+='[class^="styles__vote-container___"]{z-index:8;';
+    if(isHideVoting){
+        t+='display:none;';
+    }
+    t+='}';
 
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
 console.log("setOptionHead ok");
