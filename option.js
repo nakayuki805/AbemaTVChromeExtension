@@ -284,6 +284,7 @@ $(function(){
         var isMovieSpacingZeroTop=value.movieSpacingZeroTop||false;
         var isMovieSpacingZeroLeft=value.movieSpacingZeroLeft||false;
         var comeFontsize=Math.min(99,Math.max(1,((value.comeFontsize!==undefined)?Number(value.comeFontsize):32)));
+        var isHideVoting=value.hideVoting||false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -394,6 +395,7 @@ $(function(){
         $('#isMovieSpacingZeroTop').prop("checked",isMovieSpacingZeroTop);
         $('#isMovieSpacingZeroLeft').prop("checked",isMovieSpacingZeroLeft);
         $('#comeFontsize').val(comeFontsize);
+        $('#isHideVoting').prop("checked",isHideVoting);
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -480,7 +482,8 @@ $(function(){
             "delOldTime":$('#isDelOldTime').prop("checked"),
             "movieSpacingZeroTop":$('#isMovieSpacingZeroTop').prop("checked"),
             "movieSpacingZeroLeft":$('#isMovieSpacingZeroLeft').prop("checked"),
-            "comeFontsize":Math.min(99,Math.max(1,parseInt($('#comeFontsize').val())))
+            "comeFontsize":Math.min(99,Math.max(1,parseInt($('#comeFontsize').val()))),
+            "hideVoting":$('#isHideVoting').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
