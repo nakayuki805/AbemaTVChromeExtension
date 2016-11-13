@@ -208,6 +208,7 @@ getStorage(null, function (value) {
 var currentLocation = window.location.href;
 //var urlchangedtick=Date.now();
 var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
+var isEdge = window.navigator.userAgent.toLowerCase().indexOf("edge") != -1;
 var commentNum = 0;
 var comeLatestPosi=[];
 var comeTTLmin=3;
@@ -942,6 +943,7 @@ function putComeArray(inp){
 
         var waitsec=settings.movingCommentSecond*(mcleft+mcwidth)/(winwidth+mcfixedwidth);
         setTimeout(function(jo,w,l){
+            if(isEdge){jo = $(jo);}
             jo.css("transition","left "+w+"s linear")
                 .css("left",l+"px")
             ;
@@ -3773,7 +3775,7 @@ console.log("setOptionElement retry");
     if(isCustomPostWin){
         $(EXcomesendinp).prop("wrap","soft");
     }else{
-        $(EXcomesendinp).prop("wrap","");
+       isEdge || $(EXcomesendinp).prop("wrap","");
     }
     setProSamePosiChanged();
 
@@ -4429,6 +4431,7 @@ function copycome(d,hlsw){
     //console.log("EXCLChi",EXcomelistChildren)
     var jo=$(eo);
     if($('#copycome').length==0){
+        //console.log("copycome leng=0");
         var t='<div id="copycome" class="'+jo.parent().attr("class")+' usermade"><div id="copycomec">';
         var eofc=EXcomelistChildren[0];
         if($(eo.firstElementChild).is('[class^="styles__no-contents-text___"]')){return;}
@@ -4801,7 +4804,11 @@ function closecotwclick(){
     $(EXcomesendinp.parentElement).css("display","");
     $(EXcomesend).css("padding-left","");
 }
-$(window).on('load', mainfunc);
+if(isEdge){
+    mainfunc();
+}else{
+    $(window).on('load', mainfunc);
+}
 //URLによって実行内容を変更すべく各部を分離
 function mainfunc(){ //初回に一度実行しておけば後でURL部分が変わっても大丈夫なやつ
     console.log("loaded");

@@ -3,15 +3,9 @@
 	"name": "abematv ext",
 	"version": "0.5.2",
 	"description": "abematvを視聴しやすくする非公式の拡張機能",
+	"author": "AbemaTVChromeExtension on github",
 	"icons": {
 		"128": "abemaexticon.png"
-	},
-	"applications": {
-		"gecko": {
-			"id": "abematvextension@nakayuki.net",
-			"strict_min_version": "47.0",
-			"update_url": "https://www.nakayuki.net/abema-ext/update.json"
-		}
 	},
 	"permissions": [
 		"storage",
@@ -23,8 +17,7 @@
 	"content_scripts": [
 		{
 			"matches": ["https://abema.tv/*"],
-			"js": ["jquery-2.2.3.min.js", "settings.js", "onairpage.js", "updatenotify.js"],
-			"run_at": "document_start"
+			"js": ["jquery-2.2.3.min.js", "settings.js", "onairpage.js"]
 	}
 	],
 	"web_accessible_resources": [
@@ -35,7 +28,9 @@
 		"prognotifies.html",
 		"icon/gear.svg"
 	],
+	"options_page": "option.html",
 	"background": {
-		"scripts": ["event.js"]
+		"scripts": ["event.js"],
+		"persistent": false
 	}
 }
