@@ -2476,12 +2476,15 @@ function pophideElement(inp){
         if(inp.head==1){
             EXhead.style.visibility="visible";
             EXhead.style.opacity="1";
+            EXhead.style.transform="translate(0)";
         }else if(inp.head==-1){
             EXhead.style.visibility="hidden";
             EXhead.style.opacity="0";
+            EXhead.style.transform="translateY(-100%)";
         }else if(inp.head==0){
             EXhead.style.visibility="";
             EXhead.style.opacity="";
+            EXhead.style.transform="";
         }
     }
     if(inp.foot!==undefined){
@@ -2489,12 +2492,15 @@ function pophideElement(inp){
         if(inp.foot==1){
             EXfoot.style.visibility="visible";
             EXfoot.style.opacity="1";
+            EXfoot.style.transform="translate(0)";
         }else if(inp.foot==-1){
             EXfoot.style.visibility="hidden";
             EXfoot.style.opacity="0";
+            EXfoot.style.transform="translateY(100%)";
         }else if(inp.foot==0){
             EXfoot.style.visibility="";
             EXfoot.style.opacity="";
+            EXfoot.style.transform="";
         }
     }
     if(inp.side==1){
@@ -2727,7 +2733,7 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
         ;
     }
     if(repeatcount>0){
-        setTimeout(comemarginfix,210,repeatcount-1,inptime,inptitle,inpsame,inpbig);
+        setTimeout(comemarginfix,300,repeatcount-1,inptime,inptitle,inpsame,inpbig);
     }
 }
 function setEXs(){
@@ -3669,8 +3675,8 @@ function setOptionHead(){
     //各パネルの常時表示 隠す場合は積極的にelement.cssに隠す旨を記述する(fade-out等に任せたり単にcss除去で済まさない)
     //もしくは常時隠して表示する場合に記述する、つまり表示切替の一切を自力でやる
     //（コメ欄常時表示で黒帯パネルの表示切替が発生した時のレイアウト崩れを防ぐため）
-    t+='[class^="styles__header-container___"]{visibility:visible;opacity:1;}';
-    t+='[class^="styles__footer-container___"]{visibility:visible;opacity:1;}';
+    t+='[class^="styles__header-container___"]{visibility:visible;opacity:1;transform:translate(0);}';
+    t+='[class^="styles__footer-container___"]{visibility:visible;opacity:1;transform:translate(0);}';
     t+='[class^="styles__side___"]{transform:translateY(-50%);}';
     t+='[class^="styles__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
     t+='[class^="styles__right-slide___"]{z-index:15;}';
@@ -3719,8 +3725,8 @@ function setOptionHead(){
 
     //全画面・音量ボタン非表示 display:noneだとホイール音量操作でスタック
     if(isHideButtons){
-        t+='[class^="styles__footer___"]>[class^="styles__full-screen___"]{opacity:0;visibility:hidden;}';
-        t+='[class^="styles__footer___"]>[class^="styles__volume___"]{opacity:0;visibility:hidden;}';
+        t+='[class^="styles__footer-container___"] [class^="styles__full-screen___"]{opacity:0;visibility:hidden;}';
+        t+='[class^="styles__footer-container___"] [class^="styles__volume___"]{opacity:0;visibility:hidden;}';
     }
     //自動更新停止アイコン用
     t+='.reloadicon{fill:rgba(255,255,255,0.5);position:absolute;right:0;top:9px;}';
