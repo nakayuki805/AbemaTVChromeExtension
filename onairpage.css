@@ -57,7 +57,7 @@
     left: -100%;
 }
 
-[class^="styles__footer___"] { /* 黒帯バー下 */
+[class*="styles__footer___"] { /* 黒帯バー下 */
     opacity: 0.5;
 }
 [class*="styles__header___"] { /* 黒帯バー上 */
@@ -80,15 +80,15 @@
 body{
     overflow-x: hidden;/*コメント流したときにスクロールバーが出るのを防止*/
 }
-[class^="styles__continue-btn___"] { /* 新着コメのボタン */
+[class*="styles__continue-btn___"] { /* 新着コメのボタン */
 /*    display:none;*/
     opacity: 0.5;
 }
-[class^="styles__side___"] button{ /* 画面右の番組表ボタンと番組移動ボタン */
+[class*="styles__side___"] button{ /* 画面右の番組表ボタンと番組移動ボタン */
     opacity:0.5;
     z-index:20;
 }
-[class^="styles__side___"] { /* 画面右の番組表ボタンと番組移動ボタンをコメント欄の上からクリックできるように */
+[class*="styles__side___"] { /* 画面右の番組表ボタンと番組移動ボタンをコメント欄の上からクリックできるように */
     z-index:20;
 }
 #NGConfig { /*「AbemaTV, ニコニコ風コメントスクロール」ユーザースクリプトのNG設定画面　コメ欄とかぶらないように*/
@@ -111,7 +111,7 @@ body{
     margin: 10px;
 }
 /* 音量ゲージ下部の吹き出しを下へ伸ばす */
-[class^="styles__footer___"] [class^="styles__volume___"] [class^="styles__slider-container___"]:after{
+[class*="styles__footer___"] [class^="styles__volume___"] [class^="styles__slider-container___"]:after{
     border-top-width:15px;
 }
 /* その他メニューがコメ欄の下にくぐらないように */

@@ -209,6 +209,8 @@ var currentLocation = window.location.href;
 //var urlchangedtick=Date.now();
 var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
 var isEdge = window.navigator.userAgent.toLowerCase().indexOf("edge") != -1;
+var headerHeight = 44;
+var footerHeight = 70;
 var commentNum = 0;
 var comeLatestPosi=[];
 var comeTTLmin=3;
@@ -253,8 +255,8 @@ var EXcomesendinp;
 var EXcomecont;
 //var EXcomelist0;
 var EXobli;
-var EXwatchingnum;
-var EXwatchingstr;
+var EXwatchingnum;//EXobliの現在視聴中のチャンネルの子供のindex
+var EXwatchingstr;//現在視聴中のチャンネル名(右チャネル一覧のチャンネルロゴのaltから取得)
 var EXvolume;
 var comeclickcd=2; //コメント欄を早く開きすぎないためのウェイト
 var cmblockcd=0; //カウント用
@@ -2090,7 +2092,7 @@ function moveComeTopFilter(){
     var jo=$('.movingComment');
     var i=jo.length-1
     while(i>=0){
-        if(jo.eq(i).position().top>window.innerHeight-48-61){
+        if(jo.eq(i).position().top>window.innerHeight-headerHeight-footerHeight){
             jo.eq(i).remove();
         }
         i-=1;
@@ -2638,18 +2640,18 @@ function comemarginfix(repeatcount,inptime,inptitle,inpsame,inpbig){
                 volshift=true;
             }
 //            jfmbot=$(EXfoot).children('[class^="TVContainer__footer___"]').height();
-            jfmbot=61;
+            jfmbot=footerHeight;//old:61
             if(ptime=="commentinputbottom"&&ptitle=="commentinputbottomright"&&psame=="vertical"){//(ptitle=="commentinputbottomleft"||
                 jfpbot=Math.max(htime+htitle,15);
             }else if(ptime=="commentinputbottom"||(ptitle=="commentinputbottomleft"||ptitle=="commentinputbottomright")){
                 jfpbot=Math.max(htime,htitle,15);
             }else{
-                jfpbot=15;
+                jfpbot=footerHeight;
             }
             jcchd+=jfmbot;
         }else{ // jftop,jcbot
 //            jcmbot=$(EXfoot).children('[class^="TVContainer__footer___"]').height();
-            jcmbot=61;
+            jcmbot=footerHeight;//old:61
             jcchd+=jcmbot;
         }
     }else{
@@ -2743,9 +2745,9 @@ function setEXs(){
     else if((EXhead=$('[class*="styles__header-container___"]')[0])==null){b=false;console.log("head");}//AppContainer__header-container___
     else if((EXfoot=$('[class*="styles__footer-container___"]')[0])==null){b=false;console.log("foot");}//TVContainer__footer-container___
     else if((EXfootcome=$(EXfoot).contents().find('[class*="styles__right-container"]')[0])==null){b=false;console.log("footcome");}
-    else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
-    else if((EXfootcountview=EXfootcount[0])==null){b=false;console.log("footcountview");}
-    else if((EXfootcountcome=EXfootcount[1])==null){b=false;console.log("footcountcome");}
+    //else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
+    else if((EXfootcountview=$('[class*="styles__view-counter___"]')[0])==null){b=false;console.log("footcountview");}//閲覧数
+    //else if((EXfootcountcome=EXfootcount[1])==null){b=false;console.log("footcountcome");}//コメント数
     else if((EXside=$('[class^="styles__side___"]')[0])==null){b=false;console.log("side");}//TVContainer__side___
     else if((EXchli=$('[class*="styles__right-v-channel-list___"]')[0])==null){b=false;console.log("chli");}
     else if((EXinfo=$('[class*="styles__right-slide___"]')[0])==null){b=false;console.log("info");}//TVContainer__right-slide___
@@ -2755,6 +2757,8 @@ function setEXs(){
 //    else if((EXcomelist0=$($(EXcome).contents().find('[class^="styles__no-contents-text___"]:first')[0]).parent()[0])==null){b=false;console.log("comelist");}
     else if((EXvolume=$('[class^="styles__volume___"]')[0])==null){b=false;console.log("vol");}
     else if((EXobli=$('[class*="styles__tv-container___"]')[0])==null){b=false;console.log("obli");}//TVContainer__tv-container___
+    EXfootcount = EXfootcome;//仕様変更により右下にはコメント数のみとなった
+    EXfootcountcome = EXfootcome;
     if(b==true){
 console.log("setEXs ok");
         setEX2();
@@ -2771,11 +2775,11 @@ console.log("setEXs retry");
 function setEX2(){
     if(checkUrlPattern(true)!=3){return;}
     var b=true;
-    if($(EXchli).children('[class*="styles__watch___"]').length==0){b=false;}
-    else if((EXwatchingstr=$(EXchli).children('[class*="styles__watch___"]').contents().find('img').prop("alt"))==null){b=false;}
+    if($(EXchli).children('[class*="styles__current___"]').length==0){b=false;}
+    else if((EXwatchingstr=$(EXchli).children('[class*="styles__current___"]').contents().find('img[class*="styles__logo___"]').prop("alt"))==null){b=false;}
     else if((EXwatchingnum=$(EXobli).contents().find('img[alt='+EXwatchingstr+']').parents().index())==null){b=false;}
     else{
-        $(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__watch___"]').index()*85-$(EXside).position().top);
+        $(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__current___"]').index()*85-$(EXside).position().top);
     }
     if(b==true){
 console.log("setEX2 ok");
@@ -3054,7 +3058,7 @@ function waitforOpenableCome(retrycount){
 //console.log("waitforOpenableCome#"+retrycount);
     if(!isSlideOpen()&&!$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')){
 //    if($(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
-        $(EXfootcome).trigger("click");
+        $(EXfootcome).children('button').trigger("click");
 //console.log("comeopen waitforopenable");
         waitforOpenCome(1);
     }else if(retrycount>0){
@@ -3841,7 +3845,7 @@ function usereventMouseover(){
     }
 }
 function comemukouClick(){
-//console.log("comemukouClick");
+console.log("comemukouClick");
     if(isSureReadComment&&$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')){
         //常にコメ欄開だけど開けない状態ならoverlapはクリックさせず直接wakuclickへ移行
         usereventWakuclick();
@@ -3856,7 +3860,7 @@ function usereventWakuclick(){
     $(overlapSelector).css("pointer-events","none");
 //overlapは常時pointer-events:noneにしておき、その下のcomemukoumaskをclickさせる
 //その時にoverlapをクリックしても良さそうならクリックさせてすぐ塞ぐ
-//console.log("wakuclick");
+console.log("wakuclick");
 //ComeMukou時はそれぞれ解除・再適用スイッチ
     if(bginfo[2]>=2||bginfo[3]==2){
         if(isCMBlack&&isCMBkR){screenBlackSet(setBlacked[0]?0:(isCMBkTrans?1:3));}
@@ -5175,7 +5179,7 @@ function chkurl() {
         console.log("url changed");
         setTimeout(onresize, 1000);
         currentLocation = window.location.href;
-
+        eventAdded = false;
         commentNum = 0;
         $(".movingComment").remove();
         comeclickcd=2;
