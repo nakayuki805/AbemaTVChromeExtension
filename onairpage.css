@@ -127,3 +127,8 @@ body{
     transform:translateX(-170px);
 }
 */
+/*視聴数を下へ*/
+[class*="styles__view-counter___"] {
+    opacity: 0.5;
+    background-color: transparent;
+}

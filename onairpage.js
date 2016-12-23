@@ -243,7 +243,7 @@ var EXhead;
 var EXfoot;
 var EXfootcome;
 var EXfootcount;
-var EXfootcountview;
+var EXcountview;
 var EXfootcountcome;
 var EXside;
 var EXchli;
@@ -656,6 +656,7 @@ function onresize() {
     }
     //元の枠 ウィンドウが縦長の場合は映像サイズと同じ、横長の場合は横が長い
     var objr=obj.parents('[class*="styles__resize-screen___"]');
+    if(objr.length==0){return;}
     var oldwd=parseInt(objr[0].style.width);
     var oldhg=parseInt(objr[0].style.height);
 
@@ -715,6 +716,9 @@ function onresize() {
         obj.css("transition","width"+objt+", height"+objt);
         objr.parent().css("transition","top"+objt+", left"+objt);
     }
+
+    //視聴数の位置調整
+    $(EXcountview).offset({top:window.innerHeight-footerHeight});
 
     setTimeout(onresize2,0,obj,objr,newwd,newhg,newtop,newleft,oldwd,oldhg);
 }
@@ -1340,6 +1344,14 @@ console.log("delayset retry");
         document.getElementById('ComeMukouMask').addEventListener("click",comemukouClick);
     }
     setTimeout(copycome,1000);
+    //視聴数の位置調整
+    setInterval(function(){
+        $(EXcountview).css('right',$(EXfootcome).width()+'px');
+    },5000);//コメント数が表示されるまで待つ
+    setInterval(function(){
+        $(EXcountview).css('right',$(EXfootcome).width()+'px');
+    },60000);//1分ごとに再調整
+
 console.log("delayset ok");
 }
 function volumecheck(){
@@ -2746,7 +2758,7 @@ function setEXs(){
     else if((EXfoot=$('[class*="styles__footer-container___"]')[0])==null){b=false;console.log("foot");}//TVContainer__footer-container___
     else if((EXfootcome=$(EXfoot).contents().find('[class*="styles__right-container"]')[0])==null){b=false;console.log("footcome");}
     //else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
-    else if((EXfootcountview=$('[class*="styles__view-counter___"]')[0])==null){b=false;console.log("footcountview");}//閲覧数
+    else if((EXcountview=$('[class*="styles__view-counter___"]')[0])==null){b=false;console.log("footcountview");}//閲覧数
     //else if((EXfootcountcome=EXfootcount[1])==null){b=false;console.log("footcountcome");}//コメント数
     else if((EXside=$('[class^="styles__side___"]')[0])==null){b=false;console.log("side");}//TVContainer__side___
     else if((EXchli=$('[class*="styles__right-v-channel-list___"]')[0])==null){b=false;console.log("chli");}
