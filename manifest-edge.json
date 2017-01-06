@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "abematv ext",
-	"version": "0.5.4",
+	"version": "0.6.0",
 	"description": "abematvを視聴しやすくする非公式の拡張機能",
 	"author": "AbemaTVChromeExtension on github",
 	"icons": {

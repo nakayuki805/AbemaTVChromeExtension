@@ -4,6 +4,18 @@ if (typeof chrome === "undefined" || !chrome.extension) {
 }
 
 var settings = {};
+//debug
+/*
+$ = function(arg){
+    if(typeof arg == "string" && arg.length<100){
+        console.log("$("+arg+")");
+    }
+    return jQuery(arg);
+}
+$.extend = jQuery.extend;
+$.post = jQuery.post;
+$.get = jQuery.get;
+*/
 /*設定
 拡張機能のオプション画面から設定できます。
 以下の変数のコメントにある機能を利用する場合はtrue、利用しない場合はfalseを代入してください。
@@ -235,8 +247,8 @@ var EXcomelist;
 var EXcomments;
 
 //var commentsSelector = '[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]';
-var commentListParentSelector = '[class*="styles__comment-list-wrapper___"] > div';
-var overlapSelector = '[class^="style__overlap___"]';
+var commentListParentSelector = '#main div[class*="styles__comment-list-wrapper___"] > div';
+var overlapSelector = '#main div[class^="style__overlap___"]';
 
 var EXmain;
 var EXhead;
@@ -3897,7 +3909,7 @@ console.log("wakuclick");
     if(proinfoOpened){
         setTimeout(openInfo,50,false);
     }
-    var jo=$('[class*="styles__resize-screen___"]');
+    var jo=$('#main div[class*="styles__resize-screen___"]');
     if(jo.length>0&&!waitingforResize){
         waitingforResize=true;
         waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
@@ -4040,7 +4052,7 @@ function usereventSideChliButClick(){
         }
         pophideElement(phi);
     }
-    var jo=$('[class*="styles__resize-screen___"]');
+    var jo=$('#main div[class*="styles__resize-screen___"]');
     if(jo.length>0&&!waitingforResize){
         waitingforResize=true;
         waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
@@ -4064,7 +4076,7 @@ function usereventFootInfoButClick(){
         }
         pophideElement(phi);
     }
-    var jo=$('[class*="styles__resize-screen___"]');
+    var jo=$('#main div[class*="styles__resize-screen___"]');
     if(jo.length>0&&!waitingforResize){
         waitingforResize=true;
         waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
@@ -4106,7 +4118,7 @@ function usereventFCclick(){
             pophideSelector(3,0);
         }
     }
-    var jo=$('[class*="styles__resize-screen___"]');
+    var jo=$('#main div[class*="styles__resize-screen___"]');
     if(jo.length>0&&!waitingforResize){
         waitingforResize=true;
         waitforResize(5,jo[0],parseInt(jo[0].style.width),parseInt(jo[0].style.height));
@@ -4875,7 +4887,7 @@ function onairBasefunc(){
 //        //映像のtopが変更したらonresize()実行
 //        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
 //        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
-        var jo=$('[class*="styles__resize-screen___"]');
+        var jo=$('#main div[class*="styles__resize-screen___"]');
         //.resize-screenに設定されるwidth,heightをトリガーにする
         if(jo.length>0&&(movieWidth!=parseInt(jo[0].style.width)||movieHeight!=parseInt(jo[0].style.height))){
             onresize();
@@ -4898,7 +4910,7 @@ function onairBasefunc(){
 //            otosageru();
 //        }
         //コメント取得
-        var commentDivParent = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
+        var commentDivParent = $('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
         var isAnimationIncluded = commentDivParent[0].children[0].className.indexOf('styles__animation___')>=0;
         //console.log("isA",isAnimationIncluded,commentDivParent.children('div')[0])
         var comments = commentDivParent.children('div'+(isAnimationIncluded?':gt(1)':'')).find(' [class^="styles__message___"]');//新着animetionも除外
