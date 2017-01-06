@@ -5279,7 +5279,14 @@ function checkUrlPattern(url){
         if(output){
             return 4;
         }else{
-            putSerachNotifyButtons();
+            putSerachAndReminderNotifyButtons();
+        }
+    }else if(/https:\/\/abema.tv\/reminders/.test(url)){
+        //公式の視聴予約一覧
+        if(output){
+            return 5;
+        }else{
+            putSerachAndReminderNotifyButtons();
         }
     }
 }
@@ -5290,8 +5297,8 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
     var now = new Date();
     if (notifyTime > now){
         var progNotifyName = "progNotify_"+channel+"_"+programID;
-        var notifyButton = $('<input type="button" id="addNotify" data-prognotifyname="' + progNotifyName+ '">');
-        if(!notifyButParent.children().is('#addNotify')){ //重複設置の防止
+        var notifyButton = $('<div class="addNotify" data-prognotifyname="' + progNotifyName+ '"></div>');
+        if(!notifyButParent.children().is('.addNotify')){ //重複設置の防止
             notifyButton.appendTo(notifyButParent);
         }
         getStorage(progNotifyName, function(notifyData) {
@@ -5306,7 +5313,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
             };
             if(!notifyData[progNotifyName]){
                 //未登録
-                notifyButton.val("拡張機能の通知登録").click(function(e) {
+                notifyButton.text("拡張機能の通知登録").css('background-color','#fff').click(function(e) {
                     var clickedButton = $(e.target);
                     var request = notifyButtonData[clickedButton.attr("data-prognotifyname")];
                     request.type = "addProgramNotifyAlarm";
@@ -5325,7 +5332,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
                 });
             } else {
                 //登録済み
-                notifyButton.val("拡張機能の通知登録解除").click(function(e){
+                notifyButton.text("拡張機能の通知登録解除").css('background-color','#feb').click(function(e){
                     var clickedButton = $(e.target);
                     var progData = notifyButtonData[clickedButton.attr("data-prognotifyname")];
                     chrome.runtime.sendMessage({type: "removeProgramNotifyAlarm", progNotifyName: clickedButton.attr("data-prognotifyname")}, function(response) {
@@ -5341,16 +5348,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
         });
     }
 }
-function putNotifyButton(url){
-    if(checkUrlPattern(true)!=0){return;}
-    if($('[class*=styles__right-contents___] [class*=styles__time___]').text()==""){setTimeout(function(){putNotifyButton(url)},1000);console.log("putNotifyButton wait");return;}
-    var urlarray = url.substring(17).split("/");
-    var channel = urlarray[1];
-    var channelName = channel;//目標はチャンネル名取得
-    var programID = urlarray[3];
-    var programTitle = $('[class*=styles__right-contents___] [class*=styles__title___]').text();
-    var programTimeStr = $('[class*=styles__right-contents___] [class*=styles__time___]').text();
-    console.log(programTimeStr, urlarray)
+function programTimeStrToTime(programTimeStr){
     var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
     var programTime = new Date();
     var now = new Date();
@@ -5359,13 +5357,27 @@ function putNotifyButton(url){
     programTime.setHours(parseInt(programTimeArray[3]));
     programTime.setMinutes(parseInt(programTimeArray[4]));
     programTime.setSeconds(0);
-    if (now.getMonth() === 11 && programTime.getMonth() === 0) {programTime.setFullYear(now.getFullYear+1);} //現在12月なら1月は来年とする
-    console.log(programTime)
+    if (now.getMonth() === 11 && programTime.getMonth() === 0) {programTime.setFullYear(now.getFullYear()+1);} //現在12月なら1月は来年とする
+    return programTime;
+}
+function putNotifyButton(url){
+    if(checkUrlPattern(true)!=0){return;}
+    var rightContents = $('[class*=styles__right-contents___]');
+    if(rightContents.find('[class*=styles__time___]').text()==""){setTimeout(function(){putNotifyButton(url)},1000);console.log("putNotifyButton wait");return;}
+    var urlarray = url.substring(17).split("/");
+    var channel = urlarray[1];
+    var channelName = rightContents.find('[class*=styles__channel-name___]').text();
+    var programID = urlarray[3];
+    var programTitle = rightContents.find('span[class*=styles__title___]').text();
+    var programTimeStr = rightContents.find('[class*=styles__time___]').text();
+    //console.log(programTimeStr, urlarray)
+    var programTime = programTimeStrToTime(programTimeStr);
+    //console.log(programTime)
     putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, $("[class*=styles__left-contents___] > div"));
 }
-function putSerachNotifyButtons(){
-    if(checkUrlPattern(true)!=4){return;}
-    if($('[class*=styles__link-area___]').length == 0 && $("[class*=styles__no-contents___]").length == 0){setTimeout(function(){putSerachNotifyButtons()},1000);console.log("putSerachNotifyButtons wait");return;}
+function putSerachAndReminderNotifyButtons(){
+    if(checkUrlPattern(true)!=4 && checkUrlPattern(true)!=5){return;}
+    if($('[class*=styles__link-area___]').length == 0 && $("[class*=styles__no-contents___]").length == 0 && $("[class*=styles__reminder-feature___]").length == 0){setTimeout(function(){putSerachAndReminderNotifyButtons()},1000);console.log("putSerachAndReminderNotifyButtons wait");return;}
     $('[class*=styles__link-area___]').each(function(i,elem){
         var linkArea = $(elem);
         var progUrl = linkArea.attr('href');
@@ -5374,18 +5386,10 @@ function putSerachNotifyButtons(){
         var channel = urlarray[1];
         var channelName = linkArea.find('[class*=styles__details___]').eq(0).text();
         var programID = urlarray[3];
-        var programTitle = linkArea.find('[class*=styles__title___]').text();
-        var programTimeArray = linkArea.find('[class*=styles__details___]').text().match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
-        (parseInt(programTimeArray[1])-1);
-        var programTime = new Date();
-        var now = new Date();
-        programTime.setDate(parseInt(programTimeArray[2]));
-        programTime.setHours(parseInt(programTimeArray[3]));
-        programTime.setMinutes(parseInt(programTimeArray[4]));
-        programTime.setSeconds(0);
-        if (now.getMonth() === 11 && programTime.getMonth() === 0) {programTime.setFullYear(now.getFullYear+1);} //現在12月なら1月は来年とする
+        var programTitle = linkArea.find('[class*=styles__title___]').text();    
+        var programTime = programTimeStrToTime(linkArea.find('[class*=styles__details___]').text());
         putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, linkArea.parent());
-    })
+    });
 }
 
 chrome.runtime.onMessage.addListener(function(r){

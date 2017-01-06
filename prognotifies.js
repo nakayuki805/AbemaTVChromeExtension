@@ -5,7 +5,8 @@ if (typeof chrome === "undefined" || !chrome.extension) {
 
 function dateToStr(date){
     date = new Date(date);
-    return (date.getMonth()+1)+"月"+date.getDate()+"日 "+date.getHours()+"時"+date.getMinutes()+"分";
+    var days = ["日", "月", "火", "水", "木", "金", "土"] ;
+    return (date.getMonth()+1)+"月"+date.getDate()+"日（"+days[date.getDay()]+"）"+date.getHours()+"時"+date.getMinutes()+"分";
 }
 $(function(){
     chrome.storage.local.get(function(values){

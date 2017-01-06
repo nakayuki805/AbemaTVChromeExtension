@@ -132,3 +132,22 @@ body{
     opacity: 0.5;
     background-color: transparent;
 }
+/*通知登録ボタン*/
+.addNotify {
+    background-color: #fff;
+    border: 1px solid orangered;
+    border-radius: 2px;
+    color: orangered;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 12px 0 10px;
+    text-align: center;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+[class*="styles__item___"] .addNotify { /*検索結果*/
+    padding: 5px 0 4px;
+    margin-left: 12px;
+    margin-top: 0;
+    width: 200px;
+}
