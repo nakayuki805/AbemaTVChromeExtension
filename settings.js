@@ -140,6 +140,12 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isCommentFormWithSide",
+                "description": "↑有効時にコメント入力欄を右のボタンと連動して非表示(画面右のボタンがマウス無操作時に非表示になる場合、合わせて入力欄も非表示になります)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
                 "name": "sureReadRefreshx",
                 //        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
                 //        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",

@@ -44,6 +44,7 @@ var isVolumeWheel = false; //マウスホイールで音量を操作する
 var changeMaxVolume = 100; //最大音量(100)をこの値へ自動変更
 var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false; //コメント欄を開きっ放しにする
+settings.isCommentFormWithSide = false;//↑有効時にコメ入力欄を右ボタンに連動させて非表示
 var sureReadRefreshx=2000000; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
 settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
 //var isMovieResize = false; //映像を枠に合わせて縮小
@@ -151,6 +152,7 @@ getStorage(null, function (value) {
     changeMaxVolume = Math.min(100,Math.max(0,((value.changeMaxVolume!==undefined)?value.changeMaxVolume : changeMaxVolume)));
     isTimeVisible = value.timeVisible || false;
     isSureReadComment = value.sureReadComment || false;
+    settings.isCommentFormWithSide = value.isCommentFormWithSide || false;
     sureReadRefreshx = Math.max(101,((value.sureReadRefreshx!==undefined)?value.sureReadRefreshx : sureReadRefreshx));
 //        isMovieResize = value.movieResize || false;
 //    isMovieMaximize = value.movieMaximize || false;
@@ -261,8 +263,8 @@ var EXside;
 var EXchli;
 var EXinfo;
 var EXcome;
-var EXcomesend;
-var EXcomesendinp;
+var EXcomesend;//コメント入力フォーム
+var EXcomesendinp;//↑のtextarea
 //var EXcomesendbut;
 var EXcomecont;
 //var EXcomelist0;
@@ -2191,6 +2193,7 @@ function setSaveClicked(){
     changeMaxVolume = Math.min(100,Math.max(0,parseInt($("#changeMaxVolume").val())));
     isTimeVisible = $("#isTimeVisible").prop("checked");
     isSureReadComment = $("#isSureReadComment").prop("checked");
+    settings.isCommentFormWithSide = $("#isCommentFormWithSide").prop("checked");
     sureReadRefreshx = Math.max(101,$("#sureReadRefreshx").val());
 //    isMovieResize = $("#isMovieResize").prop("checked");
 //    isMovieMaximize = $("#isMovieMaximize").prop("checked");
@@ -2531,8 +2534,14 @@ function pophideElement(inp){
     }
     if(inp.side==1){
         EXside.style.transform="translateY(-50%)";
+        if(isSureReadComment && settings.isCommentFormWithSide){
+            $(EXcomesend).show();
+        }
     }else if(inp.side==-1){
         EXside.style.transform="translate(100%, -50%)";
+        if(isSureReadComment && settings.isCommentFormWithSide){
+            $(EXcomesend).hide();
+        }
     }else if(inp.side==0){
         EXside.style.transform="";
     }
