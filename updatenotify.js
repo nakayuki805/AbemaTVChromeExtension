@@ -6,9 +6,9 @@ if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
 
-var currentUpdateNotifyVersion = 7;//7は0.4.3の時
+var currentUpdateNotifyVersion = 8;//8は0.6.2の時
 var optionUrl = chrome.extension.getURL("option.html");
-var notifyContent = "最近追加された機能(※デフォルト無効):<br>コメント欄を常に表示する際に右ボタンに連動して入力欄を非表示にできるようになりました。<br>コメントの反映が少し遅くなっています。<br>コメント欄の表示が乱れるため<b></b><br>v0.4.0より共有NGワードに対応しました。※<br>v0.3.0よりNG設定を流れるコメントだけではなく右のコメント欄にも反映させることも可能になりました。※<br><b>設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a><br><br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。";
+var notifyContent = "最近追加された機能(※デフォルト無効):<br>番組表を開いたときに指定したチャンネルへ自動スクロール※<br>番組表の検索結果と公式の視聴予約一覧に拡張機能の通知登録ボタン設置<br>コメント欄を常に表示する際に右ボタンに連動して入力欄を非表示※<br>以上の機能が追加されています。<br><b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a><br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。";
 
 function updateInfo(message) {
     var toastElem = $("<div class='toast' id='updateInfo'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");

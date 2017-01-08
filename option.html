@@ -35,6 +35,10 @@
     <input type="button" id="saveBtn" value="保存">
     <span id="info"></span><hr>
     <input type="button" id="resetSettingsBtn" value="設定をリセット"><br>
-    <input type="button" id="resetCMSettingsBtn" value="コメント無効時関連リセット">:CM時や前後に問題が生じたときはこのボタンを試してください。
+    <input type="button" id="resetCMSettingsBtn" value="コメント無効時関連リセット">:CM時や前後に問題が生じたときはこのボタンを試してください。<br>
+    <input type="button" id="reportBugFormBtn" value="不具合報告フォームへ">
+    <form target="_blank" method="POST" id="reportBugForm" action="https://abema.nakayuki.net/abema-ext/report.php">
+    <input type="hidden" id="atachedInfo" name="info">
+    </form>
 </body>
 </html>
