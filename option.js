@@ -273,6 +273,7 @@ $(function(){
         var isChTimetableBreak=value.chTimetableBreak||false;
         var isChTimetableWeekend=value.chTimetableWeekend||false;
         var isChTimetablePlaybutton=value.chTimetablePlaybutton||false;
+        var timetableScroll = value.timetableScroll||"";
         var isHideTwitterPanel=value.hideTwitterPanel||false;
         var isHideTodayHighlight=value.hideTodayHighlight||false;
         var isComelistNG=value.comelistNG||false;
@@ -384,6 +385,7 @@ $(function(){
         $('#isChTimetableBreak').prop("checked",isChTimetableBreak);
         $('#isChTimetableWeekend').prop("checked",isChTimetableWeekend);
         $('#isChTimetablePlaybutton').prop("checked",isChTimetablePlaybutton);
+        $('#timetableScroll').val(timetableScroll);
         $('#isHideTwitterPanel').prop("checked",isHideTwitterPanel);
         $('#isHideTodayHighlight').prop("checked",isHideTodayHighlight);
         $('#isComelistNG').prop("checked",isComelistNG);
@@ -474,6 +476,7 @@ $(function(){
             "chTimetableBreak":$('#isChTimetableBreak').prop("checked"),
             "chTimetableWeekend":$('#isChTimetableWeekend').prop("checked"),
             "chTimetablePlaybutton":$('#isChTimetablePlaybutton').prop("checked"),
+            "timetableScroll": $('#timetableScroll').val(),
             "hideTwitterPanel":$('#isHideTwitterPanel').prop("checked"),
             "hideTodayHighlight":$('#isHideTodayHighlight').prop("checked"),
             "comelistNG":$('#isComelistNG').prop("checked"),

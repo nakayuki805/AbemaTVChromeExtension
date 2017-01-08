@@ -88,6 +88,7 @@ var isHidePopFresh=false; //左下に出るFresh宣伝
 var isChTimetableBreak=false; //チャンネル別番組表でタイトルの改行位置を変更する
 var isChTimetableWeekend=false; //土日を着色する
 var isChTimetablePlaybutton=false; //番組表からnow-on-airに直接移動するためのリンク設置
+settings.timetableScroll=""; //番組表で指定チャンネルへスクロール
 var isHideTwitterPanel=false; //「twitterで番組情報を受け取ろう」な左下パネル非表示
 var isHideTodayHighlight=false; //ヘッダメニューの今日のみどころのポップアップ
 var isComelistNG=false; //コメント一覧の代わりにNG適用済一覧を表示する
@@ -204,6 +205,7 @@ getStorage(null, function (value) {
     isChTimetableBreak=value.chTimetableBreak||false;
     isChTimetableWeekend=value.chTimetableWeekend||false;
     isChTimetablePlaybutton=value.chTimetablePlaybutton||false;
+    timetableScroll=value.timetableScroll||"";
     isHideTwitterPanel=value.hideTwitterPanel||false;
     isHideTodayHighlight=value.hideTodayHighlight||false;
     isComelistNG=value.comelistNG||false;
@@ -327,7 +329,7 @@ function onairCleaner(){
 function waitforloadtimetable(url){
     if(checkUrlPattern(true)!=1&&checkUrlPattern(true)!=2){return;}
     if(url!=currentLocation)return;
-    if(!isChTimetableExpand&&!isChTimetableBreak&&!isChTimetableWeekend&&!isChTimetablePlaybutton){return;}
+    if(!isChTimetableExpand&&!isChTimetableBreak&&!isChTimetableWeekend&&!isChTimetablePlaybutton&&!timetableScroll){return;}
     var b=false;
 //    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
     if($('[class*="styles__channel-content-header-wrapper___"]').next('[class*="styles__time-table___"]').length>0){
@@ -364,6 +366,16 @@ function timetabledtfix(){
     }
     if(ce){
         timetabledtloop();
+    }
+    if(timetableScroll!=""){
+        var channelLink = $('a[href="/timetable/channels/' + timetableScroll + '"][class*="styles__channel-link___"]');
+        if(channelLink.length>0){
+            var chLinkWidth = channelLink.width();
+            $('[class*="styles__content-wrapper___"]').scrollLeft(chLinkWidth*channelLink.index());
+        }else{
+            console.warn("timetable scroll failed. (channelLink not found: チャンネル名が正しくないか仕様変更)");
+        }
+
     }
 }
 function timetabledtloop(){
@@ -1236,6 +1248,7 @@ function openOption(){
     $('#isChTimetableBreak').prop("checked",isChTimetableBreak);
     $('#isChTimetableWeekend').prop("checked",isChTimetableWeekend);
     $('#isChTimetablePlaybutton').prop("checked",isChTimetablePlaybutton);
+    $('#timetableScroll').val(settings.timetableScroll);
     $('#isHideTwitterPanel').prop("checked",isHideTwitterPanel);
     $('#isHideTodayHighlitht').prop("checked",isHideTodayHighlight);
     $('#isComelistNG').prop("checked",isComelistNG);
@@ -3642,6 +3655,7 @@ function setOptionHead(){
     t+='[class^="styles__right-comment-area___"] textarea{background-color:'+uc+';color:'+tc+';}';
     t+='[class^="styles__right-comment-area___"] textarea+*{background-color:'+cc+';color:'+tc+';}';
     t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:'+bc+';color:'+tc+';}';
+    t+='[class^="styles__right-comment-area___"] [class*="styles__animation-inner___"]>div{background-color:transparent;}';
     t+='[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:'+tc+';}';
 //    //映像最大化
 ////    if(isMovieMaximize||isSureReadComment){

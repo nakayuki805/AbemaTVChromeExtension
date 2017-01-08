@@ -354,6 +354,12 @@ var settingsList = [
                 "description": "各番組表ページに、放送中画面への直接リンクを設置する (丸型の再生ボタンの場合、番組詳細画面が一瞬だけ表示されます)",
                 "type": "boolean",
                 "isInstantChangable": false
+            },{
+                "name": "timetableScroll",
+                "description": "番組表を開いたときに指定したチャンネルまで自動スクロール(abema-news、drama、anime24などのurl中のチャンネル名を一つ指定)",
+                "type": "text",
+                "default": "",
+                "isInstantChangable": false
             }
         ]
     }
@@ -629,6 +635,12 @@ function generateOptionInput(settingsArr, isPermanent) {
                 inputHTML += isNotChangable ? NCTEXT : "" + "</span>:";
                 inputHTML += '<span class="prop">-</span>';
                 inputHTML += '<input type="range" id="' + settingsArr[i].name + '" max=255 ' + disabled + '></div>';
+            } else if (settingsArr[i].type === "text"){
+                defaultVal = settingsArr[i].default || "";
+                inputHTML += description;
+                inputHTML += isNotChangable ? NCTEXT : "" + ":";
+                inputHTML += '<input type="input" id="' + settingsArr[i].name + '" ' + disabled + ' placeholder=' + defaultVal + '>';
+                inputHTML += "<br/>"
             }
         }
     }
