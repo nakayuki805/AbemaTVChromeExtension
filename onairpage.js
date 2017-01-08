@@ -329,8 +329,8 @@ function waitforloadtimetable(url){
     if(url!=currentLocation)return;
     if(!isChTimetableExpand&&!isChTimetableBreak&&!isChTimetableWeekend&&!isChTimetablePlaybutton){return;}
     var b=false;
-//    if($('[class^="TimeTableContainer__container___"]').children().is('[class*="TimeTableContainer__time-table___"]')){
-    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
+//    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
+    if($('[class*="styles__channel-content-header-wrapper___"]').next('[class*="styles__time-table___"]').length>0){
         var c=$('[class*="styles__col___"]'); //日付の列
         var t=$('[class^="styles__title___"]'); //タイトル
         if(c.length>0&&t.length>0){
@@ -389,7 +389,7 @@ function timetablechfix(){
         t+='[class^="styles__title___"]{word-break:break-word;}';
     }
     if(isChTimetableWeekend){
-        var h=$('[class*="styles__date-list-header-inner___"]').children();
+        var h=$('[class*="styles__date-list-header___"]').children();//styles__date-list-header-inner___
         var sat=-1;
         var sun=-1;
         for(var i=0;i<h.length;i++){
@@ -1170,6 +1170,7 @@ function openOption(){
     $("#changeMaxVolume").val(changeMaxVolume);
     $("#isTimeVisible").prop("checked", isTimeVisible);
     $("#isSureReadComment").prop("checked", isSureReadComment);
+    $("#isCommentFormWithSide").prop("checked", settings.isCommentFormWithSide);
     $("#sureReadRefreshx").val(sureReadRefreshx);
     $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
 //    $("#isMovieResize").prop("checked", isMovieResize);

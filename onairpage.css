@@ -151,3 +151,6 @@ body{
     margin-top: 0;
     width: 200px;
 }
+.addNotify:hover{
+    opacity: 0.7;
+}
