@@ -2794,7 +2794,7 @@ function setEXs(){
     else if((EXfootcome=$(EXfoot).contents().find('[class*="styles__right-container"]')[0])==null){b=false;console.log("footcome");}
     //else if((EXfootcount=$(EXfoot).contents().find('[class*="styles__counter___"]'))==null){b=false;console.log("footcount");}
     else if((EXcountview=$('[class*="styles__view-counter___"]')[0])==null){b=false;console.log("footcountview");}//閲覧数
-    //else if((EXfootcountcome=EXfootcount[1])==null){b=false;console.log("footcountcome");}//コメント数
+    else if((EXfootcountcome=$(EXfootcome).find("button")[0])==null){b=false;console.log("footcountcome");}//コメント数
     else if((EXside=$('[class^="styles__side___"]')[0])==null){b=false;console.log("side");}//TVContainer__side___
     else if((EXchli=$('[class*="styles__right-v-channel-list___"]')[0])==null){b=false;console.log("chli");}
     else if((EXinfo=$('[class*="styles__right-slide___"]')[0])==null){b=false;console.log("info");}//TVContainer__right-slide___
@@ -2805,7 +2805,6 @@ function setEXs(){
     else if((EXvolume=$('[class^="styles__volume___"]')[0])==null){b=false;console.log("vol");}
     else if((EXobli=$('[class*="styles__tv-container___"]')[0])==null){b=false;console.log("obli");}//TVContainer__tv-container___
     EXfootcount = EXfootcome;//仕様変更により右下にはコメント数のみとなった
-    EXfootcountcome = EXfootcome;
     if(b==true){
 console.log("setEXs ok");
         setEX2();
@@ -4374,7 +4373,7 @@ function fastEyecatching(retrycount){
     }else{
         //eyecatch消失
         eyecatcheck=false;
-        if(isNaN(parseInt(EXfootcountcome.innerHTML))){
+        if(isNaN(parseInt($(EXfootcountcome).text()))){
             bginfo[3]=2;
             cmblockcd=0;
             startCM();
@@ -5016,7 +5015,7 @@ function onairBasefunc(){
         //2つに分かれていたのを統合
         //この後ろで結局コメ数チェックするのでここでついでに実行
         if(EXfootcountcome){
-            var comeContStr=EXfootcountcome.innerHTML;
+            var comeContStr=$(EXfootcountcome).text();
             var commentCount;
             if(isNaN(parseInt(comeContStr))){ //今コメント無効
                 commentCount=-1;
@@ -5049,6 +5048,7 @@ function onairBasefunc(){
                 if(eyecatched==true){
                     //前回も有った=eyecatchが引き続き出現中
                 }else{
+                    //console.log("eyecatch appeared");
                     //前回は無かった=eyecatchが今出現した
                     if(cmblockcd<=-1){
                         //カウントアップ中なら早めてこの後すぐ発動
@@ -5079,6 +5079,7 @@ function onairBasefunc(){
                 eyecatched=false;
             }
         }
+        //console.log("cmblockcd",cmblockcd);
         if(cmblockcd!=0){
             if(cmblockcd>0){
                 cmblockcd-=1;
