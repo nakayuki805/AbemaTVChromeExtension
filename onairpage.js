@@ -222,6 +222,7 @@ getStorage(null, function (value) {
 });
 
 var currentLocation = window.location.href;
+var previousLocation = currentLocation;//URL変化前のURL
 //var urlchangedtick=Date.now();
 var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
 var isEdge = window.navigator.userAgent.toLowerCase().indexOf("edge") != -1;
@@ -2480,7 +2481,7 @@ function setComeColorChanged() {
     }
 }
 function toggleCommentList() {
-    console.log("comevisiset toggleCommentList");
+    //console.log("comevisiset toggleCommentList");
     //    var jo=$(EXcomelist).parent();
     var jo = $(EXcomelist).parent().parent().children('[class^="styles__comment-list-wrapper___"]');
     //display:noneだと崩れるので変更
@@ -3073,7 +3074,7 @@ function chkcomelist(retrycount) {
     if (EXcomelist.firstElementChild.className.indexOf('styles__animation___') >= 0) { comeListLen--; }//冒頭のanimationは数から除外
     //console.log("chkcomelist#"+retrycount+",comelistlen="+comeListLen);
     if (comeListLen <= sureReadRefreshx && (comeListLen > 1 || retrycount == 0)) {
-        console.log("comeRefreshed " + commentNum + "->" + comeListLen);
+        //console.log("comeRefreshed " + commentNum + "->" + comeListLen);
         comeRefreshing = false;
         comeFastOpen = false;
         commentNum = comeListLen;
@@ -3654,7 +3655,7 @@ function setOptionHead() {
     t += '[class^="styles__right-comment-area___"] textarea{background-color:' + uc + ';color:' + tc + ';}';
     t += '[class^="styles__right-comment-area___"] textarea+*{background-color:' + cc + ';color:' + tc + ';}';
     t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:' + bc + ';color:' + tc + ';}';
-    t += '[class^="styles__right-comment-area___"] [class*="styles__animation-inner___"]>div{background-color:transparent;}';
+    t += '[class^="styles__right-comment-area___"] [class*="styles__animation-inner___"]>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので)
     t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:' + tc + ';}';
     //    //映像最大化
     ////    if(isMovieMaximize||isSureReadComment){
@@ -4181,10 +4182,10 @@ function usereventSendInpKeyinput() {
     //console.log($(EXcomesendinp).scrollTop()+"->"+s);
     $(EXcomesendinp).scrollTop(s);
 }
-function setOptionEvent() {
+function setOptionEvent() {//放送画面用イベント設定
     if (checkUrlPattern(true) != 3) { return; }
     //自作要素のイベントは自作部分で対応
-    console.log("setOptionEvent() eventAdded:", eventAdded);
+    //console.log("setOptionEvent() eventAdded:", eventAdded);
     if (eventAdded) { return; }
     var butfs;
     var pwaku;
@@ -5226,10 +5227,14 @@ $(window).on("resize", onresize);
 setInterval(chkurl, 2000);
 function chkurl() {
     if (currentLocation != window.location.href) {
-        console.log("%curl changed", "background-color:yellow;");
-        setTimeout(onresize, 1000);
+        previousLocation = currentLocation;
         currentLocation = window.location.href;
-        eventAdded = false;
+        console.log("%curl changed", "background-color:yellow;");
+        //console.log("old location:", previousLocation);
+        setTimeout(onresize, 1000);
+        if (checkUrlPattern(false) != 3){
+            eventAdded = false;//放送画面以外→放送画面と推移した場合イベント設定しなおし
+        }
         commentNum = 0;
         $(".movingComment").remove();
         comeclickcd = 2;
@@ -5247,8 +5252,11 @@ function chkurl() {
 //onloadからも呼ばれる
 function checkUrlPattern(url) {
     //urlがtrueなら各部の実行はせず出力のみ(無限再試行でもURL切替で終了できるようにするURL判定用)
+    //urlがfalseなら各部の実行はせずpreviousLocationによる出力のみ
     var output = false;
-    if (url === true) { url = currentLocation; output = true; } else {
+    if (url === true) { url = currentLocation; output = true; } 
+    else if (url === false) { url = previousLocation; output = true; }
+    else {
         console.log("cup", url)
             ;
     }
