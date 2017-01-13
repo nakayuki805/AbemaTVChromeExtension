@@ -11,7 +11,7 @@ var settingsList = [
                 "name": "isResizeScreen",
                 //        "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
 //                "description": "映像をウィンドウに合わせてリサイズ、映像の位置を上に詰める (映像がウィンドウ外にはみ出なくなり、コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
-                "description": "映像をウィンドウに合わせてリサイズ (コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
+                "description": "映像をウィンドウに合わせてリサイズ (コメ欄などを開いても映像が縮まず、映像の上に重なります。) ◆",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -134,7 +134,7 @@ var settingsList = [
             {
                 "name": "isSureReadComment",
                 //        "description": "常にコメント欄を表示する",
-                "description": "常にコメント欄を開こうとする(開閉が制限されている時は開けません)(設定時に右下のコメント数クリックで入力欄を残してコメント欄を閉じれます)",
+                "description": "常にコメント欄を開こうとする(開閉が制限されている時は開けません)(設定時に右下のコメント数クリックで入力欄を残してコメント欄を閉じれます) ◇★",
                 "type": "boolean",
                 //        "isInstantChangable": false
                 "isInstantChangable": true
@@ -181,7 +181,7 @@ var settingsList = [
             {
                 "name": "isComelistNG",
 //                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
-                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで<s>、投稿時刻は新着のみ表示</s>となります。)コメントを選択し、右クリックNGワード追加できます。",
+                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで<s>、投稿時刻は新着のみ表示</s>となります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -217,7 +217,7 @@ var settingsList = [
         "settings": [
             {
                 "name": "isMovingComment",
-                "description": "新着コメントをあの動画サイトのように横に流す(コメント欄を開いているときのみ有効、コメント欄関連設定の「常にコメント欄を開こうとする」を同時に有効にすると常にコメントが流れるのでおすすめです。)",
+                "description": "新着コメントをあの動画サイトのように横に流す(コメント欄を開いているときのみ有効、コメント欄関連設定の「常にコメント欄を開こうとする」を同時に有効にすると常にコメントが流れるのでおすすめです。) ◇★(重くなることがあります)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -247,7 +247,7 @@ var settingsList = [
             },
             {
                 "name": "isComeDel",
-                "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/も可、//コメント)(<s>流れるコメントにのみ有効、右のコメ欄には反映されません</s> 上の設定で適用可能になりました。コメント欄関連設定の「NG設定をコメント一覧にも適用する」を有効にしてください)",
+                "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/も可、//コメント)(<s>流れるコメントにのみ有効、右のコメ欄には反映されません</s> 上の設定で適用可能になりました。コメント欄関連設定の「NG設定をコメント一覧にも適用する」を有効にしてください) ◇☆",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -290,13 +290,13 @@ var settingsList = [
                 "name": "isTimeVisible",
                 //        "description": "コメント入力欄の近くに番組残り時間を表示",
                 //        "description": "画面右上に番組残り時間を表示",
-                "description": "番組残り時間を表示",
+                "description": "番組残り時間を表示 ◆",
                 "type": "boolean",
                 "isInstantChangable": true
             },
             {
                 "name": "isProtitleVisible",
-                "description": "番組タイトルを表示",
+                "description": "番組タイトルを表示 ◆",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -319,7 +319,7 @@ var settingsList = [
             },
             {
                 "name": "isNotifyAndOpen",
-                "description": "番組通知時に自動で新しいタブで放送画面を開く",
+                "description": "番組通知時に自動で新しいタブで放送画面を開く ◆",
                 "type": "boolean",
                 "isInstantChangable": false
             },
@@ -351,7 +351,7 @@ var settingsList = [
                 "isInstantChangable": false
             },{
                 "name": "isChTimetablePlaybutton",
-                "description": "各番組表ページに、放送中画面への直接リンクを設置する (丸型の再生ボタンの場合、番組詳細画面が一瞬だけ表示されます)",
+                "description": "各番組表ページに、放送中画面への直接リンクを設置する (丸型の再生ボタンの場合、番組詳細画面が一瞬だけ表示されます) ◆",
                 "type": "boolean",
                 "isInstantChangable": false
             },{
