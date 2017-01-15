@@ -454,76 +454,83 @@ function timetablechfix() {
 }
 function TimetableExpander() {
     if (!isChTimetableExpand) { return; }
-    var c = $('[class*="styles__col___"]'); //日付の列
-    var t = $('[class^="styles__title___"]'); //タイトル
-    for (var i = 0, ci, ct; i < c.length; i++) {
-        ci = c.eq(i);
-        ct = ci.find(t);
-        for (var j = ct.length - 1, ctj, ctjh, ctjp, ctjph, ctjpot, ctjpob, ctja, ctjah, hd; j >= 0; j--) {
-            ctj = ct.eq(j);
-            ctjh = ctj.height();
-            ctjp = ci.children().has(ctj);
-            ctjpot = ctjp.offset().top;
-            ctjph = ctjp.height();
-            ctjpob = ctjpot + ctjph;
-            ctja = ctj.parents('article');
-            if (ctja.prev().is('[class^="styles__suspension-item___"]')) {
-                ctjpot = ctja.offset().top;
+    var dayCols = $('[class*="styles__col___"]'); //日付の列
+    var progTitles = $('span[class^="styles__title___"]'); //各番組タイトル
+    var i = 0, col, titlesInCol;
+    for (i = 0; i < dayCols.length; i++) { //列の日付についてのループ
+        col = dayCols.eq(i);
+        titlesInCol = col.find(progTitles);
+        var j, eachTitle, titleHeight, progDiv, progDivHeight, progDivTop, progDivBottomPos, progArticle, progArticleHeight, heightDelta;
+        for (j = titlesInCol.length - 1; j >= 0; j--) { //列の中の番組タイトルについてのループ
+            eachTitle = titlesInCol.eq(j);
+            titleHeight = eachTitle.height();
+            progDiv = col.children().has(eachTitle);
+            progDivTop = progDiv.offset().top;
+            progDivHeight = progDiv.height();
+            progDivBottomPos = progDivTop + progDivHeight;//各番組divの底のtop位置
+            progArticle = eachTitle.parents('article');//各番組div内のarticle要素
+            //番組articleの前後に空白がある場合、porgDivの位置を設定し直す
+            if (progArticle.prev().is('[class^="styles__suspension-item___"]')) { //suspension-itemは番組表の空白埋めdivで連接する番組のarticleと兄弟(例えばその日最初の番組の前に前日からの日越し番組があるとその部分がその日の番組表では空白になる)
+                progDivTop = progArticle.offset().top;
             }
-            if (ctja.next().is('[class^="styles__suspension-item___"]')) {
-                ctjpob = ctja.next('[class^="styles__suspension-item___"]').offset().top - 1;
+            if (progArticle.next().is('[class^="styles__suspension-item___"]')) {
+                progDivBottomPos = progArticle.next('[class^="styles__suspension-item___"]').offset().top - 1;
             }
-            ctjph = ctjpob - ctjpot;
-            var ctjah = parseInt(ctja.css("height"));
-            var hd = ctjh + 24 - ctjah;
-            if (hd <= 0) { continue; }
-            var a = $('[class^="styles__time-axis-item___"]');
-            for (var v = 0, av, avh, avob; v < a.length; v++) {
-                av = a.eq(v);
-                avh = parseInt(av.css("height"));
-                avob = av.offset().top + avh + 1;
-                if (avob >= ctjpob) {
-                    av.css("padding-top", (parseInt(av.css("padding-top")) + Math.floor(hd / 2)) + "px")
-                        .css("height", (avh + hd) + "px")
+            progDivHeight = progDivBottomPos - progDivTop;
+            var progArticleHeight = parseInt(progArticle.css("height"));
+            var heightDelta = titleHeight + 24 - progArticleHeight;//枠を広げた高さの差 24という数字はタイトルのpaddingの上下計(上8px,下8+8px)
+            if (heightDelta <= 0) { continue; }
+            var axisItems = $('[class^="styles__time-axis-item___"]');//時刻軸のメモリ
+            var v, axisItem, axisItemHeight, axisItemBottom;
+            for (v = 0; v < axisItems.length; v++) {//時刻軸のメモリ0-23時ループ
+                axisItem = axisItems.eq(v);
+                axisItemHeight = parseInt(axisItem.css("height"));
+                axisItemBottom = axisItem.offset().top + axisItemHeight + 1;
+                if (axisItemBottom >= progDivBottomPos) {
+                    axisItem.css("padding-top", (parseInt(axisItem.css("padding-top")) + Math.floor(heightDelta / 2)) + "px")
+                        .css("height", (axisItemHeight + heightDelta) + "px")
                         ;
                     break;
                 }
             }
-            for (var u = 0, cuc, ihd, ictjph; u < c.length; u++) {
-                cuc = c.eq(u).children();
-                ihd = hd;
-                ictjph = ctjph;
-                for (var v = cuc.length - 1, cucv, cucvc; v >= 0; v--) {
-                    cucv = cuc.eq(v);
-                    cucvc = cucv.children();
-                    for (var w = cucvc.length - 1, hm, cucvot, cucvob, cucva; w >= 0; w--) {
-                        if (cucvc.length > 1) {
-                            cucvot = cucvc.eq(w).offset().top;
-                            if (w == cucvc.length - 1) {
-                                cucvob = cucv.offset().top + cucv.height();
+            var u = 0, col_u_items, heightDelta_u, progDivHeight_u
+            for (u = 0; u < dayCols.length; u++) {//日付列についてのループ(番組タイトルについてのループの中)
+                col_u_items = dayCols.eq(u).children();
+                heightDelta_u = heightDelta;
+                progDivHeight_u = progDivHeight;
+                var v, coluItem, coluItemChildren
+                for (v = col_u_items.length - 1; v >= 0; v--) {//番組毎divについてのループ
+                    coluItem = col_u_items.eq(v);
+                    coluItemChildren = coluItem.children();
+                    var w, hm, coluItemChiTop, coluItemBottomPos, coluItemArticle;
+                    for (w = coluItemChildren.length - 1; w >= 0; w--) {//番組毎divの子供についてループ
+                        if (coluItemChildren.length > 1) {
+                            coluItemChiTop = coluItemChildren.eq(w).offset().top;
+                            if (w == coluItemChildren.length - 1) {
+                                coluItemBottomPos = coluItem.offset().top + coluItem.height();
                             } else {
-                                cucvob = cucvot + parseInt(cucvc.eq(w).css("height"));
+                                coluItemBottomPos = coluItemChiTop + parseInt(coluItemChildren.eq(w).css("height"));
                             }
                         } else {
-                            cucvot = cucv.offset().top;
-                            cucvob = cucvot + cucv.height();
+                            coluItemChiTop = coluItem.offset().top;
+                            coluItemBottomPos = coluItemChiTop + coluItem.height();
                         }
-                        hm = Math.min(ctjpob, cucvob) - Math.max(ctjpot, cucvot);
-                        //console.log("i="+i+",j="+j+",u="+u+",v="+v+",w="+w+",text="+cucv.find(t).text()+",cucvot="+cucvot+",cucvob="+cucvob+",hm="+hm);
+                        hm = Math.min(progDivBottomPos, coluItemBottomPos) - Math.max(progDivTop, coluItemChiTop);
+                        //console.log("i="+i+",j="+j+",u="+u+",v="+v+",w="+w+",text="+coluItem.find(progTitles).text()+",cucvot="+coluItemChiTop+",cucvob="+coluItemBottomPos+",hm="+hm);
                         if (hm > 0) {
-                            if (w < cucvc.length - 1) {
-                                cucva = cucvc.eq(w);
+                            if (w < coluItemChildren.length - 1) {
+                                coluItemArticle = coluItemChildren.eq(w);
                             } else {
-                                cucva = cucv.children('article');
+                                coluItemArticle = coluItem.children('article');
                             }
-                            var hn = Math.round(hd * hm / ctjph);
-                            ictjph -= hm;
-                            if (ictjph <= 0) {
-                                hn = ihd
+                            var hn = Math.round(heightDelta * hm / progDivHeight);
+                            progDivHeight_u -= hm;
+                            if (progDivHeight_u <= 0) {
+                                hn = heightDelta_u
                             } else {
-                                ihd -= hn;
+                                heightDelta_u -= hn;
                             }
-                            cucva.css("height", (parseInt(cucva.css("height")) + hn) + "px");
+                            coluItemArticle.css("height", (parseInt(coluItemArticle.css("height")) + hn) + "px");
                         }
                     }
                 }
