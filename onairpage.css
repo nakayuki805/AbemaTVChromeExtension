@@ -154,3 +154,8 @@ body{
 .addNotify:hover{
     opacity: 0.7;
 }
+
+/*チャンネル別番組表で番組の枠を広げたときに途中までしかスクロールできない問題に対応*/
+[class*="styles__time-table___"] [class*="styles__col___1"] {
+    overflow: visible;
+}
