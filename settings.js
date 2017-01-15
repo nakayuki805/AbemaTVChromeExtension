@@ -336,7 +336,7 @@ var settingsList = [
         "settings": [
             {
                 "name": "isChTimetableExpand",
-                "description": "チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (各時刻の縦の長さが一定でなくバラバラになります。現在たまに番組表の表示が時刻とずれることがあります。)",
+                "description": "チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (各時刻の縦の長さが一定でなくバラバラになります)",
                 "type": "boolean",
                 "isInstantChangable": false
             },{

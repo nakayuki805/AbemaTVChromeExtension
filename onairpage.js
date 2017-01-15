@@ -330,7 +330,7 @@ function onairCleaner() {
 function waitforloadtimetable(url) {
     if (checkUrlPattern(true) != 1 && checkUrlPattern(true) != 2) { return; }
     if (url != currentLocation) return;
-    if (!isChTimetableExpand && !isChTimetableBreak && !isChTimetableWeekend && !isChTimetablePlaybutton && !timetableScroll) { return; }
+    //if (!isChTimetableExpand && !isChTimetableBreak && !isChTimetableWeekend && !isChTimetablePlaybutton && !timetableScroll) { return; }
     var b = false;
     //    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
     if ($('[class*="styles__channel-content-header-wrapper___"]').next('[class*="styles__time-table___"]').length > 0) {
@@ -346,6 +346,7 @@ function waitforloadtimetable(url) {
         } else if (currentLocation.match(/^https:\/\/abema\.tv\/timetable(?:\/dates\/.+)?$/)) {
             setTimeout(timetabledtfix, 100);
         }
+        setTimeout(putTimetableTitleAttr, 100, 0);
     } else {
         console.log("retry waitforloadtimetable");
         setTimeout(waitforloadtimetable, 500, url);
@@ -393,7 +394,7 @@ function timetablechfix() {
     var ce = false; //定期実行するかどうか
     if (isChTimetableExpand) {
         ce = true; //現在時刻の横棒の位置を直す
-        setTimeout(TimetableExpander, 500); //playbutton設置(timetablechloop)によって隠れる分も考慮してそれより後に実行するようにset
+        setTimeout(TimetableExpander, 500, 0); //playbutton設置(timetablechloop)によって隠れる分も考慮してそれより後に実行するようにset
     }
     //削除できるようにtitleを付けているせいかusermade以降の追加cssが適用されないので全て纏めてからusermadeに適用する
     //setoptionheadも同様
@@ -452,18 +453,26 @@ function timetablechfix() {
         timetablechloop();
     }
 }
-function TimetableExpander() {
+function TimetableExpander(prevColNum) {
     if (!isChTimetableExpand) { return; }
     var dayCols = $('[class*="styles__col___"]'); //日付の列
+    if(dayCols.length == 0 || dayCols.length > prevColNum){//列が出そろうまで待つ
+        console.log("retry TimetableExpander colnum="+dayCols.length+" prev="+prevColNum);
+        setTimeout(putTimetableTitleAttr, 1500, dayCols.length);
+        return;
+    }
     var progTitles = $('span[class^="styles__title___"]'); //各番組タイトル
     var i = 0, col, titlesInCol;
     for (i = 0; i < dayCols.length; i++) { //列の日付についてのループ
         col = dayCols.eq(i);
         titlesInCol = col.find(progTitles);
-        var j, eachTitle, titleHeight, progDiv, progDivHeight, progDivTop, progDivBottomPos, progArticle, progArticleHeight, heightDelta;
+        var j, eachTitle, titleHeight, titleWrapper, lessTextClassName, progDiv, progDivHeight, progDivTop, progDivBottomPos, progArticle, progArticleHeight, heightDelta;
         for (j = titlesInCol.length - 1; j >= 0; j--) { //列の中の番組タイトルについてのループ
             eachTitle = titlesInCol.eq(j);
             titleHeight = eachTitle.height();
+            titleWrapper = eachTitle.parents('p').css('height', titleHeight + 'px');
+            lessTextClassName = (titleWrapper.attr('class').match(/style__less-text___[a-zA-Z0-9]+/)||[""])[0];
+            titleWrapper.removeClass(lessTextClassName);//省略されたタイトル等につくclassを除去
             progDiv = col.children().has(eachTitle);
             progDivTop = progDiv.offset().top;
             progDivHeight = progDiv.height();
@@ -656,6 +665,24 @@ function waitformakelink(retrycount) {
     } else if (retrycount > 0) {
         setTimeout(waitformakelink, 2000, retrycount - 1);
     }
+}
+function putTimetableTitleAttr(prevColNum){ //番組タイトルをtitle要素にする
+    var cols, progArticle, progTitle;
+    var cols = $('[class*="styles__col___"]');
+    if(cols.length == 0 || cols.length > prevColNum){
+        //console.log("retry putTimetableTitleAttr colnum="+cols.length+" prev="+prevColNum);
+        setTimeout(putTimetableTitleAttr, 1500, cols.length);
+        return;
+    }
+    cols.each(function(){
+        $(this).children().each(function(){
+            //番組毎divについてのループ
+            progArticle = $(this).find("article");
+            progTitle = progArticle.find('span[class^="styles__title___"]').text();
+            progArticle.attr("title", progTitle);
+        });
+    });
+
 }
 function onresize() {
     var resizeType = settings.isResizeScreen ? 1 : 0;
@@ -5284,14 +5311,14 @@ function checkUrlPattern(url) {
             return 1;
         } else {
             //番組表(チャンネル個別ではない)のとき
-            var chBanners = $('[class*="styles__channel-icon-header-inner___"] > div');
+            var chBanners = $('[class*="styles__channel-link___"]');
             chBanners.each(function () {
                 var chBanner = $(this);
                 var chBannerPos = chBanner.offset();
-                var chTableUrl = chBanner.children("a").attr("href");
+                var chTableUrl = chBanner.attr("href");
                 var channel = chTableUrl.match(/\/timetable\/channels\/([-a-z0-9]+)/)[1];
                 var channelUrl = "https://abema.tv/now-on-air/" + channel;
-                console.log(channelUrl)
+                //console.log(channelUrl)
                 var onairpageLink = $('<div style="border:solid 1px black;background-color:white;position:absolute;display:none;" class="onairpageLink"><a href="' + channelUrl + '">放送画面</a></div>').appendTo(chBanner);
                 //chBannerPos.top += chBanner.height();
                 //chBannerPos.left += (chBanner.width()+onairpageLink.width())/2;
@@ -5321,6 +5348,7 @@ function checkUrlPattern(url) {
         if (output) {
             return 4;
         } else {
+            onairCleaner();
             putSerachAndReminderNotifyButtons();
         }
     } else if (/https:\/\/abema.tv\/reminders/.test(url)) {
@@ -5328,6 +5356,7 @@ function checkUrlPattern(url) {
         if (output) {
             return 5;
         } else {
+            onairCleaner();
             putSerachAndReminderNotifyButtons();
         }
     }
