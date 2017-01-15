@@ -2565,20 +2565,29 @@ function pophideElement(inp) {
             EXhead.style.transform = "";
         }
     }
-    if (inp.foot !== undefined) {
+    if (inp.foot !== undefined) {//EXcountviewもfootに連動させる
         comefix = true;
         if (inp.foot == 1) {
             EXfoot.style.visibility = "visible";
             EXfoot.style.opacity = "1";
             EXfoot.style.transform = "translate(0)";
+            EXcountview.style.visibility = "visible";
+            EXcountview.style.opacity = "1";
+            EXcountview.style.transform = "translate(0)";
         } else if (inp.foot == -1) {
             EXfoot.style.visibility = "hidden";
             EXfoot.style.opacity = "0";
             EXfoot.style.transform = "translateY(100%)";
+            EXcountview.style.visibility = "hidden";
+            EXcountview.style.opacity = "0";
+            EXcountview.style.transform = "translateY(100%)";
         } else if (inp.foot == 0) {
             EXfoot.style.visibility = "";
             EXfoot.style.opacity = "";
             EXfoot.style.transform = "";
+            EXcountview.style.visibility = "";
+            EXcountview.style.opacity = "";
+            EXcountview.style.transform = "";
         }
     }
     if (inp.side == 1) {

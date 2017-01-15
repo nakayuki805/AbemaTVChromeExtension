@@ -159,3 +159,7 @@ body{
 [class*="styles__time-table___"] [class*="styles__col___1"] {
     overflow: visible;
 }
+/*視聴数*/
+[class*="styles__view-counter___"] {
+    transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);
+}
