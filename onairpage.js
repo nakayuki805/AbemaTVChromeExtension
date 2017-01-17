@@ -685,6 +685,10 @@ function putTimetableTitleAttr(prevColNum){ //番組タイトルをtitle要素�
 
 }
 function onresize() {
+    //console.log("onresize()");
+    //視聴数の位置調整
+    $(EXcountview).offset({ top: window.innerHeight - footerHeight });
+
     var resizeType = settings.isResizeScreen ? 1 : 0;
     var posiVType = isMovieSpacingZeroTop ? 1 : (isResizeSpacing ? 2 : 0);
     var posiHType = isMovieSpacingZeroLeft ? 1 : 0;
@@ -700,7 +704,10 @@ function onresize() {
         wdbyhg,
         newwd,
         newhg;
-    if (obj.length == 0) { return; }
+    if (obj.length == 0) {
+        //console.log("obj.length==0 -> onresize() return;");
+        return;
+    }
     if (resizeType == 0 && posiVType == 0 && posiHType == 0) {
         //        obj.css("top","")
         //            .css("left","")
@@ -713,11 +720,15 @@ function onresize() {
             .css("top", "")
             .css("left", "")
             ;
+        //console.log("*Type==0 -> onresize() return;");
         return;
     }
     //元の枠 ウィンドウが縦長の場合は映像サイズと同じ、横長の場合は横が長い
     var objr = obj.parents('[class*="styles__resize-screen___"]');
-    if (objr.length == 0) { return; }
+    if (objr.length == 0) {
+        //console.log("objr.length==0 -> onresize() return;");
+        return;
+    }
     var oldwd = parseInt(objr[0].style.width);
     var oldhg = parseInt(objr[0].style.height);
 
@@ -778,9 +789,7 @@ function onresize() {
         objr.parent().css("transition", "top" + objt + ", left" + objt);
     }
 
-    //視聴数の位置調整
-    $(EXcountview).offset({ top: window.innerHeight - footerHeight });
-
+    //console.log("setTimeout onresize2()");
     setTimeout(onresize2, 0, obj, objr, newwd, newhg, newtop, newleft, oldwd, oldhg);
 }
 function onresize2(obj, objr, newwd, newhg, newtop, newleft, oldwd, oldhg) {
