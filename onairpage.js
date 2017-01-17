@@ -2746,7 +2746,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
             } else if (ptime == "commentinputbottom" || (ptitle == "commentinputbottomleft" || ptitle == "commentinputbottomright")) {
                 jfpbot = Math.max(htime, htitle, 15);
             } else {
-                jfpbot = footerHeight;
+                jfpbot = 15;//footerHeight;
             }
             jcchd += jfmbot;
         } else { // jftop,jcbot
@@ -2812,6 +2812,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     jccont.css("top", jcct)
         .css("height", "calc(100% - " + jcchd + "px)")
         ;
+    console.log("form padding top, bottom", jfptop, jfpbot);
     if (isInpWinBottom) {
         jform.css("padding-top", jfptop)
             .css("padding-bottom", jfpbot)
