@@ -2812,7 +2812,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     jccont.css("top", jcct)
         .css("height", "calc(100% - " + jcchd + "px)")
         ;
-    console.log("form padding top, bottom", jfptop, jfpbot);
+    //console.log("form padding top, bottom", jfptop, jfpbot);
     if (isInpWinBottom) {
         jform.css("padding-top", jfptop)
             .css("padding-bottom", jfpbot)

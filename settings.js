@@ -604,6 +604,23 @@ function resetCMSettings(callback) {
     chrome.storage.local.remove(keys, callback);
 
 }
+function removeCMsettings(obj){
+    var keys = [], i;
+    for (i=0; i<CMSettingList.length; i++) {
+        keys.push(CMSettingList[i].name);
+        if (CMSettingList[i].name.indexOf("is")==0) {
+            keys.push(removeIs(CMSettingList[i].name));
+        }
+    }
+    for (var key in obj) {
+        for(i=0; i<keys.length; i++){
+            if(key == keys[i]){
+                delete obj[key];
+            }
+        }
+    }
+    return obj;
+}
 function generateOptionInput(settingsArr, isPermanent) {
     var inputHTML = "";
     var i = 0;

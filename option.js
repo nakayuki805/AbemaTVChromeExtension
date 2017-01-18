@@ -400,6 +400,8 @@ $(function(){
         $('#isMovieSpacingZeroLeft').prop("checked",isMovieSpacingZeroLeft);
         $('#comeFontsize').val(comeFontsize);
         $('#isHideVoting').prop("checked",isHideVoting);
+
+        isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
     $("#saveBtn").click(function () {
         var panelopenset='';
@@ -553,13 +555,48 @@ $(function(){
             $('#reportBugForm').submit();
         });
     });
+    //設定をエクスポート
+    $("#exportBtn").click(function(){
+        chrome.storage.local.get(function(value){
+            var exportVal = {};
+            for (var key in value) {
+                if (key.indexOf("progNotify")<0 && key != "updateNotifyVer") {//通知登録データとアップデート情報verは除外
+                    exportVal[key] = value[key];
+                }
+            }
+            if(isCMSettingsEnabled){
+                $("#exportInfo").text("※表示されている設定のみエクスポートされます")
+            }
+            if(!isCMSettingsShow){
+                exportVal = removeCMsettings(exportVal);
+            }
+            var exportJson = JSON.stringify(exportVal, null, 4);
+            $('#inexportArea').val(exportJson);
+        });
+    });
+    //設定をインポート
+    $("#inportBtn").click(function(){
+        var inportVal = JSON.parse($('#inexportArea').val());
+        var saveVal = {};
+        for (var key in inportVal) {
+            if (key.indexOf("progNotify")<0 && key != "updateNotifyVer") {//通知登録データとアップデート情報verは除外
+                saveVal[key] = inportVal[key];
+            }
+        }
+        chrome.storage.local.set(saveVal, function(){
+            location.reload();
+        });
+    });
 });
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";
+var isCMSettingsEnabled = false;
+var isCMSettingsShow = false;
 $(window).keyup(function(e){
     keyinput.push(e.keyCode);
     if (keyinput.toString().indexOf(keyCodes) == 0) {
         $("#CommentMukouSettings").show();
+        isCMSettingsShow = true;
         keyinput = [];
     }else{
         while(keyinput.length>0&&keyCodes.indexOf(keyinput.toString())!=0){

@@ -42,5 +42,11 @@
     <form target="_blank" method="POST" id="reportBugForm" action="https://abema.nakayuki.net/abema-ext/report.php">
     <input type="hidden" id="atachedInfo" name="info">
     </form>
+    <hr>
+    <p>設定をJSON形式でインポート/エクスポート(未保存の設定はエクスポートされません/インポートに成功したらこの画面が再読み込みされます)<span id="exportInfo"></span></p>
+    <textarea id="inexportArea" placeholder="JSONをここに貼り付けてインポートもしくはエクスポートしてここからコピー"></textarea><br>
+    <input type="button" id="exportBtn" value="設定を上欄にエクスポート">
+    <input type="button" id="inportBtn" value="貼り付けた設定をインポート">
+
 </body>
 </html>
