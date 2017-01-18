@@ -269,12 +269,23 @@ function putContextMenu(){
         "parentId": "addNGwordMenu",
         "id": "addNGwordMenuPermanent"
     });
+    chrome.contextMenus.create({
+        "title": "AbemaTV番組表で「%s」を検索",
+        "type": "normal",
+        "contexts": ["selection"],
+        "documentUrlPatterns": ["https://abema.tv/channels/*"],
+        "id": "searchAbemaTVTimetable"
+    });
 }
 function onContextMenuClick(info, tab){
     if(info.menuItemId.indexOf("addNGwordMenu")===0){
         var word = info.selectionText;
         var isPermanent = info.menuItemId=="addNGwordMenuPermanent";
         chrome.tabs.sendMessage(tab.id,{"name": "addNGword", "word": word, "isPermanent": isPermanent});
+    }else if(info.menuItemId == "searchAbemaTVTimetable"){
+        var word = info.selectionText;
+        //chrome.tabs.create({url: "https://abema.tv/search/future?q="+encodeURIComponent(word)});
+        window.open("https://abema.tv/search/future?q="+encodeURIComponent(word));
     }
 }
 chrome.contextMenus.onClicked.addListener(onContextMenuClick);
