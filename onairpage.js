@@ -628,17 +628,18 @@ function PlaybuttonEditor() {
                 //普通の左クリックのみ移動、特殊クリックの場合はその操作に従う(移動しない)
                 //console.log(e);
                 if (e.which == 1 && e.altKey == false && e.ctrlKey == false && e.shiftKey == false) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    clickPlaybuttonBack(e.currentTarget);
-                    waitformakelink(50);
+                    //e.preventDefault();
+                    //e.stopImmediatePropagation();//←↑は下の関数を使わないので不要
+                    // 番組表ページから直接放送画面へ飛ぶボタンがないため以下の関数は使用せずlocation.hrefで移動する
+                    //clickPlaybuttonBack(e.currentTarget);//←↓この2関数はソース上まだある
+                    //waitformakelink(50);
                 }
             });
         }
     }
 }
 function clickPlaybuttonBack(eo) {
-    //console.log("clickPlaybuttonBack");
+    console.log("clickPlaybuttonBack", eo);
     var jo = $(eo).parent('a').siblings('a');
     if (jo.length == 0) { return; }
     var teka = document.createEvent("MouseEvents");
@@ -647,7 +648,7 @@ function clickPlaybuttonBack(eo) {
     return jo[0].dispatchEvent(teka);
 }
 function clickOnairLink(jo) {
-    //console.log("clickOnairLink");
+    console.log("clickOnairLink", jo);
     var teka = document.createEvent("MouseEvents");
     teka.initMouseEvent("click", true, true, window);
     //console.log("dispatch");
@@ -1400,7 +1401,7 @@ function toast(message) {
 function delayset() {
     if (checkUrlPattern(true) != 3) { return; }
     var hoverContents = $('[class*="styles__hover-contents___"]');
-    if (hoverContents.length == 0) {
+    if (hoverContents.children().length == 0) {
         console.log("delayset retry");
         setTimeout(delayset, 1000);
         return;
@@ -1435,6 +1436,21 @@ function delayset() {
     }, 60000);//1分ごとに再調整
 
     console.log("delayset ok");
+}
+function delaysetNotOA(){
+    var hoverContents = $('[class*="styles__hover-contents___"]');
+    if (hoverContents.children().length == 0) {
+        console.log("delaysetNotOA retry");
+        setTimeout(delayset, 1000);
+        return;
+    }
+    //拡張機能の設定と通知番組一覧をその他メニューに追加
+    var hoverLinkClass = hoverContents.children()[0].className;
+    console.log(hoverContents,hoverContents.children(),hoverLinkClass)
+    if (hoverContents.children('#extSettingLink').length == 0) {
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank">拡張通知登録一覧</a>');
+    }
 }
 function volumecheck() {
     if (checkUrlPattern(true) != 3) { return; }
@@ -5330,9 +5346,11 @@ function checkUrlPattern(url) {
         } else {
             putNotifyButton(url);
             //放送画面へのリンク追加
-            var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z\d]+/)[1];
-            var channelUrl = "https://abema.tv/now-on-air/" + channel;
-            $('<br><a href="' + channelUrl + '">放送画面</a>').appendTo('[class*="BroadcastingFrameContainer__left-contents___"] > div');
+            // var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z\d]+/)[1];
+            // var channelUrl = "https://abema.tv/now-on-air/" + channel;
+            // $('<br><a href="' + channelUrl + '">放送画面</a>').appendTo('[class*="BroadcastingFrameContainer__left-contents___"] > div');
+            onairCleaner();
+            delaysetNotOA();
         }
     } else if (/^https:\/\/abema.tv\/timetable(?:$|\/dates\/.*)/.test(url)) {
         //日付別番組表
@@ -5355,6 +5373,7 @@ function checkUrlPattern(url) {
 
             });
             onairCleaner();
+            delaysetNotOA();
             waitforloadtimetable(url);
         }
     } else if (/^https:\/\/abema.tv\/timetable\/channels\/.*/.test(url)) {
@@ -5363,6 +5382,7 @@ function checkUrlPattern(url) {
             return 2;
         } else {
             onairCleaner();
+            delaysetNotOA();
             waitforloadtimetable(url);
         }
     } else if (/^https:\/\/abema.tv\/now-on-air\/.*/.test(url)) {
@@ -5378,6 +5398,7 @@ function checkUrlPattern(url) {
             return 4;
         } else {
             onairCleaner();
+            delaysetNotOA();
             putSerachAndReminderNotifyButtons();
         }
     } else if (/https:\/\/abema.tv\/reminders/.test(url)) {
@@ -5386,8 +5407,13 @@ function checkUrlPattern(url) {
             return 5;
         } else {
             onairCleaner();
+            delaysetNotOA();
             putSerachAndReminderNotifyButtons();
         }
+    } else {
+        // それ以外のページ
+        onairCleaner();
+        delaysetNotOA();
     }
 }
 
