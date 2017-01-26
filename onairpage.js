@@ -346,7 +346,11 @@ function waitforloadtimetable(url) {
         } else if (currentLocation.match(/^https:\/\/abema\.tv\/timetable(?:\/dates\/.+)?$/)) {
             setTimeout(timetabledtfix, 100);
         }
-        setTimeout(putTimetableTitleAttr, 100, 0);
+        setTimeout(timetableCommonFix, 100, 0);
+        //番組表クリックで右詳細に通知登録ボタン設置
+        $('[class*="styles__timetable-wrapper___"]').click(function(){
+            setTimeout(putSideDetailNotifyButton,100);
+        });
     } else {
         console.log("retry waitforloadtimetable");
         setTimeout(waitforloadtimetable, 500, url);
@@ -667,14 +671,15 @@ function waitformakelink(retrycount) {
         setTimeout(waitformakelink, 2000, retrycount - 1);
     }
 }
-function putTimetableTitleAttr(prevColNum){ //番組タイトルをtitle要素にする
+function timetableCommonFix(prevColNum){
     var cols, progArticle, progTitle;
     var cols = $('[class*="styles__col___"]');
-    if(cols.length == 0 || cols.length > prevColNum){
-        //console.log("retry putTimetableTitleAttr colnum="+cols.length+" prev="+prevColNum);
-        setTimeout(putTimetableTitleAttr, 1500, cols.length);
+    if(cols.length == 0 || cols.length > prevColNum){ //列が出そろうまで待つ
+        //console.log("retry timetableCommonFix colnum="+cols.length+" prev="+prevColNum);
+        setTimeout(timetableCommonFix, 1000, cols.length);
         return;
     }
+    //番組タイトルをtitle要素にする
     cols.each(function(){
         $(this).children().each(function(){
             //番組毎divについてのループ
@@ -684,6 +689,10 @@ function putTimetableTitleAttr(prevColNum){ //番組タイトルをtitle要素�
         });
     });
 
+}
+function getChannelNameOnTimetable(channel){ //番組表ページのチャンネルリストを利用してチャンネル名を得る
+    var hrefStr = "/timetable/channels/" + channel;
+    return $('[class*="styles__channels-navigation___"] ul').find('a[href="' + hrefStr + '"]').text();
 }
 function onresize() {
     //console.log("onresize()");
@@ -5393,7 +5402,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
             notifyButton.appendTo(notifyButParent);
         }
         getStorage(progNotifyName, function (notifyData) {
-            console.log(notifyData, progNotifyName)
+            //console.log(notifyData, progNotifyName)
             notifyButtonData[progNotifyName] = {
                 channel: channel,
                 channelName: channelName,
@@ -5481,6 +5490,20 @@ function putSerachAndReminderNotifyButtons() {
         var programTime = programTimeStrToTime(linkArea.find('[class*=styles__details___]').text());
         putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, linkArea.parent());
     });
+}
+function putSideDetailNotifyButton(){
+    //console.log('putSideDetailNotifyButton()');
+    var sideDetailWrapper = $('[class*="styles__side-slot-detail-wrapper___"][class*="styles__is-opened___"]');
+    if(sideDetailWrapper.length == 0){return;}
+    console.log('put side notify button');
+    var progTitle = sideDetailWrapper.find('p[class*="styles__title___"]').text();
+    var progTime = programTimeStrToTime(sideDetailWrapper.find('p[class*="styles__date___"]').text());
+    var progLinkArr = sideDetailWrapper.find('[class*="styles__link-detail___"]').attr("href").split('/');
+    var channel = progLinkArr[2];
+    var channelName = getChannelNameOnTimetable(channel);
+    var progID = progLinkArr[4];
+    var notifyButParent = sideDetailWrapper.find('[class*="styles__slot-detail-buttons___"]>div');
+    putNotifyButtonElement(channel, channelName, progID, progTitle, progTime, notifyButParent);
 }
 
 chrome.runtime.onMessage.addListener(function (r) {
