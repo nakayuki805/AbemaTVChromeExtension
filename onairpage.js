@@ -457,10 +457,11 @@ function TimetableExpander(prevColNum) {
     if (!isChTimetableExpand) { return; }
     var dayCols = $('[class*="styles__col___"]'); //日付の列
     if(dayCols.length == 0 || dayCols.length > prevColNum){//列が出そろうまで待つ
-        console.log("retry TimetableExpander colnum="+dayCols.length+" prev="+prevColNum);
-        setTimeout(putTimetableTitleAttr, 1500, dayCols.length);
+        //console.log("retry TimetableExpander colnum="+dayCols.length+" prev="+prevColNum);
+        setTimeout(TimetableExpander, 1500, dayCols.length);
         return;
     }
+    //console.log("TimetableExpander() colnum="+dayCols.length+" prev="+prevColNum);
     var progTitles = $('span[class^="styles__title___"]'); //各番組タイトル
     var i = 0, col, titlesInCol;
     for (i = 0; i < dayCols.length; i++) { //列の日付についてのループ
@@ -614,7 +615,7 @@ function PlaybuttonEditor() {
             q.find('[class*="style__title___"]').css("width", "130px");
             a = '<a href="javascript:location.href=\'https://abema.tv' + u + '\';" title="放送中画面へ移動">';
             a += '<div class="playbutton" style="position:absolute;right:4px;top:4px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">';
-            a += '<svg width="10" height="14" style="fill:#6fb900;transform:translate(7px,3px)">';
+            a += '<svg width="10" height="14" style="fill:#6fb900;transform:translate(1px,3px)">';// 以前は7px,3px
             a += '<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--playback">';
             a += '</use></svg></div>';
             a += '</a>';
