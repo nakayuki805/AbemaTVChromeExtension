@@ -349,7 +349,7 @@ function waitforloadtimetable(url) {
         setTimeout(timetableCommonFix, 100, 0);
         //番組表クリックで右詳細に通知登録ボタン設置
         $('[class*="styles__timetable-wrapper___"]').click(function(){
-            setTimeout(putSideDetailNotifyButton,100);
+            setTimeout(putSideDetailNotifyButton,50);
         });
     } else {
         console.log("retry waitforloadtimetable");
@@ -628,17 +628,20 @@ function PlaybuttonEditor() {
                 //普通の左クリックのみ移動、特殊クリックの場合はその操作に従う(移動しない)
                 //console.log(e);
                 if (e.which == 1 && e.altKey == false && e.ctrlKey == false && e.shiftKey == false) {
-                    //e.preventDefault();
-                    //e.stopImmediatePropagation();//←↑は下の関数を使わないので不要
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
                     // 番組表ページから直接放送画面へ飛ぶボタンがないため以下の関数は使用せずlocation.hrefで移動する
-                    //clickPlaybuttonBack(e.currentTarget);//←↓この2関数はソース上まだある
+                    //clickPlaybuttonBack(e.currentTarget);//←↓この2関数はコメントアウトされている
                     //waitformakelink(50);
+                    //再生ボタンのある番組をクリックして右詳細の視聴ボタンをクリック
+                    clickElement($(e.currentTarget).parents('button'));
+                    setTimeout(clickElement,10,$('[class*="styles__play-button___"]'));
                 }
             });
         }
     }
 }
-function clickPlaybuttonBack(eo) {
+/*function clickPlaybuttonBack(eo) {
     console.log("clickPlaybuttonBack", eo);
     var jo = $(eo).parent('a').siblings('a');
     if (jo.length == 0) { return; }
@@ -646,20 +649,20 @@ function clickPlaybuttonBack(eo) {
     teka.initMouseEvent("click", true, true, window);
     //console.log("dispatch");
     return jo[0].dispatchEvent(teka);
-}
-function clickOnairLink(jo) {
-    console.log("clickOnairLink", jo);
+}*/
+function clickElement(jo) {//clickOnairLink(jo)
+    //console.log("clickElement", jo);
     var teka = document.createEvent("MouseEvents");
     teka.initMouseEvent("click", true, true, window);
     //console.log("dispatch");
     return jo[0].dispatchEvent(teka);
 }
-function waitformakelink(retrycount) {
+/*function waitformakelink(retrycount) {
     console.log("waitformakelink#" + retrycount);
     var jo = $('[class*="styles__contents___"]').find('[class^="styles__link___"]');
     if (jo.length > 0 && /^https:\/\/abema.tv\/now-on-air\//.test(jo.prop("href"))) {
         //console.log("jo.len="+jo.length+",jo.href="+jo.prop("href"));
-        clickOnairLink(jo);
+        clickElement(jo);
     } else if (retrycount > 40) {
         setTimeout(waitformakelink, 20, retrycount - 1);
     } else if (retrycount > 30) {
@@ -671,7 +674,7 @@ function waitformakelink(retrycount) {
     } else if (retrycount > 0) {
         setTimeout(waitformakelink, 2000, retrycount - 1);
     }
-}
+}*/
 function timetableCommonFix(prevColNum){
     var cols, progArticle, progTitle;
     var cols = $('[class*="styles__col___"]');
