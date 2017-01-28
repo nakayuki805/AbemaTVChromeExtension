@@ -536,25 +536,25 @@ $(function(){
     //通知登録番組一覧リンク書き換え
     $("#prognotifiesLink").attr("href", chrome.extension.getURL("prognotifies.html"));
     //不具合報告フォーム
-    $('#reportBugFormBtn').click(function(){
-        chrome.storage.local.get(function(value){
-            var sendVal = {};
-            for (var key in value) {
-                if (key.indexOf("progNotify")<0) {//通知登録データは除外
-                    sendVal[key] = value[key];
-                }
+   // $('#reportBugFormBtn').click(function(){
+    chrome.storage.local.get(function(value){
+        var sendVal = {};
+        for (var key in value) {
+            if (key.indexOf("progNotify")<0) {//通知登録データは除外
+                sendVal[key] = value[key];
             }
-            var sendInfo = "***設定***\n";
-            sendInfo += JSON.stringify(sendVal, null, 4);
-            sendInfo += "\n***UserAgent***\n";
-            sendInfo += window.navigator.userAgent;
-            sendInfo += "\n***拡張機能バージョン***\n";
-            sendInfo += chrome.runtime.getManifest().version;
-            sendInfo += "\n***ここまで***";
-            $('#atachedInfo').val(sendInfo);
-            $('#reportBugForm').submit();
-        });
+        }
+        var sendInfo = "***設定***\n";
+        sendInfo += JSON.stringify(sendVal, null, 4);
+        sendInfo += "\n***UserAgent***\n";
+        sendInfo += window.navigator.userAgent;
+        sendInfo += "\n***拡張機能バージョン***\n";
+        sendInfo += chrome.runtime.getManifest().version;
+        sendInfo += "\n***ここまで***";
+        $('#atachedInfo').val(sendInfo);
+        //$('#reportBugForm').submit();
     });
+    //});
     //設定をエクスポート
     $("#exportBtn").click(function(){
         chrome.storage.local.get(function(value){

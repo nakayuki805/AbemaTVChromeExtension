@@ -1449,7 +1449,7 @@ function delaysetNotOA(){
     }
     //拡張機能の設定と通知番組一覧をその他メニューに追加
     var hoverLinkClass = hoverContents.children()[0].className;
-    console.log(hoverContents,hoverContents.children(),hoverLinkClass)
+    //console.log(hoverContents,hoverContents.children(),hoverLinkClass)
     if (hoverContents.children('#extSettingLink').length == 0) {
         hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
         hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank">拡張通知登録一覧</a>');
@@ -3903,7 +3903,7 @@ function setOptionHead() {
     }
     t += '}';
 
-    $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
+    $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURIComponent(t) + "'>").appendTo("head");
     console.log("setOptionHead ok");
 }
 function setOptionElement() {
