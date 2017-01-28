@@ -1668,7 +1668,8 @@ function createSettingWindow() {
         settcont += '<input type="button" id="saveBtn" value="一時保存"> ';
         settcont += '<input type="button" class="closeBtn" value="閉じる"><br>';
         settcont += '※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr>';
-        settcont += '<input type="button" id="clearLocalStorage" value="localStorageクリア">';
+        settcont += '<input type="button" id="clearLocalStorage" value="localStorageクリア"><br>';
+        settcont += '<span style="word-wrap: break-word; color: #444; font-size: smaller;">UserID:' + localStorage.getItem('abm_userId') + ' token:' + localStorage.getItem('abm_token') + '</span>';
         settcont += '</div>'
         $(settcont).prependTo('body');
         $('#CommentColorSettings').change(setComeColorChanged);
