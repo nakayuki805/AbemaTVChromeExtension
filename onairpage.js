@@ -973,7 +973,7 @@ function comefilter(m) {
 }
 function putComeArray(inp) {
     //console.log("putComeArray");
-    console.table(inp);
+    //console.table(inp);
     // inp[i]=[ commentText , commentTop , leftOffset, isSelf]
     var mci = $('#moveContainer');
     if (mci.length == 0) {
