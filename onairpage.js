@@ -5483,14 +5483,20 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
 }
 function programTimeStrToTime(programTimeStr) {
     var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
-    var programTime = new Date();
+    var programTime = new Date(0);//現在時刻ではなく0(1970/1/1)を置く ここは31日まである月の日付を置く必要がある
     var now = new Date();
+    var programMonthNum = parseInt(programTimeArray[1]) - 1;
+    if (now.getMonth() === 11 && programMonthNum === 0) { 
+        programTime.setFullYear(now.getFullYear() + 1); //現在12月なら1月は来年とする
+    } else {
+        programTime.setFullYear(now.getFullYear());
+    }
+    programTime.setDate(parseInt(programTimeArray[2]));//月より先に日をセット
     programTime.setMonth(parseInt(programTimeArray[1]) - 1);
-    programTime.setDate(parseInt(programTimeArray[2]));
+    console.log("setMonth:", parseInt(programTimeArray[1]) - 1, "getMonth(afterset):",programTime.getMonth())
     programTime.setHours(parseInt(programTimeArray[3]));
     programTime.setMinutes(parseInt(programTimeArray[4]));
     programTime.setSeconds(0);
-    if (now.getMonth() === 11 && programTime.getMonth() === 0) { programTime.setFullYear(now.getFullYear() + 1); } //現在12月なら1月は来年とする
     return programTime;
 }
 function putNotifyButton(url) {
@@ -5505,7 +5511,7 @@ function putNotifyButton(url) {
     var programTimeStr = rightContents.find('[class*=styles__time___]').text();
     //console.log(programTimeStr, urlarray)
     var programTime = programTimeStrToTime(programTimeStr);
-    //console.log(programTime)
+    console.log(programTime)
     putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, $("[class*=styles__left-contents___] > div"));
 }
 function putSerachAndReminderNotifyButtons() {
@@ -5515,7 +5521,7 @@ function putSerachAndReminderNotifyButtons() {
         var linkArea = $(elem);
         var progUrl = linkArea.attr('href');
         var urlarray = progUrl.substring(1).split("/");
-        console.log(urlarray);
+        //console.log(urlarray);
         var channel = urlarray[1];
         var channelName = linkArea.find('[class*=styles__details___]').eq(0).text();
         var programID = urlarray[3];
