@@ -229,7 +229,7 @@ $(function(){
         var isTimeVisible = value.timeVisible || false;
         var isSureReadComment = value.sureReadComment || false;
         var isCommentFormWithSide = value.isCommentFormWithSide || false;
-        var sureReadRefreshx = Math.max(101,((value.sureReadRefreshx!==undefined)?value.sureReadRefreshx : 2000000));
+        var sureReadRefreshx = Math.max(101,((value.sureReadRefreshx!==undefined)?value.sureReadRefreshx : 1500));
         var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
 //        var isMovieResize = value.movieResize || false;
 //        var isMovieMaximize = value.movieMaximize || false;

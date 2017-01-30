@@ -45,7 +45,7 @@ var changeMaxVolume = 100; //最大音量(100)をこの値へ自動変更
 var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false; //コメント欄を開きっ放しにする
 settings.isCommentFormWithSide = false;//↑有効時にコメ入力欄を右ボタンに連動させて非表示
-var sureReadRefreshx = 2000000; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
+var sureReadRefreshx = 1500; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
 settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
 //var isMovieResize = false; //映像を枠に合わせて縮小
 //var isMovieMaximize = false; //映像最大化
@@ -3186,7 +3186,7 @@ function waitforOpenCome(retrycount) {
 }
 function waitforOpenableCome(retrycount) {
     //console.log("waitforOpenableCome#"+retrycount);
-    if (!isSlideOpen() && !$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')) {
+    if (!isSlideOpen() && isFootcomeClickable()) {
         //    if($(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
         $(EXfootcome).children('button').trigger("click");
         //console.log("comeopen waitforopenable");
@@ -3969,6 +3969,9 @@ function pophideSelector(sv, sw) {
         pophideElement({ head: (st[0] > sw ? 1 : -1), foot: (st[1] > sw ? 1 : -1), side: (st[2] > sw ? 1 : -1) });
     }
 }
+function isFootcomeClickable(){ //コメント数ボタンがクリックできるかどうか
+    return $(EXfootcome).find('[class*="style__container-not-clickable___"]').length == 0;
+}
 function usereventMouseover() {
     if (forElementClose < 4) {
         forElementClose = 5;
@@ -3977,7 +3980,7 @@ function usereventMouseover() {
 }
 function comemukouClick() {
     console.log("comemukouClick");
-    if (isSureReadComment && $(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')) {
+    if (isSureReadComment && !isFootcomeClickable()) {
         //常にコメ欄開だけど開けない状態ならoverlapはクリックさせず直接wakuclickへ移行
         usereventWakuclick();
     } else {
@@ -3999,7 +4002,7 @@ function usereventWakuclick() {
         if (CMsmall < 100 && isCMsmlR) { movieZoomOut(setBlacked[2] ? 0 : 1); }
     }
     if (isSureReadComment) {
-        if ($(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')) {
+        if (!isFootcomeClickable()) {
         } else {
             //overlapのclickにより閉じられるので早く開き直す
             if (!comeFastOpen && !comeRefreshing) {
@@ -4133,7 +4136,7 @@ function waitforComemukouEnd(url) {
     //長時間になるので無限再試行が適切に終了されるようにする
     if (checkUrlPattern(true) != 3) { return; }
     if (url != currentLocation) { return; }
-    if (isSureReadComment && !$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')) {
+    if (isSureReadComment && isFootcomeClickable()) {
         setTimeout(overlapTriggerClick, 20);
     } else {
         setTimeout(waitforComemukouEnd, 500, url);
@@ -4141,7 +4144,7 @@ function waitforComemukouEnd(url) {
 }
 function usereventSideChliButClick() {
     if (isChliOpen(3)) {
-        if (isSureReadComment && $(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')) {
+        if (isSureReadComment && !isFootcomeClickable()) {
             //コメ常時開で開けない状態の場合は見た目だけ閉じてoverlapクリックは後回し
             pophideElement({ channellist: -1 });
             waitforComemukouEnd(currentLocation);
@@ -4167,7 +4170,7 @@ function usereventSideChliButClick() {
 }
 function usereventFootInfoButClick() {
     if (isInfoOpen(3)) {
-        if (isSureReadComment && $(EXfootcome).is('[class*="styles__right-container-not-clickable___"]')) {
+        if (isSureReadComment && !isFootcomeClickable()) {
             pophideElement({ programinfo: -1 });
             waitforComemukouEnd(currentLocation);
         } else {
@@ -5049,9 +5052,9 @@ function onairBasefunc() {
                 }
                 commentNum = comeListLen;
                 //                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0&&$(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==0){
-                if (isSureReadComment && commentNum > Math.max(comeHealth + 20, sureReadRefreshx) && !$(EXfootcome).is('[class*="styles__right-container-not-clickable___"]') && $(EXcome).siblings('[class*="styles__right-slide--shown___"]').length == 0) {
+                if (isSureReadComment && commentNum > Math.max(comeHealth + 20, sureReadRefreshx) && isFootcomeClickable() && $(EXcome).siblings('[class*="styles__right-slide--shown___"]').length == 0) {
                     //コメ常時表示 & コメ数>設定値 & コメ開可 & 他枠非表示
-                    //console.log("comeRefreshing start");
+                    console.log("comeRefreshing start");
                     comeRefreshing = true;
                     //                    commentNum=0;
                     $('#ComeMukouMask').trigger("click");
