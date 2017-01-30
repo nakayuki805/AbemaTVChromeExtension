@@ -56,6 +56,11 @@
     transition: left 16s linear;
     left: -100%;
 }
+.movingComment.selfComment {/* 自分のコメント */
+    border-color: yellow;
+    border-style: solid;
+    border-width: 1px;
+}
 
 [class*="styles__footer___"] { /* 黒帯バー下 */
     opacity: 0.5;

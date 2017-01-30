@@ -866,7 +866,8 @@ function applySharedNGword() {
     isNGwordShareInterval = true;
     $.get(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
         var sharedNGwords = data.ngword;
-        console.log("got shared NG words ", sharedNGwords);
+        console.log("got shared NG words ");
+        console.table(sharedNGwords);
         for (var asni = 0; asni < sharedNGwords.length; asni++) {
             postedNGwords.push(sharedNGwords[asni].word);
             appendTextNG(null, sharedNGwords[asni].word);
@@ -901,7 +902,7 @@ function arrayFullNgMaker() {
         if (b) {
             spfullng[ngi] = new RegExp(spfullng[ngi].replace(/([.*+?^=!:${}()|[\]\/\\])/g, "\\$1"));
         }
-        console.log(spfullng[ngi]);
+        //console.log(spfullng[ngi]);
         if (settings.isShareNGword) {
             postShareNGword(spfullng[ngi], getChannelByURL());
         }
@@ -972,8 +973,8 @@ function comefilter(m) {
 }
 function putComeArray(inp) {
     //console.log("putComeArray");
-    //console.log(inp);
-    // inp[i]=[ commentText , commentTop , leftOffset ]
+    console.table(inp);
+    // inp[i]=[ commentText , commentTop , leftOffset, isSelf]
     var mci = $('#moveContainer');
     if (mci.length == 0) {
         $('<div id="moveContainer" class="usermade">').appendTo('body');
@@ -1007,8 +1008,9 @@ function putComeArray(inp) {
         setfont = 'font-size:' + parseInt($('#comeFontsize').val()) + 'px;';
     }
     for (var i = 0; i < inplen; i++) {
-        outxt += '<span class="movingComment" style="position:absolute;top:' + inp[i][1] + 'px;left:' + (inp[i][2] + winwidth) + 'px;' + setfont + '">' + inp[i][0] + '</span>';
+        outxt += '<span class="movingComment' + (inp[i][3]?' selfComment':'') + '" style="position:absolute;top:' + inp[i][1] + 'px;left:' + (inp[i][2] + winwidth) + 'px;' + setfont + '">' + inp[i][0] + '</span>';
     }
+    //console.log(outxt)
     $(outxt).appendTo(mci);
     //    mclen+=inplen;
     mcj = mci.children('.movingComment');
@@ -1040,7 +1042,7 @@ function putComeArray(inp) {
         }, 0, mck, waitsec, (-mcwidth - 2));
     }
 }
-function putComment(commentText, index, inmax) {
+function putComment(commentText, index, inmax, isSelf) {
     //console.log(commentText)
     var outflg = false;
     if (index == 0) {
@@ -1049,17 +1051,20 @@ function putComment(commentText, index, inmax) {
     if (index == inmax - 1) {
         outflg = true;
     }
+    if (isSelf == undefined) {isSelf = false;}
     //kakikomiwaitが0でない時は自分の書き込みをputCommentから除外する
     //console.log("commentText="+commentText+", kakikomitxt="+kakikomitxt);
     if (commentText.length > 0 && commentText == kakikomitxt) {
-        //console.log("kakikomi match,wait="+kakikomiwait)
+        console.log("kakikomi match,wait="+kakikomiwait)
+        isSelf = true;
         if (kakikomiwait > 0) { //waitがプラスなら後から単独で流す
-            setTimeout(putComment, kakikomiwait * 1000, commentText, 0, 1);
+            setTimeout(putComment, kakikomiwait * 1000, commentText, 0, 1, true);
             commentText = "";
         } else if (kakikomiwait < 0) {
             commentText = "";
         }
         kakikomitxt = "";
+        // console.log("kakikomitxt reset: putComment")
     }
     commentText = comefilter(commentText);
     var commentTopMargin = 50;
@@ -1092,7 +1097,7 @@ function putComment(commentText, index, inmax) {
     var maxLeftOffset = window.innerWidth * 5 / settings.movingCommentSecond; //5秒の移動長さ
     var leftOffset = Math.floor(maxLeftOffset * index / inmax);
     if (commentText.length > 0) {
-        comeArray.push([commentText, commentTop, leftOffset]);
+        comeArray.push([commentText, commentTop, leftOffset, isSelf]);
     }
     if (outflg && comeArray.length > 0) {
         setTimeout(putComeArray, 50, comeArray);
@@ -4195,12 +4200,13 @@ function usereventFootInfoButClick() {
 function delkakikomitxt(inptxt) {
     if (kakikomitxt == inptxt) {
         kakikomitxt = "";
+        console.log("kakikomitxt reset: inptxt")
     }
 }
 function usercommentposted(inptxt) {
     //console.log("usercommentposted inp="+inptxt);
     kakikomitxt = inptxt;
-    setTimeout(delkakikomitxt, 1100, inptxt);
+    setTimeout(delkakikomitxt, 4100, inptxt);
 }
 function waitforinperase(retrycount, inptxt) {
     //console.log("waitforinperase#"+retrycount+",textarea="+$(EXcomesendinp).val()+",inp="+inptxt);
@@ -4335,7 +4341,7 @@ function setOptionEvent() {//放送画面用イベント設定
         .on("mouseout", usereventVolMouseout)
         ;
     window.addEventListener("keydown", function (e) {
-        //console.log(e);
+        //console.log(e)
         if (e.keyCode == 13 || e.keyCode == 229) { //enter
             usereventSendButClick();
         } else if (e.keyCode == 38 || e.keyCode == 40) { //38^ 40v
@@ -5493,7 +5499,7 @@ function programTimeStrToTime(programTimeStr) {
     }
     programTime.setDate(parseInt(programTimeArray[2]));//月より先に日をセット
     programTime.setMonth(parseInt(programTimeArray[1]) - 1);
-    console.log("setMonth:", parseInt(programTimeArray[1]) - 1, "getMonth(afterset):",programTime.getMonth())
+    //sconsole.log("setMonth:", parseInt(programTimeArray[1]) - 1, "getMonth(afterset):",programTime.getMonth())
     programTime.setHours(parseInt(programTimeArray[3]));
     programTime.setMinutes(parseInt(programTimeArray[4]));
     programTime.setSeconds(0);
