@@ -105,6 +105,12 @@ var settingsList = [
                 "description": "アンケートを非表示",
                 "type": "boolean",
                 "isInstantChangable": true
+            },
+            {
+                "name": "isStoreViewCounter",
+                "description": "コメント欄開閉ボタンのコメント数の上に視聴数をコピーする",
+                "type": "boolean",
+                "isInstantChangable": true
             }
         ]
     },
@@ -142,6 +148,12 @@ var settingsList = [
             {
                 "name": "isCommentFormWithSide",
                 "description": "↑有効時にコメント入力欄を右のボタンと連動して非表示(画面右のボタンがマウス無操作時に非表示になる場合、合わせて入力欄も非表示になります)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isComeTriming",
+                "description": "常にコメント欄を表示するような場合にコメント欄が上下に縮まないように上下黒帯を横に縮める",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -336,12 +348,13 @@ var settingsList = [
         "settings": [
             {
                 "name": "isChTimetableExpand",
-                "description": "チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (各時刻の縦の長さが一定でなくバラバラになります)",
+                "description": "<s>チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (時刻の縦の長さが一定でなくバラバラになります)</s>古いオプションで正常に動かないので無効",
                 "type": "boolean",
                 "isInstantChangable": false
             },{
                 "name": "isChTimetableBreak",
-                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
+//                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
+                "description": "番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
                 "type": "boolean",
                 "isInstantChangable": false
             },{
@@ -359,6 +372,27 @@ var settingsList = [
                 "description": "番組表を開いたときに指定したチャンネルまで自動スクロール(abema-news、drama、anime24などのurl中のチャンネル名を一つ指定)",
                 "type": "text",
                 "default": "",
+                "isInstantChangable": false
+            },{
+                "name": "allowChannelNames",
+                "description": "番組表で表示するチャンネル名を半角カンマ区切り(番組表で各リンクの右クリックメニューから切替可)",
+                "type": "text",
+                "default": "",
+                "isInstantChangable": false
+            },{
+                "name": "isExpandLastItem",
+                "description": "番組表の一番下(日付変更付近)の細いマスを縦に少し伸ばしてちゃんと見えるようにする",
+                "type": "boolean",
+                "isInstantChangable": false
+            },{
+                "name": "isExpandFewChannels",
+                "description": "番組表に左右余白がある場合、各チャンネル列を横に伸ばす",
+                "type": "boolean",
+                "isInstantChangable": false
+            },{
+                "name": "isHideArrowButton",
+                "description": "番組表の横移動ボタンを非表示",
+                "type": "boolean",
                 "isInstantChangable": false
             }
         ]
