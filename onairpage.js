@@ -108,6 +108,7 @@ var allowChannelNames = ["abema-news","abema-special","special-plus","special-pl
 var isExpandLastItem = false; //番組表の一番下の細いマスを縦に少し伸ばす
 var isExpandFewChannels = false; //番組表の余白がある場合に横に伸ばす
 var isHideArrowButton = false; //番組表の左右移動ボタンを非表示
+var isPutSideDetailHighlight = false; //番組表の右枠に番組詳細を追加する
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -231,6 +232,7 @@ getStorage(null, function (value) {
     isExpandLastItem = value.expandLastItem || false;
     isExpandFewChannels = value.expandFewChannels || false;
     isHideArrowButton = value.hideArrowButton || false;
+    isPutSideDetailHighlight = value.putSideDetailHighlight || false;
 });
 
 var currentLocation = window.location.href;
@@ -492,12 +494,59 @@ function waitforloadtimetable(url) {
         //番組表クリックで右詳細に通知登録ボタン設置
         $('[class*="styles__timetable-wrapper___"]').click(function(){
             setTimeout(putSideDetailNotifyButton,50);
+            if (isPutSideDetailHighlight) {
+                setTimeout(putSideDetailHighlight,50);
+            }
         });
         allowChannelNumMaker();
         timetableCss();
     } else {
         console.log("retry waitforloadtimetable");
         setTimeout(waitforloadtimetable, 500, url);
+    }
+}
+function putSideDetailHighlight(){
+    var sideDetailWrapper = $('[class*="styles__side-slot-detail-wrapper___"][class*="styles__is-opened___"]');
+    if (sideDetailWrapper.length == 0) { return; }
+    var progTitle = sideDetailWrapper.find('p[class*="styles__title___"]').text();
+    var progLinkArr = sideDetailWrapper.find('[class*="styles__link-detail___"]').attr("href").split('/');
+    var urlchan = progLinkArr.indexOf("channels");
+    if (urlchan < 0) { return; }
+    var channel = progLinkArr[urlchan + 1];
+
+    var cols = $('[class^="styles__timetable-wrapper___"]').children('div[class^="styles__col___"]');
+    var c = checkUrlPattern(true);
+    var j = $('[class^="styles__channel-content-header___"]');
+    var h;
+    var allTitle = $('[class^="styles__title___"]');
+    var searchTarget;
+    if (c == 1) {
+        h = '[class^="styles__channel-icon-header___"]';
+        var headLinks = j.children(h).children('a[class^="styles__channel-link___"]');
+        var headTarget = headLinks.filter('[href$="' + channel + '"]');
+        var targetIndex = headLinks.index(headTarget);
+        searchTarget = cols.eq(targetIndex).find(allTitle);
+    } else if (c == 2) {
+//        h = '[class^="styles__date-list-header___"]';
+        searchTarget = cols.find(allTitle);
+    }
+    var highlightString = "";
+    for (var i = 0, t, s; i < searchTarget.length; i++) {
+        t = searchTarget.eq(i).text();
+        if (t == progTitle) {
+            s = searchTarget.eq(i).parents('[class^="style__body-text___"]').children('[class^="style__tableHighlight___"]').text();
+            if (s.length > 0) {
+                highlightString = s;
+                break;
+            }
+        }
+    }
+    sideDetailWrapper.find('p[class="addedHighlight"]').remove();
+    if (highlightString.length > 0) {
+        $('<p class="addedHighlight" style="line-height:19px;font-size:12px;margin-top:20px;">' + highlightString + '</p>').appendTo(sideDetailWrapper.children().last());
+        sideDetailWrapper.css("overflow-x", "hidden");
+    } else {
+        sideDetailWrapper.css("overflow-x", "");
     }
 }
 function timetabledtfix() {
@@ -859,7 +908,7 @@ function timetableCommonFix(prevColNum) {
 }
 function getChannelNameOnTimetable(channel) { //番組表ページのチャンネルリストを利用してチャンネル名を得る
     var hrefStr = "/timetable/channels/" + channel;
-    return $('[class*="styles__channels-navigation___"] ul').find('a[href="' + hrefStr + '"]').text();
+    return $('[class*="styles__channels-navigation___"] ul').find('a[href$="' + hrefStr + '"]').text();
 }
 function getVideo() {
     var jo = $('object,video');
@@ -5819,9 +5868,13 @@ function putSideDetailNotifyButton(){
     var progTitle = sideDetailWrapper.find('p[class*="styles__title___"]').text();
     var progTime = programTimeStrToTime(sideDetailWrapper.find('p[class*="styles__date___"]').text());
     var progLinkArr = sideDetailWrapper.find('[class*="styles__link-detail___"]').attr("href").split('/');
-    var channel = progLinkArr[2];
+//    var channel = progLinkArr[2];
+    var urlchan = progLinkArr.indexOf("channels");
+    if (urlchan < 0) { return; }
+    var channel = progLinkArr[urlchan + 1];
     var channelName = getChannelNameOnTimetable(channel);
-    var progID = progLinkArr[4];
+//    var progID = progLinkArr[4];
+    var progID = progLinkArr[urlchan + 3];
     var notifyButParent = sideDetailWrapper.find('[class*="styles__slot-detail-buttons___"]>div');
     putNotifyButtonElement(channel, channelName, progID, progTitle, progTime, notifyButParent);
 }
