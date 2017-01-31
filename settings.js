@@ -394,6 +394,11 @@ var settingsList = [
                 "description": "番組表の横移動ボタンを非表示",
                 "type": "boolean",
                 "isInstantChangable": false
+            },{
+                "name": "isPutSideDetailHighlight",
+                "description": "番組表の右枠に詳細文を追加する(番組表本体の枠内に記載がある場合のみ)",
+                "type": "boolean",
+                "isInstantChangable": false
             }
         ]
     }
