@@ -293,6 +293,7 @@ $(function(){
         var isExpandLastItem=value.expandLastItem||false;
         var isExpandFewChannels=value.expandFewChannels||false;
         var isHideArrowButton=value.hideArrowButton||false;
+        var isPutSideDetailHighlight=value.putSideDetailHighlight||false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -412,6 +413,7 @@ $(function(){
         $('#isExpandLastItem').prop("checked",isExpandLastItem);
         $('#isExpandFewChannels').prop("checked",isExpandFewChannels);
         $('#isHideArrowButton').prop("checked",isHideArrowButton);
+        $('#isPutSideDetailHighlight').prop("checked",isPutSideDetailHighlight);
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -509,7 +511,8 @@ $(function(){
             "allowChannelNames": $('#allowChannelNames').val(),
             "expandLastItem":$('#isExpandLastItem').prop("checked"),
             "expandFewChannels":$('#isExpandFewChannels').prop("checked"),
-            "hideArrowButton":$('#isHideArrowButton').prop("checked")
+            "hideArrowButton":$('#isHideArrowButton').prop("checked"),
+            "putSideDetailHighlight":$('#isPutSideDetailHighlight').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
