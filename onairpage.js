@@ -5324,8 +5324,8 @@ function onairBasefunc() {
                 }
                 commentNum = comeListLen;
                 //                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0&&$(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==0){
-                if (isSureReadComment && commentNum > Math.max(comeHealth + 20, sureReadRefreshx) && isFootcomeClickable() && $(EXcome).siblings('[class*="styles__right-slide--shown___"]').length == 0) {
-                    //コメ常時表示 & コメ数>設定値 & コメ開可 & 他枠非表示
+                if (/*isSureReadComment && */commentNum > Math.max(comeHealth + 20, sureReadRefreshx) && isFootcomeClickable() && $(EXcome).siblings('[class*="styles__right-slide--shown___"]').length == 0) {
+                    ///*コメ常時表示 &*/ コメ数>設定値 & コメ開可 & 他枠非表示
                     console.log("comeRefreshing start");
                     comeRefreshing = true;
                     //                    commentNum=0;
