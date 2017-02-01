@@ -276,6 +276,14 @@ function putContextMenu(){
         "documentUrlPatterns": ["https://abema.tv/channels/*"],
         "id": "searchAbemaTVTimetable"
     });
+    chrome.contextMenus.create({
+        "title": "このチャンネルを表示切替",
+        "type": "normal",
+        "contexts": ["link"],
+        "documentUrlPatterns": ["https://abema.tv/timetable","https://abema.tv/timetable/dates/*"],
+        "targetUrlPatterns":["https://abema.tv/timetable/channels/*"],
+        "id": "toggleChannel"
+    });
 }
 function onContextMenuClick(info, tab){
     if(info.menuItemId.indexOf("addNGwordMenu")===0){
@@ -286,6 +294,9 @@ function onContextMenuClick(info, tab){
         var word = info.selectionText;
         //chrome.tabs.create({url: "https://abema.tv/search/future?q="+encodeURIComponent(word)});
         window.open("https://abema.tv/search/future?q="+encodeURIComponent(word));
+    }else if(info.menuItemId == "toggleChannel"){
+        var tar = info.linkUrl;
+        chrome.tabs.sendMessage(tab.id,{"name":"toggleChannel","url":tar});
     }
 }
 chrome.contextMenus.onClicked.addListener(onContextMenuClick);

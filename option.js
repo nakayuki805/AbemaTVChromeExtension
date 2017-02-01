@@ -287,6 +287,13 @@ $(function(){
         var isMovieSpacingZeroLeft=value.movieSpacingZeroLeft||false;
         var comeFontsize=Math.min(99,Math.max(1,((value.comeFontsize!==undefined)?Number(value.comeFontsize):32)));
         var isHideVoting=value.hideVoting||false;
+        var isStoreViewCounter=value.storeViewCounter||false;
+        var isComeTriming=value.comeTriming||false;
+        var allowChannelNames=value.allowChannelNames||"";
+        var isExpandLastItem=value.expandLastItem||false;
+        var isExpandFewChannels=value.expandFewChannels||false;
+        var isHideArrowButton=value.hideArrowButton||false;
+        var isPutSideDetailHighlight=value.putSideDetailHighlight||false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -400,6 +407,13 @@ $(function(){
         $('#isMovieSpacingZeroLeft').prop("checked",isMovieSpacingZeroLeft);
         $('#comeFontsize').val(comeFontsize);
         $('#isHideVoting').prop("checked",isHideVoting);
+        $('#isStoreViewCounter').prop("checked",isStoreViewCounter);
+        $('#isComeTriming').prop("checked",isComeTriming);
+        $('#allowChannelNames').val(allowChannelNames);
+        $('#isExpandLastItem').prop("checked",isExpandLastItem);
+        $('#isExpandFewChannels').prop("checked",isExpandFewChannels);
+        $('#isHideArrowButton').prop("checked",isHideArrowButton);
+        $('#isPutSideDetailHighlight').prop("checked",isPutSideDetailHighlight);
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -491,7 +505,14 @@ $(function(){
             "movieSpacingZeroTop":$('#isMovieSpacingZeroTop').prop("checked"),
             "movieSpacingZeroLeft":$('#isMovieSpacingZeroLeft').prop("checked"),
             "comeFontsize":Math.min(99,Math.max(1,parseInt($('#comeFontsize').val()))),
-            "hideVoting":$('#isHideVoting').prop("checked")
+            "hideVoting":$('#isHideVoting').prop("checked"),
+            "storeViewCounter":$('#isStoreViewCounter').prop("checked"),
+            "comeTriming":$('#isComeTriming').prop("checked"),
+            "allowChannelNames": $('#allowChannelNames').val(),
+            "expandLastItem":$('#isExpandLastItem').prop("checked"),
+            "expandFewChannels":$('#isExpandFewChannels').prop("checked"),
+            "hideArrowButton":$('#isHideArrowButton').prop("checked"),
+            "putSideDetailHighlight":$('#isPutSideDetailHighlight').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
