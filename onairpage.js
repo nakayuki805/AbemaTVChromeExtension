@@ -254,7 +254,8 @@ for (var i = 0; i < comeLatestLen; i++) {
     comeLatestPosi[i][1] = comeTTLmin;
 }
 //var playtick=0;
-var comeLatestCount = 0; //画面右下で取得するコメント数
+//var comeLatestCount = 0; //画面右下で取得するコメント数
+isComeLatestClickable = true; //右下コメント数をクリックできるか
 var arFullNg = [];
 //var retrytick=[1000,3000,6000,12000,18000];
 //var retrycount=0;
@@ -3341,14 +3342,14 @@ function faintcheck2(retrycount, sw, fcd, bgi) {
     //console.log("faintcheck#"+retrycount+",fcd="+fcd);
     if (EXfootcountcome) {
         if (sw < 0) {
-            if (isNaN(parseInt($(EXfootcountcome).text()))) {
+            if (!isFootcomeClickable()) { //isNaN(parseInt($(EXfootcountcome).text()))
                 //console.log("faintcheck cmblockcd="+cmblockcd+"->"+fcd);
                 cmblockcd = fcd;
                 bginfo[3] = bgi;
                 return;
             }
         } else if (sw > 0) {
-            if (!isNaN(parseInt($(EXfootcountcome).text()))) {
+            if (isFootcomeClickable()) { //!isNaN(parseInt($(EXfootcountcome).text()))
                 //console.log("faintcheck cmblockcd="+cmblockcd+"->"+fcd);
                 cmblockcd = fcd;
                 bginfo[3] = bgi;
@@ -4723,7 +4724,7 @@ function fastEyecatching(retrycount) {
     } else {
         //eyecatch消失
         eyecatcheck = false;
-        if (isNaN(parseInt($(EXfootcountcome).text()))) {
+        if (!isFootcomeClickable()) { //isNaN(parseInt($(EXfootcountcome).text()))
             bginfo[3] = 2;
             cmblockcd = 0;
             startCM();
@@ -5375,22 +5376,23 @@ function onairBasefunc() {
         //2つに分かれていたのを統合
         //この後ろで結局コメ数チェックするのでここでついでに実行
         if (EXfootcountcome) {
-            var comeContStr = $(EXfootcountcome).text();
-            var commentCount;
-            if (isNaN(parseInt(comeContStr))) { //今コメント無効
+            //var comeContStr = $(EXfootcountcome).text();
+            //var commentCount;
+            var isComeClickable = isFootcomeClickable();
+            /*if (isNaN(parseInt(comeContStr))) { //今コメント無効
                 commentCount = -1;
             } else {
                 commentCount = parseInt(comeContStr);
-            }
+            }*/
             if (isCMBlack || isCMsoundoff || CMsmall < 100) {
-                if (commentCount < 0 && comeLatestCount >= 0) {
+                if (!isComeClickable && isComeLatestClickable) {
                     //今コメント数無効で直前がコメント数有効(=コメント数無効開始?)
                     if (cmblockcd <= 0) {
                         faintcheck(1, cmblockcd, bginfo[3]);
                         cmblockcd = cmblockia;
                         bginfo[3] = 1;
                     }
-                } else if (commentCount >= 0 && comeLatestCount < 0) {
+                } else if (isComeClickable && !isComeLatestClickable) {
                     //今コメント数有効で直前がコメント数無効(=コメント数無効終了?)
                     if (cmblockcd >= 0) {
                         faintcheck(-1, cmblockcd, bginfo[3]);
@@ -5400,7 +5402,8 @@ function onairBasefunc() {
                 }
             } else {
             }
-            comeLatestCount = commentCount;
+            //comeLatestCount = commentCount;
+            isComeLatestClickable = isComeClickable;
         }
         if ((EXwatchingnum !== undefined) && useEyecatch) {
             if ($(EXobli.children[EXwatchingnum]).children('[class*="styles__eyecatch"]').length > 0) {
