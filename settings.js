@@ -375,7 +375,7 @@ var settingsList = [
                 "isInstantChangable": false
             },{
                 "name": "allowChannelNames",
-                "description": "番組表で表示するチャンネル名を半角カンマ区切り(番組表を指定したチャンネルのみにできます)(番組表で各リンクの右クリックメニューから切替可、この機能を使う場合は上の自動スクロールは何も指定しないでください)",
+                "description": "番組表で表示するチャンネル名を半角カンマ区切り(番組表を指定したチャンネルのみの表示にできます)(番組表で各チャンネルリンクの右クリックメニューから切替可)",
                 "type": "text",
                 "default": "",
                 "isInstantChangable": false

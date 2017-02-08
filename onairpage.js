@@ -104,7 +104,7 @@ var comeFontsize = 32; //流れるコメントのfont-size xx-large
 var isHideVoting = false; //アンケート機能の非表示
 var isStoreViewCounter = false; //視聴数をコメント開閉ボタンのコメ数表記と並べる
 var isComeTriming = false; //コメント欄常時表示時はコメ欄の分だけ上下黒帯を縮めてコメ欄を縦に伸ばす
-var allowChannelNames = ["abema-news","abema-special","special-plus","special-plus-2","special-plus-3","special-plus-4","special-plus-5","special-plus-6","drama","asia-drama","reality-show","mtv-hits","space-shower","documentary","variety","pet","club-channel","world-sports","edge-sport","fighting-sports","vice","commercial","anime24","midnight-anime","oldtime-anime","family-anime","new-anime","hiphop","yokonori-sports","golf","fishing","mahjong"];
+var allowChannelNames = ["abema-news","abema-special","special-plus","special-plus-2","special-plus-3","special-plus-4","special-plus-5","special-plus-6","drama","asia-drama","reality-show","mtv-hits","space-shower","documentary","variety","pet","club-channel","world-sports","fighting-sports","vice","commercial","anime24","midnight-anime","oldtime-anime","family-anime","new-anime","hiphop","yokonori-sports","golf","fishing","shogi","mahjong"];
 var isExpandLastItem = false; //番組表の一番下の細いマスを縦に少し伸ばす
 var isExpandFewChannels = false; //番組表の余白がある場合に横に伸ばす
 var isHideArrowButton = false; //番組表の左右移動ボタンを非表示
@@ -450,9 +450,14 @@ function toggleChannel(targetUrl) {
 //console.log("toggleChannel url="+targetUrl);
     var t = /\/([^/]+)$/.exec(targetUrl)[1];
     var i = allowChannelNames.indexOf(t);
+    var chname = getChannelNameOnTimetable(t);
     if (i < 0) {
+        //追加
+        toast(chname+"を番組表に表示するチャンネルに追加しました。");
         allowChannelNames.push(t);
     } else {
+        //削除
+        toast(chname+"を番組表に表示するチャンネルから削除しました。<br>再度表示させるには左チャンネル一覧から右クリックして表示切り替えするか設定でチャンネルを編集してください。");
         allowChannelNames.splice(i,1);
     }
 console.log(allowChannelNames);
@@ -567,11 +572,27 @@ function timetabledtfix() {
     if (ce) {
         timetabledtloop();
     }
+    console.log(allowChannelNum)
     if (timetableScroll != "") {
         var channelLink = $('a[href="/timetable/channels/' + timetableScroll + '"][class*="styles__channel-link___"]');
         if (channelLink.length > 0) {
+            var chLinkIndex = channelLink.index();
             var chLinkWidth = channelLink.width();
-            $('[class*="styles__content-wrapper___"]').scrollLeft(chLinkWidth * channelLink.index());
+            var visibleChLinkIndex = chLinkIndex;
+            if (allowChannelNum.length > 0) {
+                chLinkWidth = channelLink.siblings().eq(allowChannelNum[0]).width();//allowChannelに含まれないチャンネルのchannelLinkから幅を取得するとずれる
+                visibleChLinkIndex = 0;
+                for(var i = 0; i < allowChannelNum.length; i++){
+                    if (allowChannelNum[i] < chLinkIndex) {
+                        visibleChLinkIndex++;
+                    }else {
+                        break;
+                    }
+                }
+            }
+            //console.log(chLinkIndex, visibleChLinkIndex, allowChannelNum)
+            //console.log(chLinkWidth,visibleChLinkIndex,chLinkWidth * visibleChLinkIndex)
+            $('[class*="styles__content-wrapper___"]').scrollLeft(chLinkWidth * visibleChLinkIndex);
         } else {
             console.warn("timetable scroll failed. (channelLink not found: チャンネル名が正しくないか仕様変更)");
         }
