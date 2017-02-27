@@ -45,7 +45,7 @@ var changeMaxVolume = 100; //最大音量(100)をこの値へ自動変更
 var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false; //コメント欄を開きっ放しにする
 settings.isCommentFormWithSide = false;//↑有効時にコメ入力欄を右ボタンに連動させて非表示
-var sureReadRefreshx = 1500; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
+var sureReadRefreshx = 500; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
 settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
 //var isMovieResize = false; //映像を枠に合わせて縮小
 //var isMovieMaximize = false; //映像最大化
@@ -1699,10 +1699,10 @@ function delayset() {
     setTimeout(copycome, 1000);
     //視聴数の位置調整
     setInterval(function () {
-        $(EXcountview).css('right', $(EXfootcome).width() + 'px');
+        $(EXcountview).offset({left:($(EXfootcome).offset().left-$(EXcountview).outerWidth())});
     }, 5000);//コメント数が表示されるまで待つ
     setInterval(function () {
-        $(EXcountview).css('right', $(EXfootcome).width() + 'px');
+        $(EXcountview).offset({left:($(EXfootcome).offset().left-$(EXcountview).outerWidth())});
     }, 60000);//1分ごとに再調整
 
     console.log("delayset ok");
