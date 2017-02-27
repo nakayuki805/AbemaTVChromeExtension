@@ -111,6 +111,12 @@ var settingsList = [
                 "description": "コメント欄開閉ボタンのコメント数の上に視聴数をコピーする",
                 "type": "boolean",
                 "isInstantChangable": true
+            },
+            {
+                "name": "panelOpacity",
+                "description": "上下黒帯パネルの透過度(完全透明0～255不透明)",
+                "type": "range",
+                "isInstantChangable": true
             }
         ]
     },

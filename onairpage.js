@@ -109,6 +109,7 @@ var isExpandLastItem = false; //番組表の一番下の細いマスを縦に少
 var isExpandFewChannels = false; //番組表の余白がある場合に横に伸ばす
 var isHideArrowButton = false; //番組表の左右移動ボタンを非表示
 var isPutSideDetailHighlight = false; //番組表の右枠に番組詳細を追加する
+settings.panelOpacity = 127; //黒帯パネル透過度
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -233,6 +234,7 @@ getStorage(null, function (value) {
     isExpandFewChannels = value.expandFewChannels || false;
     isHideArrowButton = value.hideArrowButton || false;
     isPutSideDetailHighlight = value.putSideDetailHighlight || false;
+    settings.panelOpacity = (value.panelOpacity!==undefined)?value.panelOpacity : 127;
 });
 
 var currentLocation = window.location.href;
@@ -1587,6 +1589,8 @@ function openOption() {
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
 
+    $('#panelOpacity').val(settings.panelOpacity);
+
     var panelopenseu = [];
     for (var i = 0; i < 4; i++) {
         panelopenseu[i] = panelopenset[i].join('');
@@ -2608,6 +2612,7 @@ function setSaveClicked() {
     isHideVoting = $('#isHideVoting').prop("checked");
     isStoreViewCounter = $('#isStoreViewCounter').prop("checked");
     isComeTriming = $('#isComeTriming').prop("checked");
+    settings.panelOpacity =  parseInt($("#panelOpacity").val());
 
     arrayFullNgMaker();
     onresize();
@@ -4182,6 +4187,8 @@ function setOptionHead() {
         t += '[class^="styles__header-container___"],[class^="styles__footer-container___"]{width:calc(100% - 310px);}';
         t += '[class^="styles__header-container___"]>*{min-width:unset;}';
     }
+    //黒帯パネルの透過
+    t += '[class*="styles__footer___"],[class*="styles__header___"]{opacity:' + (settings.panelOpacity/255) + '}';
 
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURIComponent(t) + "'>").appendTo("head");
     console.log("setOptionHead ok");

@@ -294,6 +294,7 @@ $(function(){
         var isExpandFewChannels=value.expandFewChannels||false;
         var isHideArrowButton=value.hideArrowButton||false;
         var isPutSideDetailHighlight=value.putSideDetailHighlight||false;
+        var panelOpacity = (value.panelOpacity!==undefined)?value.panelOpacity : 127;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -414,6 +415,7 @@ $(function(){
         $('#isExpandFewChannels').prop("checked",isExpandFewChannels);
         $('#isHideArrowButton').prop("checked",isHideArrowButton);
         $('#isPutSideDetailHighlight').prop("checked",isPutSideDetailHighlight);
+        $('#panelOpacity').val(panelOpacity);
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -512,7 +514,8 @@ $(function(){
             "expandLastItem":$('#isExpandLastItem').prop("checked"),
             "expandFewChannels":$('#isExpandFewChannels').prop("checked"),
             "hideArrowButton":$('#isHideArrowButton').prop("checked"),
-            "putSideDetailHighlight":$('#isPutSideDetailHighlight').prop("checked")
+            "putSideDetailHighlight":$('#isPutSideDetailHighlight').prop("checked"),
+            "panelOpacity": parseInt($('#panelOpacity').val())
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

@@ -61,13 +61,15 @@
     border-style: solid;
     border-width: 1px;
 }
+/* 黒帯パネル上下 onairpage.jsで設定
+[class*="styles__footer___"] {
+    opacity: 0.5;
+}
 
-[class*="styles__footer___"] { /* 黒帯バー下 */
+[class*="styles__header___"] {
     opacity: 0.5;
 }
-[class*="styles__header___"] { /* 黒帯バー上 */
-    opacity: 0.5;
-}
+*/
 [class*="styles__balloon-"] { /* 緑色吹き出し非表示 */
     display:none;
 }
