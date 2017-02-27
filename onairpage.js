@@ -4620,6 +4620,7 @@ function setOptionEvent() {//放送画面用イベント設定
         }
     });
     window.addEventListener("mousemove", usereventMouseover, true);
+    window.addEventListener("keydown", usereventMouseover, true); //コメント入力時などキー入力時もマウスが動いたのと同じ扱いにしてelementをhideするカウントダウンをさせない
     pwaku.addEventListener("click", usereventWakuclick);
     //pwakuと同じイベントを#ComeMukouMaskにも設置
     $(EXvolume).on("mousemove", usereventVolMousemove)
@@ -4830,7 +4831,9 @@ function comehl(jo, hlsw) {
         default:
     }
     setTimeout(function (jo) {
+        //console.log(jo)
         for (var i = jo.length - 1, j = 0; i >= 0; i-- , j++) {
+            //console.log(jo,i)
             switch (hlsw) {
                 case 1:
                     jo.eq(i).css("border-left-color", "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0)")
