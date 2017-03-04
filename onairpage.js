@@ -5847,20 +5847,14 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
 }
 function programTimeStrToTime(programTimeStr) {
     var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
-    var programTime = new Date(0);//現在時刻ではなく0(1970/1/1)を置く ここは31日まである月の日付を置く必要がある
     var now = new Date();
+    var programYear = now.getFullYear();
     var programMonthNum = parseInt(programTimeArray[1]) - 1;
-    if (now.getMonth() === 11 && programMonthNum === 0) { 
-        programTime.setFullYear(now.getFullYear() + 1); //現在12月なら1月は来年とする
-    } else {
-        programTime.setFullYear(now.getFullYear());
-    }
-    programTime.setDate(parseInt(programTimeArray[2]));//月より先に日をセット
-    programTime.setMonth(parseInt(programTimeArray[1]) - 1);
-    //sconsole.log("setMonth:", parseInt(programTimeArray[1]) - 1, "getMonth(afterset):",programTime.getMonth())
-    programTime.setHours(parseInt(programTimeArray[3]));
-    programTime.setMinutes(parseInt(programTimeArray[4]));
-    programTime.setSeconds(0);
+    var programDate = parseInt(programTimeArray[2]);
+    var programHour = parseInt(programTimeArray[3]);
+    var programMinute = parseInt(programTimeArray[4]);
+    if (now.getMonth() === 11 && programMonthNum === 0) {programYear++;} //現在12月なら1月は来年とする
+    var programTime = new Date(programYear, programMonthNum, programDate, programHour, programMinute, 0, 0);
     return programTime;
 }
 function putNotifyButton(url) {
