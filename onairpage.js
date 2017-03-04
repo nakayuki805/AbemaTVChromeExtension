@@ -110,6 +110,8 @@ var isExpandFewChannels = false; //番組表の余白がある場合に横に伸
 var isHideArrowButton = false; //番組表の左右移動ボタンを非表示
 var isPutSideDetailHighlight = false; //番組表の右枠に番組詳細を追加する
 settings.panelOpacity = 127; //黒帯パネル透過度
+var comeFontsizeV = false;
+var proTitleFontC = false;
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -235,6 +237,8 @@ getStorage(null, function (value) {
     isHideArrowButton = value.hideArrowButton || false;
     isPutSideDetailHighlight = value.putSideDetailHighlight || false;
     settings.panelOpacity = (value.panelOpacity!==undefined)?value.panelOpacity : 127;
+    comeFontsizeV = value.comeFontsizeV || false;
+    proTitleFontC = value.proTitleFontC || false;
 });
 
 var currentLocation = window.location.href;
@@ -1590,6 +1594,8 @@ function openOption() {
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
 
     $('#panelOpacity').val(settings.panelOpacity);
+    $('#comeFontsizeV').prop("checked", comeFontsizeV);
+    $('#proTitleFontC').prop("checked", proTitleFontC);
 
     var panelopenseu = [];
     for (var i = 0; i < 4; i++) {
@@ -2613,6 +2619,8 @@ function setSaveClicked() {
     isStoreViewCounter = $('#isStoreViewCounter').prop("checked");
     isComeTriming = $('#isComeTriming').prop("checked");
     settings.panelOpacity =  parseInt($("#panelOpacity").val());
+    comeFontsizeV = $('#comeFontsizeV').prop("checked");
+    proTitleFontC = $('#proTitleFontC').prop("checked");
 
     arrayFullNgMaker();
     onresize();
@@ -3496,7 +3504,7 @@ function fastRefreshing() {
 }
 function proPositionAllReset(bigtext) {
     //console.log("proSameUnFix");
-    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
+    var prehoverContents = $('[class*="styles__hover-contents___"]').parent().parent();
     var headlogo = prehoverContents.siblings().first();
     var parexfootcount = $(EXfootcount).parent();
     var footlogo = $(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
@@ -3525,6 +3533,7 @@ function proPositionAllReset(bigtext) {
         ;
     headlogo.css("margin-top", "")
         .next().css("margin-top", "")
+        .find('[class*="styles__default-input-text___"]').css("height", "")
         ;
     parexfootcount.css("margin-bottom", "")
         .css("margin-top", "")
@@ -3540,7 +3549,7 @@ function proPositionAllReset(bigtext) {
 }
 function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
     //console.log("proSameFix time="+inptime+", title="+inptitle+", same="+inpsame);
-    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
+    var prehoverContents = $('[class*="styles__hover-contents___"]').parent().parent();
     var headlogo = prehoverContents.siblings().first();
     var parexfootcount = $(EXfootcount).parent();
     var footlogo = $(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
@@ -3591,14 +3600,14 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
             case "vertical":
                 forpros.css("top", (tproh - 4) + "px");
                 if (tprow <= 320) {
-                    prehoverContents.css("margin-right", "310px")
+                    prehoverContents.css("margin-right", isComeTriming?"":"310px")
                         .css("margin-top", "")
                         .css("margin-left", "12px")
                         .prev().css("margin-top", "")
                         .contents().find('li').slice(1).css("margin-left", "12px")
                         ;
                 } else {
-                    prehoverContents.css("margin-right", "310px")
+                    prehoverContents.css("margin-right", isComeTriming?"":"310px")
                         .css("margin-left", "12px")
                         .prev().contents().find('li').slice(1).css("margin-left", "12px")
                         ;
@@ -3711,13 +3720,16 @@ function createProtitle(sw, bt) {
 }
 function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     //残り時間との重なり処理はこれが終わってから
-    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
+    var prehoverContents = $('[class*="styles__hover-contents___"]').parent().parent();
     var headlogo = prehoverContents.siblings().first();
     var parexfootcount = $(EXfootcount).parent();
     var footlogo = $(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
     var tpro = $("#tProtitle");
     //    var bigtext=(bigpar!==undefined)?bigpar:isProTextLarge;
-    var tproh = tpro.height();
+    var tproh = tpro.height() + parseInt(tpro.css("padding-top")) + parseInt(tpro.css("padding-bottom"));
+    var tprouc = tpro.height() + parseInt(tpro.css("padding-top"));
+    var headh = $(EXhead).height();
+    var tprow = tpro.width() + parseInt(tpro.css("padding-left")) + parseInt(tpro.css("padding-right")) + parseInt(tpro.css("margin-left")) + parseInt(tpro.css("margin-right"));
     var par = titlepar;
     switch (par) {
         case "windowtopleft":
@@ -3768,7 +3780,8 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
         case "windowtopright":
         case "headerright":
-            var hmt = (tproh - 12) + Math.floor((44 - tproh - 12) / 2);
+            if (isComeTriming && tprow <= 320) break;
+            var hmt = (tproh - 12) + Math.floor((headh - tproh - 12) / 2);
             prehoverContents.css("margin-top", hmt + "px")
                 .prev().css("margin-top", hmt + "px")
                 ;
@@ -3778,10 +3791,12 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
         case "windowtopleft":
         case "headerleft":
-            var hmt = (tproh + 8 - 18) + Math.floor((44 - tproh - 8 - 18) / 2);
+            var hmt = (tproh + 8 - 18) + Math.floor((headh - tproh - 8 - 18) / 2);
             headlogo.css("margin-top", hmt + "px")
                 .next().css("margin-top", hmt + "px")
                 ;
+            if (bigpar)
+                headlogo.next().find('[class*="styles__default-input-text___"]').css("height", (headh - tprouc) + "px");
             break;
         default:
     }
@@ -3839,6 +3854,25 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
             break;
         default:
     }
+
+    var b = false;
+    if (proTitleFontC) {
+        switch (par) {
+            case "commentinputtopleft":
+            case "commentinputtopright":
+            case "commentinputbottomleft":
+            case "commentinputbottomright":
+                b = true;
+                break;
+// コメ入力欄周辺でない場合でも、ウィンドウ右下かつコメ入力欄下かつコメ欄表示中などによりコメ入力欄周辺に設置される場合があるけどそこまでは未設定
+            default:
+        }
+    }
+    if (b)
+        tpro.css("color", "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (commentTextTrans / 255) + ")");
+    else
+        tpro.css("color", "");
+
 }
 function createTime(sw, bt) {
     //console.log("createTime:"+sw);
@@ -3916,11 +3950,12 @@ function proepMouseleave() {
         ;
 }
 function setTimePosition(timepar, titlepar, samepar, bigpar) {
-    var prehoverContents = $('[class*="styles__hover-contents___"]').parent();
+    var prehoverContents = $('[class*="styles__hover-contents___"]').parent().parent();
     var parexfootcount = $(EXfootcount).parent();
     var forpros = $(".forpros");
     //    var bigtext=(bigpar!==undefined)?bigpar:isProTextLarge;
     var fproh = $("#forProEndTxt").height();
+    var headh = $(EXhead).height();
     var par = timepar;
     switch (par) {
         case "windowtop":
@@ -3942,7 +3977,8 @@ function setTimePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
         case "windowtop":
         case "header":
-            var hmt = (fproh - 12) + Math.floor((44 - fproh - 12) / 2);
+            if (isComeTriming) break;
+            var hmt = (fproh - 12) + Math.floor((headh - fproh - 12) / 2);
             prehoverContents.css("margin-top", hmt + "px")
                 .prev().css("margin-top", hmt + "px")
                 ;
@@ -3986,6 +4022,13 @@ function setTimePosition(timepar, titlepar, samepar, bigpar) {
             }
             break;
         default:
+    }
+    if (proTitleFontC && (par == "commentinputtop" || par == "commentinputbottom")) {
+        $("#forProEndTxt").css("color", "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (commentTextTrans / 255) + ")");
+        $("#forProEndBk").css("background-color", "rgba(" + commentBackColor + "," + commentBackColor + "," + commentBackColor + "," + (0.2) + ")");
+    } else {
+        $("#forProEndTxt").css("color", "");
+        $("#forProEndBk").css("background-color", "");
     }
 }
 function setOptionHead() {
@@ -4166,7 +4209,13 @@ function setOptionHead() {
         t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]:hover{color:' + rc + ';}';
     }
     //流れるコメントのフォントサイズ
-    t += '.movingComment{font-size:' + comeFontsize + 'px;}';
+    if (comeFontsizeV) {
+        var wh = $(window).height();
+        var vh = Math.round(1000 * comeFontsize / wh) / 10;
+        t += '.movingComment{font-size:' + vh + 'vh;}';
+    } else
+        t += '.movingComment{font-size:' + comeFontsize + 'px;}';
+
     //投票機能
     t += '[class^="styles__vote-container___"]{z-index:8;';
     if (isHideVoting) {
