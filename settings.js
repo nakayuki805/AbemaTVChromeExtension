@@ -105,6 +105,18 @@ var settingsList = [
                 "description": "アンケートを非表示",
                 "type": "boolean",
                 "isInstantChangable": true
+            },
+            {
+                "name": "isStoreViewCounter",
+                "description": "コメント欄開閉ボタンのコメント数の上に視聴数をコピーする",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "panelOpacity",
+                "description": "上下黒帯パネルの透過度(完全透明0～255不透明)",
+                "type": "range",
+                "isInstantChangable": true
             }
         ]
     },
@@ -146,10 +158,16 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isComeTriming",
+                "description": "常にコメント欄を表示するような場合にコメント欄が上下に縮まないように上下黒帯を横に縮める",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
                 "name": "sureReadRefreshx",
                 //        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
                 //        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
-                "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、100以前の古いコメントが破棄されることで動作が軽くなります。重いときは少なくすると軽くなります。)",
+                "description": "<s>常にコメント欄を表示する場合で、</s>読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、100以前の古いコメントが破棄されることで動作が軽くなります。重いときは少なくすると軽くなります。)",
                 "type": "number",
                 "isInstantChangable": true
             },
@@ -336,12 +354,13 @@ var settingsList = [
         "settings": [
             {
                 "name": "isChTimetableExpand",
-                "description": "チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (各時刻の縦の長さが一定でなくバラバラになります)",
+                "description": "<s>チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (時刻の縦の長さが一定でなくバラバラになります)</s>古いオプションで正常に動かないので無効",
                 "type": "boolean",
                 "isInstantChangable": false
             },{
                 "name": "isChTimetableBreak",
-                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
+//                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
+                "description": "番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
                 "type": "boolean",
                 "isInstantChangable": false
             },{
@@ -359,6 +378,32 @@ var settingsList = [
                 "description": "番組表を開いたときに指定したチャンネルまで自動スクロール(abema-news、drama、anime24などのurl中のチャンネル名を一つ指定)",
                 "type": "text",
                 "default": "",
+                "isInstantChangable": false
+            },{
+                "name": "allowChannelNames",
+                "description": "番組表で表示するチャンネル名を半角カンマ区切り(番組表を指定したチャンネルのみの表示にできます)(番組表で各チャンネルリンクの右クリックメニューから切替可)",
+                "type": "text",
+                "default": "",
+                "isInstantChangable": false
+            },{
+                "name": "isExpandLastItem",
+                "description": "番組表の一番下(日付変更付近)の細いマスを縦に少し伸ばしてちゃんと見えるようにする",
+                "type": "boolean",
+                "isInstantChangable": false
+            },{
+                "name": "isExpandFewChannels",
+                "description": "番組表に左右余白がある場合、各チャンネル列を横に伸ばす",
+                "type": "boolean",
+                "isInstantChangable": false
+            },{
+                "name": "isHideArrowButton",
+                "description": "番組表の横移動ボタンを非表示",
+                "type": "boolean",
+                "isInstantChangable": false
+            },{
+                "name": "isPutSideDetailHighlight",
+                "description": "番組表の右枠に詳細文を追加する(番組表本体の枠内に記載がある場合のみ)",
+                "type": "boolean",
                 "isInstantChangable": false
             }
         ]
