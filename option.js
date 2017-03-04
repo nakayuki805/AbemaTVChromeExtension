@@ -295,6 +295,8 @@ $(function(){
         var isHideArrowButton=value.hideArrowButton||false;
         var isPutSideDetailHighlight=value.putSideDetailHighlight||false;
         var panelOpacity = (value.panelOpacity!==undefined)?value.panelOpacity : 127;
+        var comeFontsizeV = value.comeFontsizeV || false;
+        var proTitleFontC = value.proTitleFontC || false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -416,6 +418,8 @@ $(function(){
         $('#isHideArrowButton').prop("checked",isHideArrowButton);
         $('#isPutSideDetailHighlight').prop("checked",isPutSideDetailHighlight);
         $('#panelOpacity').val(panelOpacity);
+        $('#comeFontsizeV').val(comeFontsizeV);
+        $('#proTitleFontC').val(proTitleFontC);
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -515,7 +519,9 @@ $(function(){
             "expandFewChannels":$('#isExpandFewChannels').prop("checked"),
             "hideArrowButton":$('#isHideArrowButton').prop("checked"),
             "putSideDetailHighlight":$('#isPutSideDetailHighlight').prop("checked"),
-            "panelOpacity": parseInt($('#panelOpacity').val())
+            "panelOpacity": parseInt($('#panelOpacity').val()),
+            "comeFontsizeV": $('#comeFontsizeV').prop("checked"),
+            "proTitleFontC": $('#proTitleFontC').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
