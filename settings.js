@@ -210,6 +210,12 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isDelTime",
+                "description": "↑で各コメントの投稿時刻を全て非表示にする。",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
                 "name": "isComelistClickNG",
 //                "description": "コメント一覧クリックでNG追加欄を表示(このNG追加欄による保存は一時的です。永久保存は設定画面へ。)",
                 "description": "コメント一覧クリックでNG追加欄を表示(NGボタン1回クリックで一時保存(黄色)、短時間で2回クリックすると永久保存(赤色)になります。)",
