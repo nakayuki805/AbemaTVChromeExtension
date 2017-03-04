@@ -297,6 +297,7 @@ $(function(){
         var panelOpacity = (value.panelOpacity!==undefined)?value.panelOpacity : 127;
         var comeFontsizeV = value.comeFontsizeV || false;
         var proTitleFontC = value.proTitleFontC || false;
+        var isDelTime=value.delTime||false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -420,6 +421,7 @@ $(function(){
         $('#panelOpacity').val(panelOpacity);
         $('#comeFontsizeV').val(comeFontsizeV);
         $('#proTitleFontC').val(proTitleFontC);
+        $('#isDelTime').prop("checked",isDelTime);
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -521,7 +523,8 @@ $(function(){
             "putSideDetailHighlight":$('#isPutSideDetailHighlight').prop("checked"),
             "panelOpacity": parseInt($('#panelOpacity').val()),
             "comeFontsizeV": $('#comeFontsizeV').prop("checked"),
-            "proTitleFontC": $('#proTitleFontC').prop("checked")
+            "proTitleFontC": $('#proTitleFontC').prop("checked"),
+            "delTime":$('#isDelTime').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
