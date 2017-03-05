@@ -5009,7 +5009,7 @@ function copycome(d, hlsw) {
                     m = e.children[0].textContent;
                     if (isDelOldTime || isDelTime) {
                         jc.eq(i).children().first().text(m)
-                            .css("width", e.children[0].style.width)
+                            .css("width", (isComeOpen(3) && isSideOpen(3)) ? e.children[0].style.width : "")
                             .next().text("")
                         ;
                     } else {
@@ -5065,7 +5065,7 @@ function copycome(d, hlsw) {
             if (hlsw > 0) {
                 comehl(jc.slice(0, ma.length), hlsw);
             }
-            if ((isDelOldTime || isDelTime) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
+            if ((isDelOldTime || isDelTime) && isComeOpen(3) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
         }
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
     } else if (d === undefined || copycomecount > 0) {
