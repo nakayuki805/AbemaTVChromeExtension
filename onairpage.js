@@ -5009,7 +5009,7 @@ function copycome(d, hlsw) {
                     m = e.children[0].textContent;
                     if (isDelOldTime || isDelTime) {
                         jc.eq(i).children().first().text(m)
-                            .css("width", (isComeOpen(3) && isSideOpen(3)) ? e.children[0].style.width : "")
+                            .css("width", (isComeOpen(3) && isSideOpen(3)) ? e.children[0].style.width : "unset")
                             .next().text("")
                         ;
                     } else {
