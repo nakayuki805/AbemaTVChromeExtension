@@ -210,6 +210,12 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isDelTime",
+                "description": "↑で各コメントの投稿時刻を全て非表示にする。",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
                 "name": "isComelistClickNG",
 //                "description": "コメント一覧クリックでNG追加欄を表示(このNG追加欄による保存は一時的です。永久保存は設定画面へ。)",
                 "description": "コメント一覧クリックでNG追加欄を表示(NGボタン1回クリックで一時保存(黄色)、短時間で2回クリックすると永久保存(赤色)になります。)",
@@ -298,6 +304,12 @@ var settingsList = [
                 "description": "流れるコメントの文字の大きさ(px)",
                 "type": "number",
                 "isInstantChangable": true
+            },
+            {
+                "name": "comeFontsizeV",
+                "description": "流れるコメントの文字の大きさをウィンドウ縦長さに追従させる",
+                "type": "boolean",
+                "isInstantChangable": true
             }
         ]
     },
@@ -321,6 +333,12 @@ var settingsList = [
             {
                 "name": "isProTextLarge",
                 "description": "番組残り時間・タイトルの文字を大きくする",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "proTitleFontC",
+                "description": "表示位置がコメント入力欄周辺の場合、番組残り時間・タイトルの文字色と残り時間バーの色をコメント欄に合わせる",
                 "type": "boolean",
                 "isInstantChangable": true
             }
