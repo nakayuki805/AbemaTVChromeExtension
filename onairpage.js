@@ -948,7 +948,10 @@ function getVideo() {
 function onresize() {
     //console.log("onresize()");
     //視聴数の位置調整
-    $(EXcountview).offset({ top: window.innerHeight - footerHeight });
+    setTimeout(function(){
+        $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
+        $(EXcountview).offset({left:($(EXfootcome).offset().left-$(EXcountview).outerWidth())});
+    },2000);
 
     var resizeType = settings.isResizeScreen ? 1 : 0;
     var posiVType = isMovieSpacingZeroTop ? 1 : (isResizeSpacing ? 2 : 0);
@@ -1698,7 +1701,7 @@ function delayset() {
     }
     setTimeout(copycome, 1000);
     //視聴数の位置調整
-    setInterval(function () {
+    setTimeout(function () {
         $(EXcountview).offset({left:($(EXfootcome).offset().left-$(EXcountview).outerWidth())});
     }, 5000);//コメント数が表示されるまで待つ
     setInterval(function () {
