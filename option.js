@@ -419,8 +419,8 @@ $(function(){
         $('#isHideArrowButton').prop("checked",isHideArrowButton);
         $('#isPutSideDetailHighlight').prop("checked",isPutSideDetailHighlight);
         $('#panelOpacity').val(panelOpacity);
-        $('#comeFontsizeV').val(comeFontsizeV);
-        $('#proTitleFontC').val(proTitleFontC);
+        $('#comeFontsizeV').prop("checked",comeFontsizeV);
+        $('#proTitleFontC').prop("checked",proTitleFontC);
         $('#isDelTime').prop("checked",isDelTime);
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
