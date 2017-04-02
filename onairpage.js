@@ -5470,7 +5470,11 @@ function onairBasefunc() {
             //console.log(comments.length,comeListLen,commentNum,d)
             //            if(comeListLen>commentNum){ //コメ増加あり
             //                if(!comeRefreshing||!isSureReadComment){
-            if (d > 0) { //コメ増加あり
+            var commentDivParentV = (isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : commentDivParent;
+            var scrolled = false;
+            if (isInpWinBottom) scrolled = (commentDivParentV.children().first().offset().top > window.innerHeight);
+            else scrolled = (commentDivParentV.children().first().offset().top < 0);
+            if (d > 0 && !scrolled) { //コメ増加あり && スクロールが規定値以上でない
                 //console.log("cmts",comments,commentDivParent,d,comeListLen,commentNum)
                 //                if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
                 if (isMovingComment && commentNum > 0) {
