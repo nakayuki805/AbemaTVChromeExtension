@@ -1690,9 +1690,10 @@ function delayset() {
     }
     //拡張機能の設定と通知番組一覧をその他メニューに追加
     var hoverLinkClass = hoverContents.children()[0].className;
+    var hoverSpanClass = hoverContents.children().eq(0).children()[0].className;
     if (hoverContents.children('#extSettingLink').length == 0) {
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank">拡張通知登録一覧</a>');
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>');
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>');
     }
     createSettingWindow();
     arrayFullNgMaker();
@@ -1720,18 +1721,19 @@ function delayset() {
     console.log("delayset ok");
 }
 function delaysetNotOA(){
-    var hoverContents = $('[class*="styles__hover-contents___"]');
+    var hoverContents = $('[class*="Dropdown__column___"]');
     if (hoverContents.children().length == 0) {
         console.log("delaysetNotOA retry");
-        setTimeout(delayset, 1000);
+        setTimeout(delaysetNotOA, 1000);
         return;
     }
     //拡張機能の設定と通知番組一覧をその他メニューに追加
     var hoverLinkClass = hoverContents.children()[0].className;
+    var hoverSpanClass = hoverContents.children().eq(0).children()[0].className;
     //console.log(hoverContents,hoverContents.children(),hoverLinkClass)
     if (hoverContents.children('#extSettingLink').length == 0) {
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank">拡張設定</a>');
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank">拡張通知登録一覧</a>');
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>');
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>');
     }
 }
 function volumecheck() {
@@ -3540,7 +3542,7 @@ function fastRefreshing() {
 }
 function proPositionAllReset(bigtext) {
     //console.log("proSameUnFix");
-    var prehoverContents = $('[class*="styles__hover-contents___"]').parent().parent();
+    var prehoverContents = $('[class*="Dropdown__button___"]').parent().parent();
     var headlogo = prehoverContents.siblings().first();
     var parexfootcount = $(EXfootcount).parent();
     var footlogo = $(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
@@ -3585,7 +3587,7 @@ function proPositionAllReset(bigtext) {
 }
 function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
     //console.log("proSameFix time="+inptime+", title="+inptitle+", same="+inpsame);
-    var prehoverContents = $('[class*="styles__hover-contents___"]').parent().parent();
+    var prehoverContents = $('[class*="Dropdown__button___"]').parent().parent();
     var headlogo = prehoverContents.siblings().first();
     var parexfootcount = $(EXfootcount).parent();
     var footlogo = $(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
@@ -3756,7 +3758,7 @@ function createProtitle(sw, bt) {
 }
 function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     //残り時間との重なり処理はこれが終わってから
-    var prehoverContents = $('[class*="styles__hover-contents___"]').parent().parent();
+    var prehoverContents = $('[class*="Dropdown__button___"]').parent().parent();
     var headlogo = prehoverContents.siblings().first();
     var parexfootcount = $(EXfootcount).parent();
     var footlogo = $(EXfoot).contents().find('[class*="styles__channel-logo___"]').first();
@@ -3986,7 +3988,7 @@ function proepMouseleave() {
         ;
 }
 function setTimePosition(timepar, titlepar, samepar, bigpar) {
-    var prehoverContents = $('[class*="styles__hover-contents___"]').parent().parent();
+    var prehoverContents = $('[class*="Dropdown__button___"]').parent().parent();
     var parexfootcount = $(EXfootcount).parent();
     var forpros = $(".forpros");
     //    var bigtext=(bigpar!==undefined)?bigpar:isProTextLarge;
@@ -4160,7 +4162,7 @@ function setOptionHead() {
     //各パネルの常時表示 隠す場合は積極的にelement.cssに隠す旨を記述する(fade-out等に任せたり単にcss除去で済まさない)
     //もしくは常時隠して表示する場合に記述する、つまり表示切替の一切を自力でやる
     //（コメ欄常時表示で黒帯パネルの表示切替が発生した時のレイアウト崩れを防ぐため）
-    t += '[class^="styles__header-container___"]{visibility:visible;opacity:1;transform:translate(0);}';
+    t += '[class^="HeaderContainer__header___"]{visibility:visible;opacity:1;transform:translate(0);}';
     t += '[class^="styles__footer-container___"]{visibility:visible;opacity:1;transform:translate(0);}';
     t += '[class^="styles__side___"]{transform:translateY(-50%);}';
     t += '[class^="styles__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
@@ -4269,11 +4271,12 @@ function setOptionHead() {
     }
     //コメ欄常時表示時に伸張する
     if (isComeTriming && isSureReadComment) {
-        t += '[class^="styles__header-container___"],[class^="styles__footer-container___"]{width:calc(100% - 310px);}';
-        t += '[class^="styles__header-container___"]>*{min-width:unset;}';
+        t += '[class^="HeaderContainer__header___"],[class^="styles__footer-container___"]{width:calc(100% - 310px);}';
+        t += '[class^="HeaderContainer__header___"]>*{min-width:unset;}';
     }
     //黒帯パネルの透過
-    t += '[class*="styles__footer___"],[class*="styles__header___"]{opacity:' + (settings.panelOpacity/255) + '}';
+    t += '[class*="styles__footer___"],[class*="Header__container___"]{opacity:' + (settings.panelOpacity/255) + '}';
+    t += '[class*="HeaderContainer__header___"]{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
 
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURIComponent(t) + "'>").appendTo("head");
     console.log("setOptionHead ok");

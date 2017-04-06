@@ -122,7 +122,7 @@ body{
     border-top-width:15px;
 }
 /* その他メニューがコメ欄の下にくぐらないように */
-[class*="styles__hover-contents___"]{
+[class*="Dropdown__column___"]{
     z-index: 15;
 }
 /* z-indexが効かない→音量とフルスクリーンボタンがコメ欄をくぐらないように 
