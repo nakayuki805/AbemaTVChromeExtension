@@ -351,6 +351,7 @@ function onairCleaner() {
     //onairfunc以降に作成した要素を削除
     $('.usermade').remove();
     pophideElement({ allreset: true });
+    pophideElement({head:1}); //allresetしてもヘッダーが表示されないので
 }
 function allowChannelNumMaker() {
 //console.log("allowChannelNumMaker");
@@ -861,9 +862,9 @@ function PlaybuttonEditor() {
                     // 番組表ページから直接放送画面へ飛ぶボタンがないため以下の関数は使用せずlocation.hrefで移動する
                     //clickPlaybuttonBack(e.currentTarget);//←↓この2関数はコメントアウトされている
                     //waitformakelink(50);
-                    //再生ボタンのある番組をクリックして右詳細の視聴ボタンをクリック
+                    //再生ボタンのある番組をクリックして右詳細の番組画像をクリック
                     clickElement($(e.currentTarget).parents('button'));
-                    setTimeout(clickElement,10,$('[class*="styles__play-button___"]'));
+                    setTimeout(clickElement,10,$('[class*="SlotCard__container___"]'));
                 }
             });
         }
