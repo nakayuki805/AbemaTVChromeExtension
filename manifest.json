@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "abematv ext",
-	"version": "0.9.2",
+	"version": "0.9.3",
 	"description": "abematvを快適にする非公式の拡張機能(番組通知自動再生、コメントNGワード、映像上コメント流し、映像サイズ固定など様々な機能を柔軟に設定できます)",
 	"author": "AbemaTVChromeExtension on github",
 	"icons": {
