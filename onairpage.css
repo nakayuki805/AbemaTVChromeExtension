@@ -152,7 +152,7 @@ body{
     margin-top: 12px;
     margin-bottom: 12px;
 }
-[class*="styles__item___"] .addNotify { /*検索結果*/
+.listAddNotifyWrapper .addNotify { /*検索結果と公式視聴予約一覧*/
     padding: 5px 0 4px;
     margin-left: 12px;
     margin-top: 0;

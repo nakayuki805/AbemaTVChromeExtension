@@ -5912,16 +5912,16 @@ function checkUrlPattern(url) {
         } else {
             onairCleaner();
             delaysetNotOA();
-            putSerachAndReminderNotifyButtons();
+            putSerachNotifyButtons();
         }
-    } else if (/https:\/\/abema.tv\/reminders/.test(url)) {
+    } else if (/https:\/\/abema.tv\/my\/lists\/reservation/.test(url)) {
         //公式の視聴予約一覧
         if (output) {
             return 5;
         } else {
             onairCleaner();
             delaysetNotOA();
-            putSerachAndReminderNotifyButtons();
+            putReminderNotifyButtons();
         }
     } else {
         // それ以外のページ
@@ -6014,20 +6014,40 @@ function putNotifyButton(url) {
     console.log(programTime)
     putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, $("[class*=styles__left-contents___] > div"));
 }
-function putSerachAndReminderNotifyButtons() {
+function putSerachNotifyButtons() {
     if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) { return; }
-    if ($('[class*=styles__link-area___]').length == 0 && $("[class*=styles__no-contents___]").length == 0 && $("[class*=styles__reminder-feature___]").length == 0) { setTimeout(function () { putSerachAndReminderNotifyButtons() }, 1000); console.log("putSerachAndReminderNotifyButtons wait"); return; }
-    $('[class*=styles__link-area___]').each(function (i, elem) {
+    if ($('[class*=ListItem__container___]').length == 0 && $("[class*=styles__no-contents___]").length == 0) { setTimeout(function () { putSerachNotifyButtons() }, 1000); console.log("putSerachNotifyButtons wait"); return; }
+    $('[class*=ListItem__container___]').each(function (i, elem) {
         var linkArea = $(elem);
+        var butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
         var progUrl = linkArea.attr('href');
         var urlarray = progUrl.substring(1).split("/");
         //console.log(urlarray);
         var channel = urlarray[1];
-        var channelName = linkArea.find('[class*=styles__details___]').eq(0).text();
+        var channelNameElem = linkArea.find('[class*=SearchResultsSlotList__channel___]');
+        var channelName = channelNameElem.text();
         var programID = urlarray[3];
-        var programTitle = linkArea.find('[class*=styles__title___]').text();
-        var programTime = programTimeStrToTime(linkArea.find('[class*=styles__details___]').text());
-        putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, linkArea.parent());
+        var programTitle = linkArea.find('[class*=SearchResultsSlotList__title___]').text();
+        var programTime = programTimeStrToTime(channelNameElem.next().text());
+        putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
+    });
+}
+function putReminderNotifyButtons() {
+    if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) { return; }
+    if ($('[class*=ListItem__container___]').length == 0 && $("[class*=styles__reminder-feature___]").length == 0) { setTimeout(function () { putReminderNotifyButtons() }, 1000); console.log("putReminderNotifyButtons wait"); return; }
+    $('[class*=ListItem__container___]').each(function (i, elem) {
+        var linkArea = $(elem);
+        var butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
+        var progUrl = linkArea.attr('href');
+        var urlarray = progUrl.substring(1).split("/");
+        //console.log(urlarray);
+        var channel = urlarray[1];
+        var titleElem = linkArea.find('[class*=SlotList__title___]');
+        var channelName = titleElem.next().text();
+        var programID = urlarray[3];
+        var programTitle = linkArea.find('[class*=SlotList__title___]').text();
+        var programTime = programTimeStrToTime(titleElem.next().next().text());
+        putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
     });
 }
 function putSideDetailNotifyButton(){
