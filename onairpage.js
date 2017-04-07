@@ -1015,8 +1015,8 @@ function onresize() {
         wd = oldwd;
         hg = oldhg;
     }
-    if (posiVType == 2 && hg + 44 > window.innerHeight) {
-        hg = window.innerHeight - 44;
+    if (posiVType == 2 && hg + headerHeight > window.innerHeight) {
+        hg = window.innerHeight - headerHeight;
     }
 
     //映像サイズ設定
@@ -1034,7 +1034,7 @@ function onresize() {
     //newtop設定
     var newtop;
     if (posiVType == 2) {
-        newtop = 44;
+        newtop = headerHeight;
     } else if (posiVType == 1) {
         newtop = 0;
     } else { //中央合わせ
@@ -1797,7 +1797,7 @@ function optionStatsUpdate(outflg) {
             romw = jp.width();
             romh = jp.height();
             ropw = oww - romw;
-            //            ropt=isResizeSpacing?44:0;
+            //            ropt=isResizeSpacing?headerHeight:0;
             ropt = Math.round(jp.offset().top - (jp.height() - er.height) / 2);
             ropb = owh - romh - ropt;
             //        }else if(isMovieMaximize){ //映像リサイズ2
@@ -1864,15 +1864,15 @@ function optionStatsUpdate(outflg) {
             case 2: //黒枠の分だけ空ける
                 if (settings.isResizeScreen) {
                     rnpw = 0;
-                    rnpt = 44;
-                    rnpb = 61;
+                    rnpt = headerHeight;
+                    rnpb = footerHeight;
                     //                }else if(isMovieMaximize){
                     //                    rnpw=0;
                     //                    rnpb=64;
                     //                    rnpt=64;
                 } else {
-                    npb = 61;
-                    npt = 44;
+                    npb = footerHeight;
+                    npt = headerHeight;
                 }
                 break;
             case 3: //現在の空きを維持
@@ -1940,7 +1940,7 @@ function createSettingWindow() {
     }
     if ($('#settcont').length == 0) {
         var settcont = '<div id="settcont" class="usermade" style="';
-        settcont += 'width:670px;position:absolute;right:40px;top:44px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;';//head11より上の残り時間12,13,14より上の番組情報等15より上
+        settcont += 'width:670px;position:absolute;right:40px;top:' + headerHeight + 'px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;';//head11より上の残り時間12,13,14より上の番組情報等15より上
         //ピッタリの658pxから少し余裕を見る
         settcont += '">';
         //設定ウィンドウの中身
@@ -2985,18 +2985,18 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
         if (isInpWinBottom) {
             //入力欄が下＝コメ欄が上＝対象はjcomeのtopmargin
             if (ptime == "windowtop" && ptitle == "windowtopright" && psame == "vertical") {
-                jcmtop = Math.max(htime + htitle - 8, 44);
+                jcmtop = Math.max(htime + htitle - 8, headerHeight);
             } else {
-                jcmtop = 44;
+                jcmtop = headerHeight;
             }
             jcct = jcmtop;
             jcchd += jcmtop;
         } else {
             //入力欄が上＝対象はjformのtopmargin＋番組情報(コメ上)
             if (ptime == "windowtop" && ptitle == "windowtopright" && psame == "vertical") {
-                jfmtop = Math.max(htime + htitle - 8, 44);
+                jfmtop = Math.max(htime + htitle - 8, headerHeight);
             } else {
-                jfmtop = 44;
+                jfmtop = headerHeight;
             }
             if (ptime == "commentinputtop" && ptitle == "commentinputtopright" && psame == "vertical") {//(ptitle=="commentinputtopleft"||
                 jfptop = Math.max(htime + htitle, 15);
