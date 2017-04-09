@@ -4343,6 +4343,8 @@ function usereventMouseover() {
     if (forElementClose < 4) {
         forElementClose = 5;
         pophideSelector(-1, 0);
+        //カーソルを表示する
+        EXmain.style.cursor = 'auto';
     }
 }
 function comemukouClick() {
@@ -5685,13 +5687,15 @@ function onairBasefunc() {
         if (isSureReadComment && !comeRefreshing && !comeFastOpen && !isComeOpen()) {
             waitforCloseCome(0);
         }
-        //各要素を隠すまでのカウントダウン
+        //各要素を隠すまでのカウントダウン (マウスが動かずに時間経過)
         if (forElementClose > 0) {
             //console.log("forElementClose:"+forElementClose+"->"+(forElementClose-1));
             forElementClose -= 1;
             if (forElementClose <= 0) {
                 //黒パネルを隠す
                 pophideSelector(-1, 1);
+                //カーソルを隠す
+                EXmain.style.cursor = 'none';
             }
         }
 
