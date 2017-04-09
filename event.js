@@ -171,6 +171,24 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     } else if (request.type === "tabsoundplaystop"){
         chrome.tabs.update(sender.tab.id,{muted:request.valb});
         sendResponse(0);
+    } else if (request.type === "toggleFullscreen"){
+        chrome.windows.get(sender.tab.windowId,function(w){
+            if (request.mode === "isFullscreen") {
+                sendResponse({isFullscreen: (w.state === "fullscreen"), oldState: w.state});
+            } else if (request.mode === "enter") {
+                chrome.windows.update(w.id, {state: "fullscreen"}, function(w2){
+                    sendResponse({isFullscreen: (w2.state === "fullscreen"), oldState: w.state});
+                });
+            } else if (request.mode === "exit") {
+                chrome.windows.update(w.id, {state: request.oldState}, function(w2){
+                    sendResponse({isFullscreen: (w2.state === "fullscreen"), oldState: w.state});
+                });
+            } else if (request.mode === "toggle") {
+                chrome.windows.update(w.id, {state: (w.state === "fullscreen" ? request.oldState : "fullscreen")}, function(w2){
+                    sendResponse({isFullscreen: (w2.state === "fullscreen"), oldState: w.state});
+                });
+            }
+        });
     } else if (request.type === "getStorage"){
         if (request.keys) {
             chrome.storage.local.get(request.keys, function(items){

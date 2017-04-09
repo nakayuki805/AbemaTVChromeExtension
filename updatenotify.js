@@ -8,7 +8,15 @@ if (typeof chrome === "undefined" || !chrome.extension) {
 
 var currentUpdateNotifyVersion = 10;//0.9.0の時
 var optionUrl = chrome.extension.getURL("option.html");
-var notifyContent = "最近追加された機能(※デフォルト無効):<br>流れるコメント文字サイズをウィンドウ高さに追従※<br>タイトル・残り時間表示をコメ欄付近でコメ欄の色に合わせる※<br>コメント投稿時刻の削除※<br>上下黒帯パネルの透過度を設定可に※<br>などの機能が追加されています。<br><b>コメント数が多い時に</b>コメント流しが<b>重い場合</b>はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を低めの値(数百)にすると軽減されます。<br><b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a><!--<br>abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。-->";
+var notifyContent = [
+    "最近追加された機能(※デフォルト無効):",
+    "ダブルクリックでフルスクリーン切り替えとコメントも表示したままフルスクリーン※(うまく動くようになりました。)",
+    "フルスクリーン表示すると映像の位置がずれる場合も↑を有効にすると正常になります。",
+    "などの機能が追加されています。",
+    "<b>コメント数が多い時に</b>コメント流しが<b>重い場合</b>はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を低めの値(数百)にすると軽減されます。",
+    "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>"
+    //"abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。"
+].join("<br>");
 
 function updateInfo(message) {
     var toastElem = $("<div class='toast' id='updateInfo'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");

@@ -335,6 +335,7 @@ var copycomecount = 2; //番組移動直後にcopycomeをfullcopyする回数
 var notifyButtonData = {}; //通知登録ボタンの番組情報格納
 var allowChannelNum = []; //Namesを元にした表示列番号
 var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
+var oldWindowState = "normal" // フルスクリーン切り替え前のウィンドウのstate
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -1084,22 +1085,9 @@ function onresize2(obj, objr, newwd, newhg, newtop, newleft, oldwd, oldhg) {
     console.log("screen resized");
 }
 function toggleFullscreen() {
-    var fullscElem = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullscreenElement || document.msFullscreenElement;
-    if (fullscElem) {
-        document.exitFullscreen && document.exitFullscreen();
-        document.webkitCancelFullScreen && document.webkitCancelFullScreen();
-        document.mozCancelFullScreen && document.mozCancelFullScreen();
-        document.msExitFullscreen && document.msExitFullscreen();
-        document.cancelFullScreen && document.cancelFullScreen();
-    } else {
-        //setTimeout()
-        //$(".style__screen___3qOxD").css({"position": "absolute", "left": "0px", "top": "0px"});//フルスクリーンにするとこの要素が迷子になってしまうので位置指定
-        var fullscTarget = $(".style__home___1-shO")[0];
-        fullscTarget.requestFullscreen && fullscTarget.requestFullscreen();
-        fullscTarget.webkitRequestFullscreen && fullscTarget.webkitRequestFullscreen();
-        fullscTarget.mozRequestFullScreen && fullscTarget.mozRequestFullScreen();
-        fullscTarget.msRequestFullscreen && fullscTarget.msRequestFullscreen();
-    }
+    chrome.runtime.sendMessage({type: 'toggleFullscreen', mode: 'toggle', oldState: oldWindowState}, function(response){
+        oldWindowState = response.oldState;
+    });
 }
 function getChannelByURL() {
     return (location.href.match(/https:\/\/abema\.tv\/now-on-air\/([-\w]+)/) || [null, null])[1];
