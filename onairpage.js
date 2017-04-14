@@ -1107,10 +1107,11 @@ function postShareNGwords(words, channel) {
         "channel": channel,
         "words": postWords
     };
+    postedNGwords = postedNGwords.concat(postWords);//重複送信防止のため送信前にpostedに追加する
     $.ajax({url: NGshareURLbase + 'add_json.php', type: 'POST', data: JSON.stringify(postData), contentType: 'application/json', dataType: 'json', success: function(result) {
         if (result.status == "success") {
             console.log("postShareNGwords success", postWords, channel);
-            postedNGwords = postedNGwords.concat(postWords);
+            //postedNGwords = postedNGwords.concat(postWords);
         } else {
             console.log("postShareNGwords failed", result);
         }
@@ -1123,12 +1124,16 @@ function applySharedNGword() {
     isNGwordShareInterval = true;
     $.get(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
         var sharedNGwords = data.ngword;
+        var appendNGwords = [];
         console.log("got shared NG words ");
         console.table(sharedNGwords);
         for (var asni = 0; asni < sharedNGwords.length; asni++) {
-            postedNGwords.push(sharedNGwords[asni].word);
-            appendTextNG(null, sharedNGwords[asni].word);
+            if (!hasArray(postedNGwords, sharedNGwords[asni].word)) {
+                postedNGwords.push(sharedNGwords[asni].word);
+            }
+            appendNGwords.push(sharedNGwords[asni].word);
         }
+        appendTextNG(null, appendNGwords);
     })
     if (channel) {
         setTimeout(applySharedNGword, 300000); //5分毎
@@ -1164,7 +1169,7 @@ function arrayFullNgMaker() {
         arFullNg.push(spfullng[ngi]);
     }
     if (settings.isShareNGword) {
-        setTimeout(postShareNGwords,1000, arFullNg, getChannelByURL());
+        postShareNGwords(arFullNg, getChannelByURL());
     }
 }
 
@@ -5263,7 +5268,7 @@ function paintcopyotw(mode) {
 }
 function appendTextNG(ev, inpstr) {
     //ev #textNGのclickの場合イベントが渡される
-    //inpstr これ以外からNG追加する場合こっちに渡すようにする
+    //inpstr これ以外からNG追加する場合こっちに渡すようにする(複数なら配列可)
     if (ev && comeNGmode > 0) {
         appendNGpermanent();
         return;
@@ -5280,24 +5285,36 @@ function appendTextNG(ev, inpstr) {
         comeNGmode = 0;
         return;
     }
-    var b = true;
+    var strArr = [];
+    if (Array.isArray(s)) {
+        strArr = s;
+    } else {
+        strArr = [s];
+    }
+    var b = true,
+        ngsi;
     var spfullng = fullNg.split(/\r|\n|\r\n/);
     for (var ngi = 0; ngi < spfullng.length; ngi++) {
         if (spfullng[ngi].length == 0 || spfullng[ngi].match(/^\/\//)) {
             continue;
         }
         spfullng[ngi] = spfullng[ngi].replace(/\/\/.*$/, ""); //文中コメントを除去
-        if (s == spfullng[ngi]) {
-            b = false;
-            break;
+        for (ngsi = 0; ngsi < strArr.length; ngsi++){
+            if (strArr[ngsi] == spfullng[ngi]) {
+                b = false;
+                break;
+            }
         }
     }
     if (b) { //既存のfullNgに無い場合のみ追加
-        if (/\r|\n/.test(fullNg[fullNg.length - 1])) {
-            fullNg += s;
-        } else {
-            fullNg += "\n" + s;
+        for (ngsi = 0; ngsi < strArr.length; ngsi++){
+            if (/\r|\n/.test(fullNg[fullNg.length - 1])) {
+                fullNg += strArr[ngsi];
+            } else {
+                fullNg += "\n" + strArr[ngsi];
+            }
         }
+
         arrayFullNgMaker();
         copycome();
     }
