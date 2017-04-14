@@ -6,12 +6,13 @@ if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
 
-var currentUpdateNotifyVersion = 10;//0.9.0の時
+var currentUpdateNotifyVersion = 11;//0.9.4の時
 var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",
     "ダブルクリックでフルスクリーン切り替えとコメントも表示したままフルスクリーン※(うまく動くようになりました。)",
     "フルスクリーン表示すると映像の位置がずれる場合も↑を有効にすると正常になります。",
+    "マウスを一定時間動かないときはカーソル非表示(設定不要)",
     "などの機能が追加されています。",
     "<b>コメント数が多い時に</b>コメント流しが<b>重い場合</b>はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を低めの値(数百)にすると軽減されます。",
     "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>"
