@@ -1092,22 +1092,31 @@ function toggleFullscreen() {
 function getChannelByURL() {
     return (location.href.match(/https:\/\/abema\.tv\/now-on-air\/([-\w]+)/) || [null, null])[1];
 }
-function postShareNGword(word, channel) {
-    word = word.toString();
-    if (!hasArray(postedNGwords, word)) {
-        $.post(NGshareURLbase + "add.php", {
-            "client": APIclientName,
-            "channel": channel,
-            "word": word
-        }, function (result) {
-            if (result.status == "success") {
-                console.log("postShareNGword success", word, channel);
-                postedNGwords.push(word);
-            } else {
-                console.log("postShareNGword failed", result);
-            }
-        });
+function postShareNGwords(words, channel) {
+    var postWords = [];
+    for(var i=0; i < words.length; i++) {
+        if (!hasArray(postedNGwords, words[i].toString())) {
+            postWords.push(words[i].toString());
+        }
     }
+    if(postWords.length == 0) {
+        return;
+    }
+    var postData = {
+        "client": APIclientName,
+        "channel": channel,
+        "words": postWords
+    };
+    $.ajax({url: NGshareURLbase + 'add_json.php', type: 'POST', data: JSON.stringify(postData), contentType: 'application/json', dataType: 'json', success: function(result) {
+        if (result.status == "success") {
+            console.log("postShareNGwords success", postWords, channel);
+            postedNGwords = postedNGwords.concat(postWords);
+        } else {
+            console.log("postShareNGwords failed", result);
+        }
+    }, error: function() {
+        console.log("postShareNGwords post error");
+    }});
 }
 function applySharedNGword() {
     var channel = getChannelByURL();
@@ -1151,10 +1160,11 @@ function arrayFullNgMaker() {
             spfullng[ngi] = new RegExp(spfullng[ngi].replace(/([.*+?^=!:${}()|[\]\/\\])/g, "\\$1"));
         }
         //console.log(spfullng[ngi]);
-        if (settings.isShareNGword) {
-            postShareNGword(spfullng[ngi], getChannelByURL());
-        }
+
         arFullNg.push(spfullng[ngi]);
+    }
+    if (settings.isShareNGword) {
+        setTimeout(postShareNGwords,1000, arFullNg, getChannelByURL());
     }
 }
 
