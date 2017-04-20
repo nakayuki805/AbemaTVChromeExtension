@@ -323,3 +323,9 @@ if(isFirefox){
 }else{
     chrome.runtime.onInstalled.addListener(putContextMenu);
 }
+
+//ページ推移
+chrome.webNavigation.onHistoryStateUpdated.addListener((detail) => {
+    console.log(detail);
+    chrome.tabs.sendMessage(detail.tabId,{name:"historyStateUpdated"});
+}, {url: [{hostContains: "abema.tv"}]});

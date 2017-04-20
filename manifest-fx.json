@@ -18,7 +18,8 @@
 		"alarms",
 		"notifications",
 		"tabs",
-		"contextMenus"
+		"contextMenus",
+		"webNavigation"
 	],
 	"content_scripts": [
 		{

@@ -169,4 +169,5 @@ body{
 /*視聴数*/
 [class*="styles__view-counter___"] {
     transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);
+    width: 100px; /* 要素の幅が不安定なので決め打ち 100という数字はonairpage.css中の視聴数位置調整でも使用 */
 }

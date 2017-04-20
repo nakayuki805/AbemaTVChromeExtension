@@ -959,7 +959,7 @@ function onresize() {
     //視聴数の位置調整
     setTimeout(function(){
         $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
-        $(EXcountview).offset({left:($(EXfootcome).offset().left-$(EXcountview).outerWidth())});
+        $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
     },2000);
 
     var resizeType = settings.isResizeScreen ? 1 : 0;
@@ -1717,11 +1717,14 @@ function delayset() {
     setTimeout(copycome, 1000);
     //視聴数の位置調整
     setTimeout(function () {
-        $(EXcountview).offset({left:($(EXfootcome).offset().left-$(EXcountview).outerWidth())});
-    }, 5000);//コメント数が表示されるまで待つ
+        $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+    }, 3000);//コメント数が表示されるまで待つ
+    setTimeout(function () {
+        $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+    }, 10000);//再度修正
     setInterval(function () {
-        $(EXcountview).offset({left:($(EXfootcome).offset().left-$(EXcountview).outerWidth())});
-    }, 60000);//1分ごとに再調整
+        $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+    }, 30000);//30秒ごとに再調整
 
     console.log("delayset ok");
 }
@@ -5831,12 +5834,8 @@ function onairBasefunc() {
 }
 $(window).on("resize", onresize);
 
-/*window.addEventListener('popstate', function () { //URLが変化したとき(チャンネルを変えたとき)
-    console.log("onpopstate")
-    setTimeout(onresize, 1000);
-});*/
-//↑なぜかpopstateイベントが発火しないので代わりに↓
-setInterval(chkurl, 2000);
+//↓の2秒ポーリングのかわりにevent.jsでonHistoryStateUpdatedでページ推移を捕捉
+//setInterval(chkurl, 2000);
 function chkurl() {
     if (currentLocation != window.location.href) {
         previousLocation = currentLocation;
@@ -6161,6 +6160,8 @@ chrome.runtime.onMessage.addListener(function (r) {
         }
     } else if (r.name == "toggleChannel") {
         toggleChannel(r.url);
+    } else if (r.name == "historyStateUpdated") {
+        chkurl();
     } else {
         console.warn("message not match")
     }
