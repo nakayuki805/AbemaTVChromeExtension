@@ -204,7 +204,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             sendResponse({result: "seted"});
         });
     } else {
-        console.warn("message type not match", request.type);
+        console.warn("message type not match:", request.type);
     }
     return true;
 });

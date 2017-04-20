@@ -954,6 +954,7 @@ function getVideo() {
     return jp;
 }
 function onresize() {
+    if (checkUrlPattern(true) != 3) { return; }
     //console.log("onresize()");
     //視聴数の位置調整
     setTimeout(function(){

@@ -620,6 +620,47 @@ $(function(){
             location.reload();
         });
     });
+    //通知登録をエクスポート
+    $("#progExportBtn").click(function(){
+        chrome.storage.local.get(function(value){
+            var exportVal = {};
+            for (var key in value) {
+                if (key.indexOf("progNotify") == 0) {//通知登録データのみ
+                    exportVal[key] = value[key];
+                }
+            }
+            var exportJson = JSON.stringify(exportVal, null, 4);
+            $('#inexportArea').val(exportJson);
+        });
+    });
+    //通知登録をインポート
+    $("#progInportBtn").click(function(){
+        var inportVal = JSON.parse($('#inexportArea').val());
+        chrome.storage.local.get(function(existVal){
+            for (var key in inportVal) {
+                if (key.indexOf("progNotify") == 0) {//通知登録データのみ
+                    if (!existVal[key]) {
+                        //登録されてなければここで追加
+                        chrome.runtime.sendMessage({
+                            type: 'addProgramNotifyAlarm',
+                            channel: inportVal[key].channel,
+                            channelName: inportVal[key].channelName,
+                            notifyTime: inportVal[key].notifyTime,
+                            programID: inportVal[key].programID,
+                            programTime: inportVal[key].programTime,
+                            programTitle: inportVal[key].programTitle
+                        }, function(res){
+                            if(res.result=='added'){
+                                console.log('add program notify by import: '+key);
+                            }else{
+                                console.log('add program notify by import error:'+key+', '+res.result);
+                            }
+                        });
+                    }else{console.log(key)}
+                }
+            }
+        });
+    });
 });
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";

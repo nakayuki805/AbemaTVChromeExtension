@@ -49,10 +49,13 @@
     <input type="submit" id="reportBugFormBtn" value="不具合報告フォームへ">:動作に不具合があったり正常に動いてないようであれば報告お願いします。(要望もどうぞ)
     </form>
     <hr>
-    <p>設定をJSON形式でインポート/エクスポート(未保存の設定はエクスポートされません/インポートに成功したらこの画面が再読み込みされます)<span id="exportInfo"></span></p>
-    <textarea id="inexportArea" placeholder="JSONをここに貼り付けてインポートもしくはエクスポートしてここからコピー"></textarea><br>
+    <p>JSON形式でインポート/エクスポート<span id="exportInfo"></span><br>
+    <textarea id="inexportArea" placeholder="JSONをここに貼り付けてインポートもしくはエクスポートしてここからコピー" cols="50" rows="5"></textarea><br>
     <input type="button" id="exportBtn" value="設定を上欄にエクスポート">
-    <input type="button" id="inportBtn" value="貼り付けた設定をインポート">
-
+    <input type="button" id="inportBtn" value="貼り付けた設定をインポート">未保存の設定はエクスポートされません/インポートに成功したらこの画面が再読み込みされます。
+    <br>
+    <input type="button" id="progExportBtn" value="番組通知登録データを上欄にエクスポート">
+    <input type="button" id="progInportBtn" value="貼り付けた通知登録データをインポート">インポート時、既に登録済みの番組はそのまま、未登録の番組が追加登録されます。
+    </p>
 </body>
 </html>
