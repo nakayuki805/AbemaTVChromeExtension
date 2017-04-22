@@ -10,21 +10,23 @@ var currentUpdateNotifyVersion = 11;//0.9.4の時
 var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",
-    "ダブルクリックでフルスクリーン切り替えとコメントも表示したままフルスクリーン※(うまく動くようになりました。)",
-    "フルスクリーン表示すると映像の位置がずれる場合も↑を有効にすると正常になります。",
-    "マウスを一定時間動かないときはカーソル非表示(設定不要)",
+    "コメントをMastodonにトゥート(投稿)※",
+    "ダブルクリックでフルスクリーン切り替えとコメントも表示したままフルスクリーン※",
     "などの機能が追加されています。",
-    "<b>コメント数が多い時に</b>コメント流しが<b>重い場合</b>はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を低めの値(数百)にすると軽減されます。",
-    "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>"
+    "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
+    "<span style='font-size:small'>コメント流しが<b>重い場合</b>はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を低めの値(数百)にすると軽減されます。",
+    "AbemaTVを開いたまま拡張機能がバージョンアップされるとChromeの仕様上通知登録などが正常に動かなくなることがあります。その場合、AbemaTVを再読込してください。",
+    "</span><span style='font-size:x-small;'>一部環境で裏番組一覧が開けない不具合が報告されています。もし再現した場合は設定画面の不具合報告フォームから詳細を報告お願いします。</span>"
     //"abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。"
 ].join("<br>");
 
 function updateInfo(message) {
-    var toastElem = $("<div class='toast' id='updateInfo'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
+    var toastElem = $("<div class='toast' id='updateInfo' style='width:600px;top:20%;margin-left:300px;'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
     setTimeout(function(){
         toastElem.fadeOut(10000);
     },50000);
 }
+//updateInfo(notifyContent);
 chrome.storage.local.get("updateNotifyVer", function (value) {
     if (value.updateNotifyVer == undefined || value.updateNotifyVer < currentUpdateNotifyVersion) {
         updateInfo(notifyContent);
