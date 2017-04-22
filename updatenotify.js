@@ -6,7 +6,7 @@ if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
 
-var currentUpdateNotifyVersion = 11;//0.9.4の時
+var currentUpdateNotifyVersion = 12;//0.10.1の時
 var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",

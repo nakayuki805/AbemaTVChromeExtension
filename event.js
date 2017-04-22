@@ -102,9 +102,19 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
 
 //通知をクリックした時
 chrome.notifications.onClicked.addListener(function(notificationID) {
-    var url = sessionStorage.getItem(notificationID);
-    if (url){
-        chrome.tabs.create({'url': sessionStorage.getItem(notificationID)});
+    //console.log('clicked notification: ', notificationID);
+    if (notificationID.indexOf('progNotify_') == 0){
+        var url = sessionStorage.getItem(notificationID);
+        if (url){
+            chrome.tabs.create({'url': sessionStorage.getItem(notificationID)});
+        }
+    } else if (notificationID == 'extUpdated'){
+        chrome.tabs.query({url:"https://abema.tv/*"},function(abemaTabs) {
+            //console.log(abemaTabs);
+            for(var i=0; i<abemaTabs.length; i++){
+                chrome.tabs.reload(abemaTabs[i].id);
+            }
+        });
     }
     chrome.notifications.clear(notificationID);
 });
@@ -326,11 +336,29 @@ chrome.contextMenus.onClicked.addListener(onContextMenuClick);
 if(isFirefox){
     putContextMenu();
 }else{
-    chrome.runtime.onInstalled.addListener(putContextMenu);
+    chrome.runtime.onInstalled.addListener(() => {
+        //拡張機能がインストールされた時
+        putContextMenu();
+        console.log('oninstalled');
+        //現在開かれているAbemaTVのタブを取得
+        chrome.tabs.query({url:"https://abema.tv/*"},function(abemaTabs) {
+            if(abemaTabs.length>0){
+                //通知
+                chrome.notifications.create('extUpdated', {
+                    type: 'basic',
+                    iconUrl: 'abemaexticon.png',
+                    title: chrome.runtime.getManifest().name + 'が更新されました',
+                    message: "現在開いているAbemaTVのタブを再読込してください。\nクリックで再読み込みします。"
+                }, function(notificationID) {
+                    //console.log(notificationID);
+                });
+            }
+        });
+    });
 }
 
 //ページ推移
 chrome.webNavigation.onHistoryStateUpdated.addListener((detail) => {
-    console.log(detail);
+    //console.log(detail);
     chrome.tabs.sendMessage(detail.tabId,{name:"historyStateUpdated"});
 }, {url: [{hostContains: "abema.tv"}]});
