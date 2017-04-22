@@ -422,6 +422,10 @@ $(function(){
         $('#comeFontsizeV').prop("checked",comeFontsizeV);
         $('#proTitleFontC').prop("checked",proTitleFontC);
         $('#isDelTime').prop("checked",isDelTime);
+        //以下1行で
+        $('#mastodonInstance').val(value.mastodonInstance||"");
+        $('#mastodonToken').val(value.mastodonToken||"");
+        $('#mastodonFormat').val(value.mastodonFormat||"{comment}\\n#AbemaTV\\n{onairpage}");
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -524,7 +528,10 @@ $(function(){
             "panelOpacity": parseInt($('#panelOpacity').val()),
             "comeFontsizeV": $('#comeFontsizeV').prop("checked"),
             "proTitleFontC": $('#proTitleFontC').prop("checked"),
-            "delTime":$('#isDelTime').prop("checked")
+            "delTime":$('#isDelTime').prop("checked"),
+            "mastodonInstance": $('#mastodonInstance').val(),
+            "mastodonToken": $('#mastodonToken').val(),
+            "mastodonFormat": $('#mastodonFormat').val()
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
@@ -575,6 +582,9 @@ $(function(){
         for (var key in value) {
             if (key.indexOf("progNotify")<0) {//通知登録データは除外
                 sendVal[key] = value[key];
+                if (key == 'mastodonToken') {
+                    sendVal[key] = value[key].replace(/./g, '*');//Mastodonトークンは*に置き換え
+                }
             }
         }
         var sendInfo = "***設定***\n";
@@ -661,6 +671,29 @@ $(function(){
             }
         });
     });
+    //Mastodon token取得
+    $("#getMastodonTokenBtn").click(function(){
+        var instance = $('#mastodonInstance').val();
+        var baseUrl = 'https://' + instance + '/';
+        if(!instance){
+            alert('インスタンスのホストを入力してください');
+            return;
+        }
+        getMastodonToken(baseUrl);
+        /*chrome.permissions.contains({origins: [baseUrl]}, function(res){
+            if(res){
+                getMastodonToken(baseUrl);
+            }else{
+                chrome.permissions.request({origins: [baseUrl]}, function(granted){
+                    if(granted){
+                        getMastodonToken(baseUrl);
+                    }else{
+                        alert(instance+'へのアクセスが許可されませんでした');
+                    }
+                });
+            }
+        });*/
+    });
 });
 var keyinput = [];
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";
@@ -730,4 +763,29 @@ function panelTableUpdateS(){
 }
 function panelTableUpdateT(){
     $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
+}
+//Mastodon token取得 インスタンスホストに対する許可を得た後
+function getMastodonToken(baseUrl){
+    APIbase = baseUrl + 'api/v1/'
+    //app 登録
+    $.post(APIbase + 'apps', {client_name: 'AbemaTVChromeExtension', redirect_uris: 'urn:ietf:wg:oauth:2.0:oob', scopes: 'write'}, function(data){
+        var client_id = data.client_id;
+        var client_secret = data.client_secret;
+        //$('#getMastodonTokenBtn').hide();
+        $('#authCodeArea').html('→Mastodon認証画面が開きますので、承認して表示される英数字のコードを貼り付けて確定を押してください<input type="text" id="authCodeInput" placeholder="認証画面のコードをここにコピペ"><input type="button" id="authCodeBtn" value="確定">');
+        var authUrl = baseUrl + "oauth/authorize?client_id=" + client_id + "&redirect_uri=" + 'urn:ietf:wg:oauth:2.0:oob' + "&response_type=code&scope=write";
+        window.open(authUrl);
+        $('#authCodeBtn').click(function(){
+            var authcode = $('#authCodeInput').val();
+            if(!authcode){alert('認証コードを貼り付けてください'); return;}
+            //トークン取得
+            $.post(baseUrl + 'oauth/token', {grant_type: 'authorization_code', redirect_uri: 'urn:ietf:wg:oauth:2.0:oob', client_id: client_id, client_secret: client_secret, code: authcode}, function(tokenData){
+                var accessToken = tokenData.access_token;
+                if(!accessToken){alert('トークンが取得できませんでした'); return;}
+                $('#mastodonToken').val(accessToken);
+                alert('トークンを取得しました。設定を保存してください。');
+                $('#authCodeArea').html('');
+            }, 'json');
+        });
+    }, 'json');
 }

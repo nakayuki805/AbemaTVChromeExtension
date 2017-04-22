@@ -314,6 +314,36 @@ var settingsList = [
         ]
     },
     {
+        "description": "コメントのMastodon投稿設定",
+        "header": "ホストとトークンを設定するとコメント欄の投稿ボタンの横にMastodonアイコンが追加されます。そのアイコンをクリックして切り替えてください。コメント欄関連設定で「投稿ボタン等を非表示」にしていると表示されません。<br>",
+        "footer": "<input type='button' id='getMastodonTokenBtn' value='トークンを取得'><span id='authCodeArea'></span>",
+        "instantHeader": "",
+        "settings": [
+            {
+                "name": "mastodonInstance",
+                "description": "Mastodonインスタンスのホスト(mastodon.socialなど)",
+                "type": "text",
+                "default": "",
+                "isInstantChangable": false
+            },
+            {
+                "name": "mastodonToken",
+                "description": "Mastodon APIトークン(下のボタンから取得できます)",
+                "instantDescription": "Mastodon APIトークン",
+                "type": "text",
+                "default": "",
+                "isInstantChangable": false
+            },
+            {
+                "name": "mastodonFormat",
+                "description": "トゥート内容({comment}はコメント本文、{onairpage}は放送ページのURL、\\nは改行)",
+                "type": "text",
+                "default": "{comment}\\n#AbemaTV\\n{onairpage}",
+                "isInstantChangable": true
+            }
+        ]
+    },
+    {
         "description": "番組時間・タイトル表示関連設定",
         "settings": [
             {
@@ -748,7 +778,9 @@ function generateOptionHTML(isPermanent) {
     var htmlstr = "";
     for (var i=0; i < settingsList.length; i++) {
         htmlstr += "<fieldset><legend>" + settingsList[i].description + "</legend>";
+        if(isPermanent){htmlstr += settingsList[i].header || '';}else{htmlstr += settingsList[i].instantHeader || settingsList[i].header || '';}
         htmlstr += generateOptionInput(settingsList[i].settings, isPermanent);
+        if(isPermanent){htmlstr += settingsList[i].footer || '';}else{htmlstr += settingsList[i].instantFooter || settingsList[i].footer || '';}
         htmlstr += "</fieldset>";
     }
     htmlstr += '<fieldset><legend>コメント色関連設定</legend><div id="CommentColorSettings">' + generateOptionInput(ComeColorSettingList, isPermanent) + '</div></fieldset>';

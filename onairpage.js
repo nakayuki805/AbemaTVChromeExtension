@@ -113,6 +113,9 @@ settings.panelOpacity = 127; //黒帯パネル透過度
 var comeFontsizeV = false; //流れるコメントの文字サイズをウィンドウ縦長さに合わせる
 var proTitleFontC = false; //タイトル・残り時間の文字色をコメント欄に合わせる
 var isDelTime = false; //NG適用コメ一覧からコメの書込時刻を削除する
+settings.mastodonInstance = ""; //mastodon投稿用インスタンス
+settings.mastodonToken = ""; //mastodon api token
+settings.mastodonFormat = "{comment}\\n#AbemaTV\\n{onairpage}"; //mastodon投稿用トゥートフォーマット
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -241,6 +244,10 @@ getStorage(null, function (value) {
     comeFontsizeV = value.comeFontsizeV || false;
     proTitleFontC = value.proTitleFontC || false;
     isDelTime = value.delTime || false;
+    settings.mastodonInstance = value.mastodonInstance || "";
+    settings.mastodonToken = value.mastodonToken || "";
+    settings.mastodonFormat = value.mastodonFormat || "{comment}\\n#AbemaTV\\n{onairpage}";
+
 });
 
 var currentLocation = window.location.href;
@@ -1607,6 +1614,7 @@ function openOption() {
     $('#comeFontsizeV').prop("checked", comeFontsizeV);
     $('#proTitleFontC').prop("checked", proTitleFontC);
     $('#isDelTime').prop("checked", isDelTime);
+    $('#mastodonFormat').val(settings.mastodonFormat);
 
     var panelopenseu = [];
     for (var i = 0; i < 4; i++) {
@@ -2638,6 +2646,7 @@ function setSaveClicked() {
     comeFontsizeV = $('#comeFontsizeV').prop("checked");
     proTitleFontC = $('#proTitleFontC').prop("checked");
     isDelTime = $('#isDelTime').prop("checked");
+    settings.mastodonFormat = $('#mastodonFormat').val();
 
     arrayFullNgMaker();
     onresize();
