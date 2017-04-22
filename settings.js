@@ -394,6 +394,12 @@ var settingsList = [
                 "description": "↑既に開いている放送画面があれば新しいタブを開かずそのタブを切り替える(アクティブなタブ優先)",
                 "type": "boolean",
                 "isInstantChangable": false
+            },
+            {
+                "name": "isNotifySound",
+                "description": "通知時に音を鳴らす",
+                "type": "boolean",
+                "isInstantChangable": false
             }
         ]
     },

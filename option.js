@@ -426,6 +426,7 @@ $(function(){
         $('#mastodonInstance').val(value.mastodonInstance||"");
         $('#mastodonToken').val(value.mastodonToken||"");
         $('#mastodonFormat').val(value.mastodonFormat||"{comment}\\n#AbemaTV\\n{onairpage}");
+        $('#isNotifySound').prop("checked", value.isNotifySound||false);
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -531,7 +532,8 @@ $(function(){
             "delTime":$('#isDelTime').prop("checked"),
             "mastodonInstance": $('#mastodonInstance').val(),
             "mastodonToken": $('#mastodonToken').val(),
-            "mastodonFormat": $('#mastodonFormat').val()
+            "mastodonFormat": $('#mastodonFormat').val(),
+            "isNotifySound": $('#isNotifySound').prop("checked"),
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

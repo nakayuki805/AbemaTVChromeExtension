@@ -18,7 +18,7 @@ var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -
 //通知
 chrome.alarms.onAlarm.addListener(function(alarm) {
     if (alarm.name.indexOf("progNotify_") === 0){
-        chrome.storage.local.get([alarm.name, "isNotifyAndOpen", "isNaOinActive"], function(storeObj) {
+        chrome.storage.local.get([alarm.name, "isNotifyAndOpen", "isNaOinActive", "isNotifySound"], function(storeObj) {
             console.log("show notification", storeObj);
             var programData = storeObj[alarm.name];
             //var progStartMinStr = ((programData.programTime-programData.notifyTime)/60000).toFixed(1).replace(".0","");
@@ -91,6 +91,11 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
                     sessionStorage.setItem(notificationID, channelUrl);
                 }
             });
+            //音を鳴らす
+            if (storeObj.isNotifySound) {
+                var audio = new Audio("notify.mp3");
+                audio.play();
+            }    
         });
     }
 });

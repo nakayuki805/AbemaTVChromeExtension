@@ -11,6 +11,7 @@ var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",
     "コメントをMastodonにトゥート(投稿)※",
+    "通知時に音を鳴らす※",
     "ダブルクリックでフルスクリーン切り替えとコメントも表示したままフルスクリーン※",
     "などの機能が追加されています。",
     "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
@@ -21,7 +22,7 @@ var notifyContent = [
 ].join("<br>");
 
 function updateInfo(message) {
-    var toastElem = $("<div class='toast' id='updateInfo' style='width:600px;top:20%;margin-left:300px;'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
+    var toastElem = $("<div class='toast' id='updateInfo' style='width:600px;top:20%;left:40%;'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
     setTimeout(function(){
         toastElem.fadeOut(10000);
     },50000);
