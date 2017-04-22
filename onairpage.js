@@ -305,6 +305,7 @@ var EXobli;
 var EXwatchingnum;//EXobliの現在視聴中のチャンネルの子供のindex
 var EXwatchingstr;//現在視聴中のチャンネル名(右チャネル一覧のチャンネルロゴのaltから取得)
 var EXvolume;
+var EXcomemodule;//Twitterボタンや投稿ボタンを含む要素 入力欄をフォーカスしたときにセットし放送画面以外ではnull
 var comeclickcd = 2; //コメント欄を早く開きすぎないためのウェイト
 var cmblockcd = 0; //カウント用
 var comeRefreshing = false; //コメ欄自動開閉中はソートを実行したいのでコメント更新しない用
@@ -343,6 +344,7 @@ var notifyButtonData = {}; //通知登録ボタンの番組情報格納
 var allowChannelNum = []; //Namesを元にした表示列番号
 var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
 var oldWindowState = "normal" // フルスクリーン切り替え前のウィンドウのstate
+var isTootEnabled = false; //コメントのトゥート有効か
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -360,6 +362,8 @@ function onairCleaner() {
     $('.usermade').remove();
     pophideElement({ allreset: true });
     pophideElement({head:1}); //allresetしてもヘッダーが表示されないので
+    //変数クリア
+    EXcomemodule = null;
 }
 function allowChannelNumMaker() {
 //console.log("allowChannelNumMaker");
@@ -4596,9 +4600,19 @@ function delkakikomitxt(inptxt) {
     }
 }
 function usercommentposted(inptxt) {
-    //console.log("usercommentposted inp="+inptxt);
+    console.log("usercommentposted inp="+inptxt);
     kakikomitxt = inptxt;
     setTimeout(delkakikomitxt, 4100, inptxt);
+    if (isTootEnabled) {
+        // toot
+        var tootText = settings.mastodonFormat;
+        tootText = tootText.replace('{comment}', inptxt).replace('{onairpage}', location.href).replace(/\\n/g,"\n");
+        $.ajax({url: 'https://' + settings.mastodonInstance + '/api/v1/statuses', type: 'POST', data: {status: tootText}, headers:{'Authorization': 'Bearer ' + settings.mastodonToken}, dataType: 'json', success: function(result) {
+            console.log('toot:', tootText);
+        }, error: function() {
+            toast('Mastodon投稿エラー');
+        }});
+    }
 }
 function waitforinperase(retrycount, inptxt) {
     //console.log("waitforinperase#"+retrycount+",textarea="+$(EXcomesendinp).val()+",inp="+inptxt);
@@ -4665,6 +4679,18 @@ function usereventSendInpKeyinput() {
     var s = -6 + 18 * Math.round($(EXcomesendinp).scrollTop() / 18);
     //console.log($(EXcomesendinp).scrollTop()+"->"+s);
     $(EXcomesendinp).scrollTop(s);
+}
+function comeModuleEditor() {
+    var twitterWrapper = $(EXcomemodule).find('[class*=styles__twitter-wrapper___]');
+    if (settings.mastodonInstance && settings.mastodonToken){
+        isTootEnabled = localStorage.getItem('isTootEnabled') == 'true';
+        twitterWrapper.css('float', 'left').after('<div class="usermade" id="mastodon-btn" style="float:left;margin-left:10px;padding:2px;cursor:pointer;background-color:#ddd;border-radius:2px;"><img src="' + chrome.extension.getURL("icon/mastodon-icon" + (isTootEnabled?'-blue':'') + ".svg") + '" style="" height="25" width="25" id="mastodon-icon"></div>');
+        $('#mastodon-btn').click(function(){
+            isTootEnabled = !isTootEnabled;
+            localStorage.setItem('isTootEnabled', isTootEnabled.toString());
+            $('#mastodon-icon').attr('src', chrome.extension.getURL("icon/mastodon-icon" + (isTootEnabled?'-blue':'') + ".svg"));
+        });   
+    }
 }
 function setOptionEvent() {//放送画面用イベント設定
     if (checkUrlPattern(true) != 3) { return; }
@@ -4735,7 +4761,7 @@ function setOptionEvent() {//放送画面用イベント設定
         ;
     window.addEventListener("keydown", function (e) {
         //console.log(e)
-        if (e.keyCode == 13 || e.keyCode == 229) { //enter
+        if (e.keyCode == 13) { //enter
             usereventSendButClick();
         } else if (e.keyCode == 38 || e.keyCode == 40) { //38^ 40v
             if (isCancelWheel || isVolumeWheel) {
@@ -4829,6 +4855,16 @@ function setOptionEvent() {//放送画面用イベント設定
     $(EXcomesendinp).on("keydown keyup", usereventSendInpKeyinput);
     //コメ一覧をクリック時
     $(EXcome).on("click", '[class*="styles__comment-list-wrapper___"]', comecopy);
+    //コメ入力欄がフォーカスされた時
+    $(EXcomesendinp).on('focus', function(){
+        //Twitterや投稿ボタンの親
+        if(!EXcomemodule){
+            (EXcomemodule = $('[class*=styles__etc-modules___]')[0]) || console.warn('etcModules');
+            //console.log(EXcomemodule);
+            comeModuleEditor();
+        }
+
+    });
     console.log("setOptionEvent ok");
 }
 function startCM() {
@@ -5441,6 +5477,9 @@ function onairfunc() {
         setTimeout(applySharedNGword, 1000);
     }
     copycomecount = 2;
+    if (settings.mastodonInstance && settings.mastodonToken){
+        isTootEnabled = localStorage.getItem('isTootEnabled') == 'true';
+    }
 }
 //    setInterval(function () {
 function onairBasefunc() {
