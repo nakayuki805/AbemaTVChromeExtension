@@ -223,7 +223,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
     return true;
 });
-chrome.runtime.onMessageExternal.addListener(function(request, sender, sendResponse){
+// onMessageExternal firefox54未満やedgeでは未対応
+chrome.runtime.onMessageExternal && chrome.runtime.onMessageExternal.addListener(function(request, sender, sendResponse){
     if(request.name==="bgsend"){
         chrome.tabs.sendMessage(request.tab,{name:request.name,type:request.type,value:request.value});
     }else if(request.name==="addProgramNotify"){
@@ -335,26 +336,6 @@ function onContextMenuClick(info, tab){
 chrome.contextMenus.onClicked.addListener(onContextMenuClick);
 if(isFirefox){
     putContextMenu();
-}else{
-    chrome.runtime.onInstalled.addListener(() => {
-        //拡張機能がインストールされた時
-        putContextMenu();
-        console.log('oninstalled');
-        //現在開かれているAbemaTVのタブを取得
-        chrome.tabs.query({url:"https://abema.tv/*"},function(abemaTabs) {
-            if(abemaTabs.length>0){
-                //通知
-                chrome.notifications.create('extUpdated', {
-                    type: 'basic',
-                    iconUrl: 'abemaexticon.png',
-                    title: chrome.runtime.getManifest().name + 'が更新されました',
-                    message: "現在開いているAbemaTVのタブを再読込してください。\nクリックで再読み込みします。"
-                }, function(notificationID) {
-                    //console.log(notificationID);
-                });
-            }
-        });
-    });
 }
 
 //ページ推移
@@ -362,3 +343,24 @@ chrome.webNavigation.onHistoryStateUpdated.addListener((detail) => {
     //console.log(detail);
     chrome.tabs.sendMessage(detail.tabId,{name:"historyStateUpdated"});
 }, {url: [{hostContains: "abema.tv"}]});
+chrome.runtime.onInstalled.addListener(() => {
+    console.log('oninstalled');
+    //現在開かれているAbemaTVのタブを取得
+    chrome.tabs.query({url:"https://abema.tv/*"},function(abemaTabs) {
+        if(abemaTabs.length>0){
+            //通知
+            chrome.notifications.create('extUpdated', {
+                type: 'basic',
+                iconUrl: 'abemaexticon.png',
+                title: chrome.runtime.getManifest().name + 'が更新されました',
+                message: "現在開いているAbemaTVのタブを再読込してください。\nクリックで再読み込みします。"
+            }, function(notificationID) {
+                //console.log(notificationID);
+            });
+        }
+    });
+    //context menu (not firefox)
+    if (!isFirefox) {
+        putContextMenu();
+    }
+});
