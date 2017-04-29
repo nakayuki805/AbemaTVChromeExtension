@@ -6,15 +6,33 @@ if (typeof chrome === "undefined" || !chrome.extension) {
 var settings = {};
 //debug
 /*
-$ = function(arg){
-    if(typeof arg == "string" && arg.length<100){
-        console.log("$("+arg+")");
+jQuery.noConflict();
+$ = function $(selector, context){
+    if(typeof selector == "string" && selector.length<100){
+        console.log("$("+selector+")");
     }
-    return jQuery(arg);
+    return new jQuery.fn.init(selector, context);
 }
-$.extend = jQuery.extend;
-$.post = jQuery.post;
-$.get = jQuery.get;
+$.fn = $.prototype = jQuery.fn;
+jQuery.extend($, jQuery);
+var oldfind = $.fn.find;
+$.fn.find = $.extend(function find(){
+    if(arguments[0]){
+        console.log('find('+arguments[0]+')');
+    }else{
+        console.trace('find('+arguments[0]+')');
+    }
+    return oldfind.apply(this, arguments);
+}, oldfind);
+var oldchildren = $.fn.children;
+$.fn.children = $.extend(function children(){
+    if(arguments[0]){
+        console.log('find('+arguments[0]+')');
+    }else{
+        console.trace('find('+arguments[0]+')');
+    }
+    return oldchildren.apply(this, arguments);
+}, oldchildren);
 */
 /*設定
 拡張機能のオプション画面から設定できます。
@@ -345,6 +363,7 @@ var allowChannelNum = []; //Namesを元にした表示列番号
 var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
 var oldWindowState = "normal" // フルスクリーン切り替え前のウィンドウのstate
 var isTootEnabled = false; //コメントのトゥート有効か
+var onairSecCount = 0; //onairbasefuncでカウントアップされる
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -954,6 +973,7 @@ function getChannelNameOnTimetable(channel) { //番組表ページのチャン�
     return $('[class*="styles__channels-navigation___"] ul').find('a[href$="' + hrefStr + '"]').text();
 }
 function getVideo() {
+    //console.trace('getVideo()')
     var jo = $('object,video');
     var jp;
     for (var i = 0; i < jo.length; i++) {
@@ -1315,6 +1335,7 @@ function putComeArray(inp) {
             if (isEdge) { jo = $(jo); }
             jo.css("transition", "left " + w + "s linear")
                 .css("left", l + "px")
+                .attr('data-createdSec', onairSecCount)
                 ;
         }, 0, mck, waitsec, (-mcwidth - 2));
     }
@@ -3228,6 +3249,7 @@ function setEX2() {
     }
 }
 function isComeOpen(sw) {
+    //console.trace('isComeOpen()')
     if (sw === undefined) { sw = 0; }
     var eo = EXcome;
     var jo = $(eo);
@@ -5007,6 +5029,7 @@ function copycome(d, hlsw) {
         $(EXcomelist).parent().css("display", "");
         return;
     }
+    //console.time('copycome')
     var eo = EXcomelist;
     var isAnimationIncluded = EXcomelist.children[0].className.indexOf('styles__animation___') >= 0;
     var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(1)' : ''));
@@ -5065,6 +5088,7 @@ function copycome(d, hlsw) {
         //console.log("ma:",ma)
         if (ma.length > 0) {
             if (ma.length <= 100) {
+                //console.time('ma100_loop')
                 for (var i = ec.childElementCount - 1, e, m, t, n, d, s; (e = ec.children[i - ma.length]) ; i--) {
                     //console.log("loop ma<100")
                     m = e.children[0].textContent;
@@ -5092,8 +5116,10 @@ function copycome(d, hlsw) {
                         ;
                     }
                 }
+                //console.timeEnd('ma100_loop')
             }
             var malen = Math.min(ma.length, 100);
+            //console.time('malen_loop')
             for (var i = 0, m, t, d; i < malen; i++) {
                 //console.log("loop after malen")
                 m = ma[i][0];
@@ -5118,6 +5144,7 @@ function copycome(d, hlsw) {
                     ;
                 }
             }
+            //console.timeEnd('malen_loop')
             //            if(eo.childElementCount<100){
             //                jc.slice(eo.childElementCount,100).children().text("")
             //                    .filter('.comeposttime').attr("name","")
@@ -5134,6 +5161,7 @@ function copycome(d, hlsw) {
         //100件全てを上書き
         jc.children().text("");
         $('.comeposttime').attr("name", "");
+        //console.time('fullcp_loop')
         for (var i = 0, j = 0, e, m, t, dt; (e = EXcomelist.children[i]) ; i++) {
             if (e.hasChildNodes() && e.childElementCount > 1) {
                 m = comefilter(e.children[0].textContent);
@@ -5163,6 +5191,7 @@ function copycome(d, hlsw) {
                 }
             }
         }
+        //console.timeEnd('fullcp_loop')
         if ((isDelOldTime || isDelTime) && isComeOpen(3) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
         if (--copycomecount > 0) {
@@ -5170,6 +5199,7 @@ function copycome(d, hlsw) {
             setTimeout(copycome, 800);
         }
     }
+    //console.timeEnd('copycome');
 }
 function comewidthfix(i, h) {
 // コメ欄のwidth:unsetによって文字列分の幅になっているコメントが右コントロールと被っていたら縮める
@@ -5484,7 +5514,10 @@ function onairfunc() {
 //    setInterval(function () {
 function onairBasefunc() {
     //console.log("1s");
+    //console.time('onairbasefunc');
+    onairSecCount++;
     try {
+        //console.time('obf_1');
         if (checkUrlPattern(true) != 3) { clearInterval(onairRunning); onairRunning = false; return; }
         // 1秒ごとに実行
         if (EXcome && isAutoReload) {
@@ -5515,6 +5548,8 @@ function onairBasefunc() {
                 }
             }
         }
+        //console.timeEnd('obf_1');
+        //console.time('obf_come');
         //        //黒帯パネル表示のためマウスを動かすイベント発火
         //        if (settings.isAlwaysShowPanel) {
         //            triggerMouseMoving();
@@ -5532,11 +5567,18 @@ function onairBasefunc() {
         //            otosageru();
         //        }
         //コメント取得
-        var commentDivParent = $('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
+        //console.time('obf_getComment_beforeif')
+        var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
         var isAnimationIncluded = commentDivParent[0].children[0].className.indexOf('styles__animation___') >= 0;
         //console.log("isA",isAnimationIncluded,commentDivParent.children('div')[0])
-        var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
+        //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
+        var comments = [];// 負荷軽減のためjQuery使わずに
+        var commentDivs = EXcomelist.children;
+        for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
+            comments.push(commentDivs[cdi].children[0].innerHTML);
+        }
         //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
+        //console.timeEnd('obf_getComment_beforeif')
         if (EXcomelist && isComeOpen()) {
             var comeListLen = comments.length;//EXcomelist.childElementCount;
             var d = comeListLen - commentNum;
@@ -5552,10 +5594,10 @@ function onairBasefunc() {
                 //                if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
                 if (isMovingComment && commentNum > 0) {
                     //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
-                    //                            putComment(comments[i].innerHTML);
+                    //                            putComment(comments[i]);
                     for (var i = 0; i < d; i++) {
-                        //console.log("pc",d-i-1,comments[d-i-1].innerHTML)
-                        putComment(comments[d - i - 1].innerHTML, i, d);
+                        //console.log("pc",d-i-1,comments[d-i-1])
+                        putComment(comments[d - i - 1], i, d);
                     }
                 }
                 //                }else{
@@ -5587,6 +5629,8 @@ function onairBasefunc() {
                 comeHealth = 100;
             }
         }
+        //console.timeEnd('obf_come');
+        //console.time('obf_1_2');
         if (isComelistNG) {
             //copycomeできていない場合はここで全copyする
             var b = true;
@@ -5603,18 +5647,21 @@ function onairBasefunc() {
                 copycome();
             }
         }
-
-        //流れるコメントのうち画面外に出たものを削除
+        //console.timeEnd('obf_1_2');
+        //流れるコメントのうちmovingCommentSecond*2経過したものを削除
         if (isMovingComment) {
             var arMovingComment = $('.movingComment');
-            for (var j = arMovingComment.length - 1; j >= 0; j--) {
+            for (var j = 0; j < arMovingComment.length; j++) {
                 //                if(arMovingComment.eq(j).offset().left + arMovingComment.eq(j).width()<=0){
-                if (arMovingComment.eq(j).offset().left - parseInt(arMovingComment.eq(j)[0].style.left) < 1) {
+                //if (arMovingComment.eq(j).offset().left - parseInt(arMovingComment.eq(j)[0].style.left) < 1) {
+                if (parseInt(arMovingComment[j].getAttribute('data-createdSec')) < (onairSecCount - settings.movingCommentSecond*2)) {
                     arMovingComment[j].remove();
+                } else {
+                    break; //前から順番に見ていって画面外のコメントを処理し終わったらbreak
                 }
             }
         }
-
+        //console.time('obf_2');
         //2つに分かれていたのを統合
         //この後ろで結局コメ数チェックするのでここでついでに実行
         if (EXfootcountcome) {
@@ -5876,9 +5923,11 @@ function onairBasefunc() {
                 }
             }
         }
+        //console.timeEnd('obf_2');
         //    }, 1000);
     } catch (e) {
     }
+    //console.timeEnd('onairbasefunc');
 }
 $(window).on("resize", onresize);
 
