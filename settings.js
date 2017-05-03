@@ -315,20 +315,20 @@ var settingsList = [
     },
     {
         "description": "コメントのMastodon投稿設定",
-        "header": "ホストとトークンを設定するとコメント欄の投稿ボタンの横にMastodonアイコンが追加されます。そのアイコンをクリックして切り替えてください。コメント欄関連設定で「投稿ボタン等を非表示」にしていると表示されません。<br>",
-        "footer": "<input type='button' id='getMastodonTokenBtn' value='トークンを取得'><span id='authCodeArea'></span>",
+        "header": "ホストとトークンを設定するとコメント欄の投稿ボタンの横にMastodonアイコンが追加されます。そのアイコンをクリックして切り替えてください。コメント欄関連設定で「投稿ボタン等を非表示」にしているとアイコンが表示されませんのでMastodon投稿を有効にできません。<br>",
+        "footer": "<input type='button' id='getMastodonTokenBtn' value='認証してトークンを取得'><span id='authCodeArea'></span>",
         "instantHeader": "",
         "settings": [
             {
                 "name": "mastodonInstance",
-                "description": "Mastodonインスタンスのホスト(mastodon.socialなど)",
+                "description": "Mastodonインスタンスのホスト(mstdn.jpやpawoo.netやfriends.nicoなど)",
                 "type": "text",
                 "default": "",
                 "isInstantChangable": false
             },
             {
                 "name": "mastodonToken",
-                "description": "Mastodon APIトークン(下のボタンから取得できます)",
+                "description": "Mastodon APIトークン(ホストを入力後下のボタンから取得できます、認証後画面のコードとは別物です)",
                 "instantDescription": "Mastodon APIトークン",
                 "type": "text",
                 "default": "",
@@ -336,7 +336,7 @@ var settingsList = [
             },
             {
                 "name": "mastodonFormat",
-                "description": "トゥート内容({comment}はコメント本文、{onairpage}は放送ページのURL、\\nは改行)",
+                "description": "トゥート内容フォーマット({comment}はコメント本文、{onairpage}は放送ページのURL、\\nは改行)",
                 "type": "text",
                 "default": "{comment}\\n#AbemaTV\\n{onairpage}",
                 "isInstantChangable": true

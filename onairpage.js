@@ -5931,8 +5931,8 @@ function onairBasefunc() {
 }
 $(window).on("resize", onresize);
 
-//↓の2秒ポーリングのかわりにevent.jsでonHistoryStateUpdatedでページ推移を捕捉
-//setInterval(chkurl, 2000);
+//event.jsでonHistoryStateUpdatedでページ推移を捕捉してるが念の為に10秒ポーリング(AbemaTV開いたまま拡張アップデートされたときとか)
+setInterval(chkurl, 10000);
 function chkurl() {
     if (currentLocation != window.location.href) {
         previousLocation = currentLocation;
