@@ -363,4 +363,26 @@ chrome.runtime.onInstalled.addListener(() => {
     if (!isFirefox) {
         putContextMenu();
     }
+    // 番組通知のalarmが消えていれば再登録
+    chrome.storage.local.get(function(val){
+        chrome.alarms.getAll(function(alarms){
+            for (var key in val) {
+                if (key.indexOf("progNotify") == 0) {//通知登録データのみ
+                    var alarmFlag = false;
+                    for(var i = 0; i < alarms.length; i++){
+                        if(alarms[i].name == key){
+                            alarmFlag = true;
+                        }
+                    }
+                    if (!alarmFlag) {
+                        //登録されてなければここで追加
+                        console.log('recreate alarm:' + key);
+                        chrome.alarm.create(key, {
+                            when: val[key].notifyTime
+                        });
+                    }//else{console.log('already have',key)}
+                }
+            }
+        });
+    });
 });
