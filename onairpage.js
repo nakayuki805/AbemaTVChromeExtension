@@ -5570,19 +5570,19 @@ function onairBasefunc() {
         //console.time('obf_getComment_beforeif')
         var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
         var isAnimationIncluded = commentDivParent[0].children[0].className.indexOf('styles__animation___') >= 0;
-        console.log("isA",isAnimationIncluded,commentDivParent.children('div')[0])
-        //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
-        var comments = [];// 負荷軽減のためjQuery使わずに
-        var commentDivs = EXcomelist.children;
+        //console.log("isA",isAnimationIncluded,commentDivParent.children('div')[0])
+        var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
+        //revert: var comments = [];// 負荷軽減のためjQuery使わずに
+        /* rvert: var commentDivs = EXcomelist.children;
         for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
             comments.push(commentDivs[cdi].children[0].innerHTML);
-        }
+        }*/
         //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
         //console.timeEnd('obf_getComment_beforeif')
         if (EXcomelist && isComeOpen()) {
             var comeListLen = comments.length;//EXcomelist.childElementCount;
             var d = comeListLen - commentNum;
-            console.log(comments.length,comeListLen,commentNum,d)
+            //console.log(comments.length,comeListLen,commentNum,d)
             //            if(comeListLen>commentNum){ //コメ増加あり
             //                if(!comeRefreshing||!isSureReadComment){
             var commentDivParentV = (isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : commentDivParent;
@@ -5597,7 +5597,7 @@ function onairBasefunc() {
                     //                            putComment(comments[i]);
                     for (var i = 0; i < d; i++) {
                         //console.log("pc",d-i-1,comments[d-i-1])
-                        putComment(comments[d - i - 1], i, d);
+                        putComment(comments[d - i - 1].innerHTML, i, d);
                     }
                 }
                 //                }else{
