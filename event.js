@@ -377,7 +377,7 @@ chrome.runtime.onInstalled.addListener(() => {
                     if (!alarmFlag) {
                         //登録されてなければここで追加
                         console.log('recreate alarm:' + key);
-                        chrome.alarm.create(key, {
+                        chrome.alarms.create(key, {
                             when: val[key].notifyTime
                         });
                     }//else{console.log('already have',key)}
