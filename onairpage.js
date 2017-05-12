@@ -122,7 +122,7 @@ var comeFontsize = 32; //流れるコメントのfont-size xx-large
 var isHideVoting = false; //アンケート機能の非表示
 var isStoreViewCounter = false; //視聴数をコメント開閉ボタンのコメ数表記と並べる
 var isComeTriming = false; //コメント欄常時表示時はコメ欄の分だけ上下黒帯を縮めてコメ欄を縦に伸ばす
-var allowChannelNames = ["abema-news", "abema-special", "special-plus", "special-plus-2", "special-plus-3", "special-plus-4", "special-plus-5", "special-plus-6", "drama", "asia-drama", "reality-show", "mtv-hits", "space-shower", "documentary", "variety", "pet", "club-channel", "soccer", "fighting-sports", "fighting-sports2", "vice", "commercial", "anime24", "midnight-anime", "oldtime-anime", "family-anime", "new-anime", "hiphop", "yokonori-sports", "golf", "fishing", "shogi", "mahjong"];
+var allowChannelNames = ["abema-news", "abema-special", "special-plus", "special-plus-2", "special-plus-3", "special-plus-4", "special-plus-5", "special-plus-6", "drama", "asia-drama", "reality-show", "mtv-hits", "space-shower", "documentary", "variety", "pet", "club-channel", "commercial", "anime24", "midnight-anime", "oldtime-anime", "family-anime", "new-anime", "yokonori-sports", "hiphop", "soccer", "fighting-sports", "fighting-sports2", "golf", "fishing", "shogi", "mahjong"];
 var isExpandLastItem = false; //番組表の一番下の細いマスを縦に少し伸ばす
 var isExpandFewChannels = false; //番組表の余白がある場合に横に伸ばす
 var isHideArrowButton = false; //番組表の左右移動ボタンを非表示
@@ -5569,14 +5569,15 @@ function onairBasefunc() {
         //コメント取得
         //console.time('obf_getComment_beforeif')
         var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
-        var isAnimationIncluded = commentDivParent[0].children[0].className.indexOf('styles__animation___') >= 0;
-        //console.log("isA",isAnimationIncluded,commentDivParent.children('div')[0])
-        var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
-        //revert: var comments = [];// 負荷軽減のためjQuery使わずに
-        /* rvert: var commentDivs = EXcomelist.children;
-        for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
+        var isAnimationIncluded = EXcomelist.children[0].className.indexOf('styles__animation___') >= 0;
+        //console.log("isA",isAnimationIncluded,EXcomelist.children[0])
+        //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
+        var comments = [];// 負荷軽減のためjQuery使わずに
+        var commentDivs = EXcomelist.children;
+        //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
+        for(var cdi = isAnimationIncluded?2:0; cdi < commentDivs.length; cdi++){
             comments.push(commentDivs[cdi].children[0].innerHTML);
-        }*/
+        }
         //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
         //console.timeEnd('obf_getComment_beforeif')
         if (EXcomelist && isComeOpen()) {
@@ -5597,7 +5598,7 @@ function onairBasefunc() {
                     //                            putComment(comments[i]);
                     for (var i = 0; i < d; i++) {
                         //console.log("pc",d-i-1,comments[d-i-1])
-                        putComment(comments[d - i - 1].innerHTML, i, d);
+                        putComment(comments[d - i - 1], i, d);
                     }
                 }
                 //                }else{
