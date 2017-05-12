@@ -122,7 +122,8 @@ var comeFontsize = 32; //流れるコメントのfont-size xx-large
 var isHideVoting = false; //アンケート機能の非表示
 var isStoreViewCounter = false; //視聴数をコメント開閉ボタンのコメ数表記と並べる
 var isComeTriming = false; //コメント欄常時表示時はコメ欄の分だけ上下黒帯を縮めてコメ欄を縦に伸ばす
-var allowChannelNames = ["abema-news", "abema-special", "special-plus", "special-plus-2", "special-plus-3", "special-plus-4", "special-plus-5", "special-plus-6", "drama", "asia-drama", "reality-show", "mtv-hits", "space-shower", "documentary", "variety", "pet", "club-channel", "commercial", "anime24", "midnight-anime", "oldtime-anime", "family-anime", "new-anime", "yokonori-sports", "hiphop", "soccer", "fighting-sports", "fighting-sports2", "golf", "fishing", "shogi", "mahjong"];
+//var allowChannelNames = ["abema-news", "abema-special", "special-plus", "special-plus-2", "special-plus-3", "special-plus-4", "special-plus-5", "special-plus-6", "drama", "asia-drama", "reality-show", "mtv-hits", "space-shower", "documentary", "variety", "pet", "club-channel", "commercial", "anime24", "midnight-anime", "oldtime-anime", "family-anime", "new-anime", "yokonori-sports", "hiphop", "soccer", "fighting-sports", "fighting-sports2", "golf", "fishing", "shogi", "mahjong"];
+var allowChannelNames = [];
 var isExpandLastItem = false; //番組表の一番下の細いマスを縦に少し伸ばす
 var isExpandFewChannels = false; //番組表の余白がある場合に横に伸ばす
 var isHideArrowButton = false; //番組表の左右移動ボタンを非表示
@@ -376,7 +377,7 @@ function hasArray(array, item) {//配列arrayにitemが含まれているか
 }
 
 function onairCleaner() {
-    //console.log("onairCleaner");
+    console.log("onairCleaner");
     //onairfunc以降に作成した要素を削除
     $('.usermade').remove();
     pophideElement({ allreset: true });
@@ -489,18 +490,25 @@ function timetableCss() {
 function toggleChannel(targetUrl) {
 //console.log("toggleChannel url="+targetUrl);
     var t = /\/([^/]+)$/.exec(targetUrl)[1];
-    var i = allowChannelNames.indexOf(t);
-    var chname = getChannelNameOnTimetable(t);
-    if (i < 0) {
-        //追加
-        toast(chname+"を番組表に表示するチャンネルに追加しました。");
-        allowChannelNames.push(t);
-    } else {
-        //削除
-        toast(chname+"を番組表に表示するチャンネルから削除しました。<br>再度表示させるには左チャンネル一覧から右クリックして表示切り替えするか設定でチャンネルを編集してください。");
-        allowChannelNames.splice(i,1);
+    if(t == 'timetable'){
+        //ALLを選択した時
+        toast("番組表に表示するチャンネルをリセットしました。");
+        allowChannelNames = [];
+        allowChannelNum = [];
+    }else{
+        var i = allowChannelNames.indexOf(t);
+        var chname = getChannelNameOnTimetable(t);
+        if (i < 0) {
+            //追加
+            toast(chname+"を番組表に表示するチャンネルに追加しました。");
+            allowChannelNames.push(t);
+        } else {
+            //削除
+            toast(chname+"を番組表に表示するチャンネルから削除しました。");
+            allowChannelNames.splice(i,1);
+        }
     }
-console.log(allowChannelNames);
+    console.log(allowChannelNames);
     setStorage({"allowChannelNames": allowChannelNames.join(",")});
     waitforloadtimetable(currentLocation);
 }
@@ -629,15 +637,37 @@ function timetabledtfix() {
                         break;
                     }
                 }
+                $('[class*="styles__content-wrapper___"]').scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$('[class*="styles__content-wrapper___"]').width()+20));
+            }else{
+                $('[class*="styles__content-wrapper___"]').scrollLeft(chLinkWidth * visibleChLinkIndex);
             }
-            //console.log(chLinkIndex, visibleChLinkIndex, allowChannelNum)
-            //console.log(chLinkWidth,visibleChLinkIndex,chLinkWidth * visibleChLinkIndex)
-            $('[class*="styles__content-wrapper___"]').scrollLeft(chLinkWidth * visibleChLinkIndex);
+            //console.log(chLinkWidth,visibleChLinkIndex,chLinkWidth * visibleChLinkIndex, allowChannelNum);
         } else {
             console.warn("timetable scroll failed. (channelLink not found: チャンネル名が正しくないか仕様変更)");
         }
-
     }
+    //左チャンネル一覧にチェックボックス設置
+    var channelsli = $('[class*=styles__channels-navigation___] [class*=scrollarea-content ]>ul>li');
+    if(channelsli.length == 0){console.warn('channelsli');}
+    channelsli.each(function (i, li){
+        // if(i == 0){return;}
+        // i--;
+        li = $(li);
+        var checkbox = li.children('input');
+        if(checkbox.length == 0){
+            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="float:right;margin:10px;">').appendTo(li);
+            checkbox.click(function (e){
+                toggleChannel(e.currentTarget.previousElementSibling.getAttribute('href'));
+            });
+        }
+        if(i == 0){
+            checkbox.prop('checked', allowChannelNum.length == 0);
+            checkbox.prop('disabled', allowChannelNum.length == 0)
+        }else{
+            checkbox.prop('checked', hasArray(allowChannelNum, i - 1));
+        }
+        li.children('a').css('display', 'inline-block').css('width', 'calc(100% - 33px)');
+    });
 }
 function timetabledtloop() {
     if (checkUrlPattern(true) != 1) { return; }
@@ -6042,8 +6072,13 @@ function checkUrlPattern(url) {
         }
     } else {
         // それ以外のページ
-        onairCleaner();
-        delaysetNotOA();
+         if (output) {
+            return -1;
+        } else {
+            onairCleaner();
+            delaysetNotOA();
+        }
+
     }
 }
 
