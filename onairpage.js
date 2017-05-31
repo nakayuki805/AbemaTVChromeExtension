@@ -4351,6 +4351,10 @@ function setOptionHead() {
     t += '[class*="styles__footer___"],[class*="Header__container___"]{opacity:' + (settings.panelOpacity/255) + '}';
     t += '[class*="HeaderContainer__header___"]{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
 
+    //番組情報のコピー置換
+    t += '[class^="styles__right-slide___"]>*:not(#copyinfo){display:none;}';
+    t += '[class^="styles__right-slide___"]>#copyinfo{width:100%;padding:15px;}';
+
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURIComponent(t) + "'>").appendTo("head");
     console.log("setOptionHead ok");
 }
@@ -5875,6 +5879,9 @@ function onairBasefunc() {
                     $('#tProtitle').text(proTitle);
                     copycomecount = 2;
                     setTimeout(copycome, 300);
+                    //番組情報(コピー)を更新
+                    $(EXinfo).children('#copyinfo').remove();
+                    $(EXinfo).children().not('#copyinfo').first().clone().removeClass().addClass('usermade').prop("id", "copyinfo").appendTo($(EXinfo));
                 }
             }
         }
