@@ -215,8 +215,8 @@ $(function(){
         var isCMsoundoff = value.CMsoundoff || false;
         var CMsmall = Math.min(100,Math.max(5,((value.CMsmall!==undefined)?value.CMsmall : 100)));
         var isMovingComment = value.movingComment || false;
-        var movingCommentSecond = Math.max(1,((value.movingCommentSecond!==undefined)?value.movingCommentSecond : 10));
-        var movingCommentLimit = Math.max(0,((value.movingCommentLimit!==undefined)?value.movingCommentLimit : 30));
+        var movingCommentSecond = Math.max(1,((value.movingCommentSecond!==undefined)?value.movingCommentSecond : 8));
+        var movingCommentLimit = Math.max(0,((value.movingCommentLimit!==undefined)?value.movingCommentLimit : 50));
 //        var isMoveByCSS =　value.moveByCSS || false;
         var isComeNg = value.comeNg || false;
         var isComeDel = value.comeDel || false;
