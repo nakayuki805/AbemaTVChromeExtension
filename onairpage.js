@@ -365,6 +365,10 @@ var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
 var oldWindowState = "normal" // フルスクリーン切り替え前のウィンドウのstate
 var isTootEnabled = false; //コメントのトゥート有効か
 var onairSecCount = 0; //onairbasefuncでカウントアップされる
+var commentObserver = new MutationObserver(function(mutations) {
+    onCommentChange(mutations);
+}); //コメント欄DOM監視
+var isFirstComeAnimated = false; //最初に既存のコメがanimationしたか 最初に既存のコメが一気に画面に流れてくるのを防ぐためのフラグ
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -384,6 +388,8 @@ function onairCleaner() {
     pophideElement({head:1}); //allresetしてもヘッダーが表示されないので
     //変数クリア
     EXcomemodule = null;
+    //DOM監視停止
+    commentObserver.disconnect();
 }
 function allowChannelNumMaker() {
 //console.log("allowChannelNumMaker");
@@ -925,7 +931,7 @@ function PlaybuttonEditor() {
                     //waitformakelink(50);
                     //再生ボタンのある番組をクリックして右詳細の番組画像をクリック
                     clickElement($(e.currentTarget).parents('button'));
-                    setTimeout(clickElement,10,$('[class*="SlotCard__container___"]'));
+                    setTimeout(clickElement,10,$('[class*="SlotCard__thumbnail___"]'));
                 }
             });
         }
@@ -1767,6 +1773,8 @@ function delayset() {
     arrayFullNgMaker();
     EXcomelist = $(commentListParentSelector)[0];
     EXcomments = $(EXcomelist).contents().find('[class^="styles__message___"]');
+    //コメ欄のDOM変更監視
+    commentObserver.observe(EXcomelist, { childList: true});
     //映像のリサイズ
     onresize();
     volumecheck(); //1秒ごとに実行していた最大音量チェックを初回読込時の1回だけに変更
@@ -5530,12 +5538,15 @@ function mainfunc() { //初回に一度実行しておけば後でURL部分が�
     setTimeout(onresize, 1000);
 }
 function onairfunc() {
+    //変数リセット
+    isFirstComeAnimated = false;
     //要素チェック
     setEXs();
     delayset();
     if (onairRunning === false) {
         onairRunning = setInterval(onairBasefunc, 1000);
     }
+
     setTimeout(onresize, 5000);
     if (settings.isShareNGword && !isNGwordShareInterval) {
         setTimeout(applySharedNGword, 1000);
@@ -5600,70 +5611,9 @@ function onairBasefunc() {
         //            }
         //            otosageru();
         //        }
-        //コメント取得
-        //console.time('obf_getComment_beforeif')
-        var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
-        var isAnimationIncluded = EXcomelist.children[0].className.indexOf('styles__animation___') >= 0;
-        //console.log("isA",isAnimationIncluded,EXcomelist.children[0])
-        //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
-        var comments = [];// 負荷軽減のためjQuery使わずに
-        var commentDivs = EXcomelist.children;
-        //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
-        for(var cdi = isAnimationIncluded?2:0; cdi < commentDivs.length; cdi++){
-            comments.push(commentDivs[cdi].children[0].innerHTML);
-        }
-        //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
-        //console.timeEnd('obf_getComment_beforeif')
-        if (EXcomelist && isComeOpen()) {
-            var comeListLen = comments.length;//EXcomelist.childElementCount;
-            var d = comeListLen - commentNum;
-            //console.log(comments.length,comeListLen,commentNum,d)
-            //            if(comeListLen>commentNum){ //コメ増加あり
-            //                if(!comeRefreshing||!isSureReadComment){
-            var commentDivParentV = (isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : commentDivParent;
-            var scrolled = false;
-            if (isInpWinBottom) scrolled = (commentDivParentV.children().first().offset().top > window.innerHeight);
-            else scrolled = (commentDivParentV.children().first().offset().top < 0);
-            if (d > 0 && !scrolled) { //コメ増加あり && スクロールが規定値以上でない
-                //console.log("cmts",comments,commentDivParent,d,comeListLen,commentNum)
-                //                if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
-                if (isMovingComment && commentNum > 0) {
-                    //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
-                    //                            putComment(comments[i]);
-                    for (var i = 0; i < d; i++) {
-                        //console.log("pc",d-i-1,comments[d-i-1])
-                        putComment(comments[d - i - 1], i, d);
-                    }
-                }
-                //                }else{
-                //                    comeRefreshing=false;
-                //                }
-                if (commentNum == 0) {
-                    comeHealth = Math.min(100, Math.max(0, comeListLen));
-                    comeColor($(EXfootcountcome), comeHealth);
-                }
-                commentNum = comeListLen;
-                //                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0&&$(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==0){
-                if (/*isSureReadComment && */commentNum > Math.max(comeHealth + 20, sureReadRefreshx) && isFootcomeClickable() && $(EXcome).siblings('[class*="styles__right-slide--shown___"]').length == 0) {
-                    ///*コメ常時表示 &*/ コメ数>設定値 & コメ開可 & 他枠非表示
-                    console.log("comeRefreshing start");
-                    comeRefreshing = true;
-                    //                    commentNum=0;
-                    $('#ComeMukouMask').trigger("click");
-                    fastRefreshing();
-                }
-                //新着コメント強調 一時試用できるように、一時保存画面が開いている場合を考慮
-                var hlsw = $('#settcont').css("display") == "none" ? highlightNewCome : parseInt($('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked').val());
-                if (isComelistNG) {
-                    copycome(d, hlsw); //copycome内からcomehlを実行
-                } else if (hlsw > 0) {
-                    comehl($(EXcomelist).children().slice(0, d), hlsw);
-                }
-            } else if (comeListLen < commentNum && !isAnimationIncluded) {
-                commentNum = 0;
-                comeHealth = 100;
-            }
-        }
+        
+        // コメント取得関係はonCommentChange()へ移動
+
         //console.timeEnd('obf_come');
         //console.time('obf_1_2');
         if (isComelistNG) {
@@ -5967,6 +5917,108 @@ function onairBasefunc() {
     }
     //console.timeEnd('onairbasefunc');
 }
+function onCommentChange(mutations){
+    //console.log(mutations)
+    var isAnimationAdded = false,
+        isCommentAdded = false,
+        nodeClass;
+    for(var i=0; i<mutations.length; i++){
+        if(mutations[i].type == 'childList' && mutations[i].addedNodes.length > 0){
+            nodeClass = mutations[i].addedNodes[0].className;
+            if(nodeClass.indexOf('styles__item___')>=0){
+                isCommentAdded = true;
+            }else if(nodeClass.indexOf('styles__animation___')>=0){
+                isAnimationAdded = true;
+            }else if(nodeClass.indexOf('styles__no-contents-text___')>=0){
+                //CH切り替え等でコメ欄が空になった時 何もしない
+            }else{
+                console.warn('unexpected onCommentChange()', mutations[i]);
+            }
+        }
+    }
+    //console.log(isAnimationAdded,isCommentAdded);
+    if(isCommentAdded){
+        //コメント取得(animation除外)
+        //console.time('obf_getComment_beforeif')
+        var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
+        var isAnimationIncluded = EXcomelist.children[0].className.indexOf('styles__animation___') >= 0;
+        //console.log("isA",isAnimationIncluded,EXcomelist.children[0])
+        //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
+        var comments = [];// 負荷軽減のためjQuery使わずに
+        var commentDivs = EXcomelist.children;
+        //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
+        for(var cdi = isAnimationIncluded?2:0; cdi < commentDivs.length; cdi++){
+            comments.push(commentDivs[cdi].children[0].innerHTML);
+        }
+        //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
+        //console.timeEnd('obf_getComment_beforeif')
+        if (EXcomelist && isComeOpen()) {
+            var comeListLen = comments.length;//EXcomelist.childElementCount;
+            var d = comeListLen - commentNum;
+            //console.log(comments.length,comeListLen,commentNum,d)
+            //            if(comeListLen>commentNum){ //コメ増加あり
+            //                if(!comeRefreshing||!isSureReadComment){
+            var commentDivParentV = (isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : commentDivParent;
+            var scrolled = false;
+            if (isInpWinBottom) scrolled = (commentDivParentV.children().first().offset().top > window.innerHeight);
+            else scrolled = (commentDivParentV.children().first().offset().top < 0);
+            if (d > 0 && !scrolled) { //コメ増加あり && スクロールが規定値以上でない
+                //console.log("cmts",comments,commentDivParent,d,comeListLen,commentNum)
+                //                if(!comeRefreshing){ //isSureReadCommentの判定が必要な理由を失念。
+
+                //                }else{
+                //                    comeRefreshing=false;
+                //                }
+                if (commentNum == 0) {
+                    comeHealth = Math.min(100, Math.max(0, comeListLen));
+                    comeColor($(EXfootcountcome), comeHealth);
+                }
+                commentNum = comeListLen;
+                //                if(isSureReadComment&&commentNum>Math.max(comeHealth+20,sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0&&$(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==0){
+                if (/*isSureReadComment && */commentNum > Math.max(comeHealth + 20, sureReadRefreshx) && isFootcomeClickable() && $(EXcome).siblings('[class*="styles__right-slide--shown___"]').length == 0) {
+                    ///*コメ常時表示 &*/ コメ数>設定値 & コメ開可 & 他枠非表示
+                    console.log("comeRefreshing start");
+                    comeRefreshing = true;
+                    //                    commentNum=0;
+                    $('#ComeMukouMask').trigger("click");
+                    fastRefreshing();
+                }
+                //新着コメント強調 一時試用できるように、一時保存画面が開いている場合を考慮
+                var hlsw = $('#settcont').css("display") == "none" ? highlightNewCome : parseInt($('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked').val());
+                if (isComelistNG) {
+                    copycome(d, hlsw); //copycome内からcomehlを実行
+                } else if (hlsw > 0) {
+                    comehl($(EXcomelist).children().slice(0, d), hlsw);
+                }
+            } else if (comeListLen < commentNum && !isAnimationIncluded) {
+                commentNum = 0;
+                comeHealth = 100;
+            }
+        }
+    }
+    if(isAnimationAdded){
+        //animation部の新着コメのコメ流し
+        if (isMovingComment && isFirstComeAnimated) {
+            //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
+            //                            putComment(comments[i]);
+            /*for (var i = 0; i < d; i++) {
+                //console.log("pc",d-i-1,comments[d-i-1])
+                putComment(comments[d - i - 1], i, d);
+            }*/
+            //animation部から新着コメを取得し流す
+            var animationCommentDivs = EXcomelist.children[0].children[0].children
+            //console.log(animationCommentDivs)
+            for(var i = animationCommentDivs.length-1; i >= 0; i--){
+                //console.log('pc',animationCommentDivs[i].children[0].innerHTML,i,animationCommentDivs.length);
+                putComment(animationCommentDivs[i].children[0].innerHTML,i,animationCommentDivs.length);
+            }
+        }
+        if(!isFirstComeAnimated){
+            isFirstComeAnimated = true;
+        }
+    }
+}
+
 $(window).on("resize", onresize);
 
 //event.jsでonHistoryStateUpdatedでページ推移を捕捉してるが念の為に10秒ポーリング(AbemaTV開いたまま拡張アップデートされたときとか)
