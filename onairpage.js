@@ -5077,7 +5077,7 @@ function copycome(d, hlsw) {
     //console.time('copycome')
     var eo = EXcomelist;
     var isAnimationIncluded = EXcomelist.children[0].className.indexOf('styles__animation___') >= 0;
-    var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(1)' : ''));
+    var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(0)' : ''));
     //console.log("EXCLChi",EXcomelistChildren)
     var jo = $(eo);
     if ($('#copycome').length == 0) {
@@ -5950,7 +5950,7 @@ function onCommentChange(mutations){
         var comments = [];// 負荷軽減のためjQuery使わずに
         var commentDivs = EXcomelist.children;
         //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
-        for(var cdi = isAnimationIncluded?2:0; cdi < commentDivs.length; cdi++){
+        for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
             comments.push(commentDivs[cdi].children[0].innerHTML);
         }
         //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
@@ -6000,7 +6000,7 @@ function onCommentChange(mutations){
         }
     }
     if(isAnimationAdded){
-        //console.log(mutations)
+        console.log(isFirstComeAnimated,mutations)
         //animation部の新着コメのコメ流し
         if (isMovingComment && isFirstComeAnimated) {
             //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
