@@ -49,8 +49,8 @@ var isCMBkTrans = false; //コメント数無効の時ずっと画面真っ黒�
 var isCMsoundoff = false; //コメント数無効の時ずっと音量ミュート
 var CMsmall = 100; //コメント数無効の時ずっと映像縮小
 var isMovingComment = false; //あの動画サイトのように画面上をコメントが流れる(コメント欄を表示しているときのみ機能)
-settings.movingCommentSecond = 10;//コメントが画面を流れる秒数
-var movingCommentLimit = 30;//同時コメント最大数
+settings.movingCommentSecond = 8;//コメントが画面を流れる秒数
+var movingCommentLimit = 50;//同時コメント最大数
 //var isMoveByCSS = false;//CSSのanimationでコメントを動かす//デフォに
 var isComeNg = false;//流れるコメントのうち特定の文字列を削除or置き換えする
 var isComeDel = false;//流れるコメントのうちユーザー指定の文字列を含むものを流さない(この処理は↑の除去前に実行される)
@@ -1152,6 +1152,13 @@ function onresize2(obj, objr, newwd, newhg, newtop, newleft, oldwd, oldhg) {
 
     console.log("screen resized");
 }
+function onScreenDblClick() {
+    console.log("dblclick");
+    if (comeNGmode == 2) { return; }
+    if (settings.isDblFullscreen) {
+        toggleFullscreen();
+    }
+}
 function toggleFullscreen() {
     chrome.runtime.sendMessage({type: 'toggleFullscreen', mode: 'toggle', oldState: oldWindowState}, function(response){
         oldWindowState = response.oldState;
@@ -1481,6 +1488,7 @@ function screenBlackSet(type) {
         $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
         pwaku = $('#ComeMukouMask');
         pwaku[0].addEventListener("click", comemukouClick);
+        pwaku[0].addEventListener("dblclick", onScreenDblClick);
     }
     if (type == 0) {
         setBlacked[0] = false;
@@ -1784,6 +1792,7 @@ function delayset() {
     if ($('#ComeMukouMask').length == 0) { //delaysetにも設置
         $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
         document.getElementById('ComeMukouMask').addEventListener("click", comemukouClick);
+        document.getElementById('ComeMukouMask').addEventListener("dblclick", onScreenDblClick);
     }
     setTimeout(copycome, 1000);
     //視聴数の位置調整
@@ -4769,14 +4778,6 @@ function setOptionEvent() {//放送画面用イベント設定
         return;
     }
     eventAdded = true;
-    //ダブルクリックでフルスクリーン
-    $(window).on("dblclick", function () {
-        console.log("dblclick");
-        if (comeNGmode == 2) { return; }
-        if (settings.isDblFullscreen) {
-            toggleFullscreen();
-        }
-    });
     //    $(window).on("click",usereventWindowclick);
     //マウスホイール無効か音量操作
     var mousewheelEvtName = isFirefox ? 'DOMMouseScroll' : 'mousewheel';
@@ -4819,6 +4820,8 @@ function setOptionEvent() {//放送画面用イベント設定
     window.addEventListener("mousemove", usereventMouseover, true);
     window.addEventListener("keydown", usereventMouseover, true); //コメント入力時などキー入力時もマウスが動いたのと同じ扱いにしてelementをhideするカウントダウンをさせない
     pwaku.addEventListener("click", usereventWakuclick);
+    //ダブルクリックでフルスクリーン
+    pwaku.addEventListener("dblclick", onScreenDblClick);
     //pwakuと同じイベントを#ComeMukouMaskにも設置
     $(EXvolume).on("mousemove", usereventVolMousemove)
         .on("mouseout", usereventVolMouseout)
@@ -5918,7 +5921,7 @@ function onairBasefunc() {
     //console.timeEnd('onairbasefunc');
 }
 function onCommentChange(mutations){
-    //console.log(mutations)
+    //console.log('mutations', mutations)
     var isAnimationAdded = false,
         isCommentAdded = false,
         nodeClass;
@@ -5938,7 +5941,7 @@ function onCommentChange(mutations){
     }
     //console.log(isAnimationAdded,isCommentAdded);
     if(isCommentAdded){
-        //コメント取得(animation除外)
+        //コメント取得(animation除外) ただし最初のanimationでも実行
         //console.time('obf_getComment_beforeif')
         var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
         var isAnimationIncluded = EXcomelist.children[0].className.indexOf('styles__animation___') >= 0;
@@ -5997,6 +6000,7 @@ function onCommentChange(mutations){
         }
     }
     if(isAnimationAdded){
+        //console.log(mutations)
         //animation部の新着コメのコメ流し
         if (isMovingComment && isFirstComeAnimated) {
             //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
@@ -6006,11 +6010,13 @@ function onCommentChange(mutations){
                 putComment(comments[d - i - 1], i, d);
             }*/
             //animation部から新着コメを取得し流す
-            var animationCommentDivs = EXcomelist.children[0].children[0].children
+            var animationCommentDivs = EXcomelist.children[0].children[0].children;
+            var idx;
             //console.log(animationCommentDivs)
-            for(var i = animationCommentDivs.length-1; i >= 0; i--){
-                //console.log('pc',animationCommentDivs[i].children[0].innerHTML,i,animationCommentDivs.length);
-                putComment(animationCommentDivs[i].children[0].innerHTML,i,animationCommentDivs.length);
+            for(var i = 0; i < animationCommentDivs.length; i++){
+                idx = animationCommentDivs.length - i - 1;
+                //console.log('pc',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
+                putComment(animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
             }
         }
         if(!isFirstComeAnimated){
