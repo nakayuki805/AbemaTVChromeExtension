@@ -369,6 +369,7 @@ var commentObserver = new MutationObserver(function(mutations) {
     onCommentChange(mutations);
 }); //コメント欄DOM監視
 var isFirstComeAnimated = false; //最初に既存のコメがanimationしたか 最初に既存のコメが一気に画面に流れてくるのを防ぐためのフラグ
+var timetableRunning = false; //番組表表示時の10分インターバル
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -520,8 +521,12 @@ function toggleChannel(targetUrl) {
 }
 function waitforloadtimetable(url) {
     var c = checkUrlPattern(true);
-    if (c != 1 && c != 2) { return; }
+    if (c != 1 && c != 2) { clearInterval(timetableRunning); timetableRunning = false; return; }
     if (url != currentLocation) return;
+    // 10分インターバル
+    if (timetableRunning === false) {
+        timetableRunning = setInterval(waitforloadtimetable, 600000, url);
+    }
     //if (!isChTimetableExpand && !isChTimetableBreak && !isChTimetableWeekend && !isChTimetablePlaybutton && !timetableScroll) { return; }
     var b = false;
     //    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
@@ -661,7 +666,7 @@ function timetabledtfix() {
         li = $(li);
         var checkbox = li.children('input');
         if(checkbox.length == 0){
-            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="float:right;margin:10px;">').appendTo(li);
+            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="float:right;margin:10px;" title="拡張機能のチャンネル表示切替">').appendTo(li);
             checkbox.click(function (e){
                 toggleChannel(e.currentTarget.previousElementSibling.getAttribute('href'));
             });
