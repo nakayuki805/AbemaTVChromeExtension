@@ -483,12 +483,12 @@ function timetableCss() {
         var sat = r[0];
         var sun = r[1];
         if (sat >= 0) {
-            t += '[class^="styles__timetable-wrapper"]>div[class^="styles__col___"]:nth-child(' + (sat + 1) + ') [class*="style__status-future___"]{background-color:rgba(227,238,255,0.7);}';
-            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sat + 1) + ') [class*="style__status-future___"]:hover{background-color:rgba(222,233,250,0.7);}';
+            t += '[class^="styles__timetable-wrapper"]>div[class^="styles__col___"]:nth-child(' + (sat + 1) + ') article:not(.registeredProgs) [class*="style__status-future___"]{background-color:rgba(227,238,255,0.7);}';
+            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sat + 1) + ') article:not(.registeredProgs) [class*="style__status-future___"]:hover{background-color:rgba(222,233,250,0.7);}';
         }
         if (sun >= 0) {
-            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sun + 1) + ') [class*="style__status-future___"]{background-color:rgba(255,227,238,0.7);}';
-            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sun + 1) + ') [class*="style__status-future___"]:hover{background-color:rgba(250,222,233,0.7);}';
+            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sun + 1) + ') article:not(.registeredProgs) [class*="style__status-future___"]{background-color:rgba(255,227,238,0.7);}';
+            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sun + 1) + ') article:not(.registeredProgs) [class*="style__status-future___"]:hover{background-color:rgba(250,222,233,0.7);}';
         }
     }
 
@@ -1007,7 +1007,29 @@ function timetableCommonFix(prevColNum) {
             progArticle.attr("title", progTitle);
         });
     });
+    setRegistProgsBackground();
 
+}
+//拡張機能通知登録済みの番組に背景をつける
+function setRegistProgsBackground(){
+    getStorage(null, function(values){
+        var programIDs = [];
+        for (var key in values) {
+            if (key.indexOf("progNotify")==0) {//通知登録データ
+                programIDs.push(values[key].programID);
+                //登録済みなのでclass追加
+                $('#'+values[key].programID).closest('article').addClass('registeredProgs');
+            }
+        }
+        //登録されてないのに背景がついてる番組のclass解除
+        $('.registeredProgs').each(function(){
+            var article = $(this);
+            var progID = article.find('input[type=checkbox]').attr('id');
+            if(!hasArray(programIDs, progID)){
+                article.removeClass('registeredProgs');
+            }
+        });
+    });
 }
 function getChannelNameOnTimetable(channel) { //番組表ページのチャンネルリストを利用してチャンネル名を得る
     var hrefStr = "/timetable/channels/" + channel;
@@ -6184,6 +6206,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
                             var clickedButtonParent = clickedButton.parent();
                             clickedButton.remove();
                             putNotifyButtonElement(request.channel, request.channelName, request.programID, request.programTitle, request.programTime, clickedButtonParent);
+                            if(checkUrlPattern(true) == 1 || checkUrlPattern(true) == 2){setRegistProgsBackground();}
                         } else if (response.result === "notificationDined") {
                             toast("拡張機能からの通知が拒否されているので通知できません")
                         } else if (response.result === "pastTimeError") {
@@ -6202,6 +6225,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
                             var clickedButtonParent = clickedButton.parent();
                             clickedButton.remove();
                             putNotifyButtonElement(progData.channel, progData.channelName, progData.programID, progData.programTitle, progData.programTime, clickedButtonParent);
+                            if(checkUrlPattern(true) == 1 || checkUrlPattern(true) == 2){setRegistProgsBackground();}
                         }
                     });
                 });
