@@ -271,8 +271,8 @@ $(function(){
         var isChTimetableExpand=value.chTimetableExpand||false;
         var isHidePopFresh = value.hidePopFresh||false;
         var isChTimetableBreak=value.chTimetableBreak||false;
-        var isChTimetableWeekend=value.chTimetableWeekend||false;
-        var isChTimetablePlaybutton=value.chTimetablePlaybutton||false;
+        var isChTimetableWeekend=value.chTimetableWeekend||true;
+        var isChTimetablePlaybutton=value.chTimetablePlaybutton||true;
         var timetableScroll = value.timetableScroll||"";
         var isHideTwitterPanel=value.hideTwitterPanel||false;
         var isHideTodayHighlight=value.hideTodayHighlight||false;
@@ -293,7 +293,7 @@ $(function(){
         var isExpandLastItem=value.expandLastItem||false;
         var isExpandFewChannels=value.expandFewChannels||false;
         var isHideArrowButton=value.hideArrowButton||false;
-        var isPutSideDetailHighlight=value.putSideDetailHighlight||false;
+        var isPutSideDetailHighlight=value.putSideDetailHighlight||true;
         var panelOpacity = (value.panelOpacity!==undefined)?value.panelOpacity : 127;
         var comeFontsizeV = value.comeFontsizeV || false;
         var proTitleFontC = value.proTitleFontC || false;
