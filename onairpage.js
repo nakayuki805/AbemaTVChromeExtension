@@ -921,7 +921,7 @@ function PlaybuttonEditor() {
             a = '<a href="javascript:location.href=\'https://abema.tv' + u + '\';" title="放送中画面へ移動">';
             a += '<div class="playbutton" style="position:absolute;right:4px;top:4px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">';
             a += '<svg width="10" height="14" style="fill:#6fb900;transform:translate(1px,3px)">';// 以前は7px,3px
-            a += '<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--playback">';
+            a += '<use xlink:href="/svg/images/icons/playback.svg#svg-body">';
             a += '</use></svg></div>';
             a += '</a>';
             $(a).insertAfter(q);
@@ -4420,9 +4420,9 @@ function setOptionElement() {
     if ($('#reloadon').length == 0) {
         var ri = '<a title="スクロール時コメ自動更新は現在 OFF です">';
         ri += '<svg id="reloadon" class="usermade reloadicon" width="16" height="16">';
-        ri += '<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--return"></use></svg>';
+        ri += '<use xlink:href="/svg/images/icons/return.svg#svg-body"></use></svg>';
         ri += '<svg id="reloadoff" class="usermade reloadicon" width="16" height="16" style="">';
-        ri += '<use xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--close"></use></svg>';
+        ri += '<use xlink:href="/svg/images/icons/close.svg#svg-body"></use></svg>';
         ri += '</a>';
         $(ri).appendTo(EXcomesendinp.parentElement);
         $('#reloadon').on("click", function () {
@@ -5329,7 +5329,7 @@ function comecopy() {
     if (s.length > 0) {
         if ($('#copyotw').length == 0) {
             var t = '<div id="copyotw" class="' + $(EXcomesendinp.parentElement).attr("class") + ' usermade" style="padding:5px 28px 5px 18px;">';
-            t += '<a style="position:absolute;top:10px;left:1px;cursor:pointer;"><svg id="closecopyotw" class="usermade" width="16" height="16" style="fill:rgba(255,255,255,0.5);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--close"></use></svg></a>';
+            t += '<a style="position:absolute;top:10px;left:1px;cursor:pointer;"><svg id="closecopyotw" class="usermade" width="16" height="16" style="fill:rgba(255,255,255,0.5);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/svg/images/icons/close.svg#svg-body"></use></svg></a>';
             t += '<textarea id="copyot" class="' + $(EXcomesendinp).attr("class") + '" rows="1" maxlength="100" wrap="soft" style="height:24px;width:264px;padding-left:4px;"></textarea>';
             t += '<div style="height:24px;pointer-events:none;">　</div>';
             t += '<a id="textNG" style="position:absolute;top:6px;right:1px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.5);padding:0px 1px;letter-spacing:1px;cursor:pointer;">NG</a>';
@@ -5896,7 +5896,7 @@ function onairBasefunc() {
             }
             var viewcounticon = $("#viewcounticon");
             if (viewcounticon.length == 0) {
-                $('<svg id="viewcounticon" width="14" height="14"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/symbol/svg/sprite.symbol.svg#images--icons--view"></use></svg>').insertBefore(viewcountcont);
+                $('<svg id="viewcounticon" width="14" height="14"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/svg/images/icons/view.svg#svg-body"></use></svg>').insertBefore(viewcountcont);
                 viewcounticon = $("#viewcounticon");
             }
             if (viewcountcont.next("br").length == 0) {
@@ -6027,7 +6027,7 @@ function onCommentChange(mutations){
         }
     }
     if(isAnimationAdded){
-        console.log(isFirstComeAnimated,mutations)
+        //console.log(isFirstComeAnimated,mutations)
         //animation部の新着コメのコメ流し
         if (isMovingComment && isFirstComeAnimated) {
             //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
