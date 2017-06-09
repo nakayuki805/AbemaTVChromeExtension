@@ -666,7 +666,7 @@ function timetabledtfix() {
         li = $(li);
         var checkbox = li.children('input');
         if(checkbox.length == 0){
-            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="float:right;margin:10px;" title="拡張機能のチャンネル表示切替">').appendTo(li);
+            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="float:right;margin:'+(isFirefox?9:10)+'px;" title="拡張機能のチャンネル表示切替">').appendTo(li);
             checkbox.click(function (e){
                 toggleChannel(e.currentTarget.previousElementSibling.getAttribute('href'));
             });
@@ -677,7 +677,7 @@ function timetabledtfix() {
         }else{
             checkbox.prop('checked', hasArray(allowChannelNum, i - 1));
         }
-        li.children('a').css('display', 'inline-block').css('width', 'calc(100% - 33px)');
+        li.children('a').css('display', 'inline-block').css('width', 'calc(100% - '+(20+checkbox.width())+'px)');
     });
 }
 function timetabledtloop() {

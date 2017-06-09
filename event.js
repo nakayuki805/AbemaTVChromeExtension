@@ -20,24 +20,26 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
     if (alarm.name.indexOf("progNotify_") === 0){
         chrome.storage.local.get([alarm.name, "isNotifyAndOpen", "isNaOinActive", "isNotifySound"], function(storeObj) {
             console.log("show notification", storeObj);
+            var now = new Date();
             var programData = storeObj[alarm.name];
             //var progStartMinStr = ((programData.programTime-programData.notifyTime)/60000).toFixed(1).replace(".0","");
-            var progStartSecStr = (programData.programTime-programData.notifyTime)/1000;
+            var progStartSecStr = Math.round((programData.programTime-now)/1000);
             var programTime = new Date(programData.programTime);
-            var programTimeStr = programTime.getHours() + "時" + programTime.getMinutes() + "分";
+            var isPastNotify = (programTime - now) < -3600000; //現在時刻が番組開始時刻より1時間以上後
+            var programTimeStr = (isPastNotify?((programTime.getMonth()+1)+'/'+programTime.getDate()+' '):'') + programTime.getHours() + "時" + programTime.getMinutes() + "分";
             var channelUrl = "https://abema.tv/now-on-air/" + programData.channel;
             chrome.notifications.create(alarm.name, {
                 type: 'basic',
                 iconUrl: 'icon/notify.png',
-                title: '「' + programData.programTitle +'」開始' + progStartSecStr + '秒前',
-                message: "AbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」が" + progStartSecStr + "秒後の" + programTimeStr + "に始まります。"
+                title: isPastNotify?('「' + programData.programTitle +'」通知時刻を過ぎました'):('「' + programData.programTitle +'」開始' + progStartSecStr + '秒前'),
+                message: isPastNotify?("ブラウザが起動してない間にAbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」(" + programTimeStr + ")が通知時間になりました。(番組開始から1時間以上経過)"):("AbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」が" + progStartSecStr + "秒後の" + programTimeStr + "に始まります。")
             }, function(notificationID)  {
                 chrome.storage.local.remove(alarm.name);
-                if (storeObj.isNotifyAndOpen === true && !storeObj.isNaOinActive) {
+                if (storeObj.isNotifyAndOpen === true && !storeObj.isNaOinActive && !isPastNotify) {
                     chrome.tabs.create({'url': channelUrl}, function(newTab) {
                         chrome.windows.update(newTab.windowId,{focused: true});
                     });
-                } else if (storeObj.isNaOinActive) {
+                } else if (storeObj.isNaOinActive && !isPastNotify) {
                     chrome.tabs.query({url:"https://abema.tv/now-on-air/*"},function(onairTabs) {
                         if (onairTabs.length > 0) {
                             var targetTab = onairTabs[0];
