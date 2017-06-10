@@ -1052,8 +1052,10 @@ function onresize() {
     //console.log("onresize()");
     //視聴数の位置調整
     setTimeout(function(){
-        $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
-        $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+        if(EXcountview){
+            $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
+            $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+        }
     },2000);
 
     var resizeType = settings.isResizeScreen ? 1 : 0;
@@ -5851,12 +5853,14 @@ function onairBasefunc() {
         }
 
         //番組タイトルの更新
-        if (isProtitleVisible && EXinfo) {
+        if (EXinfo) {
             var jo = $(EXinfo).contents().find('h2');
             if (jo.length > 0) {
-                if ($('#tProtitle').text() != jo.first().text()) {
+                if (proTitle != jo.first().text()) {//if ($('#tProtitle').text() != jo.first().text()) {
                     proTitle = jo.first().text();
-                    $('#tProtitle').text(proTitle);
+                    if(isProtitleVisible){
+                        $('#tProtitle').text(proTitle);
+                    }
                     copycomecount = 2;
                     setTimeout(copycome, 300);
                     //番組情報(コピー)を更新
