@@ -427,6 +427,11 @@ $(function(){
         $('#mastodonToken').val(value.mastodonToken||"");
         $('#mastodonFormat').val(value.mastodonFormat||"{comment}\\n#AbemaTV\\n{onairpage}");
         $('#isNotifySound').prop("checked", value.isNotifySound||false);
+        $('#isNotifyOnline').prop("checked", value.isNotifyOnline||false);
+        $('#notifyOnlineMinutes').val((value.notifyOnlineMinutes!==undefined)?value.notifyOnlineMinutes:5);
+        $('#notifyMailAddress').val(value.notifyMailAddress||"");
+        $('#notifyLNtoken').val(value.notifyLNtoken||"");
+        $('#notifyPostUrl').val(value.notifyPostUrl||"");
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -534,6 +539,11 @@ $(function(){
             "mastodonToken": $('#mastodonToken').val(),
             "mastodonFormat": $('#mastodonFormat').val(),
             "isNotifySound": $('#isNotifySound').prop("checked"),
+            "isNotifyOnline": $('#isNotifyOnline').prop("checked"),
+            "notifyOnlineMinutes": Math.max(0,parseInt($("#notifyOnlineMinutes").val())),
+            "notifyMailAddress": $('#notifyMailAddress').val(),
+            "notifyLNtoken": $('#notifyLNtoken').val(),
+            "notifyPostUrl": $('#notifyPostUrl').val()
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

@@ -121,6 +121,54 @@ chrome.notifications.onClicked.addListener(function(notificationID) {
     chrome.notifications.clear(notificationID);
 });
 
+var client = "AbemaTVChromeExtension";
+function registOnlineNotify(programID, progNotifyName){
+    var postUrl = "https://abema.nakayuki.net/notify/add.php";
+    chrome.storage.local.get(function(val){
+        if(val.isNotifyOnline && (val.notifyMailAddress || val.notifyLNtoken || val.notifyPostUrl)){
+            var notifyto = {};
+            if(val.notifyMailAddress!=""){notifyto['mailto'] = val.notifyMailAddress;}
+            if(val.notifyLNtoken!=""){notifyto['linenotifyToken'] = val.notifyLNtoken;}
+            if(val.notifyPostUrl!=""){notifyto['postUrl'] = val.notifyPostUrl;}
+            $.post(postUrl, {'client': client, 'slotid': programID, 'notifyminutes': val.notifyOnlineMinutes, 'notifyto': JSON.stringify(notifyto)}, function(res){
+                if(res.status=="OK"){
+                    var storeObj = {};
+                    storeObj[progNotifyName] = val[progNotifyName];
+                    storeObj[progNotifyName].token = res.token;
+                    chrome.storage.local.set(storeObj, function() {
+                    });
+                }else if(res.status!="past"){
+                    //エラー
+                    chrome.notifications.create("notifyRegistFailed", {
+                        type: 'basic',
+                        iconUrl: 'icon/abemaexticon.png',
+                        title: "通知登録失敗",
+                        message: "メール等の通知登録に失敗しました。拡張機能自体の通知登録には影響ありません。\nエラー: "+res.error
+                    }, function(notificationID){});
+                }
+            });
+        }
+    });
+
+}
+function deleteOnlineNotify(token){
+    postUrl = "https://abema.nakayuki.net/notify/delete.php";
+    $.post(postUrl, {'token': token}, function(res){
+        if(res.status=="OK"){
+            //削除成功
+        }else{
+            //削除失敗
+            chrome.notifications.create("notifyRegistFailed", {
+                type: 'basic',
+                iconUrl: 'icon/abemaexticon.png',
+                title: "通知登録削除失敗",
+                message: "メール等の通知登録解除に失敗しました。拡張機能自体の通知登録解除には影響ありません。\nエラー: "+res.error
+            }, function(notificationID){});
+            //console.log(res);
+        }
+    });
+
+}
 function getNotificationPermission(callback){
     if (chrome.notifications.getPermissionLevel) {
         chrome.notifications.getPermissionLevel(callback);
@@ -149,6 +197,7 @@ function addProgramNotify(programID, channel, channelName, programTime, notifyTi
                     notifyTime: notifyTime
                 };
                 chrome.storage.local.set(storeObj, function() {
+                    registOnlineNotify(programID, progNotifyName);
                     addedCallback();
                 });
             } else {
@@ -159,9 +208,14 @@ function addProgramNotify(programID, channel, channelName, programTime, notifyTi
 }
 function removeProgramNotify(progNotifyName, callback){
     chrome.alarms.clear(progNotifyName, function(wasCleared) {
-        chrome.storage.local.remove(progNotifyName, function(){
-            //console.log("alarm " + progNotifyName + " cleared>"+wasCleared);
-            callback();
+        chrome.storage.local.get(function(val){
+            if(val[progNotifyName] && val[progNotifyName].token){
+                deleteOnlineNotify(val[progNotifyName].token);
+            }
+            chrome.storage.local.remove(progNotifyName, function(){
+                //console.log("alarm " + progNotifyName + " cleared>"+wasCleared);
+                callback();
+            });
         });
     });
 }

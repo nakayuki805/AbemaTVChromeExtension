@@ -400,8 +400,42 @@ var settingsList = [
                 "description": "通知時に音を鳴らす",
                 "type": "boolean",
                 "isInstantChangable": false
+            },
+            {
+                "name": "isNotifyOnline",
+                "description": "<a href='https://abema.nakayuki.net/notify/' target='_blank'>メールやLINE Notify等による通知</a>を有効にする(実験的)(ブラウザを起動していない時に便利です。以下をいずれか設定した内容が通知登録時にサーバーに送信されます。)",
+                "type": "boolean",
+                "isInstantChangable": false
+            },
+            {
+                "name": "notifyOnlineMinutes",//これ関係の設定はonairpage.jsでは変数代入も含めて完全ノータッチ
+                "description": "↑を番組開始の何分前に通知するか",
+                "type": "number",
+                "isInstantChangable": false
+            },
+            {
+                "name": "notifyMailAddress",
+                "description": "↑の通知先メールアドレス",
+                "type": "text",
+                "default": "",
+                "isInstantChangable": false
+            },
+            {
+                "name": "notifyLNtoken",
+                "description": "↑の通知先LINE Notifyのトークン <a href='https://abema.nakayuki.net/notify/#getLNtoken' target='_blank'>取得方法</a>",
+                "type": "text",
+                "default": "",
+                "isInstantChangable": false
+            },
+            {
+                "name": "notifyPostUrl",
+                "description": "↑の通知POST先URL (slackのincoming webhookも設定可)",
+                "type": "text",
+                "default": "",
+                "isInstantChangable": false
             }
-        ]
+        ],
+        footer: "上の3つの通知先の内、必要分を設定してください。正しく設定されていないと通知登録に失敗します。"
     },
     {
         "description": "番組表関連設定",
@@ -435,7 +469,7 @@ var settingsList = [
                 "isInstantChangable": false
             },{
                 "name": "allowChannelNames",
-                "description": "番組表で表示するチャンネル名を半角カンマ区切り(番組表を指定したチャンネルのみの表示にできます)(番組表で各チャンネルリンクの右クリックメニューから切替可)",
+                "description": "番組表で表示するチャンネル名を半角カンマ区切り(番組表を指定したチャンネルのみの表示にできます)(番組表で各チャンネルリンクの右クリックメニューやチャンネル一覧のチェックボックスから切替可)",
                 "type": "text",
                 "default": "",
                 "isInstantChangable": false

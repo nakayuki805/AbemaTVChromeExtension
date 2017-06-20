@@ -6,13 +6,12 @@ if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
 
-var currentUpdateNotifyVersion = 12;//0.10.1の時
+var currentUpdateNotifyVersion = 13;//0.11.0の時
 var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",
-    "コメントをMastodonにトゥート(投稿)※",
-    "通知時に音を鳴らす※",
-    "ダブルクリックでフルスクリーン切り替えとコメントも表示したままフルスクリーン※",
+    "メールやLINE Notifyへの番組開始通知に対応※",
+    "番組表でチャンネル一覧のチェックボックスでチャンネル表示切り替え",
     "などの機能が追加されています。",
     "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
     "<span style='font-size:small'>コメント流しが<b>重い場合</b>はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を低めの値(数百)にすると軽減されます。",

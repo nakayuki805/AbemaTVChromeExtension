@@ -5948,6 +5948,7 @@ function onairBasefunc() {
         //console.timeEnd('obf_2');
         //    }, 1000);
     } catch (e) {
+        console.log(e);
     }
     //console.timeEnd('onairbasefunc');
 }
