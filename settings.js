@@ -29,7 +29,7 @@ var settingsList = [
             },
             {
                 "name": "isMovieSpacingZeroLeft",
-                "description": "映像の左右位置を左に詰める",
+                "description": "映像の左右位置を左に詰める(コメントを映像にかぶせたくないときに便利です。)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -435,7 +435,7 @@ var settingsList = [
                 "isInstantChangable": false
             }
         ],
-        footer: "上の3つの通知先の内、必要分を設定してください。正しく設定されていないと通知登録に失敗します。"
+        footer: "上の3つの通知先の内、必要分を設定してください。正しく設定されていないと通知登録に失敗します。新しい設定は設定変更後の通知登録から反映されます。"
     },
     {
         "description": "番組表関連設定",

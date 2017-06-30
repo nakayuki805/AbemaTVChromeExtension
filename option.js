@@ -596,6 +596,8 @@ $(function(){
                 sendVal[key] = value[key];
                 if (key == 'mastodonToken') {
                     sendVal[key] = value[key].replace(/./g, '*');//Mastodonトークンは*に置き換え
+                }else if(key == 'notifyMailAddress' || key == 'notifyLNtoken' || key == 'notifyPostUrl'){
+                    sendVal[key] = value[key].replace(/[a-z]/g, 'a').replace(/[A-Z]/g, 'A').replace(/\d/g, '0');
                 }
             }
         }
