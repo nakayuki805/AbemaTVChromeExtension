@@ -4249,15 +4249,16 @@ function setOptionHead() {
         t += '[class^="styles__right-comment-area___"]>*{display:flex;flex-direction:column-reverse;}';
         t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid ' + vc + ';border-bottom:1px solid ' + vc + ';}';
         t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{display:flex;flex-direction:column-reverse;}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{overflow:visible;}';
+        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{overflow:visible;min-height:min-content;}';//min-heightがないとdislay:flexで重なってしまう
         //↑の構成そのままだと各コメントのデフォ間隔padding:15px 15px 0;のtop,bottomがうまく効かなくなってしまう
         //2つめのflex(下スクロール、コメント少数時の下詰め)を解除すれば有効になるけど、下スクロールを解除したくない
-        //各コメントの中身(本文、投稿時刻)にpadding設定したらうまくいった
-        if (!isCommentPadZero) {
+        //各コメントの中身(本文、投稿時刻)にpadding設定したらうまくいった→min-height指定で不要に
+        /*if (!isCommentPadZero) {
             t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
             t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
-        }
+        }*/
     }
+    t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
     //    if(isCustomPostWin){ //1行化
     //        t+='[class^="TVContainer__right-comment-area___"] textarea{height:18px!important;}';
     //        t+='[class^="TVContainer__right-comment-area___"] textarea+div{height:18px!important;}';
