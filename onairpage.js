@@ -5867,6 +5867,10 @@ function onairBasefunc() {
                     //番組情報(コピー)を更新
                     $(EXinfo).children('#copyinfo').remove();
                     $(EXinfo).children().not('#copyinfo').first().clone().removeClass().addClass('usermade').prop("id", "copyinfo").appendTo($(EXinfo));
+                    //番組情報のSNSボタンのイベント設定
+                    $('#copyinfo [class*="SNSShare__share___HguA0"] button').click(function (e){
+                        $(EXinfo).children().not('#copyinfo').first().find('[class*="SNSShare__share___HguA0"] button').eq($(e.target).parent().index()).trigger('click');
+                    });
                 }
             }
         }
