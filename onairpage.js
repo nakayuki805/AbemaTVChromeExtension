@@ -1262,6 +1262,7 @@ function arrayFullNgMaker() {
                 spfullng[ngi] = new RegExp(rexefullng[1], rexefullng[2]);
                 b = false;
             } catch (e) {
+                console.warn(e);
                 //                spfullng[ngi]=new RegExp("\\"+spfullng[ngi].split("").join("\\"));
             }
         }
@@ -5953,7 +5954,7 @@ function onairBasefunc() {
         //console.timeEnd('obf_2');
         //    }, 1000);
     } catch (e) {
-        console.log(e);
+        console.warn(e);
     }
     //console.timeEnd('onairbasefunc');
 }
@@ -5961,12 +5962,14 @@ function onCommentChange(mutations){
     //console.log('mutations', mutations)
     var isAnimationAdded = false,
         isCommentAdded = false,
+        newCommentNum = 0,
         nodeClass;
     for(var i=0; i<mutations.length; i++){
         if(mutations[i].type == 'childList' && mutations[i].addedNodes.length > 0){
             nodeClass = mutations[i].addedNodes[0].className;
             if(nodeClass.indexOf('styles__item___')>=0){
                 isCommentAdded = true;
+                newCommentNum++;
             }else if(nodeClass.indexOf('styles__animation___')>=0){
                 isAnimationAdded = true;
             }else if(nodeClass.indexOf('styles__no-contents-text___')>=0){
@@ -5994,8 +5997,9 @@ function onCommentChange(mutations){
         //console.timeEnd('obf_getComment_beforeif')
         if (EXcomelist && isComeOpen()) {
             var comeListLen = comments.length;//EXcomelist.childElementCount;
-            var d = comeListLen - commentNum;
-            //console.log(comments.length,comeListLen,commentNum,d)
+            //var d = comeListLen - commentNum;//一定数(500)に達するとコメント数の総数は増えなくなるので左式は0になる
+            var d = newCommentNum;
+            //console.log(comeListLen,commentNum,d)
             //            if(comeListLen>commentNum){ //コメ増加あり
             //                if(!comeRefreshing||!isSureReadComment){
             var commentDivParentV = (isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : commentDivParent;
