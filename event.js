@@ -274,6 +274,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.storage.local.set(request.items,function(){
             sendResponse({result: "seted"});
         });
+    } else if (request.type === "getTabAudible"){
+        chrome.tabs.get(sender.tab.id,function(t){
+          sendResponse({audible:t.audible});
+        });
     } else {
         console.warn("message type not match:", request.type);
     }

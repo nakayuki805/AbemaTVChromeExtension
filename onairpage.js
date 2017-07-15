@@ -135,6 +135,7 @@ var isDelTime = false; //NG適用コメ一覧からコメの書込時刻を削�
 settings.mastodonInstance = ""; //mastodon投稿用インスタンス
 settings.mastodonToken = ""; //mastodon api token
 settings.mastodonFormat = "{comment}\\n#AbemaTV\\n{onairpage}"; //mastodon投稿用トゥートフォーマット
+var audibleReloadWait = 20; // タブの音声再生が停止してからタブを更新するまでの秒数
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -266,7 +267,7 @@ getStorage(null, function (value) {
     settings.mastodonInstance = value.mastodonInstance || "";
     settings.mastodonToken = value.mastodonToken || "";
     settings.mastodonFormat = value.mastodonFormat || "{comment}\\n#AbemaTV\\n{onairpage}";
-
+    audibleReloadWait = (value.audibleReloadWait !== undefined) ? value.audibleReloadWait : 20;
 });
 
 var currentLocation = window.location.href;
@@ -370,6 +371,7 @@ var commentObserver = new MutationObserver(function(mutations) {
 }); //コメント欄DOM監視
 var isFirstComeAnimated = false; //最初に既存のコメがanimationしたか 最初に既存のコメが一気に画面に流れてくるのを防ぐためのフラグ
 var timetableRunning = false; //番組表表示時の10分インターバル
+var audibleReloadCount = -1;
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -1705,6 +1707,7 @@ function openOption() {
     $('#isHideVoting').prop("checked", isHideVoting);
     $('#isStoreViewCounter').prop("checked", isStoreViewCounter);
     $('#isComeTriming').prop("checked", isComeTriming);
+    $('#audibleReloadWait').val(audibleReloadWait);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -2749,6 +2752,7 @@ function setSaveClicked() {
     proTitleFontC = $('#proTitleFontC').prop("checked");
     isDelTime = $('#isDelTime').prop("checked");
     settings.mastodonFormat = $('#mastodonFormat').val();
+    audibleReloadWait = Math.max(0, parseInt($('#audibleReloadWait').val()));
 
     arrayFullNgMaker();
     onresize();
@@ -5951,6 +5955,12 @@ function onairBasefunc() {
                 }
             }
         }
+
+        //タブの音声再生状態を取得して停止してたらリロードまでカウントダウン
+        chrome.runtime.sendMessage({type:"getTabAudible"},function(r){
+            if(r.audible==true)audibleReloadCount=audibleReloadWait;
+            else if(audibleReloadCount>=0&&--audibleReloadCount<0)window.location.href=window.location.href;
+        });
         //console.timeEnd('obf_2');
         //    }, 1000);
     } catch (e) {

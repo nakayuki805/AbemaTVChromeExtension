@@ -298,6 +298,7 @@ $(function(){
         var comeFontsizeV = value.comeFontsizeV || false;
         var proTitleFontC = value.proTitleFontC || false;
         var isDelTime=value.delTime||false;
+        var audibleReloadWait=(value.audibleReloadWait!==undefined)?Number(value.audibleReloadWait):20;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -422,6 +423,7 @@ $(function(){
         $('#comeFontsizeV').prop("checked",comeFontsizeV);
         $('#proTitleFontC').prop("checked",proTitleFontC);
         $('#isDelTime').prop("checked",isDelTime);
+        $('#audibleReloadWait').val(audibleReloadWait);
         //以下1行で
         $('#mastodonInstance').val(value.mastodonInstance||"");
         $('#mastodonToken').val(value.mastodonToken||"");
@@ -543,7 +545,8 @@ $(function(){
             "notifyOnlineMinutes": Math.max(0,parseInt($("#notifyOnlineMinutes").val())),
             "notifyMailAddress": $('#notifyMailAddress').val(),
             "notifyLNtoken": $('#notifyLNtoken').val(),
-            "notifyPostUrl": $('#notifyPostUrl').val()
+            "notifyPostUrl": $('#notifyPostUrl').val(),
+            "audibleReloadWait": Math.max(0,parseInt($('#audibleReloadWait').val()))
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

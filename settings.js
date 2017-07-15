@@ -117,6 +117,12 @@ var settingsList = [
                 "description": "上下黒帯パネルの透過度(完全透明0～255不透明)",
                 "type": "range",
                 "isInstantChangable": true
+            },
+            {
+                "name": "audibleReloadWait",
+                "description": "音声の再生が停止してから自動的にタブを更新するまでの秒数",
+                "type": "number",
+                "isInstantChangable": true
             }
         ]
     },
