@@ -434,6 +434,7 @@ $(function(){
         $('#notifyMailAddress').val(value.notifyMailAddress||"");
         $('#notifyLNtoken').val(value.notifyLNtoken||"");
         $('#notifyPostUrl').val(value.notifyPostUrl||"");
+        $('#isNotifyRemain').prop("checked", value.isNotifyRemain||false);
 
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -546,7 +547,8 @@ $(function(){
             "notifyMailAddress": $('#notifyMailAddress').val(),
             "notifyLNtoken": $('#notifyLNtoken').val(),
             "notifyPostUrl": $('#notifyPostUrl').val(),
-            "audibleReloadWait": Math.max(0,parseInt($('#audibleReloadWait').val()))
+            "audibleReloadWait": Math.max(0,parseInt($('#audibleReloadWait').val())),
+            "isNotifyRemain": $('#isNotifyRemain').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });

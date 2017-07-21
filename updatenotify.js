@@ -10,13 +10,14 @@ var currentUpdateNotifyVersion = 13;//0.11.0の時
 var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",
+    "通知ポップアップが自動で消えない設定※",
+    "音声停止から一定時間経つと再起動",
     "メールやLINE Notifyへの番組開始通知に対応※",
-    "番組表でチャンネル一覧のチェックボックスでチャンネル表示切り替え",
     "などの機能が追加されています。",
     "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
     "<span style='font-size:small'>コメント流しが<b>重い場合</b>はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を低めの値(数百)にすると軽減されます。",
     "AbemaTVを開いたまま拡張機能がバージョンアップされるとChromeの仕様上通知登録などが正常に動かなくなることがあります。その場合、AbemaTVを再読込してください。",
-    "</span><span style='font-size:x-small;'>一部環境で裏番組一覧が開けない不具合が報告されています。もし再現した場合は設定画面の不具合報告フォームから詳細を報告お願いします。</span>"
+    "</span><span style='font-size:x-small;'>不具合等あれば設定画面の不具合報告フォームから詳細を報告お願いします。</span>"
     //"abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。"
 ].join("<br>");
 

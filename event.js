@@ -18,7 +18,7 @@ var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -
 //通知
 chrome.alarms.onAlarm.addListener(function(alarm) {
     if (alarm.name.indexOf("progNotify_") === 0){
-        chrome.storage.local.get([alarm.name, "isNotifyAndOpen", "isNaOinActive", "isNotifySound"], function(storeObj) {
+        chrome.storage.local.get([alarm.name, "isNotifyAndOpen", "isNaOinActive", "isNotifySound", "isNotifyRemain"], function(storeObj) {
             console.log("show notification", storeObj);
             var now = new Date();
             var programData = storeObj[alarm.name];
@@ -32,7 +32,10 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
                 type: 'basic',
                 iconUrl: 'icon/notify.png',
                 title: isPastNotify?('「' + programData.programTitle +'」通知時刻を過ぎました'):('「' + programData.programTitle +'」開始' + progStartSecStr + '秒前'),
-                message: isPastNotify?("ブラウザが起動してない間にAbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」(" + programTimeStr + ")が通知時間になりました。(番組開始から1時間以上経過)"):("AbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」が" + progStartSecStr + "秒後の" + programTimeStr + "に始まります。")
+                message: isPastNotify?("ブラウザが起動してない間にAbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」(" + programTimeStr + ")が通知時間になりました。(番組開始から1時間以上経過)"):("AbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」が" + progStartSecStr + "秒後の" + programTimeStr + "に始まります。"),
+                eventTime: programData.programTime-0,
+                isClickable: true,
+                requireInteraction: storeObj.isNotifyRemain === true
             }, function(notificationID)  {
                 chrome.storage.local.remove(alarm.name);
                 if (storeObj.isNotifyAndOpen === true && !storeObj.isNaOinActive && !isPastNotify) {
@@ -413,7 +416,8 @@ chrome.runtime.onInstalled.addListener(() => {
                 type: 'basic',
                 iconUrl: 'abemaexticon.png',
                 title: chrome.runtime.getManifest().name + 'が更新されました',
-                message: "現在開いているAbemaTVのタブを再読込してください。\nクリックで再読み込みします。"
+                message: "現在開いているAbemaTVのタブを再読込してください。\nクリックで再読み込みします。",
+                isClickable: true
             }, function(notificationID) {
                 //console.log(notificationID);
             });
