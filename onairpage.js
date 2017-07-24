@@ -372,6 +372,7 @@ var commentObserver = new MutationObserver(function(mutations) {
 var isFirstComeAnimated = false; //最初に既存のコメがanimationしたか 最初に既存のコメが一気に画面に流れてくるのを防ぐためのフラグ
 var timetableRunning = false; //番組表表示時の10分インターバル
 var audibleReloadCount = -1;
+var isSoundFlag = true; //soundSet(isSound)のisSound保存用
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -1483,6 +1484,7 @@ function putComment(commentText, index, inmax, isSelf) {
 //ミュート(false)・ミュート解除(true)する関数
 function soundSet(isSound) {
     //isSound=true:音を出す
+    isSoundFlag = isSound;
     if (isTabSoundplay) {
         setBlacked[1] = !isSound;
         chrome.runtime.sendMessage({ type: "tabsoundplaystop", valb: !isSound }, function (r) { });
@@ -5873,8 +5875,8 @@ function onairBasefunc() {
                     $(EXinfo).children('#copyinfo').remove();
                     $(EXinfo).children().not('#copyinfo').first().clone().removeClass().addClass('usermade').prop("id", "copyinfo").appendTo($(EXinfo));
                     //番組情報のSNSボタンのイベント設定
-                    $('#copyinfo [class*="SNSShare__share___HguA0"] button').click(function (e){
-                        $(EXinfo).children().not('#copyinfo').first().find('[class*="SNSShare__share___HguA0"] button').eq($(e.target).parent().index()).trigger('click');
+                    $('#copyinfo [class*="SNSShare__share___"] button').click(function (e){
+                        $(EXinfo).children().not('#copyinfo').first().find('[class*="SNSShare__share___"] button').eq($(e.target).parent().index()).trigger('click');
                     });
                 }
             }
@@ -5958,7 +5960,7 @@ function onairBasefunc() {
 
         //タブの音声再生状態を取得して停止してたらリロードまでカウントダウン
         chrome.runtime.sendMessage({type:"getTabAudible"},function(r){
-            if(r.audible==true)audibleReloadCount=audibleReloadWait;
+            if(r.audible==true || !isSoundFlag)audibleReloadCount=audibleReloadWait;
             else if(audibleReloadCount>=0&&--audibleReloadCount<0)window.location.href=window.location.href;
         });
         //console.timeEnd('obf_2');
