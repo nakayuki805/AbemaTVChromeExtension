@@ -1493,7 +1493,9 @@ function soundSet(isSound) {
     if (!EXvolume) { return; }
     var volcon = $(EXvolume).contents();
     var butvol = volcon.find('svg')[0];
-    var valvol = volcon.find('[class^="styles__highlighter___"]').height();
+    var volobj=getVolbarObject();
+    if(volobj==null)return;
+    var valvol = volobj.height();
     var evt = document.createEvent("MouseEvents");
     evt.initEvent("click", true, true);
     //    valvol=parseInt(valvol[0].style.height);
@@ -1865,7 +1867,9 @@ function delaysetNotOA(){
 function volumecheck() {
     if (checkUrlPattern(true) != 3) { return; }
     //console.log("volumecheck");
-    var v = $('[class^="styles__highlighter___"]').height();
+    var t=getVolbarObject();
+    if(t==null)return;
+    var v = t.height();
     if (v !== null && 0 <= v && v <= 92) {
         if (v == 92 && changeMaxVolume < 100) {
             if ($(EXvolume).contents().find('svg').css("fill") == "rgb(255, 255, 255)") {
@@ -3298,9 +3302,9 @@ function setEXs() {
     else if ((EXside = $('[class^="styles__side___"]')[0] || getSideElement()) == null) { b = false; console.log("side"); }//TVContainer__side___
     else if ((EXchli = $('[class*="styles__right-v-channel-list___"]')[0] || getChannelListElement()) == null) { b = false; console.log("chli"); }
     else if ((EXinfo = $('[class*="styles__right-slide___"]')[0] || getInfoElement()) == null) { b = false; console.log("info"); }//TVContainer__right-slide___
-    else if ((EXcome = $('[class*="styles__right-comment-area___"]')[0] || getComeOuterElement()) == null) { b = false; console.log("come"); }//TVContainer__right-comment-area___
-    else if ((EXcomesend = $(EXcome).contents().find('[class*="styles__comment-form___"]')[0] || getComeFormElement()) == null) { b = false; console.log("comesend"); }
-    else if ((EXcomesendinp = $(EXcomesend).contents().find('textarea')[0] || getComeInputElement()) == null) { b = false; console.log("comesendinp"); }
+    else if ((EXcome = $('[class*="styles__right-comment-area___"]')[0] || getComeFormElement(0)) == null) { b = false; console.log("come"); }//TVContainer__right-comment-area___
+    else if ((EXcomesend = $(EXcome).contents().find('[class*="styles__comment-form___"]')[0] || getComeFormElement(1)) == null) { b = false; console.log("comesend"); }
+    else if ((EXcomesendinp = $(EXcomesend).contents().find('textarea')[0] || getComeFormElement(2)) == null) { b = false; console.log("comesendinp"); }
     //    else if((EXcomelist0=$($(EXcome).contents().find('[class^="styles__no-contents-text___"]:first')[0]).parent()[0])==null){b=false;console.log("comelist");}
     else if ((EXvolume = $('[class^="styles__volume___"]')[0] || getVolElement()) == null) { b = false; console.log("vol"); }
     else if ((EXobli = $('[class*="styles__tv-container___"]')[0] || getObliElement()) == null) { b = false; console.log("obli"); }//TVContainer__tv-container___
@@ -3479,20 +3483,9 @@ function getChannelListElement() {
     }
     return ret;
 }
-function getComeOuterElement() {
-    console.log("?come");
-    //formを孫にもち右方にあるものをcomeとする
-    var ret = null
-    var jo = $('form').eq(0).parents();
-    for (var i = jo.length - 1; i >= 0; i--) {
-        if (jo.eq(i).offset().left > window.innerHeight * 3 / 5) {
-            ret = jo.eq(i)[0];
-            break;
-        }
-    }
-    return ret;
-}
-function getComeFormElement() {
+function getComeFormElement(sw) {
+    //sw 0:outer 1:form 2:input
+    // outerは右にある大きい要素
     console.log("?comesend");
     //textareaにコメントを含むformをcomesendとする
     var ret = null;
@@ -3500,8 +3493,15 @@ function getComeFormElement() {
     for(var i=0,t;i<taa.length;i++){
         t=taa.eq(i);
         if(t.attr("placeholder")!=undefined&&t.attr("placeholder").indexOf("コメント")>=0){
-            while(t[0].nodeName.toUpperCase()!="FORM"){
-                t=t.parent();
+            if(sw==0){
+                while(t.parent().offset().left>window.innerHeight*3/5){
+                    t=t.parent();
+                }
+            }
+            else if(sw==1){
+                while(t[0].nodeName.toUpperCase()!="FORM"){
+                    t=t.parent();
+                }
             }
             ret=t[0];
             break;
@@ -3509,15 +3509,24 @@ function getComeFormElement() {
     }
     return ret;
 }
-function getComeInputElement() {
-    console.log("?comesendinp");
-    //クラスにcommentを含むformの孫のtextareaをcomesendinpとする
-    var ret = null;
-    var jo = $('textarea');
-    for (var i = jo.length - 1; i >= 0; i--) {
-        if (jo.eq(i).parents('form[class*="comment"]').length > 0) {
-            ret = jo.eq(i)[0];
-            break;
+function getComeListElement(){
+    console.log("?comelist");
+    //EXcomeの中で秒前とかを探して5人以上の親をcomelistとする
+    var ret=null;
+    var jo=$(EXcome).find("p");
+    if(jo.length>5){
+        for(var i=0,j,t;i<jo.length;i++){
+            j=jo.eq(i);
+            t=j.text();
+            if(t.indexOf("秒前")>=0||t.indexOf("分前")>=0){
+                while(j.children().length<5&&!j.is(EXcome)){
+                    j=j.parent();
+                }
+                if(!j.is(EXcome)){
+                    ret=j;
+                    break;
+                }
+            }
         }
     }
     return ret;
@@ -3526,7 +3535,7 @@ function getVolElement(){
     console.log("?vol");
     //音声アイコンを含むdivをvolとする
     var ret=null;
-    var jo = $('[*|href$="/volume_on.svg#svg-body"]:not([href])');
+    var jo = $('[*|href$="/volume_on.svg#svg-body"]:not([href])').add('[*|href$="/volume_off.svg#svg-body"]:not([href])');
     for(var i=0;i<jo.length;i++){
         while(jo.parent().offset().left>window.innerHeight*3/5){
             jo=jo.parent();
@@ -3614,6 +3623,26 @@ function getMenuObject() {
         }
         if (si >= 0) {
             ret = $(alinks[si][0]);
+        }
+    }
+    return ret;
+}
+function getVolbarObject(){
+    var ret=null;
+    //EXvolume内で細くて背景に彩度がありそうなのを選ぶ
+    var jo = $(EXvolume).find("div");
+    var re=/rgba? *\( *(\d+) *, *(\d+) *, *(\d+)(?: *, *\d+ *,?)? *\)/;
+    for(var i=0,j,r,g,b,w;i<jo.length;i++){
+        w=jo.eq(i).width();
+        if(w<5&&w>0){
+            j=re.exec(jo.eq(i).css("background-color"));
+            r=parseInt(j[1]);
+            g=parseInt(j[2]);
+            b=parseInt(j[3]);
+            if((r<5||g<5||b<5)&&(r>5||g>5||b>5)){
+                ret=jo.eq(i);
+                break;
+            }
         }
     }
     return ret;
@@ -3757,9 +3786,12 @@ function otosageru() {
     if (!EXvolume) { return; }
     var teka = document.createEvent("MouseEvents");
     //    var teki=$('[class^="styles__slider-container___"]').children();
-    var teki = $(EXvolume).contents().find('[class^="styles__slider-container___"]').children();
-    var targetvolume = Math.min(92, Math.max(0, Math.floor(92 * changeMaxVolume / 100)));
-    var teku = teki.offset().top + 106 - targetvolume;
+    var teki = getVolbarObject();
+    if(teki==null)return;
+    var maxvol=teki.parent().height();
+    var targetvolume = Math.min(maxvol, Math.max(0, Math.floor(maxvol * changeMaxVolume / 100)));
+    teki=teki.parent().parent();
+    var teku = teki.offset().top + parseInt(teki.css("padding-top")) + maxvol - targetvolume;
     teka.initMouseEvent("mousedown", true, true, window, 0, 0, 0, teki.offset().left + 15, teku);
     setTimeout(otomouseup, 100, teku);
     return teki[0].dispatchEvent(teka);
@@ -3767,10 +3799,14 @@ function otosageru() {
 function moVol(d) {
     if (!EXvolume) { return; }
     var teka = document.createEvent("MouseEvents");
-    var teki = $(EXvolume).contents().find('[class^="styles__slider-container___"]').children();
-    var orivol = parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]').css("height"));
-    var targetvolume = Math.min(92, Math.max(0, orivol + d));
-    var teku = teki.offset().top + 106 - targetvolume;
+    var teki = getVolbarObject();
+    if(teki==null)return;
+    var orivol = teki.height();
+    teki=teki.parent();
+    var maxvol=teki.height();
+    var targetvolume = Math.min(maxvol, Math.max(0, orivol + d));
+    teki=teki.parent();
+    var teku = teki.offset().top + parseInt(teki.css("padding-top")) + maxvol - targetvolume;
     teka.initMouseEvent("mousedown", true, true, window, 0, 0, 0, teki.offset().left + 15, teku);
     setTimeout(otomouseup, 100, teku);
     return teki[0].dispatchEvent(teka);
@@ -3778,8 +3814,9 @@ function moVol(d) {
 function otomouseup(p) {
     if (!EXvolume) { return; }
     var teka = document.createEvent("MouseEvents");
-    var teki = $(EXvolume).contents().find('[class^="styles__slider-container___"]').children();
-    teka.initMouseEvent("mouseup", true, true, window, 0, 0, 0, teki.offset().left + 15, p);
+    var teki = getVolbarObject();
+    if(teki==null)return;
+    teka.initMouseEvent("mouseup", true, true, window, 0, 0, 0, teki.parent().parent().offset().left + 15, p);
     setTimeout(volbar, 100);
     return teki[0].dispatchEvent(teka);
 }
@@ -3813,11 +3850,17 @@ function volbar() {
     } else {
         //        jo.prop("class","");
         jo.addClass('vol');
-        var orivol = parseInt($(EXvolume).contents().find('[class^="styles__highlighter___"]').css("height"));
-        var v = Math.min(92, Math.max(0, orivol));
+        var teki=getVolbarObject();
+        var orivol = 46;
+        var maxvol=92;
+        if(teki!=null){
+            orivol=teki.height();
+            maxvol=teki.parent().height();
+        }
+        var v = Math.min(maxvol, Math.max(0, orivol));
         var p = Math.min(100, Math.round(100 * v / 92));
         var q = (v == 0) ? "mute" : (p + "%");
-        var w = 1 + Math.round(309 * v / 92);
+        var w = 1 + Math.round(309 * v / maxvol);
         jo.text("vol " + q);
         $('#forProEndBk').css("width", w + "px");
         setTimeout(volbar, 800);
