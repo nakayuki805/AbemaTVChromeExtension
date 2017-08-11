@@ -1,4 +1,4 @@
-// edge等ブラウザ対応
+﻿// edge等ブラウザ対応
 if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
@@ -3523,7 +3523,7 @@ function getComeListElement(){
                     j=j.parent();
                 }
                 if(!j.is(EXcome)){
-                    ret=j;
+                    ret=j[0];
                     break;
                 }
             }
@@ -3646,6 +3646,146 @@ function getVolbarObject(){
         }
     }
     return ret;
+}
+function getElementSelector(inpElm,includeID,includeClass,includeIndex){
+//includeID true:#idを含める false:含めない
+//includeClass 2:全ての.classを含める 1:全体で唯一の.classだけ含める 0:含めない
+//includeIndex 2:全要素*:eq(index)を含める 1:要素名:eq(index)を含める 0:含めない
+    var ta=$(inpElm);
+    var pa=ta.parentsUntil("html");
+    var ts="";
+    var ps="";
+    var tt=[];
+    var ns=[];
+    var re=/\w/;
+    var rd=/\s+/;
+    var rc=/^\s+|\s+$/g;
+    ns[0]=[];
+    ns[0][0]=ta.prop("nodeName");
+    if(includeID){
+        ns[0][1]=ta.prop("id");
+    }else{
+        ns[0][1]="";
+    }
+    ns[0][3]=[];
+    ts=ta.prop("class");
+    if(re.test(ts)){
+        tt=ts.split(rd);
+        for(var j=0,k=0;j<tt.length;j++){
+            ts=tt[j].replace(rc,"");
+            if(re.test(ts)){
+                if(includeClass==1){
+                    if($('.'+ts).length==1){
+                        ns[0][3][k++]=ts;
+                    }
+                }else if(includeClass==2){
+                    ns[0][3][k++]=ts;
+                }
+            }
+        }
+    }
+    if(includeIndex==2&&includeClass==0&&!includeID){
+        ns[0][2]=ta.index();
+    }else if(includeIndex>0){
+        if(includeIndex==1){
+            ts=ta.prop("nodeName");
+        }else if(includeIndex==2){
+            ts="";
+        }
+        if(ns[0][1].length>0){
+            ts=ts+"#"+ns[0][1];
+        }
+        for(var j=0;j<ns[0][3].length;j++){
+            ts=ts+"."+ns[0][3][j];
+        }
+        ns[0][2]=ta.prevAll(ts).length;
+    }else{
+        ns[0][2]=0;
+    }
+    for(var i=0;i<pa.length;i++){
+        ns[i+1]=[];
+        ns[i+1][0]=pa.eq(i).prop("nodeName");
+        if(includeID){
+            ns[i+1][1]=pa.eq(i).prop("id");
+        }else{
+            ns[i+1][1]="";
+        }
+        ns[i+1][3]=[];
+        ts=pa.eq(i).prop("class");
+        if(re.test(ts)){
+            tt=ts.split(rd);
+            for(var j=0,k=0;j<tt.length;j++){
+                ts=tt[j].replace(rc,"");
+                if(re.test(ts)){
+                    if(includeClass==1){
+                        if($('.'+ts).length==1){
+                            ns[i+1][3][k++]=ts;
+                        }
+                    }else if(includeClass==2){
+                        ns[i+1][3][k++]=ts;
+                    }
+                }
+            }
+        }
+        if(includeIndex==2&&includeClass==0&&!includeID){
+            ns[i+1][2]=pa.eq(i).index();
+        }else if(includeIndex>0){
+            if(includeIndex==1){
+                ts=pa.eq(i).prop("nodeName");
+            }else if(includeIndex==2){
+                ts="*";
+            }
+            if(ns[i+1][1].length>0){
+                ts=ts+"#"+ns[i+1][1];
+            }
+            for(var j=0;j<ns[i+1][3].length;j++){
+                ts=ts+"."+ns[i+1][3][j];
+            }
+            ns[i+1][2]=pa.eq(i).prevAll(ts).length;
+        }else{
+            ns[i+1][2]=0;
+        }
+    }
+
+    ps="";
+    if(includeIndex==2){
+        ts="*";
+    }else{
+        ts=ns[0][0];
+    }
+    if(includeID && ns[0][1].length>0){
+        ts=ts+"#"+ns[0][1];
+    }
+    if(includeClass>0){
+        for(var j=0;j<ns[0][3].length;j++){
+            ts=ts+"."+ns[0][3][j];
+        }
+    }
+    if(includeIndex>0){
+        ts=ts+":eq("+ns[0][2]+")";
+    }
+    ps=ts;
+    for(var i=1;i<ns.length-1;i++){
+        if(includeIndex==2){
+            ts="*";
+        }else{
+            ts=ns[i][0];
+        }
+        if(includeID && ns[i][1].length>0){
+            ts=ts+"#"+ns[i][1];
+        }
+        if(includeClass>0){
+            for(var j=0;j<ns[i][3].length;j++){
+                ts=ts+"."+ns[i][3][j];
+            }
+        }
+        if(includeIndex>0){
+            ts=ts+":eq("+ns[i][2]+")";
+        }
+        ps=ts+">"+ps;
+    }
+    ps="BODY>"+ps;
+    return ps;
 }
 function isComeOpen(sw) {
     //console.trace('isComeOpen()')
@@ -4528,9 +4668,41 @@ function setTimePosition(timepar, titlepar, samepar, bigpar) {
 function setOptionHead() {
     $('head>link[title="usermade"]').remove();
     var t = "";
+    var jo,jp;
+    var to="";
+    var selCome,selComesend,selComesendinpp,selComesendinp,selComelist,selComelistp,selHead,selFoot,selSide,selChli,selInfo;
+    var sendbtnRecheck=false; // 投稿ボタンが生成されるまではクラス名を決め打ちしておいて後でsetOptionHeadし直す
+    var comelistRecheck=false; // コメントリストが〃
     //投稿ボタン削除（入力欄1行化はこの下のコメ見た目のほうとoptionElementでやる）
     if (isCustomPostWin) {
-        t += '[class^="styles__right-comment-area___"] [class*="styles__comment-form___"]>[class*="styles__etc-modules___"]{display:none;}';
+        sendbtnRecheck=true;
+        jo=$(EXcomesend).find("button");
+        jp=null;
+        for(var i=0;i<jo.length;i++){
+            if(jo.eq(i).text().indexOf("投稿")>=0){
+                jp=jo.eq(i);
+                break;
+            }
+        }
+        if(jp!=null){
+            jo=jp.parent();
+            while(jo.find(EXcomesendinp).length==0){
+                jp=jo;
+                jo=jo.parent();
+            }
+            to=jp.prop("class");
+            if(/\w/.test(to)){
+                to="."+to.replace(/^\s+|\s+$/,"").split(/\s/).join(".");
+                if($(to).length==1){
+                    sendbtnRecheck=false;
+                }
+            }
+        }
+        if(sendbtnRecheck){
+            console.log("?投稿ボタン削除");
+            to='.hw_hy.HH_HR';
+        }
+        t += to+'{display:none;}'
     }
     //コメント見た目
     var bc = "rgba(" + commentBackColor + "," + commentBackColor + "," + commentBackColor + "," + (commentBackTrans / 255) + ")";
@@ -4539,15 +4711,55 @@ function setOptionHead() {
     var tc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (commentTextTrans / 255) + ")";
     var uc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (0.2) + ")";
     var vc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (0.3) + ")";
-    t += '[class^="styles__right-comment-area___"]{background-color:transparent;}';
-    t += '[class^="styles__right-comment-area___"]>*{background-color:transparent;}';
-    t += '[class^="styles__right-comment-area___"] [class*="styles__comment-form___"]{background-color:' + bc + ';}';
-    t += '[class^="styles__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{background-color:' + uc + ';}';
-    t += '[class^="styles__right-comment-area___"] textarea{background-color:' + uc + ';color:' + tc + ';}';
-    t += '[class^="styles__right-comment-area___"] textarea+*{background-color:' + cc + ';color:' + tc + ';}';
-    t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{background-color:' + bc + ';color:' + tc + ';}';
-    t += '[class^="styles__right-comment-area___"] [class*="styles__animation-inner___"]>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので)
-    t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{color:' + tc + ';}';
+    selCome=getElementSelector(EXcome,true,1,0);
+    if($(selCome).length!=1){
+        console.log("?EXcome "+selCome);
+        selCome=getElementSelector(EXcome,false,0,0)+".v3_wi.v3_we.v3_wo";
+    }
+    t += selCome+'{background-color:transparent;}';
+    t += selCome+'>*{background-color:transparent;}';
+    selComesend=getElementSelector(EXcomesend,true,1,0);
+    if($(selComesend).length!=1){
+        console.log("?EXcomesend "+selComesend);
+        selComesend=getElementSelector(EXcomesend,false,0,0)+".HH_e.Ai_Ak";
+    }
+    t += selComesend+'{background-color:' + bc + ';}';
+    selComesendinpp=getElementSelector(EXcomesendinp.parentElement,true,1,0);
+    if($(selComesendinpp).length!=1){
+        console.log("?EXcomesendinp.parentElement "+selComesendinpp);
+        selComesendinpp=getElementSelector(EXcomesendinp.parentElement,false,0,0)+".HH_HL";
+    }
+    t += selComesendinpp+'{background-color:' + uc + ';}';
+    selComesendinp=getElementSelector(EXcomesendinp,true,1,0);
+    if($(selComesendinp).length!=1){
+        console.log("?EXcomesendinp "+selComesendinp);
+        selComesendinp=getElementSelector(EXcomesendinp,false,0,0)+".HH_HN";
+    }
+    t += selComesendinp+'{background-color:' + uc + ';color:' + tc + ';}';
+    t += selComesendinp+'+*{background-color:' + cc + ';color:' + tc + ';}';
+    jo=getComeListElement();
+    if(jo==null){
+        console.log("getComeListElement()==null");
+        comelistRecheck=true;
+    }else{
+        selComelist=getElementSelector(jo,true,1,0);
+        if($(selComelist).length!=1){
+            console.log("?comelist "+selComelist);
+            comelistRecheck=true;
+        }
+        selComelistp=getElementSelector(jo.parentElement,true,1,0);
+        if($(selComelistp).length!=1){
+            console.log("?comelistp "+selComelistp);
+            comelistRecheck=true;
+        }
+    }
+    if(comelistRecheck){
+        selComelist=".uo_e";
+        selComelistp=".Ai_Am.t7_e.t7_t9"
+    }
+    t += selComelist+'>div{background-color:' + bc + ';color:' + tc + ';}';
+    t += selComelist+'>div.uo_k{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので)
+    t += selComelist+'>div>p.xH_fy{color:' + tc + ';}';
     //    //映像最大化
     ////    if(isMovieMaximize||isSureReadComment){
     //    if(isSureReadComment){
@@ -4568,11 +4780,11 @@ function setOptionHead() {
 
     //コメ欄スクロールバー非表示
     if (isInpWinBottom) {//コメ逆順の時は対象が逆になる
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{overflow:hidden;}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{';
+        t += selComelistp+'{overflow:hidden;}';
+        t += selComelist+'{';
     } else {
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{overflow:hidden;}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{';
+        t += selComelist+'{overflow:hidden;}';
+        t += selComelistp+'{';
     }
     if (isHideOldComment) {
         t += 'overflow:hidden;';
@@ -4583,10 +4795,10 @@ function setOptionHead() {
     //ユーザースクリプトのngconfigのz-index変更
     t += '#NGConfig{z-index:20;}';
     if (isInpWinBottom) { //コメ入力欄を下
-        t += '[class^="styles__right-comment-area___"]>*{display:flex;flex-direction:column-reverse;}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]{display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid ' + vc + ';border-bottom:1px solid ' + vc + ';}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div{display:flex;flex-direction:column-reverse;}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{overflow:visible;min-height:min-content;}';//min-heightがないとdislay:flexで重なってしまう
+        t += selCome+'>*{display:flex;flex-direction:column-reverse;}';
+        t += selComelistp+'{display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid ' + vc + ';border-bottom:1px solid ' + vc + ';}';
+        t += selComelist+'{display:flex;flex-direction:column-reverse;}';
+        t += selComelist+'>div{overflow:visible;min-height:min-content;}';//min-heightがないとdislay:flexで重なってしまう
         //↑の構成そのままだと各コメントのデフォ間隔padding:15px 15px 0;のtop,bottomがうまく効かなくなってしまう
         //2つめのflex(下スクロール、コメント少数時の下詰め)を解除すれば有効になるけど、下スクロールを解除したくない
         //各コメントの中身(本文、投稿時刻)にpadding設定したらうまくいった→min-height指定で不要に
@@ -4595,36 +4807,61 @@ function setOptionHead() {
             t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
         }*/
     }
-    t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
+    t += selComelist+'>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
     //    if(isCustomPostWin){ //1行化
     //        t+='[class^="TVContainer__right-comment-area___"] textarea{height:18px!important;}';
     //        t+='[class^="TVContainer__right-comment-area___"] textarea+div{height:18px!important;}';
     //    }
     if (isCommentPadZero) { //コメ間隔詰め
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{margin-top:0px;}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__time__"]{margin-top:0px;}';
+        t += selComelist+'>div{padding-top:0px;padding-bottom:0px;}';
+        t += selComelist+'>div>p{margin-top:0px;}';
     }
     if (isCommentTBorder) { //コメ区切り線
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{border-top:1px solid ' + vc + ';}';
+        t += selComelist+'>div{border-top:1px solid ' + vc + ';}';
         if (isInpWinBottom) { //先頭コメ(一番下)の下にも線を引く
-            t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div:first{border-bottom:1px solid ' + vc + ';}';
+            t += selComelist+'>div:first{border-bottom:1px solid ' + vc + ';}';
         }
     }
     if (isCommentWide) { //コメント部分をほんの少し広く
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-right:4px;padding-left:8px;}';
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]{width:' + (isHideOldComment ? 258 : 242) + 'px;}';
+        t += selComelist+'>div{padding-right:4px;padding-left:8px;}';
+        t += selComelist+'>div>p:first{width:' + (isHideOldComment ? 258 : 242) + 'px;}';
         //フォントによるがそれぞれ259,243でギリギリなので1だけ余裕をみる
+        t += selComelist+'{margin:0;}';
     }
     //各パネルの常時表示 隠す場合は積極的にelement.cssに隠す旨を記述する(fade-out等に任せたり単にcss除去で済まさない)
     //もしくは常時隠して表示する場合に記述する、つまり表示切替の一切を自力でやる
     //（コメ欄常時表示で黒帯パネルの表示切替が発生した時のレイアウト崩れを防ぐため）
-    t += '[class^="HeaderContainer__header___"]{visibility:visible;opacity:1;transform:translate(0);}';
-    t += '[class^="styles__footer-container___"]{visibility:visible;opacity:1;transform:translate(0);}';
-    t += '[class^="styles__side___"]{transform:translateY(-50%);}';
-    t += '[class^="styles__right-list-slide___"]{z-index:15;}';//head11より上の残り時間12,13,14より上
-    t += '[class^="styles__right-slide___"]{z-index:15;}';
-    t += '[class^="styles__right-comment-area___"] *{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
+    selHead=getElementSelector(EXhead,true,1,0);
+    if($(selHead).length!=1){
+        console.log("?EXhead "+selHead);
+        selHead=getElementSelector(EXhead,false,0,0)+".P_R";
+    }
+    t += selHead+'{visibility:visible;opacity:1;transform:translate(0);}';
+    selFoot=getElementSelector(EXfoot,true,1,0);
+    if($(selFoot).length!=1){
+        console.log("?EXfoot "+selFoot);
+        selFoot=getElementSelector(EXfoot,false,0,0)+".v3_v_";
+    }
+    t += selFoot+'{visibility:visible;opacity:1;transform:translate(0);}';
+    selSide=getElementSelector(EXside,true,1,0);
+    if($(selSide).length!=1){
+        console.log("?EXside "+selSide);
+        selSide=getElementSelector(EXside,false,0,0)+".v3_v5";
+    }
+    t += selSide+'{transform:translateY(-50%);}';
+    selChli=getElementSelector(EXchli,true,1,0);
+    if($(selChli).length!=1){
+        console.log("?EXchli "+selChli);
+        selChli=getElementSelector(EXchli,false,0,0)+".v3_wk";
+    }
+    t += selChli+'{z-index:15;}';//head11より上の残り時間12,13,14より上
+    selInfo=getElementSelector(EXinfo,true,1,0);
+    if($(selInfo).length!=1){
+        console.log("?EXinfo "+selInfo);
+        selInfo=getElementSelector(EXinfo,false,0,0)+".v3_wg";
+    }
+    t += selInfo+'{z-index:15;}';
+    t += selCome+' *{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
     //左上・左下の非表示
     if (isHidePopBL) {
         t += '[class^="styles__ad-reserve-button___"]{transform:translateX(-170px);}';
@@ -4669,8 +4906,24 @@ function setOptionHead() {
 
     //全画面・音量ボタン非表示 display:noneだとホイール音量操作でスタック
     if (isHideButtons) {
-        t += '[class^="styles__footer-container___"] [class^="styles__full-screen___"]{opacity:0;visibility:hidden;}';
-        t += '[class^="styles__footer-container___"] [class^="styles__volume___"]{opacity:0;visibility:hidden;}';
+        jo=getFullScreenElement();
+        if(jo==null){
+            console.log("getFullScreenElement()==null");
+            to=selFoot+" .mb_mi";
+        }else{
+            to=getElementSelector(jo,true,1,0);
+            if($(to).length!=1){
+                console.log("?fullscreen "+to);
+                to=selFoot+" .mb_mi";
+            }
+        }
+        t += to+'{opacity:0;visibility:hidden;}';
+        to=getElementSelector(EXvolume,true,1,0);
+        if($(to).length!=1){
+            console.log("?volume "+to);
+            to=selFoot+" .mb_mk";
+        }
+        t += to+'{opacity:0;visibility:hidden;}';
     }
     //自動更新停止アイコン用
     t += '.reloadicon{fill:rgba(255,255,255,0.5);position:absolute;right:0;top:9px;}';
@@ -4701,7 +4954,7 @@ function setOptionHead() {
     }
     //コメント一覧クリックNG時はマウスオーバーで文字色を赤系にする
     if (isComelistClickNG) {
-        t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p[class^="styles__message__"]:hover{color:' + rc + ';}';
+        t += selComelist+'>div>p[class^="styles__message__"]:hover{color:' + rc + ';}';
     }
     //流れるコメントのフォントサイズ
     if (comeFontsizeV) {
@@ -4723,21 +4976,26 @@ function setOptionHead() {
         t += '#viewcounticon{vertical-align:middle;fill:#1a1a1a;}';
         t += '#viewcountcont{margin-left:4px;font-size:12px;font-weight:700;vertical-align:middle;color:#1a1a1a;}';
         t += '#comecountcont{margin-left:10px;font-size:18px;font-weight:700;vertical-align:middle;line-height:1.6;color:#1a1a1a;}';
-        t += '[class^="styles__footer-container___"] [class*="styles__right-container___"] button{line-height:1;}';
-        t += '[class^="styles__footer-container___"] [class*="styles__right-container___"] button>span:not(#viewcountcont):not(#comecountcont){display:none;}';
+        to=getElementSelector(EXfootcome,true,1,0);
+        if($(to).length!=1){
+            console.log("?EXfootcome "+to);
+            to=selFoot+" .mb_mo";
+        }
+        t += to+' button{line-height:1;}';
+        t += to+' button>span:not(#viewcountcont):not(#comecountcont){display:none;}';
     }
     //コメ欄常時表示時に伸張する
     if (isComeTriming && isSureReadComment) {
-        t += '[class^="HeaderContainer__header___"],[class^="styles__footer-container___"]{width:calc(100% - 310px);}';
-        t += '[class^="HeaderContainer__header___"]>*{min-width:unset;}';
+        t += selHead+','+selFoot+'{width:calc(100% - 310px);}';
+        t += selHead+'>*{min-width:unset;}';
     }
     //黒帯パネルの透過
-    t += '[class*="styles__footer___"],[class*="Header__container___"]{opacity:' + (settings.panelOpacity/255) + '}';
-    t += '[class*="HeaderContainer__header___"]{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
+    t += selFoot+','+selHead+'{opacity:' + (settings.panelOpacity/255) + '}';
+    t += selHead+'{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
 
     //番組情報のコピー置換
-    t += '[class^="styles__right-slide___"]>*:not(#copyinfo){display:none;}';
-    t += '[class^="styles__right-slide___"]>#copyinfo{width:100%;padding:15px;}';
+    t += selInfo+'>*:not(#copyinfo){display:none;}';
+    t += selInfo+'>#copyinfo{width:100%;padding:15px;}';
 
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURIComponent(t) + "'>").appendTo("head");
     console.log("setOptionHead ok");
