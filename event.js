@@ -428,6 +428,11 @@ chrome.runtime.onInstalled.addListener(() => {
         putContextMenu();
     }
     // 番組通知のalarmが消えていれば再登録
+    reRegistAlarms()
+});
+chrome.runtime.onStartup.addListener(reRegistAlarms)
+
+function reRegistAlarms(){
     chrome.storage.local.get(function(val){
         chrome.alarms.getAll(function(alarms){
             for (var key in val) {
@@ -449,4 +454,4 @@ chrome.runtime.onInstalled.addListener(() => {
             }
         });
     });
-});
+}

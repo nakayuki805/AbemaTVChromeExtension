@@ -6,9 +6,10 @@ if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
 
-var currentUpdateNotifyVersion = 13;//0.11.0の時
+var currentUpdateNotifyVersion = 14;//0.12.0の時
 var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
+    "仕様変更にとりあえず対応しましたがまだ不安定な可能性があります",
     "最近追加された機能(※デフォルト無効):",
     "通知ポップアップが自動で消えない設定※",
     "音声停止から一定時間経つと再起動",
