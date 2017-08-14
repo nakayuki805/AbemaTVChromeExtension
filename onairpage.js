@@ -377,7 +377,7 @@ var commentObserver = new MutationObserver(function(mutations) {
 var isFirstComeAnimated = false; //最初に既存のコメがanimationしたか 最初に既存のコメが一気に画面に流れてくるのを防ぐためのフラグ
 var timetableRunning = false; //番組表表示時の10分インターバル
 var audibleReloadCount = -1;
-var isSoundFlag = true; //soundSet(isSound)のisSound保存用
+var isSoundFlag = true; //音が出ているか soundSet(isSound)のisSoundを保持したり音量クリック時にミュートチェック
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -3500,7 +3500,7 @@ function getElementSingleSelector(ret,sw){
     if(!rw.test(tms)) return null;
     var tma=tms.replace(rt,"").split(rs);
     for(var i=0;i<tma.length;i++){
-        if(!rw.test(tma[i])) continue;
+        if(!rw.test(tma[i]) && tma[i].indexOf('ext_abm-')<0) continue; //拡張機能が付与したclassは除外
         tms=ren+'.'+tma[i].replace(rt,"");
         jolen=$(tms).length;
         if(jolen==1) return tms;
@@ -5393,6 +5393,13 @@ function usereventVolMouseout() {
     if (!EXside) { return; }
     $(EXside).css("transform", "translate(0px,-50%)");
 }
+function usereventVolClick() {
+    setTimeout(function(){
+           var svgpath = $(EXvolume).find('button').find('use').attr('xlink:href');
+    if (svgpath.indexOf('volume_off')>=0) {isSoundFlag = false;}
+    else {isSoundFlag = true;}
+    }, 100);
+}
 function usereventFCMouseleave() {
     //console.log("ueFCMouseleave");
     if (!EXfootcome) { return; }
@@ -5715,6 +5722,7 @@ function setOptionEvent() {//放送画面用イベント設定
     //pwakuと同じイベントを#ComeMukouMaskにも設置
     $(EXvolume).on("mousemove", usereventVolMousemove)
         .on("mouseout", usereventVolMouseout)
+        .on('click', usereventVolClick)
         ;
     window.addEventListener("keydown", function (e) {
         //console.log(e)
