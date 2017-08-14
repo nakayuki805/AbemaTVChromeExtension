@@ -646,7 +646,7 @@ function waitforloadtimetable(url) {
         allowChannelNumMaker();
         timetableCss();
         //$('div')を取ってきてあるのでここで使う
-        dd.map(function(i,e){if($(e).css("z-index")>10)return e;}).css("z-index","-1");
+        dd.map(function(i,e){if($(e).css("z-index")>10 && e.className.indexOf('toast')<0)return e;}).css("z-index","-1");
     } else {
         console.log("retry waitforloadtimetable");
         setTimeout(waitforloadtimetable, 500, url);
@@ -713,7 +713,7 @@ function timetabledtfix() {
     if (ce) {
         timetabledtloop();
     }
-    console.log(allowChannelNum)
+    //console.log('allowChannelNum,timetableScroll', allowChannelNum, timetableScroll)
     if (timetableScroll != "") {
         var channelLink = $(EXTThead).children('a[href$="/timetable/channels/' + timetableScroll + '"]');
         if (channelLink.length > 0) {
@@ -730,9 +730,9 @@ function timetabledtfix() {
                         break;
                     }
                 }
-                $(EXTTbody).scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbody).width()+20));
+                $(EXTTbody).parent().parent().parent().parent().scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbody).width()+20));
             }else{
-                $(EXTTbody).scrollLeft(chLinkWidth * visibleChLinkIndex);
+                $(EXTTbody).parent().parent().parent().parent().scrollLeft(chLinkWidth * visibleChLinkIndex);
             }
             //console.log(chLinkWidth,visibleChLinkIndex,chLinkWidth * visibleChLinkIndex, allowChannelNum);
         } else {
@@ -1878,7 +1878,7 @@ function toast(message) {
     var toastElem = $("<div class='toast'><p>" + message + "</p></div>").appendTo("body");
     setTimeout(function () {
         toastElem.fadeOut(3000);
-    }, 4000);
+    }, 4000);    
 }
 function delayset(isInit,isOLS,isHC,isEXC) {
     if (checkUrlPattern(true) != 3) { return; }
@@ -3286,10 +3286,10 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
             jcchd += jfmtop;
         }
     }
-    //フッタ表示かつコメ入力下の場合は音量ボタン等の下位置を上げる
+    //フッタ表示かつコメ入力下の場合は音量ボタンとフルスクリーンボタンの下位置を上げる
     var volshift = false;
     $(EXvolume).css("bottom", "")
-        .prev('[class^="styles__full-screen___"]').css("bottom", "")
+        .prev('button').css("bottom", "")
         ;
     if (!isComeTriming && $(EXfoot).css("visibility") == "visible") {
         //フッタ表示時
@@ -3390,7 +3390,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     //    ;
     if (volshift) {
         $(EXvolume).css("bottom", (80 + jform.height() + jfptop + jfpbot) + "px")
-            .prev('[class^="styles__full-screen___"]').css("bottom", (80 + jform.height() + jfptop + jfpbot) + "px")
+            .prev('button').css("bottom", (80 + jform.height() + jfptop + jfpbot) + "px")
             ;
     }
     if (repeatcount > 0) {
@@ -5679,17 +5679,19 @@ function setOptionEvent() {//放送画面用イベント設定
     //マウスホイール無効か音量操作
     var mousewheelEvtName = isFirefox ? 'DOMMouseScroll' : 'mousewheel';
     window.addEventListener(mousewheelEvtName, function (e) {
-        console.log("onmousewheel",e)
         //        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
-        if (isVolumeWheel && e.target.id == "ComeMukouMask") {
-            if (EXvolume && $(EXvolume).contents().find('svg').css("zoom") == "1") {
-                otoSize(e.wheelDelta < 0 ? 0.8 : 1.2);
+        if (e.target.id == "ComeMukouMask") {
+            console.log("onmousewheel on video",e)
+            if (isVolumeWheel) {
+                if (EXvolume && $(EXvolume).contents().find('svg').css("zoom") == "1") {
+                    otoSize(e.wheelDelta < 0 ? 0.8 : 1.2);
+                }
+                moVol(e.wheelDelta < 0 ? -5 : 5);
             }
-            moVol(e.wheelDelta < 0 ? -5 : 5);
-        }
-        if (isCancelWheel || isVolumeWheel) { //設定ウィンドウ反映用
-            //console.log("cancelling wheel")
-            e.stopImmediatePropagation();
+            if (isCancelWheel || isVolumeWheel) { //設定ウィンドウ反映用
+                //console.log("cancelling wheel")
+                e.stopImmediatePropagation();
+            }
         }
     }, true);
     //フルスクリーンボタンの割り当て変更
@@ -6737,8 +6739,8 @@ function onairBasefunc() {
                     $(EXinfo).children('#copyinfo').remove();
                     $(EXinfo).children().not('#copyinfo').first().clone().removeClass().addClass('usermade').prop("id", "copyinfo").appendTo($(EXinfo));
                     //番組情報のSNSボタンのイベント設定
-                    $('#copyinfo [class*="SNSShare__share___"] button').click(function (e){
-                        $(EXinfo).children().not('#copyinfo').first().find('[class*="SNSShare__share___"] button').eq($(e.target).parent().index()).trigger('click');
+                    $('#copyinfo ul>li button').click(function (e){
+                        $(EXinfo).children().not('#copyinfo').first().find('ul>li button').eq($(e.target).parent().index()).trigger('click');
                     });
                 }
             }
