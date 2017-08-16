@@ -330,6 +330,7 @@ var EXfullscr;
 var EXcomemodule;//Twitterボタンや投稿ボタンを含む要素 入力欄をフォーカスしたときにセットし放送画面以外ではnull
 var EXTThead;//timetableのヘッダ部分(チャンネル,日付の親)
 var EXTTbody;//timetableのボディ(チャンネル,日付の親)
+var EXTTbodyS;//bodyのスクロール担当(sideL,Rの兄弟)
 var EXTTsideR;//timetableの右の番組詳細
 var EXTTsideL;//timetableの左の番組一覧
 var EXTTtime;//timetableの時間列(縦長の緑のやつ)
@@ -380,6 +381,7 @@ var isFirstComeAnimated = false; //最初に既存のコメがanimationしたか
 var timetableRunning = false; //番組表表示時の10分インターバル
 var audibleReloadCount = -1;
 var isSoundFlag = true; //音が出ているか soundSet(isSound)のisSoundを保持したり音量クリック時にミュートチェック
+var timetableGrabbing = {value:false,cx:0,cy:0,test:false,sx:0,sy:0,scrolled:false,}; //番組表を掴む
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -444,7 +446,7 @@ function timetableCss() {
     var ts = "";
     var to,tp;
     var selBody,selHead,selTime,selPTitle;
-    var eo;
+    var eo,ep;
     var m;
     var alt=false;
 
@@ -455,45 +457,26 @@ function timetableCss() {
         selPTitle=alt?'.ok_bq':'';
     }else selPTitle='.'+selPTitle;
 
-    if (isExpandFewChannels) {
-        //横長さ制限があるのはfuturetitleだけ
-        to=getTTTimeClassFromPT(selPTitle,2);
-        if(!to){
-            console.log("?放送予定背景クラス "+to);
-            to=alt?'.w7_mH':"";
-        }
-        if(to){
-            //最初のpのクラス(のどれか)が横長さ制限を司る 他のクラスは他の要素にもよく付いてるので一番少ないのを探す
-            eo=$(EXTTbody).find('.'+to).first().find('p').first().prop("class").split(/\s/);
-            m=9999;
-            to=null;
-            for(var i=0,c,l;i<eo.length;i++){
-                c=eo[i].replace(/^\s+|\s+$/,"");
-                if(!c) continue;
-                l=$('.'+c).length;
-                if(m<l) continue;
-                m=l;
-                to=c;
-            }
-            if(!to){
-                console.log("?放送予定背景クラスの最初のpのクラスで該当要素が少ないクラス "+null);
-                to=alt?'.w7_xi':"";
-            }else to='.'+to;
-            if(to){
-                t += to+'{width:unset!important;padding-right:1em;}';//各番組のタイトルの横長さ制限を外す
-                ts = 'width:calc((100vw - 265px) / '+allowChannelNum.length+');min-width:176px;';
-            }
-        }
-    }
-    if (isChTimetableBreak&&selPTitle) {
-        t += selPTitle+'{word-break:break-word;}';
-    }
-
     selBody=getElementSingleSelector(EXTTbody);
     if($(selBody).length!=1){
         console.log("?EXTTbody "+selBody);
         selBody=alt?'.pi_pk':"";
     }
+
+    if (isExpandFewChannels) {
+        //横長さ制限があるのはfuturetitleのpだけだが仕様変更に備えて全てのpに適用しておく
+        //futuretitleだけに適用する場合はgetTTTimeClassとかでがんばる
+        if(selBody) t += selBody+' p{width:100%;padding-right:1em;}';
+
+        //横幅100%から左端～時間軸の右端と右のスクロールバーの分(適当)を引いた幅にする
+        //真面目にやるならexttbodyから上がっていってoverflowがvisibleでない要素(またはsideLの兄弟)のclientWidthを取ればスクロールバーまでバッチリ取れるかも
+        m=EXTTtime?EXTTtime.getBoundingClientRect().right+19:265;
+        ts = 'width:calc((100vw - '+m+'px) / '+allowChannelNum.length+')!important;min-width:176px;';
+    }
+    if (isChTimetableBreak&&selPTitle) {
+        t += selPTitle+'{word-break:break-word;}';
+    }
+
     var c = checkUrlPattern(true);
     if (c == 1) {
         if (allowChannelNum.length > 0) {
@@ -506,7 +489,7 @@ function timetableCss() {
             if(selBody) t += selBody+'>div{display:none;}';
             for (var i = 0, j; i < allowChannelNum.length; i++) {
                 j = allowChannelNum[i] + 1;
-                if(selHead) t += selHead+'>a:nth-child(' + j + '){display:unset!important;width:176px;' + ts + '}';
+                if(selHead) t += selHead+'>a:nth-child(' + j + '){display:unset!important;' + ts + '}';
                 if(selBody) t += selBody+'>div:nth-child(' + j + '){display:unset!important;' + ts + '}';
             }
         }
@@ -595,33 +578,34 @@ function waitforloadtimetable(url) {
 //        }
 //    }
     var dd=$('div');
+    var alt=false;
     $('head>link[title="usermade"]').remove();//要素がdisplay:noneだと探索で大きさが取れないのでまず元に戻す
     var j=dd.map(function(i,e){ //ヘッダ探索　上の方にあって横長くて列の数は7日分くらいより多いやつ
         var b=e.getBoundingClientRect();
         if(b.top<window.innerHeight/4&&b.top>5&&b.left<window.innerWidth/3&&b.width>window.innerWidth/2&&b.height<window.innerHeight/3&&e.childElementCount>5)return e;
     });
     if(j.length>0) EXTThead=j[0];
-    else{
+    else if(alt){
         j=$('.rT_r1').children("div");
-        if(j.length>0)EXTThead=j[0];
-        else{
-            console.log("?EXTThead");
-            EXTThead=null;
-        }
+        if(j.length>0) EXTThead=j[0];
+    }
+    if(!EXTThead){
+        console.log("?EXTThead");
+        EXTThead=null;
     }
 
     j=dd.map(function(i,e){
         var b=e.getBoundingClientRect(); //ボディ探索　でかいやつ
         if(b.top<window.innerHeight/4&&b.left<window.innerWidth/4&&b.width>window.innerWidth/2&&b.height>window.innerHeight/2&&$(e).children("div").length>5)return e;
     });
-    if(j.length>=0)EXTTbody=j[0];
-    else{
+    if(j.length>=0) EXTTbody=j[0];
+    else if(alt){
         j=$('.pi_pk');
-        if(j.length>0)EXTTbody=j[0];
-        else{
-            console.log("?EXTTbody");
-            EXTTbody=null;
-        }
+        if(j.length>0) EXTTbody=j[0];
+    }
+    if(!EXTTbody){
+        console.log("?EXTTbody");
+        EXTTbody=null;
     }
 
     j=dd.map(function(i,e){ //番組詳細探索　右にあるやつ
@@ -629,45 +613,59 @@ function waitforloadtimetable(url) {
         if($(e).css("position")=="fixed"&&!isNaN(parseInt($(e).css("z-index")))&&parseInt($(e).css("z-index"))>0&&b.top<window.innerHeight/4&&b.left>window.innerWidth/2&&b.width<window.innerWidth/2&&b.width>50&&b.height>window.innerHeight*2/3)return e;
     });
     if(j.length>0)EXTTsideR=j[0];
-    else{
+    else if(alt){
         j=$('.rT_sL');
-        if(j.length>0)EXTTsideR=j[0];
-        else{
-            console.log("?EXTTsideR");
-            EXTTsideR=null;
-        }
+        if(j.length>0) EXTTsideR=j[0];
+    }
+    if(!EXTTsideR){
+        console.log("?EXTTsideR");
+        EXTTsideR=null;
     }
 
-    j=$('a[href$="/timetable"]');
-    if(j>=2){
+    j=$('a[href$="/timetable"]'); // 番組表リンク(ALL)をsideLとする
+    if(j.length>=2){
         j=j.eq(1); //ヘッダの番組表リンクは除く
-        while(j.children().length<5)j=j.parent();
-        EXTTsideL=j[0];
+        while(j.prop("tagName").toUpperCase()!="BODY"&&j.children().length<5) j=j.parent();
+        if(j.children().length>=5) EXTTsideL=j[0];
     }
-    else{
+    if(!EXTTsideL && alt){
         j=$('.rT_sq ul');
-        if(j.length>0)EXTTsideL=j[0];
-        else{
-            console.log("?EXTTsideL");
-            EXTTsideL=null;
-        }
+        if(j.length>0) EXTTsideL=j[0];
+    }
+    if(!EXTTsideL){
+        console.log("?EXTTsideL");
+        EXTTsideL=null;
+    }
+
+    if(EXTTbody){
+        j=$(EXTTbody);
+        while(j.prop("tagName").toUpperCase()!="BODY"&&j.css("overflow")=="visible"&&!j.siblings().is(EXTTsideL)) j=j.parent();
+        if(j.css("overflow")!="visible") EXTTbodyS=j[0];
+    }
+    if(!EXTTbodyS && alt){
+        j=$('.rT_ss');
+        if(j.length>0) EXTTbodyS=j[0];
+    }
+    if(!EXTTbodyS){
+        console.log("?EXTTbodyS");
+        EXTTbodyS=null;
     }
 
     j=dd.map(function(i,e){ //timetable-axis
         var b=e.getBoundingClientRect();
         if(b.top<window.innerHeight/3&&b.left<window.innerWidth/3&&b.width<50&&b.height>window.innerHeight*2/3&&e.childElementCount>20)return e;
     });
-    if(j.length>0)EXTTtime=j[0];
-    else{
+    if(j.length>0) EXTTtime=j[0];
+    else if(alt){
         j=$('.pi_eR');
-        if(j.length>0)EXTTtime=j[0];
-        else{
-            console.log("?EXTTtime");
-            EXTTtime=null;
-        }
+        if(j.length>0) EXTTtime=j[0];
+    }
+    if(!EXTTtime){
+        console.log("?EXTTtime");
+        EXTTtime=null;
     }
 
-    if (EXTThead!=null && EXTTbody!=null && EXTTsideR!=null&&EXTTsideL!=null&&EXTTtime!=null) {
+    if (EXTThead!=null && EXTTbody!=null && EXTTsideR!=null&&EXTTsideL!=null&&EXTTtime!=null &&EXTTbodyS!=null) {
 //        if (currentLocation.indexOf("https://abema.tv/timetable/channels/") == 0) {
         if (c == 2) {
             setTimeout(timetablechfix, 100);
@@ -677,16 +675,59 @@ function waitforloadtimetable(url) {
         }
         setTimeout(timetableCommonFix, 100, 0);
         //番組表クリックで右詳細に通知登録ボタン設置
-        $(EXTTbody).click(function(){
-            setTimeout(putSideDetailNotifyButton,50);
-            if (isPutSideDetailHighlight) {
-                setTimeout(putSideDetailHighlight,50);
+        $(EXTTbody).click(function(e){ // 掴んでスクロールした場合番組詳細は開かないことにする
+            if(!timetableGrabbing.scrolled){
+                setTimeout(putSideDetailNotifyButton,50);
+                if (isPutSideDetailHighlight) {
+                    setTimeout(putSideDetailHighlight,50);
+                }
+            }else{
+                e.preventDefault();
+                e.stopImmediatePropagation();
             }
         });
         allowChannelNumMaker();
         timetableCss();
         //$('div')を取ってきてあるのでここで使う
         dd.map(function(i,e){if($(e).css("z-index")>10)return e;}).css("z-index","-1");
+
+        //番組表を掴んでドラッグする
+        timetableGrabbing.test=false;
+        timetableGrabbing.value=false;
+        $(EXTTbodyS).mouseleave();
+        if(timetableGrabbing.test==false){
+            $(EXTTbodyS).mouseleave(function(){
+                timetableGrabbing.test=true;
+                timetableGrabbing.value=false;
+                timetableGrabbing.scrolled=false;
+            })
+            .mouseup(function(e){timetableGrabbing.value=false;})
+            .mousedown(function(e){
+                if(e.buttons==1){ // 左クリックだけの場合掴む
+                    timetableGrabbing.value=true;
+                    timetableGrabbing.cx=e.clientX;
+                    timetableGrabbing.cy=e.clientY;
+                    timetableGrabbing.sx=$(EXTTbodyS).scrollLeft();
+                    timetableGrabbing.sy=$(EXTTbodyS).scrollTop();
+                    timetableGrabbing.scrolled=false;
+                }else{
+                    //timetableGrabbing.value=false;
+                    //timetableGrabbing.scrolled=false;
+                }
+            })
+            .mousemove(function(e){ // 掴んで少し移動したらスクロール
+                if(timetableGrabbing.value==false||e.buttons!=1){
+                    //timetableGrabbing.scrolled=false;
+                }else{
+                    if(timetableGrabbing.scrolled==false&&(Math.abs(timetableGrabbing.cx-e.clientX)>10||Math.abs(timetableGrabbing.cy-e.clientY)>10)) timetableGrabbing.scrolled=true;
+                    if(timetableGrabbing.scrolled){
+                        $(EXTTbodyS).scrollLeft(timetableGrabbing.sx+timetableGrabbing.cx-e.clientX)
+                            .scrollTop(timetableGrabbing.sy+timetableGrabbing.cy-e.clientY)
+                        ;
+                    }
+                }
+            });
+        }
     } else {
         console.log("retry waitforloadtimetable");
         setTimeout(waitforloadtimetable, 500, url);
@@ -4056,6 +4097,20 @@ function getTTTimeClassFromPT(proTitleClass,sw){
         return n;
     }
     return null;
+}
+function getTTLRArrowContainerElement(returnSingleSelector){
+    //右アイコンの親buttonの親divを選ぶ 左アイコンはスクロール左端にいる初期状態では存在しないので無視する
+    // z-indexがautoでないdivを探す方が適切かもしれない
+    var jo=$('[*|href$="/images/icons/chevron_right.svg#svg-body"]:not([href])');
+    if(jo.length==0) return null;
+    var eo=jo[0];
+    var ret=eo.parentElement;
+    while(ret.tagName.toUpperCase()!="BODY"&&eo.tagName.toUpperCase()!="BUTTON"){
+        eo=ep;
+        ret=eo.parentElement;
+    }
+    if(ret.tagName.toUpperCase()=="BODY") return null;
+    return returnSingleSelector?getElementSingleSelector(ret):ret;
 }
 function getElementSelector(inpElm,includeID,includeClass,includeIndex,remove){
 //includeID true:#idを含める false:含めない
