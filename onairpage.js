@@ -5935,20 +5935,20 @@ function usereventSendInpKeyinput() {
         $(EXcomesendinp).parent().css("padding-top", "5px")
             .css("padding-bottom", "5px")
             ;
-        $(EXcomesendinp).css("height", "24px")
+        /*$(EXcomesendinp).css("height", "24px")//入力欄のレイアウトが崩れるのでとりあえずコメントアウト
             .css("overflow-y", "scroll")
-            .siblings('[class^="styles__print-text___"]').css("height", "24px")
+            .next('div').css("height", "24px")//textareaに重なっている入力内容が表示されるdiv
             .css("visibility", "hidden")
-            ;
+            ;*/
     } else {
         $(EXcomesendinp).parent().css("padding-top", "")
             .css("padding-bottom", "")
             ;
-        $(EXcomesendinp).css("height", "18px")
+        /*$(EXcomesendinp).css("height", "18px")
             .css("overflow-y", "")
-            .siblings('[class^="styles__print-text___"]').css("height", "18px")
+            .next('div').css("height", "18px")
             .css("visibility", "")
-            ;
+            ;*/
     }
     var s = -6 + 18 * Math.round($(EXcomesendinp).scrollTop() / 18);
     //console.log($(EXcomesendinp).scrollTop()+"->"+s);
@@ -6293,7 +6293,7 @@ function copycome(d, hlsw) {
     }
     //console.time('copycome')
     var eo = EXcomelist;
-    var isAnimationIncluded = EXcomelist.children[0].className.indexOf('uo_k') >= 0;
+    var isAnimationIncluded = parseInt($(EXcomelist.children[0]).css('height'))<10;
     var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(0)' : ''));
     //console.log("EXCLChi",EXcomelistChildren)
     var jo = $(eo);
@@ -6301,7 +6301,8 @@ function copycome(d, hlsw) {
         //console.log("copycome leng=0");
         var t = '<div id="copycome" class="' + jo.parent().attr("class") + ' usermade"><div id="copycomec" class="'+jo.attr("class")+' usermade">';
         var eofc = EXcomelistChildren[0];
-        if ($(eo.firstElementChild).is('.uo_uq')) { return; }
+        //console.log(eofc)
+        if ($(eo.firstElementChild).text().indexOf('まだ投稿がありません')<0) { return; }
         //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
         var eofcc = $(eofc).prop("class");
         if (eofc === undefined || !eofc.hasChildNodes()) { return; }
@@ -6330,7 +6331,7 @@ function copycome(d, hlsw) {
     var rs = /^(\d+) *秒前$/;
     var rm = /^(\d+) *分前$/;
 
-    if (d < 0 || jo.children().is('.uo_uq')) { //全消去
+    if (d < 0 || jo.children().eq(0).text().indexOf('まだ投稿がありません')<0) { //全消去
         console.log("copycome allerase");
         jc.children().text("");
         $('.comeposttime').attr("name", "");
@@ -7174,7 +7175,9 @@ function onCommentChange(mutations){
         if(mutations[i].type == 'childList' && mutations[i].addedNodes.length > 0){
             jo=$(mutations[i].addedNodes[0]);
             nodeClass = mutations[i].addedNodes[0].className;
-            if(jo.css("height")=="0px"){//jo.css("transition-property")=="height"だと反応しないっぽい
+            //nextClass = jo.next().attr('class');
+            //console.log(nodeClass, jo.css("height"), jo.css("transition-property"))
+            if(parseInt(jo.css("height"))<10){//jo.css("transition-property")=="height"だと反応しないっぽい
                 //console.log('mutation added: animation');
                 isAnimationAdded = true;
             }else if(jo.find("p").map(function(i,e){var t=e.innerText;if(t.indexOf("今")>=0||t.indexOf("秒前")>=0||t.indexOf("分前")>=0) return e;}).length>0){
@@ -7193,7 +7196,7 @@ function onCommentChange(mutations){
         //コメント取得(animation除外) ただし最初のanimationでも実行
         //console.time('obf_getComment_beforeif')
         var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
-        var isAnimationIncluded = commentDivParent.css("height")=="0px";//EXcomelist.children[0].className.indexOf('uo_k') >= 0;
+        var isAnimationIncluded = parseInt(commentDivParent.children().eq(0).css("height"))<10;//EXcomelist.children[0].className.indexOf('uo_k') >= 0;
         //console.log("isA",isAnimationIncluded,EXcomelist.children[0])
         //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
         var comments = [];// 負荷軽減のためjQuery使わずに
