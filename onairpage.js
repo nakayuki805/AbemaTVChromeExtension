@@ -6065,7 +6065,6 @@ function setOptionEvent() {//放送画面用イベント設定
         setTimeout(setOptionEvent, 1000);
         return;
     }
-    eventAdded = true;
     //    $(window).on("click",usereventWindowclick);
     //マウスホイール無効か音量操作
     var mousewheelEvtName = isFirefox ? 'DOMMouseScroll' : 'mousewheel';
@@ -6215,7 +6214,8 @@ function setOptionEvent() {//放送画面用イベント設定
     $(EXcome).on("click", '#copycomec', comecopy);
     //コメ入力欄がフォーカスされた時
     $(EXcomesendinp).on('focus', comeModuleEditor);
-
+    
+    eventAdded = true;
     console.log("setOptionEvent ok");
 }
 function startCM() {
@@ -7104,7 +7104,7 @@ function onairBasefunc() {
             waitforCloseCome(0);
         }
         //各要素を隠すまでのカウントダウン (マウスが動かずに時間経過)
-        if (forElementClose > 0) {
+        if (forElementClose > 0 && eventAdded) {
             //console.log("forElementClose:"+forElementClose+"->"+(forElementClose-1));
             forElementClose -= 1;
             if (forElementClose <= 0) {
