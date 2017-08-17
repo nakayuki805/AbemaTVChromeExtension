@@ -2059,7 +2059,9 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
         resetOptionHead=true;
         isVideo=true;
     }
+    try{//タイミングによってはsetEXsが完了する前にここでsetOptionHead()が実行されエラーになってdelaysetが完遂されないのでとりあえずtryで囲む
     if(resetOptionHead) setOptionHead();
+    }catch(e){console.warn(e);}
 
     if(isInit&&isOLS&&isEXC&&isInfo&&isTwT&&isVideo)console.log("delayset ok");
     else{
