@@ -1,4 +1,4 @@
-﻿// edge等ブラウザ対応
+// edge等ブラウザ対応
 if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
@@ -136,6 +136,7 @@ settings.mastodonInstance = ""; //mastodon投稿用インスタンス
 settings.mastodonToken = ""; //mastodon api token
 settings.mastodonFormat = "{comment}\\n#AbemaTV\\n{onairpage}"; //mastodon投稿用トゥートフォーマット
 var audibleReloadWait = 20; // タブの音声再生が停止してからタブを更新するまでの秒数
+var isDAR43 = false;//映像リサイズ4:3処理モード
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -268,6 +269,7 @@ getStorage(null, function (value) {
     settings.mastodonToken = value.mastodonToken || "";
     settings.mastodonFormat = value.mastodonFormat || "{comment}\\n#AbemaTV\\n{onairpage}";
     audibleReloadWait = (value.audibleReloadWait !== undefined) ? value.audibleReloadWait : 20;
+    isDAR43 = value.DAR43 || false;
 });
 
 var currentLocation = window.location.href;
@@ -365,12 +367,12 @@ var isNGwordShareInterval = false; //applySharedNGwordがinterval状態か
 var postedNGwords = []; //送信済みNGワード
 var isComelistMouseDown = false;
 var movieWidth = 0; //.TVContainer__resize-screenの大きさ(onresize発火用)
-var movieHeight = 0;
+//var movieHeight = 0;
 var waitingforResize = false; //waitforresizeの複数起動防止用
 var copycomecount = 2; //番組移動直後にcopycomeをfullcopyする回数
 var notifyButtonData = {}; //通知登録ボタンの番組情報格納
 var allowChannelNum = []; //Namesを元にした表示列番号
-var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
+//var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
 var oldWindowState = "normal" // フルスクリーン切り替え前のウィンドウのstate
 var isTootEnabled = false; //コメントのトゥート有効か
 var onairSecCount = 0; //onairbasefuncでカウントアップされる
@@ -382,6 +384,7 @@ var timetableRunning = false; //番組表表示時の10分インターバル
 var audibleReloadCount = -1;
 var isSoundFlag = true; //音が出ているか soundSet(isSound)のisSoundを保持したり音量クリック時にミュートチェック
 var timetableGrabbing = {value:false,cx:0,cy:0,test:false,sx:0,sy:0,scrolled:false,}; //番組表を掴む
+var comelistClasses={stabled:"",animated:"",empty:"",};
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -1203,7 +1206,7 @@ function getChannelNameOnTimetable(channel) { //番組表ページのチャン�
 function getVideo() {
     //console.trace('getVideo()')
     var jo = $('object,video');
-    var jp;
+    var jp = null;
     for (var i = 0; i < jo.length; i++) {
         if (jo.eq(i).css("display") != "none") {
             jp = jo.eq(i).parent();
@@ -1212,6 +1215,69 @@ function getVideo() {
     }
     return jp;
 }
+function onresize() {
+    if (checkUrlPattern(true) != 3) { return; }
+    //console.log("onresize()");
+    //視聴数の位置調整
+    setTimeout(function(){
+        if(EXcountview){
+            $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
+            $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+        }
+    },2000);
+
+    var mode43=isDAR43;
+    var resizeType = (settings.isResizeScreen ? 2 : 0)+(mode43?1:0);//0:左枠内で中央,1:左枠内で最大(4:3用),2:ウィンドウ内で最大,3:ウィンドウ内で最大(4:3用),
+    var posiVType = isMovieSpacingZeroTop ? 1 : (isResizeSpacing ? 2 : 0);//0:上下内で中央,1:上端,2:上端+head
+    var posiHType = isMovieSpacingZeroLeft ? 1 : 0;//0:左端,1:左端(4:3用)
+    if ($('#settcont').css("display") != "none") {
+        mode43=$('#isDAR43').prop("checked");
+        resizeType = +$('#movieResizeContainer input[type="radio"][name="movieResizeType"]:checked').val()*2+(mode43?1:0);
+        posiVType = +$('#moviePositionContainer input[type="radio"][name="moviePositionVType"]:checked').val();
+        posiHType = +$('#moviePositionContainer input[type="radio"][name="moviePositionHType"]:checked').val();
+    }
+
+    var tar=getVideo();
+    if(!tar) return;
+    tar=tar.first();//.parent();
+    var ori=tar.parent();
+    var o={w:{l:ori.offset().left,t:ori.offset().top,w:ori.width(),h:ori.height(),},v:{l:-1,t:-1,w:-1,h:-1,},};
+    var t={w:{l:-1,t:-1,w:-1,h:-1,},v:{l:-1,t:-1,w:-1,h:-1,},};
+    o.v.h=9*o.w.w>=16*o.w.h?o.w.h:o.w.w*9/16;
+    o.v.w=Math.min(o.w.w, o.v.h*(mode43?4/3:16/9));
+    o.v.t=o.w.t+(o.w.h-o.v.h)/2;
+    o.v.l=o.w.l+(o.w.w-o.v.w)/2;
+
+    var hh=posiVType==2&&EXhead?$(EXhead).height():0;
+    var zz=resizeType==0?100:Math.min(100*(resizeType==1?o.w.w:window.innerWidth)/o.v.w,100*(window.innerHeight-hh)/o.v.h);
+    t.v.w=o.v.w*zz/100;
+    t.v.h=o.v.h*zz/100;
+    t.w.w=t.v.h*16/9;
+    t.w.h=t.v.h;
+    t.w.l=o.w.l;
+    t.w.t=o.w.t;
+    t.v.l=t.w.l+(t.w.w-t.v.w)/2;
+    t.v.t=t.w.t+(t.w.h-t.v.h)/2;
+    //tar.css("width",t.w.w+"px").css("height",t.w.h+"px");//px指定だと各ウィンドウ開閉時の自動リサイズ時にズレる(movieWidthで監視するから問題無さそうだけど一応%指定にしておく)
+    tar.css("width",zz+"%").css("height",zz+"%");
+
+    var r;
+    if(posiVType==0){
+        r=resizeType>0?"translateY("+((window.innerHeight-t.v.h)/2-t.v.t)+"px)":"";
+    }else if(posiVType==1){
+        r="translateY("+(-t.v.t)+"px)";
+    }else if(posiVType==2){
+        r="translateY("+(hh-t.v.t)+"px)";
+    }
+
+    if(posiHType==0) r+=resizeType>0?" translateX("+((window.innerWidth-t.v.w)/2-t.v.l)+"px)":"";
+    else if(posiHType==1) r+=" translateX("+(-t.v.l)+"px)";
+
+    tar.css("transform",r);
+    console.log("screen resized");
+    movieWidth=parseInt(tar.width());
+}
+/*
 function onresize() {
     if (checkUrlPattern(true) != 3) { return; }
     //console.log("onresize()");
@@ -1346,6 +1412,7 @@ function onresize2(obj, objr, newwd, newhg, newtop, newleft, oldwd, oldhg) {
 
     console.log("screen resized");
 }
+*/
 function onScreenDblClick() {
     console.log("dblclick");
     if (comeNGmode == 2) { return; }
@@ -1734,21 +1801,16 @@ function screenBlackSet(type) {
     }
 }
 function movieZoomOut(sw) {
-    //    if(EXwatchingnum===undefined){return;}
     var j = getVideo();
-//    if (j.length == 0) { return; }
-    if (j === undefined) return;
+    if (!j) return;
+    var t=j[0].style.transform.replace(/\s*scale\(\d*(\.\d+)?\)/,"");
     if (sw == 1 && CMsmall < 100) {
         setBlacked[2] = true;
-        //        $(EXobli.children[EXwatchingnum]).css("transform","scale("+CMsmall/100+")");
-//        $('object,video').parent().css("transform", "scale(" + CMsmall / 100 + ")");
-        j.css("transform", "scale(" + CMsmall / 100 + ")");
+        t+=" scale(" + CMsmall / 100 + ")";
     } else {
         setBlacked[2] = false;
-        //        $(EXobli.children[EXwatchingnum]).css("transform","");
-//        $('object,video').parent().css("transform", "");
-        j.css("transform", "");
     }
+    j.css("transform", t);
 }
 //マウスを動かすイベント
 //var movecnt = 0;
@@ -1874,6 +1936,7 @@ function openOption() {
     $('#isStoreViewCounter').prop("checked", isStoreViewCounter);
     $('#isComeTriming').prop("checked", isComeTriming);
     $('#audibleReloadWait').val(audibleReloadWait);
+    $('#isDAR43').prop("checked", isDAR43);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -2054,7 +2117,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
         isEXC=true;
         //}
     }
-    if(!isVideo&&$('video,object').length>0){
+    if(!isVideo&&getVideo()){
         console.log("setOptionHead delayset(video)");
         resetOptionHead=true;
         isVideo=true;
@@ -2597,14 +2660,14 @@ function createSettingWindow() {
         var jo = $('#isResizeScreen');
         var ja = jo.parent().contents();
         //        var jm=$('#isMovieMaximize');
-        var jm = jo;
+        var jm = $('#isDAR43');
         ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll('<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">');
         //        $('<input id="movieResizeChkA" type="checkbox">').prependTo('#movieResizeContainer')
         //            .after(':映像リサイズ (ウィンドウに合わせます。映像がウィンドウの外にハミ出なくなり、コメ欄などを開いても映像の大きさは変わらず、コメ欄などは映像の上に重なります。)<br>　映像の上下位置<br>')
         //            .change(movieResizeChkChanged)
         //        ;
-        var tres = '映像の大きさ';
-        tres += '<br><input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:デフォルト';
+        var tres = '';
+        tres += '<br><input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:<span id="movieResizeDesc">'+(isDAR43?'左枠サイズに合わせる(左詰め推奨)':'デフォルト')+'</span>';
         tres += '<br><input type="radio" name="movieResizeType" value=1 style="margin-left:16px;">:ウィンドウ全体に最大化';
         $('#isResizeScreen').css("display", "none")
             //            .before('<input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:上に詰める (空き無し)')
@@ -2620,9 +2683,11 @@ function createSettingWindow() {
         jc.eq(jc.index($('#isResizeScreen')) + 1)
             //            .add(jc.eq(jc.index($('#isResizeSpacing'))+1))
             //            .add(jc.eq(jc.index($('#isMovieMaximize'))+1))
+            .add(jc.eq(jc.index($('#isDAR43'))+1))
             .remove()
             ;
-        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').change(movieResizeTypeChanged);
+        $('#isDAR43').prependTo("#movieResizeContainer").before('映像の大きさ　').after(" 映像4:3モード");
+        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').add("#isDAR43").change(movieResizeTypeChanged);
     }
     if ($('#moviePositionContainer').length == 0) {
         var jo = $('#isMovieSpacingZeroTop');
@@ -2640,7 +2705,7 @@ function createSettingWindow() {
             ;
         tres = '映像の左右位置';
         tres += '<br><input type="radio" name="moviePositionHType" value=0 style="margin-left:16px;">:デフォルト <span id="moviePosiHDesc"></span>';
-        tres += '<br><input type="radio" name="moviePositionHType" value=1 style="margin-left:16px;">:左に詰める (空き無し) ※額縁は詰まりません';
+        tres += '<br><input type="radio" name="moviePositionHType" value=1 style="margin-left:16px;">:左に詰める (空き無し)';
         $('#isMovieSpacingZeroLeft').css("display", "none")
             .before(tres)
             ;
@@ -2757,6 +2822,7 @@ function movieResizeTypeChanged() {
         //            break;
         default:
     }
+    $('#movieResizeDesc').text($('#isDAR43').prop("checked")?"左枠サイズに合わせる(左詰め推奨)":"デフォルト");
     onresize();
 }
 //function movieResizeChkChanged(){
@@ -3617,7 +3683,7 @@ function getElementSingleSelector(ret,sw,remove){
     if(!ret) return null;
     var ren=ret.tagName;
     var rw=/\w/;
-    var rt=/^\s+|\s+$/;
+    var rt=/^\s+|\s+$/g;
     var tms=ret.id;
     if(rw.test(tms)) return ren+'#'+tms.replace(rt,"");
     var rs=/\s/;
@@ -3817,20 +3883,23 @@ function getComeListElement(returnSingleSelector){
     var ret=null;
     var jo=$(EXcome).find("p");
     if(jo.length<5){
-        for(var i=0;i<jo.length;i++){
-            if(jo.eq(i).text().indexOf("まだ投稿がありません")<0) continue;
-            ret=jo.eq(i).parent("div")[0];
+        for(var i=0,ji;i<jo.length;i++){
+            ji=jo.eq(i);
+            if(ji.text().indexOf("まだ投稿がありません")<0) continue;
+            comelistClasses.empty=ji.prop("class");
+            ret=ji.parent("div")[0];
             break;
         }
         if(!ret){console.log("?comelist(emptylist notfound)");return null;}
         return returnSingleSelector?getElementSingleSelector(ret):ret;
     }
 
-    for(var i=0,t;i<jo.length;i++){
-        t=jo.eq(i).text();
-        if(t.indexOf("秒前")<0&&t.indexOf("分前")<0) continue;
+    for(var i=0,t,ji;i<jo.length;i++){
+        ji=jo.eq(i);
+        t=ji.text();
+        if(t.indexOf("今")<0&&t.indexOf("秒前")<0&&t.indexOf("分前")<0) continue; //この辺でcomelistClassesを取得したいがまだ分離が不完全
         ret=true;
-        jo=jo.eq(i).parentsUntil(EXcome);
+        jo=ji.parentsUntil(EXcome);
         break;
     }
     if(!ret){console.log("?comelist(time notfound)");return null;}
@@ -4083,7 +4152,7 @@ function getTTTimeClassFromPT(proTitleClass,sw){
     var jo=jb.find(proTitleClass);
     var re=/rgba?\( *(\d+) *, *(\d+) *, *(\d+)(?: *, *\d+ *,?)? *\)/;
     var rs=/\s/;
-    var rr=/^\s+|\s+$/;
+    var rr=/^\s+|\s+$/g;
     for(var i=0,j,t,e,r,g,b,c,m,n;i<jo.length;i++){
         j=jo.eq(i).parentsUntil("article").eq(-2);
         t=j.css("background-color");
@@ -5687,22 +5756,22 @@ function usereventWakuclick() {
     if (proinfoOpened) {
         setTimeout(openInfo, 50, false);
     }
-    var jo = $('#main div[class*="styles__resize-screen___"]');
+    var jo = getVideo();
     if (jo.length > 0 && !waitingforResize) {
         waitingforResize = true;
-        waitforResize(5, jo[0], parseInt(jo[0].style.width), parseInt(jo[0].style.height));
+        waitforResize(5, jo.first(), parseInt(jo.first().width()));//, parseInt(jo[0].style.height));
     }
 }
-function waitforResize(retrycount, eo, w, h) {
-    var jw = parseInt(eo.style.width);
-    var jh = parseInt(eo.style.height);
-    if (w != jw || h != jh) {
+function waitforResize(retrycount, jo, w){//, h) {
+    var jw = parseInt(jo.width());
+    //var jh = parseInt(eo.style.height);
+    if (w != jw){// || h != jh) {
         waitingforResize = false;
-        if (jw != movieWidth || jh != movieHeight) {
+        if (jw != movieWidth){// || jh != movieHeight) {
             onresize();
         }
     } else if (retrycount > 0) {
-        setTimeout(waitforResize, 50, retrycount - 1, eo, w, h);
+        setTimeout(waitforResize, 50, retrycount - 1, jo, w);//, h);
     } else {
         waitingforResize = false;
     }
@@ -5837,10 +5906,10 @@ function usereventSideChliButClick() {
         }
         pophideElement(phi);
     }
-    var jo = $('#main div[class*="styles__resize-screen___"]');
+    var jo = getVideo();
     if (jo.length > 0 && !waitingforResize) {
         waitingforResize = true;
-        waitforResize(5, jo[0], parseInt(jo[0].style.width), parseInt(jo[0].style.height));
+        waitforResize(5, jo.first(), parseInt(jo.first().width()));//, parseInt(jo[0].style.height));
     }
 }
 function usereventFootInfoButClick() {
@@ -5861,10 +5930,10 @@ function usereventFootInfoButClick() {
         }
         pophideElement(phi);
     }
-    var jo = $('#main div[class*="styles__resize-screen___"]');
+    var jo = getVideo();
     if (jo.length > 0 && !waitingforResize) {
         waitingforResize = true;
-        waitforResize(5, jo[0], parseInt(jo[0].style.width), parseInt(jo[0].style.height));
+        waitforResize(5, jo.first(), parseInt(jo.first().width()));//, parseInt(jo[0].style.height));
     }
 }
 function delkakikomitxt(inptxt) {
@@ -6293,7 +6362,7 @@ function copycome(d, hlsw) {
     }
     //console.time('copycome')
     var eo = EXcomelist;
-    var isAnimationIncluded = parseInt($(EXcomelist.children[0]).css('height'))<10;
+    var isAnimationIncluded = (comelistClasses.animated && eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0) || parseInt($(eo.firstElementChild).css('height')) < 10;
     var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(0)' : ''));
     //console.log("EXCLChi",EXcomelistChildren)
     var jo = $(eo);
@@ -6302,7 +6371,7 @@ function copycome(d, hlsw) {
         var t = '<div id="copycome" class="' + jo.parent().attr("class") + ' usermade"><div id="copycomec" class="'+jo.attr("class")+' usermade">';
         var eofc = EXcomelistChildren[0];
         //console.log(eofc)
-        if ($(eo.firstElementChild).text().indexOf('まだ投稿がありません')<0) { return; }
+        if ((comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) return;
         //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
         var eofcc = $(eofc).prop("class");
         if (eofc === undefined || !eofc.hasChildNodes()) { return; }
@@ -6331,7 +6400,7 @@ function copycome(d, hlsw) {
     var rs = /^(\d+) *秒前$/;
     var rm = /^(\d+) *分前$/;
 
-    if (d < 0 || jo.children().eq(0).text().indexOf('まだ投稿がありません')<0) { //全消去
+    if (d < 0 || (comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) { //全消去
         console.log("copycome allerase");
         jc.children().text("");
         $('.comeposttime').attr("name", "");
@@ -6808,13 +6877,13 @@ function onairBasefunc() {
         //        //映像のtopが変更したらonresize()実行
         //        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
         //        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
-        var jo = $('#main div[class*="styles__resize-screen___"]');
+        var jo = getVideo();
         //.resize-screenに設定されるwidth,heightをトリガーにする
-        if (jo.length > 0 && (movieWidth != parseInt(jo[0].style.width) || movieHeight != parseInt(jo[0].style.height))) {
+        if (jo.length > 0 && (movieWidth != parseInt(jo.first().width()))){// || movieHeight != parseInt(jo[0].style.height))) {
             onresize();
         }
-
-//video.parentのwidthが外れた場合にonresizeをかけ直す用
+/*
+//video.parentのwidthが外れた場合にonresizeをかけ直す用 onresize変更で一旦不要になった
         if (settings.isResizeScreen) {
             var jo;
             if ((jo = getVideo())){
@@ -6824,6 +6893,7 @@ function onairBasefunc() {
                 }
             }
         }
+*/
         //console.timeEnd('obf_1');
         //console.time('obf_come');
         //        //黒帯パネル表示のためマウスを動かすイベント発火
@@ -6951,7 +7021,7 @@ function onairBasefunc() {
         }
         //console.log("cmblockcd",cmblockcd);
         if (cmblockcd != 0) {
-        console.log("cmblockcd",cmblockcd);
+        //console.log("cmblockcd",cmblockcd);
             if (cmblockcd > 0) {
                 cmblockcd -= 1;
                 if (cmblockcd <= 0) {
@@ -7171,19 +7241,32 @@ function onCommentChange(mutations){
         isCommentAdded = false,
         newCommentNum = 0,
         nodeClass;
-    for(var i=0,jo; i<mutations.length; i++){
+    for(var i=0,eo; i<mutations.length; i++){
         if(mutations[i].type == 'childList' && mutations[i].addedNodes.length > 0){
-            jo=$(mutations[i].addedNodes[0]);
-            nodeClass = mutations[i].addedNodes[0].className;
+            eo = mutations[i].addedNodes[0];
+            nodeClass = eo.className;
             //nextClass = jo.next().attr('class');
             //console.log(nodeClass, jo.css("height"), jo.css("transition-property"))
-            if(parseInt(jo.css("height"))<10){//jo.css("transition-property")=="height"だと反応しないっぽい
-                //console.log('mutation added: animation');
+            if (!comelistClasses.animated && comelistClasses.empty && mutations[i].addedNodes.length == 1 && EXcomelist.childElementCount == 1) { //1つだけなら初回読込としてanimatedとする(emptyも1つだけだがEXcomelist取得時にempty取得済 だけど一応チェック)
+                comelistClasses.animated = nodeClass;
                 isAnimationAdded = true;
-            }else if(jo.find("p").map(function(i,e){var t=e.innerText;if(t.indexOf("今")>=0||t.indexOf("秒前")>=0||t.indexOf("分前")>=0) return e;}).length>0){
+            }else if (!comelistClasses.animated && eo.firstElementChild.tagName.toUpperCase() == "DIV") { //直下のコメ本文がpじゃなければanimatedとする
+                comelistClasses.animated = nodeClass;
+                isAnimationAdded = true;
+            }else if(!comelistClasses.animated && parseInt(eo.style.height)<10){//jo.css("transition-property")=="height"だと反応しないっぽい
+                //console.log('mutation added: animation');
+                comelistClasses.animated = nodeClass;
+                isAnimationAdded = true;
+            }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0) {
+                isAnimationAdded = true;
+            }else if (comelistClasses.animated && !comelistClasses.stabled && eo.childElementCount>1 && eo.children[1].tagName.toUpperCase() == "P" && (eo.children[1].innerText.indexOf("今")>=0 || eo.children[1].innerText.indexOf("秒前")>=0 || eo.children[1].innerText.indexOf("分前")>=0)) {
+                comelistClasses.stabled = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g,"");
                 isCommentAdded = true;
                 newCommentNum++;
-            }else if(jo.is('p') && jo.text().indexOf('この番組にはまだ投稿がありません')>=0){
+            }else if (comelistClasses.stabled&&nodeClass.indexOf(comelistClasses.stabled) >= 0){
+                isCommentAdded = true;
+                newCommentNum++;
+            }else if((comelistClasses.empty && nodeClass.indexOf(comelistClasses.empty) >= 0) || (eo.tagName.toUpperCase() == "P" && eo.textContent.indexOf('この番組にはまだ投稿がありません')>=0)){
                 //CH切り替え等でコメ欄が空になった時 何もしない
                 console.log('mutation added: no comment');
             }else{

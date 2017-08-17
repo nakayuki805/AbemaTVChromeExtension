@@ -1,4 +1,4 @@
-// edge等ブラウザ対応
+﻿// edge等ブラウザ対応
 if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
@@ -12,6 +12,12 @@ var settingsList = [
                 //        "description": "ウィンドウサイズに合わせて映像の端が切れないようにリサイズ(コメ欄開いた時映像の大きさは変わらずコメ欄にかぶります。)",
 //                "description": "映像をウィンドウに合わせてリサイズ、映像の位置を上に詰める (映像がウィンドウ外にはみ出なくなり、コメ欄などを開いても映像の大きさは変わらず映像の上に重なります。)",
                 "description": "映像をウィンドウに合わせてリサイズ (コメ欄などを開いても映像が縮まず、映像の上に重なります。) ◆",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isDAR43",
+                "description": "映像4:3用の処理を使用する(リサイズ時に左右の黒帯部分を無視します)",
                 "type": "boolean",
                 "isInstantChangable": true
             },

@@ -1,4 +1,4 @@
-// edge等ブラウザ対応
+﻿// edge等ブラウザ対応
 if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
@@ -299,6 +299,7 @@ $(function(){
         var proTitleFontC = value.proTitleFontC || false;
         var isDelTime=value.delTime||false;
         var audibleReloadWait=(value.audibleReloadWait!==undefined)?Number(value.audibleReloadWait):20;
+        var isDAR43=value.DAR43 || false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -424,6 +425,7 @@ $(function(){
         $('#proTitleFontC').prop("checked",proTitleFontC);
         $('#isDelTime').prop("checked",isDelTime);
         $('#audibleReloadWait').val(audibleReloadWait);
+        $('#isDAR43').prop("checked",isDAR43);
         //以下1行で
         $('#mastodonInstance').val(value.mastodonInstance||"");
         $('#mastodonToken').val(value.mastodonToken||"");
@@ -548,7 +550,8 @@ $(function(){
             "notifyLNtoken": $('#notifyLNtoken').val(),
             "notifyPostUrl": $('#notifyPostUrl').val(),
             "audibleReloadWait": Math.max(0,parseInt($('#audibleReloadWait').val())),
-            "isNotifyRemain": $('#isNotifyRemain').prop("checked")
+            "isNotifyRemain": $('#isNotifyRemain').prop("checked"),
+            "DAR43": $('#isDAR43').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
