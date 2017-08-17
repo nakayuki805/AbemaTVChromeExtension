@@ -5181,12 +5181,12 @@ function setOptionHead() {
     }
 
     //コメント見た目
-    var bc = "rgba(" + commentBackColor + "," + commentBackColor + "," + commentBackColor + "," + (commentBackTrans / 255) + ")";
+    var bc = "rgba(" + commentBackColor + "," + commentBackColor + "," + commentBackColor + "," + (commentBackTrans / 255) + ")";//コメント背景色
     var cc = "rgba(" + commentBackColor + "," + commentBackColor + "," + commentBackColor + "," + (0.2) + ")";
-    var rc = "rgba(" + Math.floor(255 - (255 - commentTextColor) * 0.8) + "," + Math.floor(commentTextColor * 0.8) + "," + Math.floor(commentTextColor * 0.8) + "," + (commentTextTrans / 255) + ")";
-    var tc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (commentTextTrans / 255) + ")";
-    var uc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (0.2) + ")";
-    var vc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (0.3) + ")";
+    var rc = "rgba(" + Math.floor(255 - (255 - commentTextColor) * 0.8) + "," + Math.floor(commentTextColor * 0.8) + "," + Math.floor(commentTextColor * 0.8) + "," + (commentTextTrans / 255) + ")";//赤系のコメント文字色(NG登録で使用)
+    var tc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (commentTextTrans / 255) + ")";//コメント文字色
+    var uc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (0.2) + ")";//コメント入力欄背景色
+    var vc = "rgba(" + commentTextColor + "," + commentTextColor + "," + commentTextColor + "," + (0.3) + ")";//コメント一覧区切り線色
 
     selCome=getElementSingleSelector(EXcome);
     if($(selCome).length!=1){
@@ -5239,8 +5239,8 @@ function setOptionHead() {
     }
     if(selComelist){
         t += selComelist+'>div{background-color:' + bc + ';color:' + tc + ';}';
-        t += selComelist+'>div.uo_k{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので)
-        t += selComelist+'>div>p.xH_fy{color:' + tc + ';}';
+        t += selComelist+'>div:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので)
+        t += selComelist+'>div>p:nth-child(1){color:' + tc + ';}';//コメント文字色
     }
 
     //    //映像最大化
