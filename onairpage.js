@@ -689,7 +689,7 @@ function waitforloadtimetable(url) {
         allowChannelNumMaker();
         timetableCss();
         //$('div')を取ってきてあるのでここで使う
-        dd.map(function(i,e){if($(e).css("z-index")>10)return e;}).css("z-index","-1");
+        dd.map(function(i,e){if($(e).css("z-index")>10 && e.className.indexOf('toast')<0)return e;}).css("z-index","-1");
 
         //番組表を掴んでドラッグする
         timetableGrabbing.test=false;
@@ -811,9 +811,9 @@ function timetabledtfix() {
                         break;
                     }
                 }
-                $(EXTTbody).scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbody).width()+20));
+                $(EXTTbody).parent().parent().parent().parent().scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbody).width()+20));
             }else{
-                $(EXTTbody).scrollLeft(chLinkWidth * visibleChLinkIndex);
+                $(EXTTbody).parent().parent().parent().parent().scrollLeft(chLinkWidth * visibleChLinkIndex);
             }
             //console.log(chLinkWidth,visibleChLinkIndex,chLinkWidth * visibleChLinkIndex, allowChannelNum);
         } else {
@@ -3402,7 +3402,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     //フッタ表示かつコメ入力下の場合は音量ボタン等の下位置を上げる
     var volshift = false;
     $(EXvolume).css("bottom", "")
-        .prev('[class^="styles__full-screen___"]').css("bottom", "")
+    $(EXfullscr).css("bottom", "")
         ;
     if (!isComeTriming && $(EXfoot).css("visibility") == "visible") {
         //フッタ表示時
@@ -3502,9 +3502,8 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     //        .css("margin-bottom",jcmbot)
     //    ;
     if (volshift) {
-        $(EXvolume).css("bottom", (80 + jform.height() + jfptop + jfpbot) + "px")
-            .prev('[class^="styles__full-screen___"]').css("bottom", (80 + jform.height() + jfptop + jfpbot) + "px")
-            ;
+        $(EXvolume).css("bottom", (80 + jform.height() + jfptop + jfpbot) + "px");
+        $(EXfullscr).css("bottom", (80 + jform.height() + jfptop + jfpbot) + "px");
     }
     if (repeatcount > 0) {
         setTimeout(comemarginfix, 300, repeatcount - 1, inptime, inptitle, inpsame, inpbig);
@@ -6000,17 +5999,19 @@ function setOptionEvent() {//放送画面用イベント設定
     //マウスホイール無効か音量操作
     var mousewheelEvtName = isFirefox ? 'DOMMouseScroll' : 'mousewheel';
     window.addEventListener(mousewheelEvtName, function (e) {
-        console.log("onmousewheel",e)
-        //        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
-        if (isVolumeWheel && e.target.id == "ComeMukouMask") {
-            if (EXvolume && $(EXvolume).contents().find('svg').css("zoom") == "1") {
-                otoSize(e.wheelDelta < 0 ? 0.8 : 1.2);
+        if (e.target.id == "ComeMukouMask") {
+            console.log("onmousewheel on ComeMukouMask",e);
+                //        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+            if (isVolumeWheel && e.target.id == "ComeMukouMask") {
+                if (EXvolume && $(EXvolume).contents().find('svg').css("zoom") == "1") {
+                    otoSize(e.wheelDelta < 0 ? 0.8 : 1.2);
+                }
+                moVol(e.wheelDelta < 0 ? -5 : 5);
             }
-            moVol(e.wheelDelta < 0 ? -5 : 5);
-        }
-        if (isCancelWheel || isVolumeWheel) { //設定ウィンドウ反映用
-            //console.log("cancelling wheel")
-            e.stopImmediatePropagation();
+            if (isCancelWheel || isVolumeWheel) { //設定ウィンドウ反映用
+                //console.log("cancelling wheel")
+                e.stopImmediatePropagation();
+            }
         }
     }, true);
     //フルスクリーンボタンの割り当て変更
@@ -6968,7 +6969,7 @@ function onairBasefunc() {
         //残り時間表示
         if (isTimeVisible && EXinfo) {
             //            var eProTime = $('[class^="TVContainer__right-slide___"] [class^="styles__time___"]');
-            var eProTime = $(EXinfo).contents().find('.vR_fb');
+            var eProTime = $(EXinfo).children('div:not(#copyinfo)').find('h2').nextAll().eq(1);
             //            var reProTime = /(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?[　 ]*\~[　 ]*(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?/;
             var reProTime = /(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?[　 ]*[\~～〜\-－][　 ]*(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?/;
             var arProTime;
@@ -7012,6 +7013,7 @@ function onairBasefunc() {
                 }
                 proEnd.setSeconds(0);
             }
+            //console.log(eProTime, arProTime, proStart, proEnd)
             var forProEnd = proEnd.getTime() - Date.now(); //番組の残り時間
             var proLength = proEnd.getTime() - proStart.getTime(); //番組の全体長さ
             var strProEnd = Math.floor(forProEnd / 1000);
@@ -7065,8 +7067,8 @@ function onairBasefunc() {
                     $(EXinfo).children('#copyinfo').remove();
                     $(EXinfo).children().not('#copyinfo').first().clone().removeClass().addClass('usermade').prop("id", "copyinfo").appendTo($(EXinfo));
                     //番組情報のSNSボタンのイベント設定
-                    $('#copyinfo [class*="SNSShare__share___"] button').click(function (e){
-                        $(EXinfo).children().not('#copyinfo').first().find('[class*="SNSShare__share___"] button').eq($(e.target).parent().index()).trigger('click');
+                    $('#copyinfo ul>li button').click(function (e){
+                        $(EXinfo).children().not('#copyinfo').first().find('ul>li button').eq($(e.target).parent().index()).trigger('click');
                     });
                 }
             }
@@ -7170,13 +7172,15 @@ function onCommentChange(mutations){
         if(mutations[i].type == 'childList' && mutations[i].addedNodes.length > 0){
             jo=$(mutations[i].addedNodes[0]);
             nodeClass = mutations[i].addedNodes[0].className;
-            if(jo.css("transition-property")=="height"){
+            if(jo.css("height")=="0px"){//jo.css("transition-property")=="height"だと反応しないっぽい
+                //console.log('mutation added: animation');
                 isAnimationAdded = true;
-            }else if(jo.find("p").map(function(i,e){var t=e.innerText;if(t.indexOf("今")>=0||t.indexOf("秒前")>=0) return e;}).length>0){
+            }else if(jo.find("p").map(function(i,e){var t=e.innerText;if(t.indexOf("今")>=0||t.indexOf("秒前")>=0||t.indexOf("分前")>=0) return e;}).length>0){
                 isCommentAdded = true;
                 newCommentNum++;
-            }else if(nodeClass.indexOf('.uo_uq')>=0){
+            }else if(jo.is('p') && jo.text().indexOf('この番組にはまだ投稿がありません')>=0){
                 //CH切り替え等でコメ欄が空になった時 何もしない
+                console.log('mutation added: no comment');
             }else{
                 console.warn('unexpected onCommentChange()', mutations[i]);
             }
@@ -7187,7 +7191,7 @@ function onCommentChange(mutations){
         //コメント取得(animation除外) ただし最初のanimationでも実行
         //console.time('obf_getComment_beforeif')
         var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
-        var isAnimationIncluded = EXcomelist.children[0].className.indexOf('uo_k') >= 0;
+        var isAnimationIncluded = commentDivParent.css("height")=="0px";//EXcomelist.children[0].className.indexOf('uo_k') >= 0;
         //console.log("isA",isAnimationIncluded,EXcomelist.children[0])
         //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
         var comments = [];// 負荷軽減のためjQuery使わずに
