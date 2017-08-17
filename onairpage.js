@@ -3504,7 +3504,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
 function addExtClass(elm, className){
     //return ;
     className = 'ext_abm-'+className;
-    $('.'+className).removeClass('id');
+    $('.'+className).removeClass(className);
     $(elm).addClass(className)
 }
 function setEXs() {
@@ -7360,6 +7360,19 @@ function checkUrlPattern(url) {
             onairCleaner();
             delaysetNotOA();
             putReminderNotifyButtons();
+            //スクロールで続きを読み込んだときのためチェック
+            var itemCount = 0;
+            var checkListInterval = setInterval(function(){
+                if(checkUrlPattern(true) != 5){
+                    clearInterval(checkListInterval);
+                    return;
+                }
+                var count = $('a[role=listitem]').length;
+                if(itemCount<count){
+                    putReminderNotifyButtons();
+                    itemCount = count;
+                }
+            });
         }
     } else {
         // それ以外のページ
@@ -7446,52 +7459,82 @@ function programTimeStrToTime(programTimeStr) {
 }
 function putNotifyButton(url) {
     if (checkUrlPattern(true) != 0) { return; }
-    var rightContents = $('[class*=styles__right-contents___]');
-    if (rightContents.find('[class*=styles__time___]').text() == "") { setTimeout(function () { putNotifyButton(url) }, 1000); console.log("putNotifyButton wait"); return; }
+    var divs = $("div");
+    var contentsWrapper;
+    var rightContents;
+    var leftContnts;
+    var j=divs.map(function(i, e){//大きくて子要素が２つ
+        var rect = e.getBoundingClientRect();
+        if(rect.top<window.innerHeight/4&&rect.left<window.innerWidth/4&&rect.width>1000/2&&rect.height>window.innerHeight/2&&$(e).children().length==2)return e;
+    });
+    if(j.length>0){contentsWrapper=j;}
+    else{
+        contentsWrapper=$('.tZ_o')
+    }
+    rightContents = contentsWrapper.children().eq(1);
+    leftContnts = contentsWrapper.children().eq(0);
+    var titleElement = rightContents.find('h2').eq(0);
+    if (titleElement.text() == "") { setTimeout(function () { putNotifyButton(url) }, 1000); console.log("putNotifyButton wait"); return; }
     var urlarray = url.substring(17).split("/");
     var channel = urlarray[1];
-    var channelName = rightContents.find('[class*=styles__channel-name___]').text();
+    var channelName = titleElement.next().text();
     var programID = urlarray[3];
-    var programTitle = rightContents.find('span[class*=styles__title___]').text();
-    var programTimeStr = rightContents.find('[class*=styles__time___]').text();
+    var programTitle = titleElement.text();
+    var programTimeStr = titleElement.nextAll().eq(2).text();
     //console.log(programTimeStr, urlarray)
     var programTime = programTimeStrToTime(programTimeStr);
     console.log(programTime)
-    putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, $("[class*=styles__left-contents___] > div"));
+    putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, leftContnts.children('div'));
 }
 function putSerachNotifyButtons() {
     if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) { return; }
-    if ($('[class*=ListItem__container___]').length == 0 && $("[class*=styles__no-contents___]").length == 0) { setTimeout(function () { putSerachNotifyButtons() }, 1000); console.log("putSerachNotifyButtons wait"); return; }
-    $('[class*=ListItem__container___]').each(function (i, elem) {
+    var listWrapper = $('div[role=list]');
+    var listItems = $('a[role=listitem]');
+    var noContentText = '該当する放送予定の番組はありませんでした';
+    var noContentMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(noContentText)>=0){return e}});
+    if (listItems.length == 0 && noContentMessage.length == 0) { setTimeout(function () { putSerachNotifyButtons() }, 1000); console.log("putSerachNotifyButtons wait"); return; }
+    listItems.each(function (i, elem) {
         var linkArea = $(elem);
+        var spans = linkArea.children().eq(1).find('span');
         var butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
         var progUrl = linkArea.attr('href');
         var urlarray = progUrl.substring(1).split("/");
         //console.log(urlarray);
         var channel = urlarray[1];
-        var channelNameElem = linkArea.find('[class*=SearchResultsSlotList__channel___]');
+        var channelNameElem = spans.eq(1);
         var channelName = channelNameElem.text();
         var programID = urlarray[3];
-        var programTitle = linkArea.find('[class*=SearchResultsSlotList__title___]').text();
-        var programTime = programTimeStrToTime(channelNameElem.next().text());
+        var programTitle = spans.eq(0).text();
+        var programTime = programTimeStrToTime(spans.eq(2).text());
+        //console.log(linkArea, channel, channelName, programID, programTitle, programTime, butParent);
         putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
     });
 }
 function putReminderNotifyButtons() {
     if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) { return; }
-    if ($('[class*=ListItem__container___]').length == 0 && $("[class*=styles__reminder-feature___]").length == 0) { setTimeout(function () { putReminderNotifyButtons() }, 1000); console.log("putReminderNotifyButtons wait"); return; }
-    $('[class*=ListItem__container___]').each(function (i, elem) {
+    var listWrapper = $('div[role=list]');
+    var listItems = $('a[role=listitem]');
+    var featureText = '見たい番組を見逃さないためには';//公式通知登録一覧で何も登録してないときの機能紹介文
+    var featureMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(featureText)>=0){return e}});
+    if (listItems.length == 0 && featureMessage.length == 0) { setTimeout(function () { putReminderNotifyButtons() }, 1000); console.log("putReminderNotifyButtons wait"); return; }
+    listItems.each(function (i, elem) {
         var linkArea = $(elem);
-        var butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
+        var spans = linkArea.children().eq(1).find('span');
+        var butParent;
+        if(linkArea.next().is('.listAddNotifyWrapper')){
+            butParent = linkArea.next();
+        }else{
+            butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
+        }
         var progUrl = linkArea.attr('href');
         var urlarray = progUrl.substring(1).split("/");
         //console.log(urlarray);
         var channel = urlarray[1];
-        var titleElem = linkArea.find('[class*=SlotList__title___]');
-        var channelName = titleElem.next().text();
+        var titleElem = spans.eq(0);
+        var channelName = spans.eq(1).text();
         var programID = urlarray[3];
-        var programTitle = linkArea.find('[class*=SlotList__title___]').text();
-        var programTime = programTimeStrToTime(titleElem.next().next().text());
+        var programTitle = spans.eq(0).text();
+        var programTime = programTimeStrToTime(spans.eq(2).text());
         putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
     });
 }
