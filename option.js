@@ -613,6 +613,9 @@ $(function(){
         sendInfo += JSON.stringify(sendVal, null, 4);
         sendInfo += "\n***UserAgent***\n";
         sendInfo += window.navigator.userAgent;
+        sendInfo += "\n***画面***\n";
+        sendInfo += "スクリーン w:"+window.parent.screen.width+",h:"+window.parent.screen.height;
+        sendInfo += "\nウィンドウ(設定画面) w:"+window.innerWidth+",h:"+window.innerHeight;
         sendInfo += "\n***拡張機能バージョン***\n";
         sendInfo += chrome.runtime.getManifest().version;
         sendInfo += "\n***ここまで***";

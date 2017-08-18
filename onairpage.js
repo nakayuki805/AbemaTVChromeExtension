@@ -304,7 +304,7 @@ var EXcomelist;
 var EXcomments;
 
 //var commentsSelector = '[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]';
-var commentListParentSelector = '#main div.Ai_Am.t7_e.t7_t9 > div';
+var commentListParentSelector = '#main div.ww_wA.rH_e.rH_rJ > div';
 var overlapSelector;// = '#main div.'+$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0))return e;}).eq(0).prop("class");
 
 var EXmain;
@@ -6214,7 +6214,7 @@ function setOptionEvent() {//放送画面用イベント設定
     $(EXcome).on("click", '#copycomec', comecopy);
     //コメ入力欄がフォーカスされた時
     $(EXcomesendinp).on('focus', comeModuleEditor);
-    
+
     eventAdded = true;
     console.log("setOptionEvent ok");
 }
