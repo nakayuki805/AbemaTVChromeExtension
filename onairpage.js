@@ -1188,7 +1188,11 @@ function getVideo() {
     for (var i = 0; i < jo.length; i++) {
         if (jo.eq(i).css("display") != "none") {
             jp = jo.eq(i).parent();
-            break;
+            if(!jp.is('body')){
+                break;
+            }else{
+                jp = null;
+            }
         }
     }
     return jp;
@@ -1238,6 +1242,7 @@ function onresize() {
     t.v.t=t.w.t+(t.w.h-t.v.h)/2;
     //tar.css("width",t.w.w+"px").css("height",t.w.h+"px");//px指定だと各ウィンドウ開閉時の自動リサイズ時にズレる(movieWidthで監視するから問題無さそうだけど一応%指定にしておく)
     tar.css("width",zz+"%").css("height",zz+"%");
+    //console.log("tar", tar,zz)
 
     var r;
     if(posiVType==0){
@@ -3790,7 +3795,14 @@ function getInfoElement(returnSingleSelector) {
         ret=h3a[i];
         break;
     }
-    if(!ret){console.log("?info");return null;}
+    if(!ret){
+        //CM中など↑で取得できないことがあるのでEXchliの隣を使う
+        if(EXchli){
+            ret = $(EXchli).next().get(0);
+            console.log("?info -> EXchli next");
+        }
+        if(!ret){console.log("?info");return null;}
+    }
     var rep=ret.parentElement;
     var b=rep.getBoundingClientRect();
     while(rep.tagName.toUpperCase()!="BODY"&&b.left>window.innerWidth/2){
@@ -3914,8 +3926,15 @@ function getVolElement(returnSingleSelector){
 }
 function getObliElement(returnSingleSelector){
     //console.log("?obli");
-    //videoを含んで子沢山をobliとする
+    //videoもしくは子が多いobjectを含んで子沢山をobliとする
     var ret=$('video').get(0);
+    if(!ret){
+        ret=$('object').get(0);
+        if(ret && ret.childElementCount<7){
+            //console.log("ocec",ret.childElementCount)
+            ret=null;
+        }
+    }
     if(!ret){console.log("?obli");return null;}
     while(ret.tagName.toUpperCase!="BODY"&&ret.childElementCount<16){
         ret=ret.parentElement;
@@ -5714,9 +5733,9 @@ function isFootcomeClickable(){ //コメント数ボタンがクリックでき�
 function usereventMouseover() {
     if (forElementClose < 4) {
         forElementClose = 5;
-        pophideSelector(-1, 0);
         //カーソルを表示する
         EXmain.style.cursor = 'auto';
+        pophideSelector(-1, 0);
     }
 }
 function comemukouClick() {
