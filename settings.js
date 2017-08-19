@@ -171,7 +171,7 @@ var settingsList = [
             },
             {
                 "name": "isComeTriming",
-                "description": "常にコメント欄を表示するような場合にコメント欄が上下に縮まないように上下黒帯を横に縮める",
+                "description": "↑常にコメント欄を表示するような場合にコメント欄が上下に縮まないように上下黒帯を横に縮める",
                 "type": "boolean",
                 "isInstantChangable": true
             },

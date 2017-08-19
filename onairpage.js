@@ -3388,7 +3388,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     var ptitle = (inptitle !== undefined) ? inptitle : (isProtitleVisible ? protitlePosition : "");
     var psame = (inpsame !== undefined) ? inpsame : proSamePosition;
     //画面上部の設定
-    if (!isComeTriming && $(EXhead).css("visibility") == "visible") {
+    if (!(isComeTriming && isSureReadComment) && $(EXhead).css("visibility") == "visible") {
         //ヘッダ表示時
         if (isInpWinBottom) {
             //入力欄が下＝コメ欄が上＝対象はjcomeのtopmargin
@@ -3460,7 +3460,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     $(EXvolume).css("bottom", "")
     $(EXfullscr).css("bottom", "")
         ;
-    if (!isComeTriming && $(EXfoot).css("visibility") == "visible") {
+    if (!(isComeTriming && isSureReadComment) && $(EXfoot).css("visibility") == "visible") {
         //フッタ表示時
         if (isInpWinBottom) { // jctop,jfbot
             if (isComeOpen()) {
@@ -4804,14 +4804,14 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
             case "vertical":
                 forpros.css("top", (tproh - 4) + "px");
                 if (tprow <= 320) {
-                    prehoverContents.css("margin-right", isComeTriming?"":"310px")
+                    prehoverContents.css("margin-right", (isComeTriming && isSureReadComment)?"":"310px")
                         .css("margin-top", "")
                         .css("margin-left", "12px")
                         .prev().css("margin-top", "")
                         .contents().find('li').slice(1).css("margin-left", "12px")
                         ;
                 } else {
-                    prehoverContents.css("margin-right", isComeTriming?"":"310px")
+                    prehoverContents.css("margin-right", (isComeTriming && isSureReadComment)?"":"310px")
                         .css("margin-left", "12px")
                         .prev().contents().find('li').slice(1).css("margin-left", "12px")
                         ;
@@ -4984,7 +4984,7 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
         case "windowtopright":
         case "headerright":
-            if (isComeTriming && tprow <= 320) break;
+            if ((isComeTriming && isSureReadComment) && tprow <= 320) break;
             var hmt = (tproh - 12) + Math.floor((headh - tproh - 12) / 2);
             prehoverContents.css("margin-top", hmt + "px")
                 .prev().css("margin-top", hmt + "px")
@@ -5181,7 +5181,7 @@ function setTimePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
         case "windowtop":
         case "header":
-            if (isComeTriming) break;
+            if (isComeTriming && isSureReadComment) break;
             var hmt = (fproh - 12) + Math.floor((headh - fproh - 12) / 2);
             prehoverContents.css("margin-top", hmt + "px")
                 .prev().css("margin-top", hmt + "px")
@@ -6385,7 +6385,8 @@ function copycome(d, hlsw) {
     }
     //console.time('copycome')
     var eo = EXcomelist;
-    var isAnimationIncluded = (comelistClasses.animated && eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0) || parseInt($(eo.firstElementChild).css('height')) < 10;
+    var isAnimationIncluded = (comelistClasses.animated && eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0);// || parseInt($(eo.firstElementChild).css('height')) < 10;//height判定もうまくいかなくなった
+    //console.log('copycome isA:',isAnimationIncluded,eo.firstElementChild)
     var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(0)' : ''));
     //console.log("EXCLChi",EXcomelistChildren)
     var jo = $(eo);
@@ -7304,8 +7305,12 @@ function onCommentChange(mutations){
         //コメント取得(animation除外) ただし最初のanimationでも実行
         //console.time('obf_getComment_beforeif')
         var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
-        var isAnimationIncluded = parseInt(commentDivParent.children().eq(0).css("height"))<10;//EXcomelist.children[0].className.indexOf('uo_k') >= 0;
-        //console.log("isA",isAnimationIncluded,EXcomelist.children[0])
+        var firstChild = commentDivParent.children().eq(0);
+        var isAnimationIncluded = false;//parseInt(commentDivParent.children().eq(0).css("height"))<10;//EXcomelist.children[0].className.indexOf('uo_k') >= 0;
+        if(comelistClasses.animated && firstChild.attr('class').indexOf(comelistClasses.animated)>=0){
+            isAnimationIncluded = true;
+        }
+        //console.log("isA",isAnimationIncluded,EXcomelist.children[0],commentDivParent.children().eq(0).css("height"))
         //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
         var comments = [];// 負荷軽減のためjQuery使わずに
         var commentDivs = EXcomelist.children;
