@@ -17,7 +17,7 @@ var settingsList = [
             },
             {
                 "name": "isDAR43",
-                "description": "映像4:3用の処理を使用する(リサイズ時に左右の黒帯部分を無視します)",
+                "description": "映像4:3用の処理を使用する(左右の黒帯部分を無視して映像の最大化を行います)",
                 "type": "boolean",
                 "isInstantChangable": true
             },
@@ -82,18 +82,18 @@ var settingsList = [
                 "type": "boolean",
                 "isInstantChangable": true
             },
-            {
-                "name": "isAlwaysShowPanel",
-                "description": "常に黒帯パネルを表示する※下の黒帯パネル開閉設定で設定",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isOpenPanelwCome",
-                "description": "コメント欄を開いていても黒帯パネル等を表示できるようにする※下の黒帯パネル開閉設定で設定",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
+            //{
+            //    "name": "isAlwaysShowPanel",
+            //    "description": "常に黒帯パネルを表示する※下の黒帯パネル開閉設定で設定",
+            //    "type": "boolean",
+            //    "isInstantChangable": true
+            //},
+            //{
+            //    "name": "isOpenPanelwCome",
+            //    "description": "コメント欄を開いていても黒帯パネル等を表示できるようにする※下の黒帯パネル開閉設定で設定",
+            //    "type": "boolean",
+            //    "isInstantChangable": true
+            //},
             {
                 "name": "isHideTwitterPanel",
                 "description": "パネル「twitterで通知を受け取る」を非表示",
@@ -459,11 +459,11 @@ var settingsList = [
         "description": "番組表関連設定",
         "settings": [
             {
-                "name": "isChTimetableExpand",
-                "description": "<s>チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (時刻の縦の長さが一定でなくバラバラになります)</s>古いオプションで正常に動かないので無効",
-                "type": "boolean",
-                "isInstantChangable": false
-            },{
+            //    "name": "isChTimetableExpand",
+            //    "description": "<s>チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (時刻の縦の長さが一定でなくバラバラになります)</s>古いオプションで正常に動かないので無効",
+            //    "type": "boolean",
+            //    "isInstantChangable": false
+            //},{
                 "name": "isChTimetableBreak",
 //                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
                 "description": "番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
@@ -509,6 +509,11 @@ var settingsList = [
             },{
                 "name": "isPutSideDetailHighlight",
                 "description": "番組表の右枠に詳細文を追加する(番組表本体の枠内に記載がある場合のみ)",
+                "type": "boolean",
+                "isInstantChangable": false
+            }, {
+                "name": "isReplaceIcons",
+                "description": "番組表のタイトルに付いているアイコンを開始時刻(分)の下へ移動",
                 "type": "boolean",
                 "isInstantChangable": false
             }
@@ -586,7 +591,7 @@ var RadioSettingList = [
             ]]
     },{
         "name": "panelopenset",
-        "list":[[["111000000000","デフォルト"],["222222222222","常に表示"],["333333333333","カスタム"]]]
+        "list":[[[255879,"デフォルト"],[531440,"常に表示"],[531441,"カスタム"]]]
     },{
         "name": "highlightNewCome",
         "list":[[
