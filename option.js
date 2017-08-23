@@ -135,11 +135,11 @@ $(function(){
             .css("padding","8px");
             //.css("border","1px solid black")
         ;
-        $('#isAlwaysShowPanel').appendTo('#panelCustom').prop("disabled",true).before("旧");
-        $('<input type="button" id="alwaysShowPanelB" value="下表に適用">').insertAfter('#isAlwaysShowPanel').before("常に黒帯パネルを表示する");
-        $('#isOpenPanelwCome').appendTo('#panelCustom').prop("disabled",true).before("<br>旧");
-        $('<input type="button" id="openPanelwComeB" value="下表に適用">').insertAfter('#isOpenPanelwCome').before("コメント欄を開いていても黒帯パネル等を表示できるようにする");
-        $('<br><span>※以上の古いオプションは以下の新オプションに統合され、適当な経過期間の後に削除予定</span>').appendTo('#panelCustom');
+        // $('#isAlwaysShowPanel').appendTo('#panelCustom').prop("disabled",true).before("旧");
+        // $('<input type="button" id="alwaysShowPanelB" value="下表に適用">').insertAfter('#isAlwaysShowPanel').before("常に黒帯パネルを表示する");
+        // $('#isOpenPanelwCome').appendTo('#panelCustom').prop("disabled",true).before("<br>旧");
+        // $('<input type="button" id="openPanelwComeB" value="下表に適用">').insertAfter('#isOpenPanelwCome').before("コメント欄を開いていても黒帯パネル等を表示できるようにする");
+        //$('<br><span>※以上の古いオプションは以下の新オプションに統合され、適当な経過期間の後に削除予定</span>').appendTo('#panelCustom');
         $('#ipanelopenset').appendTo('#panelCustom')
             .children().css("display","flex")
             .css("flex-direction","row")
@@ -230,7 +230,7 @@ $(function(){
         var isSureReadComment = value.sureReadComment || false;
         var isCommentFormWithSide = value.isCommentFormWithSide || false;
         var sureReadRefreshx = Math.max(101,((value.sureReadRefreshx!==undefined)?value.sureReadRefreshx : 500));
-        var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
+        // var isAlwaysShowPanel = value.isAlwaysShowPanel || false;
 //        var isMovieResize = value.movieResize || false;
 //        var isMovieMaximize = value.movieMaximize || false;
         var commentBackColor = (value.commentBackColor!==undefined)?value.commentBackColor : 255;
@@ -252,7 +252,7 @@ $(function(){
         var isCMsoundR = (value.CMsoundR || false)&&isCMsoundoff;
         var isCMsmlR = (value.CMsmlR || false)&&(CMsmall!=100);
         var isTabSoundplay = value.tabSoundplay || false;
-        var isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : true;
+        // var isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : true;
         var isProtitleVisible=value.protitleVisible||false;
         var protitlePosition=value.protitlePosition||"windowtopleft";
         var proSamePosition=value.proSamePosition||"over";
@@ -262,13 +262,15 @@ $(function(){
         var useEyecatch=value.useEyecatch||false;
         var isHidePopTL=value.hidePopTL||false;
         var isHidePopBL=value.hidePopBL||false;
-        var panelopenset=value.panelopenset||(isAlwaysShowPanel?"222222222222":(isOpenPanelwCome?"111000000111":"111000000000"));//isA..とisO..を初回のみ適用
+        //var panelopenset = value.panelopenset || (isAlwaysShowPanel ? "222222222222" : (isOpenPanelwCome ? "111000000111" : "111000000000"));//isA..とisO..を初回のみ適用
+        var panelopenset = typeof value.panelopenset == "number" ? value.panelopenset : parseInt(value.panelopenset || "111000000000", 3);
+        console.log(panelopenset);
         var comeMovingAreaTrim=value.comeMovingAreaTrim||false;
         var isHideButtons=value.hideButtons||false;
         var isResizeSpacing=value.resizeSpacing||false;
         var isDeleteStrangeCaps=value.deleteStrangeCaps||false;
         var highlightNewCome=(value.highlightNewCome!==undefined)?Number(value.highlightNewCome):0;
-        var isChTimetableExpand=value.chTimetableExpand||false;
+        // var isChTimetableExpand=value.chTimetableExpand||false;
         var isHidePopFresh = value.hidePopFresh||false;
         var isChTimetableBreak=value.chTimetableBreak||false;
         var isChTimetableWeekend=value.chTimetableWeekend||true;
@@ -299,7 +301,8 @@ $(function(){
         var proTitleFontC = value.proTitleFontC || false;
         var isDelTime=value.delTime||false;
         var audibleReloadWait=(value.audibleReloadWait!==undefined)?Number(value.audibleReloadWait):20;
-        var isDAR43=value.DAR43 || false;
+        var isDAR43 = value.DAR43 || false;
+        var isReplaceIcons = value.replaceIcons || false;
 
         $("#isResizeScreen").prop("checked", isResizeScreen);
         $("#isDblFullscreen").prop("checked", isDblFullscreen);
@@ -324,7 +327,7 @@ $(function(){
         $("#isSureReadComment").prop("checked", isSureReadComment);
         $("#isCommentFormWithSide").prop("checked", isCommentFormWithSide);
         $("#sureReadRefreshx").val(sureReadRefreshx);
-        $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
+        // $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
 //        $("#isMovieResize").prop("checked", isMovieResize);
 //        $("#isMovieMaximize").prop("checked", isMovieMaximize);
         var bc="rgba("+commentBackColor+","+commentBackColor+","+commentBackColor+","+(commentBackTrans/255)+")";
@@ -359,7 +362,7 @@ $(function(){
         $("#isCMsoundR").prop("checked", isCMsoundR);
         $("#isCMsmlR").prop("checked", isCMsmlR);
         $("#isTabSoundplay").prop("checked", isTabSoundplay);
-        $("#isOpenPanelwCome").prop("checked",isOpenPanelwCome);
+        // $("#isOpenPanelwCome").prop("checked",isOpenPanelwCome);
         $("#isProtitleVisible").prop("checked",isProtitleVisible);
         $('#iprotitlePosition [type="radio"][name="protitlePosition"]').val([protitlePosition]);
         $('#iproSamePosition [type="radio"][name="proSamePosition"]').val([proSamePosition]);
@@ -379,12 +382,23 @@ $(function(){
         if($('#ipanelopenset [type="radio"][name="panelopenset"][value='+panelopenset+']').length>0){
             $('#ipanelopenset [type="radio"][name="panelopenset"]').val([panelopenset]);
         }else{
-            $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
+            $('#ipanelopenset [type="radio"][name="panelopenset"]').val([531441]);
         }
-        var sp=panelopenset.split('');
-        for(var i=0;i<4;i++){
-            for(var j=0;j<3;j++){
-                $('#panelcustomTable [type="radio"][name="d'+i+''+j+'"]').val([sp[i*3+j]]);
+        var sp = panelopenset;
+        console.log(("0".repeat(12) + sp.toString(3)).slice(-12));
+        if (sp < Math.pow(3, 12)) {
+            for (var i = 0; i < 4; i++) {
+                for (var j = 0, m, d; j < 3; j++) {
+                    m = Math.pow(3, (3 - i) * 3 + (2 - j));
+                    console.log("i=" + i + ",j=" + j + ",m=" + m.toString(3));
+                    d = 0;
+                    while (m <= sp) {
+                        sp -= m;
+                        d++;
+                    }
+                    console.log("sp=" + sp.toString(3) + ",d=" + d);
+                    if (d < 3) $('#panelcustomTable [type="radio"][name="d' + i + '' + j + '"]').val([d]);
+                }
             }
         }
         $('#comeMovingAreaTrim').prop("checked",comeMovingAreaTrim);
@@ -393,7 +407,7 @@ $(function(){
         $('#isDeleteStrangeCaps').prop("checked",isDeleteStrangeCaps);
 //        $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
         $('#ihighlightNewCome [type="radio"][name="highlightNewCome"]').val([highlightNewCome]);
-        $('#isChTimetableExpand').prop("checked",isChTimetableExpand);
+        // $('#isChTimetableExpand').prop("checked",isChTimetableExpand);
         $('#isHidePopFresh').prop("checked",isHidePopFresh);
         $('#isChTimetableBreak').prop("checked",isChTimetableBreak);
         $('#isChTimetableWeekend').prop("checked",isChTimetableWeekend);
@@ -425,7 +439,8 @@ $(function(){
         $('#proTitleFontC').prop("checked",proTitleFontC);
         $('#isDelTime').prop("checked",isDelTime);
         $('#audibleReloadWait').val(audibleReloadWait);
-        $('#isDAR43').prop("checked",isDAR43);
+        $('#isDAR43').prop("checked", isDAR43);
+        $('#isReplaceIcons').prop("checked", isReplaceIcons);
         //以下1行で
         $('#mastodonInstance').val(value.mastodonInstance||"");
         $('#mastodonToken').val(value.mastodonToken||"");
@@ -441,12 +456,13 @@ $(function(){
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
     $("#saveBtn").click(function () {
-        var panelopenset='';
-        for(var i=0;i<4;i++){
-            for(var j=0;j<3;j++){
-                panelopenset+=''+$('#panelcustomTable [type="radio"][name="d'+i+''+j+'"]:checked').val();
+        var panelopenset = 0;
+        for (var i = 0; i < 4; i++) {
+            for (var j = 0; j < 3; j++) {
+                panelopenset += parseInt($('#panelcustomTable [type="radio"][name="d' + i + '' + j + '"]:checked').val()) * Math.pow(3, (3 - i) * 3 + (2 - j));
             }
         }
+        console.log(panelopenset);
         chrome.storage.local.set({
             "resizeScreen": $("#isResizeScreen").prop("checked"), 
             "dblFullscreen": $("#isDblFullscreen").prop("checked"),
@@ -471,7 +487,7 @@ $(function(){
             "sureReadComment": $("#isSureReadComment").prop("checked"),
             "isCommentFormWithSide": $("#isCommentFormWithSide").prop("checked"),
             "sureReadRefreshx": Math.max(101,parseInt($("#sureReadRefreshx").val())),
-            "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked"),
+            // "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked"),
 //            "movieResize": $("#isMovieResize").prop("checked")
 //            "movieMaximize": $("#isMovieMaximize").prop("checked"),
             "commentBackColor": parseInt($("#commentBackColor").val()),
@@ -493,7 +509,7 @@ $(function(){
             "CMsoundR": $("#isCMsoundR").prop("checked")&&$("#isCMsoundoff").prop("checked"),
             "CMsmlR": $("#isCMsmlR").prop("checked")&&(parseInt($("#CMsmall").val())!=100),
             "tabSoundplay": $("#isTabSoundplay").prop("checked"),
-            "openPanelwCome":$("#isOpenPanelwCome").prop("checked"),
+            // "openPanelwCome":$("#isOpenPanelwCome").prop("checked"),
             "protitleVisible":$("#isProtitleVisible").prop("checked"),
             "protitlePosition":$('#iprotitlePosition [name="protitlePosition"]:checked').val(),
             "proSamePosition":$('#iproSamePosition [name="proSamePosition"]:checked').val(),
@@ -510,7 +526,7 @@ $(function(){
             "deleteStrangeCaps":$('#isDeleteStrangeCaps').prop("checked"),
 //            "highlightNewCome":$('#isHighlightNewCome').prop("checked"),
             "highlightNewCome":$('#ihighlightNewCome [name="highlightNewCome"]:checked').val(),
-            "chTimetableExpand":$('#isChTimetableExpand').prop("checked"),
+            // "chTimetableExpand":$('#isChTimetableExpand').prop("checked"),
             "hidePopFresh":$('#isHidePopFresh').prop("checked"),
             "chTimetableBreak":$('#isChTimetableBreak').prop("checked"),
             "chTimetableWeekend":$('#isChTimetableWeekend').prop("checked"),
@@ -551,7 +567,8 @@ $(function(){
             "notifyPostUrl": $('#notifyPostUrl').val(),
             "audibleReloadWait": Math.max(0,parseInt($('#audibleReloadWait').val())),
             "isNotifyRemain": $('#isNotifyRemain').prop("checked"),
-            "DAR43": $('#isDAR43').prop("checked")
+            "DAR43": $('#isDAR43').prop("checked"),
+            "replaceIcons": $('#isReplaceIcons').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
@@ -574,8 +591,8 @@ $(function(){
     $('#highlightComePower').change(function(){
         $('#highlightPdesc').text("背景濃さ"+$('#highlightComePower').val());
     });
-    $('#alwaysShowPanelB').on("click",panelTableUpdateA);
-    $('#openPanelwComeB').on("click",panelTableUpdateO);
+    //$('#alwaysShowPanelB').on("click",panelTableUpdateA);
+    //$('#openPanelwComeB').on("click",panelTableUpdateO);
     $('#ipanelopenset').change(panelTableUpdateS);
     $('#panelcustomTable').change(panelTableUpdateT);
     //クリアボタン
@@ -768,26 +785,30 @@ function setCMBKChangedR(){
 function setCMsoundChangedR(){
     $('#settingsArea #isTabSoundplay').prop("checked",$('#settingsArea input[type="radio"][name="cmsotype"]:checked').val()==1?true:false);
 }
-function panelTableUpdateA(){
-    $('#panelcustomTable [type="radio"]').val([2]);
-}
-function panelTableUpdateO(){
-    $('#panelcustomTable [type="radio"][name^="d3"]').val([1]);
-}
-function panelTableUpdateS(){
-    var jo=$('#panelcustomTable [type="radio"]');
-    var jv=$('#ipanelopenset [type="radio"][name="panelopenset"]:checked').val();
-    var js=jv.split('');
-    for(var i=0;i<4;i++){
-        for(var j=0;j<3;j++){
-            if(parseInt(js[i*3+j])<3){
-                jo.filter('[name^="d'+i+''+j+'"]').val([js[i*3+j]]);
+//function panelTableUpdateA(){
+//    $('#panelcustomTable [type="radio"]').val([2]);
+//}
+//function panelTableUpdateO(){
+//    $('#panelcustomTable [type="radio"][name^="d3"]').val([1]);
+//}
+function panelTableUpdateS() {
+    var jo = $('#panelcustomTable [type="radio"]');
+    var jv = parseInt($('#ipanelopenset [type="radio"][name="panelopenset"]:checked').val());
+    if (jv >= Math.pow(3, 12)) return;
+    for (var i = 0; i < 4; i++) {
+        for (var j = 0, m, d; j < 3; j++) {
+            m = Math.pow(3, (3 - i) * 3 + (2 - j));
+            d = 0;
+            while (m <= jv) {
+                jv -= m;
+                d++;
             }
+            if (d < 3) jo.filter('[name^="d' + i + '' + j + '"]').val([d]);
         }
     }
 }
 function panelTableUpdateT(){
-    $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
+    $('#ipanelopenset [type="radio"][name="panelopenset"]').val([531441]);
 }
 //Mastodon token取得 インスタンスホストに対する許可を得た後
 function getMastodonToken(baseUrl){

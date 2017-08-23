@@ -64,7 +64,7 @@ var isTimeVisible = false; //残り時間を表示
 var isSureReadComment = false; //コメント欄を開きっ放しにする
 settings.isCommentFormWithSide = false;//↑有効時にコメ入力欄を右ボタンに連動させて非表示
 var sureReadRefreshx = 500; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
-settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
+// settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
 //var isMovieResize = false; //映像を枠に合わせて縮小
 //var isMovieMaximize = false; //映像最大化
 var commentBackColor = 255; //コメント一覧の背景色
@@ -84,7 +84,7 @@ var isCMBkR = false; //画面クリックによる真っ黒解除
 var isCMsoundR = false; //画面クリックによるミュート解除
 var isCMsmlR = false; //画面クリックによる縮小解除
 var isTabSoundplay = false; //タブ設定によるミュート切替
-var isOpenPanelwCome = true; //コメント欄を開いてる時にもマウスオーバーで各要素を表示する
+// var isOpenPanelwCome = true; //コメント欄を開いてる時にもマウスオーバーで各要素を表示する
 var isProtitleVisible = false; //番組名を画面右の情報枠から取得して表示する
 var protitlePosition = "windowtopleft"; //番組名の表示位置
 var proSamePosition = "over"; //番組名と残り時間の位置が重なった場合の対処方法
@@ -94,14 +94,14 @@ var kakikomiwait = 0; //自分のコメントを流すまでのウェイト(マ�
 var isHidePopBL = false; //左下に出る告知
 var isHidePopTL = false; //左上に出るロゴ
 var panelopenset = [[1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]];//head,foot,sideの開閉設定[全閉,info開,chli開,come開] 0:非表示 1:5秒で隠す 2:常に表示
-var panelopenses = '111000000000'; //設定との読み書き時にのみ使用
+// var panelopenses = 255879; //設定との読み書き時にのみ使用
 var useEyecatch = false; //左上に出るロゴのタイミングを利用する
 var comeMovingAreaTrim = false; //false:ウィンドウ全体 true:映像でない右側では流さない
 var isHideButtons = false; //全画面と音量ボタンの非表示
 var isResizeSpacing = false; //上下位置調整時に上ヘッダ分の余白を開けて上に詰めるかどうか
 var isDeleteStrangeCaps = false; //流れるコメントの規定NGに文字コード基準のフィルターを適用する
 var highlightNewCome = 0; //新着コメントの強調
-var isChTimetableExpand = false; //チャンネル別番組表でタイトルが隠れないように縦に広げる
+// var isChTimetableExpand = false; //チャンネル別番組表でタイトルが隠れないように縦に広げる
 var isHidePopFresh = false; //左下に出るFresh宣伝
 var isChTimetableBreak = false; //チャンネル別番組表でタイトルの改行位置を変更する
 var isChTimetableWeekend = true; //土日を着色する
@@ -137,6 +137,7 @@ settings.mastodonToken = ""; //mastodon api token
 settings.mastodonFormat = "{comment}\\n#AbemaTV\\n{onairpage}"; //mastodon投稿用トゥートフォーマット
 var audibleReloadWait = 20; // タブの音声再生が停止してからタブを更新するまでの秒数
 var isDAR43 = false;//映像リサイズ4:3処理モード
+var isReplaceIcons = false; // 番組表のタイトル接頭接尾アイコンを開始時刻下に収納
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -192,7 +193,7 @@ getStorage(null, function (value) {
     sureReadRefreshx = Math.max(101, ((value.sureReadRefreshx !== undefined) ? value.sureReadRefreshx : sureReadRefreshx));
     //        isMovieResize = value.movieResize || false;
     //    isMovieMaximize = value.movieMaximize || false;
-    settings.isAlwaysShowPanel = value.isAlwaysShowPanel || false;
+    // settings.isAlwaysShowPanel = value.isAlwaysShowPanel || false;
     commentBackColor = (value.commentBackColor !== undefined) ? value.commentBackColor : commentBackColor;
     commentBackTrans = (value.commentBackTrans !== undefined) ? value.commentBackTrans : commentBackTrans;
     commentTextColor = (value.commentTextColor !== undefined) ? value.commentTextColor : commentTextColor;
@@ -210,7 +211,7 @@ getStorage(null, function (value) {
     isCMsoundR = (value.CMsoundR || false) && isCMsoundoff;
     isCMsmlR = (value.CMsmlR || false) && (CMsmall != 100);
     isTabSoundplay = value.tabSoundplay || false;
-    isOpenPanelwCome = (value.openPanelwCome !== undefined) ? value.openPanelwCome : isOpenPanelwCome;
+    // isOpenPanelwCome = (value.openPanelwCome !== undefined) ? value.openPanelwCome : isOpenPanelwCome;
     isProtitleVisible = value.protitleVisible || false;
     protitlePosition = value.protitlePosition || protitlePosition;
     proSamePosition = value.proSamePosition || proSamePosition;
@@ -221,21 +222,28 @@ getStorage(null, function (value) {
     isHidePopTL = value.hidePopTL || false;
     isHidePopBL = value.hidePopBL || false;
     //        panelopenses=value.panelopenset||"111000000000";
-    panelopenses = value.panelopenset || (settings.isAlwaysShowPanel ? "222222222222" : (isOpenPanelwCome ? "111000000111" : "111000000000"));//isA..とisO..を初回のみ適用
-    for (var i = 0; i < 4; i++) {
-        for (var j = 0; j < 3; j++) {
-            panelopenset[i][j] = panelopenses.split('')[i * 3 + j];
+    // panelopenses = value.panelopenset || (settings.isAlwaysShowPanel ? "222222222222" : (isOpenPanelwCome ? "111000000111" : "111000000000"));//isA..とisO..を初回のみ適用
+    var panelopenses = typeof value.panelopenset == "number" ? value.panelopenset : parseInt(value.panelopenset || "111000000000", 3);
+    if (panelopenses == 0) putPopacti();
+    if (panelopenses < Math.pow(3, 12)) {
+        for (var i = 0; i < 4; i++) {
+            for (var j = 0, m, d; j < 3; j++) {
+                m = Math.pow(3, (3 - i) * 3 + (2 - j));
+                d = 0;
+                while (m <= panelopenses) {
+                    panelopenses -= m;
+                    d++;
+                }
+                if (d < 3) panelopenset[i][j] = d;
+            }
         }
-    }
-    if (panelopenses == "000000000000") {
-        putPopacti();
     }
     comeMovingAreaTrim = value.comeMovingAreaTrim || false;
     isHideButtons = value.hideButtons || false;
     isResizeSpacing = value.resizeSpacing || false;
     isDeleteStrangeCaps = value.deleteStrangeCaps || false;
     highlightNewCome = (value.highlightNewCome !== undefined) ? Number(value.highlightNewCome) : highlightNewCome;
-    isChTimetableExpand = value.chTimetableExpand || false;
+    // isChTimetableExpand = value.chTimetableExpand || false;
     isHidePopFresh = value.hidePopFresh || false;
     isChTimetableBreak = value.chTimetableBreak || false;
     isChTimetableWeekend = value.chTimetableWeekend || false;
@@ -270,6 +278,7 @@ getStorage(null, function (value) {
     settings.mastodonFormat = value.mastodonFormat || "{comment}\\n#AbemaTV\\n{onairpage}";
     audibleReloadWait = (value.audibleReloadWait !== undefined) ? value.audibleReloadWait : 20;
     isDAR43 = value.DAR43 || false;
+    isReplaceIcons = value.replaceIcons || false;
 });
 
 var currentLocation = window.location.href;
@@ -349,7 +358,7 @@ var keyinput = []; //コマンド入れ
 var keyCodes = "38,38,40,40,37,39,37,39,66,65";
 var comeArray = []; //流すコメントで、新着の複数コメントのうちNG処理等を経て実際に出力するコメントのリスト
 //var popElemented=false; //mouseoverでunpopElementが実行されまくるのを防止
-var proTitle = "未取得"; //番組タイトル
+var proTitle = ""; //番組タイトル
 var proinfoOpened = false; //番組タイトルクリックで番組情報枠を開いた後にクリックで閉じれるようにする
 var optionStatsUpdated = false; //optionStatsUpdateの重複起動防止
 var kakikomitxt = ""; //自分の投稿内容
@@ -384,7 +393,8 @@ var timetableRunning = false; //番組表表示時の10分インターバル
 var audibleReloadCount = -1;
 var isSoundFlag = true; //音が出ているか soundSet(isSound)のisSoundを保持したり音量クリック時にミュートチェック
 var timetableGrabbing = {value:false,cx:0,cy:0,test:false,sx:0,sy:0,scrolled:false,}; //番組表を掴む
-var comelistClasses={stabled:"",animated:"",empty:"",message:"",posttime:"",};
+var comelistClasses = { stabled: "", animated: "", empty: "", message: "", posttime: "", };
+var timetableClasses = { arrow: "", timebar: "", };//ページ遷移直後に取得できないので初回取得時に保持する getSingleSelectorの結果を入れるので使用時は.を付けない
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -448,7 +458,7 @@ function timetableCss() {
     var t = "";
     var ts = "";
     var to,tp;
-    var selBody,selHead,selTime,selPTitle;
+    var selBody, selHead, selTime, selPTitle, selBodyS;
     var eo,ep;
     var m;
     var alt=false;
@@ -496,12 +506,17 @@ function timetableCss() {
                 if(selBody) t += selBody+'>div:nth-child(' + j + '){display:unset!important;' + ts + '}';
             }
         }
-        selTime=EXTTtime?getElementSingleSelector(EXTTtime.lastChild):null;
-        if($(selTime).length!=1){
-            console.log("?date-bar "+selTime);
-            selTime=alt?'.rT_sC':"";
+        if (!timetableClasses.timebar) {
+            selTime = getTTtimebarElement(true);
+            if ($(selTime).length != 1) {
+                console.log("?date-bar " + selTime);
+                selTime = alt ? '.i__j3' : "";
+            }
+        } else selTime = timetableClasses.timebar;
+        if (selTime) {
+            timetableClasses.timebar = selTime;
+            t += selTime + '{pointer-events:none;}';
         }
-        t += selTime+'{pointer-events:none;}';
         //t += '[class^="styles__date-bar___"]{pointer-events:none;}';
 //    }else if(c==2){
 //        t+='[class^="styles__date-list-header___"]>*{width:calc((100vw - 265px) / 8);min-width:176px;}';
@@ -509,7 +524,17 @@ function timetableCss() {
     }
 
     if (isHideArrowButton) {
-        t += '.rT_r3{display:none;}'; //todo
+        if (!timetableClasses.arrow) {
+            to = getTTLRArrowContainerElement(true);
+            if ($(to).length != 1) {
+                console.log("?Arrowbutton " + to);
+                to = alt ? '.i__jw' : "";
+            }
+        } else to = timetableClasses.arrow;
+        if (to) {
+            timetableClasses.arrow = to;
+            t += to + '{visibility:hidden;opacity:0;pointer-events:none;}';
+        }
     }
     if (isExpandLastItem) {
         if(selBody) t += selBody+'>div{height:unset;min-height:' + ($(EXTTtime).height()||4320) + 'px;}';//各列の縦長さ制限を外す
@@ -534,6 +559,13 @@ function timetableCss() {
             t += tp+'>div:nth-child(' + (sun + 1) + ') article:not(.registeredProgs) .w7_mH:hover{background-color:rgba(250,222,233,0.7);}';
         }
     }
+
+    selBodyS = getElementSingleSelector(EXTTbodyS);
+    if ($(selBodyS).length != 1) {
+        console.log("?EXTTbodyS " + selBodyS);
+        selBody = alt ? '.i__jT' : "";
+    }
+    if (selBodyS) t += selBodyS + '{user-select:none;}';//選択テキストを掴むと移動できないので選択不可にしておく
 
     $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
 }
@@ -676,7 +708,7 @@ function waitforloadtimetable(url) {
         } else if (c == 1) {
             setTimeout(timetabledtfix, 100);
         }
-        setTimeout(timetableCommonFix, 100, 0);
+        setTimeout(timetableCommonFix, 100);
         //番組表クリックで右詳細に通知登録ボタン設置
         $(EXTTbody).click(function(e){ // 掴んでスクロールした場合番組詳細は開かないことにする
             if(!timetableGrabbing.scrolled){
@@ -738,7 +770,7 @@ function waitforloadtimetable(url) {
 }
 function putSideDetailHighlight() {
     var sideDetailWrapper = $(EXTTsideR);
-    if (sideDetailWrapper.length == 0 || sideDetailWrapper.offset().left > window.innerWidth - 50) { return; }
+    if (sideDetailWrapper.length == 0 || sideDetailWrapper.offset().left > window.innerWidth - 50) return;
     sideDetailWrapper.css("overflow-x", "").find('p[class="addedHighlight"]').remove();
     var fp = sideDetailWrapper.find('p');//番組詳細,タイトル,日時,見逃し云々?
     if (fp.length < 2) return;
@@ -825,8 +857,8 @@ function timetabledtfix() {
     });
 }
 function timetabledtloop() {
-    if (checkUrlPattern(true) != 1) { return; }
-    if (!isChTimetablePlaybutton) { return; }
+    if (checkUrlPattern(true) != 1) return;
+    if (!isChTimetablePlaybutton) return;
     if (isChTimetablePlaybutton) {
         PlaybuttonEditor();
     }
@@ -1001,9 +1033,9 @@ function getSatSun() {
 }*/
 function timetablechloop() {
     //URL変わったら終われるようにURLチェック
-    if (checkUrlPattern(true) != 2) { return; }
+    if (checkUrlPattern(true) != 2) return;
 //    if (!isChTimetableExpand && !isChTimetablePlaybutton) { return; }
-    if (!isChTimetablePlaybutton) { return; }
+    if (!isChTimetablePlaybutton) return;
 //    if (isChTimetableExpand) {
 //        //現在時刻の赤棒の位置変更
 //        var nd = new Date;
@@ -1021,7 +1053,7 @@ function timetablechloop() {
     setTimeout(timetablechloop, 1000);
 }
 function PlaybuttonEditor() {
-    if (!isChTimetablePlaybutton) { return; }
+    if (!isChTimetablePlaybutton) return;
     //放送中の緑枠の移動に合わせて再生ボタンを削除、設置する
     var p = $('[class*="style__status-present___"]'); //放送中の緑色枠 //todo
     var b = $('.playbutton');
@@ -1120,8 +1152,8 @@ function clickElement(jo) {//clickOnairLink(jo)
         setTimeout(waitformakelink, 2000, retrycount - 1);
     }
 }*/
-function timetableCommonFix(prevColNum) {
-    var cols, progArticle, progTitle;
+function timetableCommonFix(retrycount) {
+    var progArticle, progTitle;
 //    var cols = $('[class*="styles__col___"]');
 //    if(cols.length == 0 || cols.length > prevColNum){ //列が出そろうまで待つ
 //        //console.log("retry timetableCommonFix colnum="+cols.length+" prev="+prevColNum);
@@ -1142,14 +1174,38 @@ function timetableCommonFix(prevColNum) {
         setTimeout(timetableCommonFix, 1000);
         return;
     }
+
+    //別の日のページへの遷移直後は前の読込済表示が残っている(cols.len=head.childcount)ので更新を待つ必要がある
+    //とりあえず最後の番組のarticleにtitleが付いてたら残ってることにしてリトライする
+    if (cols.last().children().last().find("article").attr("title")) {
+        if (retrycount === undefined) retrycount = 5;
+        if (retrycount > 0) setTimeout(timetableCommonFix, 1000, retrycount - 1);
+    }
+
     //番組タイトルをtitle要素にする
+    var selPTitle = getTTProgramTitleClass();
+    var selICont = getTTProgramTimeClasses()[1];
+    var jt, jp, jf;
     cols.each(function(){
         $(this).children().each(function(){
             //番組毎divについてのループ
             progArticle = $(this).find("article");
-            progTitle = progArticle.find('span.ok_bq').text();
+            jt = progArticle.find('.' + selPTitle);
+            progTitle = jt.text();
             //progTitle = progArticle.find('span[class^="styles__title___"]').text();
             progArticle.attr("title", progTitle);
+
+            if (isReplaceIcons && selICont) {
+                jp = jt.siblings("span,svg");
+                if (jp.length > 0) {
+                    jf = progArticle.find('.' + selICont);
+                    if (jf.length > 0) {
+                        jp.each(function () {
+                            $(this).appendTo(jf);
+                        });
+                    }
+                }
+            }
         });
     });
     setRegistProgsBackground();
@@ -1178,8 +1234,8 @@ function setRegistProgsBackground(){
 }
 function getChannelNameOnTimetable(channel) { //番組表ページのチャンネルリストを利用してチャンネル名を得る
     var hrefStr = "/timetable/channels/" + channel;
-    if(EXTTsideL!=null) return $(EXTTsideL).find('a[href$="' + hrefStr + '"]').text();
-    else return $('.rT_sq ul').find('a[href$="' + hrefStr + '"]').text(); //todo
+    if (EXTTsideL != null) return $(EXTTsideL).find('a[href$="' + hrefStr + '"]').text();
+    else return $('.i__jP ul').find('a[href$="' + hrefStr + '"]').text();
 }
 function getVideo() {
     //console.trace('getVideo()')
@@ -1198,7 +1254,7 @@ function getVideo() {
     return jp;
 }
 function onresize() {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     //console.log("onresize()");
     //視聴数の位置調整
     setTimeout(function(){
@@ -1220,7 +1276,7 @@ function onresize() {
     }
 
     var tar=getVideo();
-    if(!tar) return;
+    if (!tar) return;
     tar=tar.first();//.parent();
     var ori=tar.parent();
     var o={w:{l:ori.offset().left,t:ori.offset().top,w:ori.width(),h:ori.height(),},v:{l:-1,t:-1,w:-1,h:-1,},};
@@ -1244,17 +1300,17 @@ function onresize() {
     tar.css("width",zz+"%").css("height",zz+"%");
     //console.log("tar", tar,zz)
 
-    var r;
-    if(posiVType==0){
-        r=resizeType>0?"translateY("+((window.innerHeight-t.v.h)/2-t.v.t)+"px)":"";
-    }else if(posiVType==1){
-        r="translateY("+(-t.v.t)+"px)";
-    }else if(posiVType==2){
-        r="translateY("+(hh-t.v.t)+"px)";
+    var r = tar[0].style.transform.replace(/\s*translate(X|Y)\(\d*(\.\d+)?(px|vw|%)\)/g, "").replace(/^\s+|\s+$/g, "");
+    switch (posiHType) {
+        case 0: r += resizeType > 0 ? " translateX(" + ((window.innerWidth - t.v.w) / 2 - t.v.l) + "px)" : ""; break;
+        case 1: r += " translateX(" + (-t.v.l) + "px)"; break;
     }
-
-    if(posiHType==0) r+=resizeType>0?" translateX("+((window.innerWidth-t.v.w)/2-t.v.l)+"px)":"";
-    else if(posiHType==1) r+=" translateX("+(-t.v.l)+"px)";
+    switch (posiVType) {
+        case 0: r += resizeType > 0 ? " translateY(" + ((window.innerHeight - t.v.h) / 2 - t.v.t) + "px)" : ""; break;
+        case 1: r += " translateY(" + (-t.v.t) + "px)"; break;
+        case 2: r += " translateY(" + (hh - t.v.t) + "px)"; break;
+    }
+    r = r.replace(/^\s+|\s+$/g, "");
 
     tar.css("transform",r);
     console.log("screen resized");
@@ -1398,7 +1454,7 @@ function onresize2(obj, objr, newwd, newhg, newtop, newleft, oldwd, oldhg) {
 */
 function onScreenDblClick() {
     console.log("dblclick");
-    if (comeNGmode == 2) { return; }
+    if (comeNGmode == 2) return;
     if (settings.isDblFullscreen) {
         toggleFullscreen();
     }
@@ -1418,9 +1474,8 @@ function postShareNGwords(words, channel) {
             postWords.push(words[i].toString());
         }
     }
-    if(postWords.length == 0) {
-        return;
-    }
+    if (postWords.length == 0) return;
+
     var postData = {
         "client": APIclientName,
         "channel": channel,
@@ -1574,7 +1629,7 @@ function putComeArray(inp) {
     }
 //    var jo = $("object,video").parent();
     var jo;
-    if(!(jo = getVideo())) return;
+    if (!(jo = getVideo())) return;
     var er = jo[0].getBoundingClientRect();
     var movieRightEdge;
     //    if(isMovieMaximize){
@@ -1702,11 +1757,11 @@ function soundSet(isSound) {
         chrome.runtime.sendMessage({ type: "tabsoundplaystop", valb: !isSound }, function (r) { });
         return;
     }
-    if (!EXvolume) { return; }
+    if (!EXvolume) return;
     var volcon = $(EXvolume).contents();
     var butvol = volcon.find('svg')[0];
     var volobj=getVolbarObject();
-    if(volobj==null)return;
+    if (volobj == null) return;
     var valvol = volobj.height();
     var evt = document.createEvent("MouseEvents");
     evt.initEvent("click", true, true);
@@ -1732,7 +1787,7 @@ function screenBlackSet(type) {
     //    var pwaku = $('[class^="style__overlap___"]'); //動画枠
     var pwaku = $('#ComeMukouMask');
     if (pwaku.length == 0) { //delaysetから移動してきた
-        if ($(overlapSelector).length == 0) { return; }
+        if ($(overlapSelector).length == 0) return;
         $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
         pwaku = $('#ComeMukouMask');
         pwaku[0].addEventListener("click", comemukouClick);
@@ -1838,7 +1893,7 @@ function openOption() {
     $("#isSureReadComment").prop("checked", isSureReadComment);
     $("#isCommentFormWithSide").prop("checked", settings.isCommentFormWithSide);
     $("#sureReadRefreshx").val(sureReadRefreshx);
-    $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
+    // $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
     //    $("#isMovieResize").prop("checked", isMovieResize);
     //    $("#isMovieMaximize").prop("checked", isMovieMaximize);
     $("#commentBackColor").val(commentBackColor);
@@ -1851,7 +1906,7 @@ function openOption() {
     jo.css("background-color", bc)
         .css("color", tc)
         ;
-        //.children('[class^="styles__message___"]').css("color", tc)
+    //.children('[class^="styles__message___"]').css("color", tc)
     if (comelistClasses.message) jo.children('.' + comelistClasses.message).css("color", tc);
     $("#commentBackColor").val(commentBackColor)
         .prev('span.prop').text(commentBackColor + " (" + Math.round(commentBackColor * 100 / 255) + "%)")
@@ -1881,7 +1936,7 @@ function openOption() {
     $("#isCMsoundR").prop("checked", isCMsoundR);
     $("#isCMsmlR").prop("checked", isCMsmlR);
     $("#isTabSoundplay").prop("checked", isTabSoundplay);
-    $("#isOpenPanelwCome").prop("checked", isOpenPanelwCome);
+    // $("#isOpenPanelwCome").prop("checked", isOpenPanelwCome);
     $("#isProtitleVisible").prop("checked", isProtitleVisible);
     $('#iprotitlePosition input[type="radio"][name="protitlePosition"]').val([protitlePosition]);
     $('#iprotitlePosition').css("display", isProtitleVisible ? "flex" : "none");
@@ -1899,7 +1954,7 @@ function openOption() {
     $('#isDeleteStrangeCaps').prop("checked", isDeleteStrangeCaps);
     //    $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
     $('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]').val([highlightNewCome]);
-    $('#isChTimetableExpand').prop("checked", isChTimetableExpand);
+    // $('#isChTimetableExpand').prop("checked", isChTimetableExpand);
     $('#isHidePopFresh').prop("checked", isHidePopFresh);
     $('#isChTimetableBreak').prop("checked", isChTimetableBreak);
     $('#isChTimetableWeekend').prop("checked", isChTimetableWeekend);
@@ -1932,25 +1987,29 @@ function openOption() {
     $('#isDelTime').prop("checked", isDelTime);
     $('#mastodonFormat').val(settings.mastodonFormat);
 
-    var panelopenseu = [];
+    var panelopenses = 0;
     for (var i = 0; i < 4; i++) {
-        panelopenseu[i] = panelopenset[i].join('');
+        for (var j = 0; j < 3; j++) {
+            panelopenses += panelopenset[i][j] * Math.pow(3, (3 - i) * 3 + (2 - j));
+        }
     }
-    panelopenses = panelopenseu.join('');
+    //    panelopenseu[i] = panelopenset[i].join('');
+    //}
+    //panelopenses = panelopenseu.join('');
     if ($('#ipanelopenset [type="radio"][name="panelopenset"][value=' + panelopenses + ']').length > 0) {
         $('#ipanelopenset [type="radio"][name="panelopenset"]').val([panelopenses]);
     } else {
-        $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
+        $('#ipanelopenset [type="radio"][name="panelopenset"]').val([531441]);
     }
-    if (panelopenses == "000000000000") {
+    if (panelopenses == 0) {
         putPopacti();
     } else {
         cancelPopacti();
     }
-    var sp = panelopenses.split('');
+    // var sp = panelopenses.split('');
     for (var i = 0; i < 4; i++) {
         for (var j = 0; j < 3; j++) {
-            $('#panelcustomTable [type="radio"][name="d' + i + '' + j + '"]').val([sp[i * 3 + j]]);
+            $('#panelcustomTable [type="radio"][name="d' + i + '' + j + '"]').val([panelopenset[i][j]]);
         }
     }
 
@@ -2012,7 +2071,7 @@ function toast(message) {
     }, 4000);
 }
 function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     if(!isOLS){
         if(!overlapSelector){//ページ遷移の再delayset時に本来のoverlapが無くなって映像枠が引っかかるので再探査しない
             var jo=$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&parseInt($(e).css("opacity"))>0)return e;});
@@ -2129,19 +2188,20 @@ function delaysetNotOA(){
         return;
     }
     //拡張機能の設定と通知番組一覧をその他メニューに追加
-    var hoverLinkClass = hoverContents.children()[0].className;
-    var hoverSpanClass = hoverContents.children().eq(0).children()[0].className;
+    var hoverLinkClass = hoverContents.children('a')[0].className;
+    var hoverSpanClass = hoverContents.children('a').children('span')[0].className;
     //console.log(hoverContents,hoverContents.children(),hoverLinkClass)
-    if (hoverContents.children('#extSettingLink').length == 0) {
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>');
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>');
+    if ($(EXmenu).children('#extSettingLink').length == 0) {
+        $(EXmenu).append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
+            .append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>')
+            ;
     }
 }
 function volumecheck() {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     //console.log("volumecheck");
     var t=getVolbarObject();
-    if(t==null)return;
+    if (t == null) return;
     var v = t.height();
     if (v !== null && 0 <= v && v <= 92) {
         if (v == 92 && changeMaxVolume < 100) {
@@ -2155,10 +2215,10 @@ function volumecheck() {
     }
 }
 function optionStatsUpdate(outflg) {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     //console.log("optionStatusUpdate("+(outflg?"true":"false"));
     var out = [0, 0];
-    if ($('#settcont').length == 0 || $('#settcont').css("display") == "none") { return; }
+    if ($('#settcont').length == 0 || $('#settcont').css("display") == "none") return;
     var tar = $('#sourceheight');
     if (bginfo[0] > 0 && tar.length > 0) {
         tar.text("(ソース:" + bginfo[0] + "p)")
@@ -2318,7 +2378,7 @@ function optionStatsUpdate(outflg) {
     }
 }
 function createSettingWindow() {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     if (!EXside) {
         console.log("createSettingWindow retry");
         setTimeout(createSettingWindow, 1000);
@@ -2409,7 +2469,7 @@ function createSettingWindow() {
         $('<span id="prosamedesc" style="margin-left:4px;">↑と↓が同じ位置の場合: </span>').prependTo("#iproSamePosition>*");
     }
     if ($('.leftshift').length == 0) {
-        $('<input type="button" class="leftshift" value="←この設定画面を少し左へ" style="float:right;margin-top:10px;padding:0px 3px;">').appendTo('#CommentColorSettings');
+        $('<input type="button" class="leftshift" value="←この設定画面を少し左へ" style="float:right;margin-top:10px;padding:0px 3px;">').insertBefore($('#CommentColorSettings').parent());
         $(".leftshift").on("click", function () {
             $("#settcont").css("right", "320px");
             $(".leftshift").css("display", "none");
@@ -2417,15 +2477,15 @@ function createSettingWindow() {
         });
     }
     if ($('.rightshift').length == 0) {
-        $('<input type="button" class="rightshift" value="この設定画面を右へ→" style="float:right;margin-top:10px;display:none;padding:0px 3px;">').appendTo('#CommentColorSettings');
+        $('<input type="button" class="rightshift" value="この設定画面を右へ→" style="float:right;margin-top:10px;display:none;padding:0px 3px;">').insertBefore($('#CommentColorSettings').parent());
         $(".rightshift").on("click", function () {
             $("#settcont").css("right", "40px");
             $(".rightshift").css("display", "none");
             $(".leftshift").css("display", "");
-            $('#PsaveCome').prop("disabled", true)
-                .css("color", "gray")
-                ;
-            setTimeout(clearBtnColored, 1200, $('#PsaveCome'));
+            //$('#PsaveCome').prop("disabled", true)
+            //    .css("color", "gray")
+            //    ;
+            //setTimeout(clearBtnColored, 1200, $('#PsaveCome'));
         });
     }
     if ($('#windowresize').length == 0) {
@@ -2607,11 +2667,11 @@ function createSettingWindow() {
             .css("padding", "8px")
             .css("border", "1px solid black")
             ;
-        $('#isAlwaysShowPanel').appendTo('#panelCustom').prop("disabled", true).before("旧");
-        $('<input type="button" id="alwaysShowPanelB" value="下表に適用">').insertAfter('#isAlwaysShowPanel').before("常に黒帯パネルを表示する");
-        $('#isOpenPanelwCome').appendTo('#panelCustom').prop("disabled", true).before("<br>旧");
-        $('<input type="button" id="openPanelwComeB" value="下表に適用">').insertAfter('#isOpenPanelwCome').before("コメント欄を開いていても黒帯パネル等を表示できるようにする");
-        $('<br><span>※以上の古いオプションは以下の新オプションに統合され、適当な経過期間の後に削除予定</span>').appendTo('#panelCustom');
+        // $('#isAlwaysShowPanel').appendTo('#panelCustom').prop("disabled", true).before("旧");
+        // $('<input type="button" id="alwaysShowPanelB" value="下表に適用">').insertAfter('#isAlwaysShowPanel').before("常に黒帯パネルを表示する");
+        // $('#isOpenPanelwCome').appendTo('#panelCustom').prop("disabled", true).before("<br>旧");
+        // $('<input type="button" id="openPanelwComeB" value="下表に適用">').insertAfter('#isOpenPanelwCome').before("コメント欄を開いていても黒帯パネル等を表示できるようにする");
+        // $('<br><span>※以上の古いオプションは以下の新オプションに統合され、適当な経過期間の後に削除予定</span>').appendTo('#panelCustom');
         $('#ipanelopenset').appendTo('#panelCustom')
             .children().css("display", "flex")
             .css("flex-direction", "row")
@@ -2638,8 +2698,8 @@ function createSettingWindow() {
             .css("padding", "3px")
             ;
         $('#panelcustomTable td:first-child').css("text-align", "center");
-        $('#alwaysShowPanelB').on("click", panelTableUpdateA);
-        $('#openPanelwComeB').on("click", panelTableUpdateO);
+        // $('#alwaysShowPanelB').on("click", panelTableUpdateA);
+        // $('#openPanelwComeB').on("click", panelTableUpdateO);
         $('#ipanelopenset').change(panelTableUpdateS);
         $('#panelcustomTable').change(panelTableUpdateT);
     }
@@ -2973,7 +3033,7 @@ function setSaveClicked() {
     sureReadRefreshx = Math.max(101, $("#sureReadRefreshx").val());
     //    isMovieResize = $("#isMovieResize").prop("checked");
     //    isMovieMaximize = $("#isMovieMaximize").prop("checked");
-    settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
+    // settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
     commentBackColor = parseInt($("#commentBackColor").val());
     commentBackTrans = parseInt($("#commentBackTrans").val());
     commentTextColor = parseInt($("#commentTextColor").val());
@@ -2991,7 +3051,7 @@ function setSaveClicked() {
     isCMsoundR = $("#isCMsoundR").prop("checked") && $("#isCMsoundoff").prop("checked");
     isCMsmlR = $("#isCMsmlR").prop("checked") && ($("#CMsmall").val() != 100);
     isTabSoundplay = $("#isTabSoundplay").prop("checked");
-    isOpenPanelwCome = $("#isOpenPanelwCome").prop("checked");
+    // isOpenPanelwCome = $("#isOpenPanelwCome").prop("checked");
     isProtitleVisible = $("#isProtitleVisible").prop("checked");
     protitlePosition = $('#iprotitlePosition input[type="radio"][name="protitlePosition"]:checked').val();
     proSamePosition = $('#iproSamePosition input[type="radio"][name="proSamePosition"]:checked').val();
@@ -3038,6 +3098,7 @@ function setSaveClicked() {
     isDelTime = $('#isDelTime').prop("checked");
     settings.mastodonFormat = $('#mastodonFormat').val();
     audibleReloadWait = Math.max(0, parseInt($('#audibleReloadWait').val()));
+    isDAR43 = $('#isDAR43').prop("checked");
 
     arrayFullNgMaker();
     onresize();
@@ -3180,30 +3241,35 @@ function setCMBKChangedR() {
 function setCMsoundChangedR() {
     $('#isTabSoundplay').prop("checked", $('#CommentMukouSettings input[type="radio"][name="cmsotype"]:checked').val() == 1 ? true : false);
 }
-function panelTableUpdateA() {
-    $('#panelcustomTable [type="radio"]').val([2]);
-    cancelPopacti();
-    $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["222222222222"]);
-}
-function panelTableUpdateO() {
-    $('#panelcustomTable [type="radio"][name^="d3"]').val([1]);
-    cancelPopacti();
-    $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
-}
+//function panelTableUpdateA() {
+//    $('#panelcustomTable [type="radio"]').val([2]);
+//    cancelPopacti();
+//    $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["222222222222"]);
+//}
+//function panelTableUpdateO() {
+//    $('#panelcustomTable [type="radio"][name^="d3"]').val([1]);
+//    cancelPopacti();
+//    $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
+//}
 function panelTableUpdateS() {
     var jo = $('#panelcustomTable [type="radio"]');
-    var jv = $('#ipanelopenset [type="radio"][name="panelopenset"]:checked').val();
-    if (jv == "333333333333") { return; }
-    var js = jv.split('');
+    var jv = parseInt($('#ipanelopenset [type="radio"][name="panelopenset"]:checked').val());
+    if (jv >= Math.pow(3, 12)) return;
     for (var i = 0; i < 4; i++) {
-        for (var j = 0; j < 3; j++) {
-            jo.filter('[name^="d' + i + '' + j + '"]').val([js[i * 3 + j]]);
+        for (var j = 0, m, d; j < 3; j++) {
+            m = Math.pow(3, (3 - i) * 3 + (2 - j));
+            d = 0;
+            while (m <= jv) {
+                jv -= m;
+                d++;
+            }
+            if (d < 3) jo.filter('[name^="d' + i + '' + j + '"]').val([d]);
         }
     }
     cancelPopacti();
 }
 function panelTableUpdateT() {
-    $('#ipanelopenset [type="radio"][name="panelopenset"]').val(["333333333333"]);
+    $('#ipanelopenset [type="radio"][name="panelopenset"]').val([531441]);
     for (var i = 0; i < 4; i++) {
         for (var j = 0; j < 3; j++) {
             if (parseInt($('#panelcustomTable [type="radio"][name="d' + i + '' + j + '"]:checked').val()) != 0) {
@@ -3275,7 +3341,7 @@ function pophideElement(inp) {
     //console.log(inp);
     //inpを1(pop),-1(hide),0(除去)で受け取る
     //除去前の中身はチェックせずに除去する
-    if (EXfoot === undefined) { return; } //未setEXs：now-on-air未表示：pophideする必要が無い
+    if (EXfoot === undefined) return; //未setEXs：now-on-air未表示：pophideする必要が無い
     if (inp.allreset == true) {
         inp.head = 0;
         inp.foot = 0;
@@ -3575,7 +3641,7 @@ function setEXs() {
     //ロード直後に取得が期待できるやつ
     //obliが遅くinfoはもっと遅い
     //infoはdelaysetの方でやる
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     var b = true;
     if (                                                                                  $('#main' ).length == 0 || !( EXmain          = $('#main' )[0] ))    b = false;// console.log("#main"); }
     if (! EXhead          &&!( EXhead          = getHeaderElement()              ) /*&& ($('.P_R'  ).length == 0 || !( EXhead          = $('.P_R'  )[0] ))*/) b = false;// console.log("head"); }//AppContainer__header-container___
@@ -3748,7 +3814,7 @@ function getViewCounterElement(returnSingleSelector) {
     var ret = null;
     var pa=document.getElementsByTagName("p");
     for(var i=0;i<pa.length;i++){
-        if(pa[i].innerText.indexOf("視聴数")<0) continue;
+        if (pa[i].textContent.indexOf("視聴数") < 0) continue;
         ret=pa[i];
         break;
     }
@@ -3791,7 +3857,7 @@ function getInfoElement(returnSingleSelector) {
     var ret = null;
     var h3a=document.getElementsByTagName('h3');
     for(var i=0,t;i<h3a.length;i++){
-        if(h3a[i].innerText.indexOf("番組概要")<0) continue;
+        if (h3a[i].textContent.indexOf("番組概要") < 0) continue;
         ret=h3a[i];
         break;
     }
@@ -4137,63 +4203,187 @@ function getVideoRouteClasses(){
 function getTTProgramTitleClass(){
     // 0:ビデオのN、1～その他、10くらいから番組タイトル
     //後ろから取るが、番組表の後ろに要素が新設されても対応できるように適当なオフセットを設けておく
-    return $(EXTTbody).find('span').map(function(i,e){if(e.childElementCount==0&&e.className!=""&&e.innerText!="")return e;}).eq(-5).prop("class");
+    return $(EXTTbody).find('span').map(function (i, e) { if (e.childElementCount == 0 && e.className != "" && e.textContent != "") return e; }).eq(-5).prop("class");
 }
-function getTTTimeClassFromPT(proTitleClass,sw){
-    // sw 0:過去 1:放送中 2:放送予定 の背景を司るクラスを番組タイトルクラスから探す
-    // programtitleの親のarticleの子のbuttonの子のdivが灰/緑/白の背景を持っているのでそれを探す
+function getTTTimeClassesFromPT(proTitleClass) {
+    // return[] 0:過去 1:放送中 2:放送予定 の背景を司るクラスを番組タイトルクラスから探す
+    // programtitleの親の(articleの子の)buttonの子のdivが灰/緑/白の背景を持っているのでそれを探す
     //　'.'を付けたクラス名で受ける(ここでは付けない)
-
-    if(!proTitleClass){
-        proTitleClass=getTTProgramTitleClass();
-        if(!proTitleClass) return null;
-        else proTitleClass="."+proTitleClass;
+    var ret = [null, null, null];
+    if (!proTitleClass) {
+        proTitleClass = getTTProgramTitleClass();
+        if (!proTitleClass) return ret;
+        else proTitleClass = "." + proTitleClass;
     }
 
-    var jb=$(EXTTbody);
-    var jo=jb.find(proTitleClass);
-    var re=/rgba?\( *(\d+) *, *(\d+) *, *(\d+)(?: *, *\d+ *,?)? *\)/;
-    var rs=/\s/;
-    var rr=/^\s+|\s+$/g;
-    for(var i=0,j,t,e,r,g,b,c,m,n;i<jo.length;i++){
-        j=jo.eq(i).parentsUntil("article").eq(-2);
-        t=j.css("background-color");
-        if(!re.test(t))continue;
-        e=re.exec(t);
-        r=parseInt(e[1]);
-        g=parseInt(e[2]);
-        b=parseInt(e[3]);
-        if(!(sw==2&&r>248&&g>248&&b>248)&&!(sw==0&&r<248&&g<248&&b<248)&&!(sw==1&&r<248&&g>248&&b<248)) continue;
-        c=j.prop("class").split(rs);
+    var jb = $(EXTTbody);
+    var jo = jb.find(proTitleClass);
+    var re = /rgba?\( *(\d+) *, *(\d+) *, *(\d+)(?: *, *\d+ *,?)? *\)/;
+    var rs = /\s/;
+    var rr = /^\s+|\s+$/g;
+    var classes = [null, null, null,];
+    for (var i = 0, j, t, e, r, g, b, c; i < jo.length; i++) {
+        j = jo.eq(i).parentsUntil("button").last();
+        t = j.css("background-color");
+        if (!re.test(t)) continue;
+        e = re.exec(t);
+        r = parseInt(e[1]);
+        g = parseInt(e[2]);
+        b = parseInt(e[3]);
+        if (!classes[0] && r < 248 && g < 248 && b < 248) c = 0;
+        else if (!classes[1] && r < 248 && g > 248 && b < 248) c = 1;
+        else if (!classes[2] && r > 248 && g > 248 && b > 248) c = 2;
+        else continue;
+        classes[c] = j.prop("class").split(rs);
+        if (classes[0] && classes[1] && classes[2]) break;
+    }
 
-        //3クラスのうち2つは全部に付いてるので一番少ないクラスを探す
-        m=9999;
-        n=null;
-        for(var k=0,d,l;k<c.length;k++){
-          d=c[k].replace(rr,"");
-          if(!d) continue;
-          l=jb.find('.'+d).length;
-          if(m<l) continue;
-          m=l;
-          n=d;
+    // timetable/dates/など全部過去、全部未来の場合(1つしか取れてない)はクラスが該当する要素が同数で判別できない
+    var nc = 0;
+    for (var i = 0; i < 3; i++) if (!classes[i]) nc++;
+    if (nc == 3 || nc == 2) return ret;
+    //(2以上の要素内で)重複クラスを削除して1つにならなければ全体の該当要素が少ないのを選ぶ
+    for (var i = 0; i < 3; i++) {
+
+    }
+    var jc = 9999;
+    var eq = true;
+    var ret = null;
+    for (var i = 0, ci, cl; i < classes.length; i++) {
+        ci = classes[i].replace(rr, "");
+        if (!ci) continue;
+        cl = jb.find('.' + ci).length;
+        if (jc > cl) {
+            jc = cl;
+            ret = ci;
+            eq = i == 0;
         }
-        return n;
+        else if (jc < cl) eq = false;
     }
+    return eq ? null : ret;
+}
+function getTTLRArrowContainerElement(returnSingleSelector) {
+    //右にある右アイコンの親buttonの親divを選びたいが初期状態では存在せず取れない場合があるので、
+    //横に長くて縦が短く画面中央にあってtimebarでないものを選ぶ
+    //var jo = $('[*|href$="/images/icons/chevron_right.svg#svg-body"]:not([href])');
+    var jo = $('div').map(function (i, e) { if (e.clientWidth > window.innerWidth / 2 && e.offsetTop > window.innerHeight / 3 && e.offsetTop < window.innerHeight * 2 / 3) return e; });
+    if (jo.length == 0) return null;
+    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+
+    //特定条件でtimebarも取れるので除外する
+    var ret = getTTtimebarElement();
+    if (ret) {
+        jo = jo.not(ret);
+        if (jo.length == 0) return null;
+        else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+    }
+    for (var i = 0; i < jo.length; i++) {
+        if ($(EXTTtime).find(jo.eq(i)).length > 0) jo = jo.not(jo.eq(i));
+    }
+    if (jo.length == 0) return null;
+    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+
+    for (var i = 0, z; i < jo.length; i++) {
+        z = jo.eq(i).css("z-index");
+        if (z == "auto" || isNaN(parseInt(z)) || parseInt(z) <= 0) jo = jo.not(jo.eq(i));
+    }
+    if (jo.length == 0) return null;
+    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+
+    for (var i = 0, z; i < jo.length; i++) {
+        if (jo.eq(i).offset().left > 50) jo = jo.not(jo.eq(i));
+    }
+    if (jo.length == 0) return null;
+    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+
     return null;
 }
-function getTTLRArrowContainerElement(returnSingleSelector){
-    //右アイコンの親buttonの親divを選ぶ 左アイコンはスクロール左端にいる初期状態では存在しないので無視する
-    // z-indexがautoでないdivを探す方が適切かもしれない
-    var jo=$('[*|href$="/images/icons/chevron_right.svg#svg-body"]:not([href])');
-    if(jo.length==0) return null;
-    var eo=jo[0];
-    var ret=eo.parentElement;
-    while(ret.tagName.toUpperCase()!="BODY"&&eo.tagName.toUpperCase()!="BUTTON"){
-        eo=ep;
-        ret=eo.parentElement;
+function getTTtimebarElement(returnSingleSelector) {
+    //横に長くて縦が短くtopが直接指定されてるのを選ぶ
+    var jo = $('div').map(function (i, e) { if (e.clientWidth > window.innerWidth / 2 && e.clientHeight < 30 && e.style.top != "") return e; });
+    if (jo.length == 0) return null;
+    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+
+    //もし2以上引っかかったら時刻を探す
+    var re = /(^|[^\d])\d{1,2}:\d{2}($|[^\d])/;
+    jo = jo.map(function (i, e) { if (re.test(e.textContent)) return e; });
+    if (jo.length == 0) return null;
+    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+
+    //この時点でまだ取りきれないなら背景を使う
+    var rt = /rgba? *\( *(\d+) *, *(\d+) *, *(\d+)(?: *,\d+ *,?)? *\)/;
+    var jo = $('p').map(function (i, e) { if (e.offsetHeight > 0 && e.offsetHeight < 30 && re.test(e.textContent)) return e; });
+    var ret = null;
+    for (var i = 0, c, e, r, g, b; i < jo.length; i++) {
+        c = jo.eq(i).css("background-color");
+        if (!rt.test(c)) continue;
+        e = rt.exec(c);
+        r = parseInt(e[1]);
+        g = parseInt(e[2]);
+        b = parseInt(e[3]);
+        if ((r < 192 && g < 192 && b < 192) || (r > 64 && g > 64 && b > 64)) continue;
+        ret = jo[i];
+        break;
     }
-    if(ret.tagName.toUpperCase()=="BODY") return null;
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    if (!ret) return null;
+    var p = ret.parentElement;
+    while (p.tagName.toUpperCase() != "BODY" && p.offsetHeight < 30) {
+        ret = p;
+        p = ret.parentElement;
+    }
+    if (p.tagName.toUpperCase() == "BODY") return null;
+    return returnSingleSelector ? getElementSingleSelector(ret) : ret;
+}
+function getTTProgramTimeClasses() {
+    //番組開始の00とか30のクラス とその中のアイコンコンテナ(FREEとかを収納する用)があれば取る
+    //数字2桁をexttbody以外から取ると時間軸と日付も引っかかる
+    var ret = [null, null];
+    var jo = $(EXTTbody).find('div').map(function (i, e) { if (/^\d{2}$/.test(e.textContent)) return e; });
+    var ja = [];
+    for (var i = 0, c, added; i < jo.length; i++) {
+        c = jo.eq(i).prop("class");
+        if (!/\w/.test(c)) continue;
+        c = c.split(/\s/)[0].replace(/^\s+|\s+$/, "");
+        added = false;
+        for (var j = 0; j < ja.length; j++) {
+            if (ja[j][0] != c) continue;
+            ja[j][1]++;
+            added = true;
+            break;
+        }
+        if (!added) {
+            ja[ja.length] = [c, 1];
+        }
+    }
+    if (ja.length == 0) return ret;
+    var t = ja[0][0];
+    var m = ja[0][1];
+    for (var i = 1; i < ja.length; i++) {
+        if (m > ja[i][1]) continue;
+        t = ja[i][0];
+        m = ja[i][1];
+    }
+    ret[0] = t;
+
+    //時刻の後ろでtable-cellなdivのclassを選ぶ
+    var jo = $('.' + t);
+    for (var i = 0, ji; i < jo.length; i++) {
+        ji = jo.eq(i).contents();
+        for (var j = 0, jp; j < ji.length; j++) {
+            if (!/^\d{2}$/.test(ji.eq(j).text())) continue;
+            jp = ji.eq(j).nextAll("div");
+            for (var k = 0, c; k < jp.length; k++) {
+                if (jp.eq(k).css("display") != "table-cell") continue;
+                c = jp.eq(k).prop("class");
+                if (!/\w/.test(c)) continue;
+                ret[1] = c.split(/\s/)[0].replace(/\s+|\s+$/, "");
+                break;
+            }
+            if (ret[1]) break;
+        }
+        if (ret[1]) break;
+    }
+    return ret;
 }
 function getElementSelector(inpElm,includeID,includeClass,includeIndex,remove){
 //includeID true:#idを含める false:含めない
@@ -4365,25 +4555,16 @@ function isComeOpen(sw) {
         bb = hasNotTransformed(jo);//.is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
     }
     var bc = (eo.style.transform == "translateX(0px)");
-    var bd = jo.offset().left < window.innerWidth;
+    var bd = jo.offset().left < window.innerWidth; //少しでも開いてるとtrue
+    var be = jo.offset().left + jo.width() < window.innerWidth + 50; //ほぼ開いてたらtrue
     switch (sw) {
-        case 0:
-            //            return $(EXcome).is('[class*="TVContainer__right-slide--shown___"]');
-            return bb;
-            break;
-        case 1:
-            //            return (EXcome.style.transform=="translateX(0px)");
-            return bc;
-            break;
-        case 2:
-            //            return $(EXcome).is('[class*="TVContainer__right-slide--shown___"]')||(EXcome.style.transform=="translateX(0px)");
-            return bb || bc;
-            break;
-        case 3:
-            return bd;
-            break;
-        default:
+        case 0: return bb; break;
+        case 1: return bc; break;
+        case 2: return bb || bc; break;
+        case 3: return bd; break;
+        case 4: return be; break;
     }
+    return false;
 }
 function isSlideOpen(sw) {
     //    return ($(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==1)?true:false;
@@ -4491,11 +4672,11 @@ function isSideOpen(sw) {
     }
 }
 function otosageru() {
-    if (!EXvolume) { return; }
+    if (!EXvolume) return;
     var teka = document.createEvent("MouseEvents");
     //    var teki=$('[class^="styles__slider-container___"]').children();
     var teki = getVolbarObject();
-    if(teki==null)return;
+    if (teki == null) return;
     var maxvol=teki.parent().height();
     var targetvolume = Math.min(maxvol, Math.max(0, Math.floor(maxvol * changeMaxVolume / 100)));
     teki=teki.parent().parent();
@@ -4505,11 +4686,11 @@ function otosageru() {
     return teki[0].dispatchEvent(teka);
 }
 function moVol(d) {
-console.log("movol "+d);
-    if (!EXvolume) { return; }
+    console.log("movol "+d);
+    if (!EXvolume) return;
     var teka = document.createEvent("MouseEvents");
     var teki = getVolbarObject();
-    if(teki==null)return;
+    if (teki == null) return;
     var orivol = teki.height();
     teki=teki.parent();
     var maxvol=teki.height();
@@ -4521,17 +4702,17 @@ console.log("movol "+d);
     return teki[0].dispatchEvent(teka);
 }
 function otomouseup(p) {
-    if (!EXvolume) { return; }
+    if (!EXvolume) return;
     var teka = document.createEvent("MouseEvents");
     var teki = getVolbarObject();
-    if(teki==null)return;
+    if (teki == null) return;
     teka.initMouseEvent("mouseup", true, true, window, 0, 0, 0, teki.parent().parent().offset().left + 15, p);
     setTimeout(volbar, 100);
     return teki[0].dispatchEvent(teka);
 }
 function otoColor() {
     var jo = $(EXvolume).contents().find('svg');
-    if (jo.length == 0) { return; }
+    if (jo.length == 0) return;
     if (jo.css("fill") == "rgb(255, 255, 255)") {
         jo.css("fill", "red");
         setTimeout(otoColor, 800);
@@ -4541,7 +4722,7 @@ function otoColor() {
 }
 function otoSize(ts) {
     var jo = $(EXvolume).contents().find('svg');
-    if (jo.length == 0) { return; }
+    if (jo.length == 0) return;
     if (jo.css("zoom") == "1") {
         jo.css("zoom", ts);
         setTimeout(otoSize, 400);
@@ -4550,7 +4731,7 @@ function otoSize(ts) {
     }
 }
 function volbar() {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     var jo = $('#forProEndTxt');
     //    if(jo.filter('.forProEndTxt').length==0){
     if (jo.is('.vol')) {
@@ -4606,9 +4787,9 @@ function faintcheck(sw, fcd, bgi) {
     }
 }
 function comeColor(jo, inp) {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     //console.log("comeColor:"+inp);
-    if (!EXfootcountcome) { return; }
+    if (!EXfootcountcome) return;
     //console.log($(EXfootcountcome).css("color"));
     if (inp === undefined) {
         jo.css("display", "none");
@@ -4635,7 +4816,7 @@ function comeColor(jo, inp) {
 }
 function chkcomelist(retrycount) {
     //console.log("chkcomelist#"+retrycount);
-    if($(EXcomelist).length==0)return;
+    if ($(EXcomelist).length == 0) return;
     var comeListLen = EXcomelist.childElementCount;
     if (EXcomelist.firstElementChild.className.indexOf('styles__animation___') >= 0) { comeListLen--; }//冒頭のanimationは数から除外
     //console.log("chkcomelist#"+retrycount+",comelistlen="+comeListLen);
@@ -4683,7 +4864,7 @@ function waitforOpenableCome(retrycount) {
 }
 function waitforCloseSlide(retrycount) {
     //console.log("waitforCloseSlide#"+retrycount);
-    if (comeRefreshing) { return; }
+    if (comeRefreshing) return;
     if (!isSlideOpen()) {
         waitforOpenableCome(5);
     } else if (retrycount > 0) {
@@ -4694,7 +4875,7 @@ function waitforCloseSlide(retrycount) {
 }
 function waitforCloseCome(retrycount) {
     //console.log("waitforCloseCome#"+retrycount);
-    if (comeFastOpen) { return; }
+    if (comeFastOpen) return;
     if (!isComeOpen()) {
         waitforOpenableCome(5);
     } else if (retrycount > 0) {
@@ -4889,7 +5070,7 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
     }
 }
 function openInfo(sw) {
-    if (!EXinfo) { return; }
+    if (!EXinfo) return;
     if (sw) {
         $(EXinfo).css("transform", "translateX(0)");
         proinfoOpened = true; //クリックで解除できるようにする
@@ -4899,18 +5080,18 @@ function openInfo(sw) {
     }
 }
 function createProtitle(sw, bt) {
-    if (!EXcome) { return; }
+    if (!EXcome) return;
     if (sw == 0) {
         if ($("#tProtitle").length == 0) {
             var eProtitle = '<span id="tProtitle" class="usermade" style="';
             //            eProtitle+='position:absolute;right:0;font-size:'+(bt?"medium":"x-small")+';padding:4px 8px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;top:0px;';
             eProtitle += 'font-size:' + (bt ? "medium" : "x-small") + ';position:absolute;top:0px;right:0';
-            eProtitle += '">未取得</span>';
+            eProtitle += '">' + (proTitle ? proTitle : '未取得') + '</span>';
             //            EXcome.insertBefore(eProtitle,EXcome.firstChild);
             $(eProtitle).prependTo(EXcome);
             //番組名クリックで番組情報タブ開閉
             $("#tProtitle").on("click", function () {
-                if (!EXinfo) { return; }
+                if (!EXinfo) return;
                 if (!proinfoOpened) {
                     setTimeout(openInfo, 50, true);
                 } else {
@@ -5080,7 +5261,7 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
 }
 function createTime(sw, bt) {
     //console.log("createTime:"+sw);
-    if (!EXcome) { return; }
+    if (!EXcome) return;
     if (sw == 0) {
         var fsize = bt ? "medium" : "x-small";
         if ($("#forProEndBk").length == 0) {
@@ -5132,9 +5313,9 @@ function proepMousemove() {
     //    var c=parseInt($('#epnumedit input[type="number"][name="epcount"]').val());
     //    if(c<=6){return;}
     var c = parseInt($('#epnumedit input[type="number"][name="epfirst"]').val());
-    if (c <= 0) { return; }
+    if (c <= 0) return;
     var jo = $('#forProEndTxt');
-    if (jo.css("display") == "none") { return; }
+    if (jo.css("display") == "none") return;
     var t = parseFloat(jo.css("opacity"));
     if (t == 0) {
         jo.css("display", "none")
@@ -5656,7 +5837,7 @@ function setOptionHead() {
     console.log("setOptionHead ok");
 }
 function setOptionElement() {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
 
     if (isCustomPostWin) {
         $(EXcomesendinp).prop("wrap", "soft");
@@ -5800,11 +5981,11 @@ function waitforResize(retrycount, jo, w){//, h) {
     }
 }
 function usereventVolMousemove() {
-    if (!EXside) { return; }
+    if (!EXside) return;
     $(EXside).css("transform", "translate(50%,-50%)");
 }
 function usereventVolMouseout() {
-    if (!EXside) { return; }
+    if (!EXside) return;
     $(EXside).css("transform", "translate(0px,-50%)");
 }
 function usereventVolClick() {
@@ -5816,7 +5997,7 @@ function usereventVolClick() {
 }
 function usereventFCMouseleave() {
     //console.log("ueFCMouseleave");
-    if (!EXfootcome) { return; }
+    if (!EXfootcome) return;
     $(EXfootcome).css("transition", "")
         .css("background-color", "")
         ;
@@ -5876,7 +6057,7 @@ function chkFCbgc(retrycount) {
 }
 function usereventFCMousemove() {
     //console.log("ueFCMousemove");
-    if (!EXfootcome || !isManualMouseBR) { return; }
+    if (!EXfootcome || !isManualMouseBR) return;
     if (cmblockcd != 0 && Math.abs(cmblockcd * 100 % 100) != 63) {
         if ($(EXfootcome).css("transition") != "background-color 1.2s linear 0s") {
             $(EXfootcome).css("transition", "background-color 1.2s linear 0s")
@@ -5901,8 +6082,8 @@ function waitforComemukouEnd(url) {
     //コメ欄常時開でComeMukou中に放送中一覧を閉じた場合、overlapをクリックしないために映像縮小が解除されない
     //そのままだとComeMukouが終わっても縮小が解除されないので、ComeMukouが終わるのを待つ
     //長時間になるので無限再試行が適切に終了されるようにする
-    if (checkUrlPattern(true) != 3) { return; }
-    if (url != currentLocation) { return; }
+    if (checkUrlPattern(true) != 3) return;
+    if (url != currentLocation) return;
     if (isSureReadComment && isFootcomeClickable()) {
         setTimeout(overlapTriggerClick, 20);
     } else {
@@ -6047,7 +6228,7 @@ function usereventSendInpKeyinput() {
     $(EXcomesendinp).scrollTop(s);
 }
 function comeModuleEditor() {
-    if(EXcomemodule) return;
+    if (EXcomemodule) return;
     var ret=getComeModuleElements();
     if(!ret[0]||!ret[1]||!ret[2]){
         console.log("retry comeModuleEditor");
@@ -6077,10 +6258,10 @@ function comeModuleEditor() {
     }
 }
 function setOptionEvent() {//放送画面用イベント設定
-    if (checkUrlPattern(true) != 3) { return; }
+    if (checkUrlPattern(true) != 3) return;
     //自作要素のイベントは自作部分で対応
     //console.log("setOptionEvent() eventAdded:", eventAdded);
-    if (eventAdded) { return; }
+    if (eventAdded) return;
     var butfs;
     var pwaku;
     if (((butfs = EXfullscr) == null) || ((pwaku = $(overlapSelector)[0]) == null) || !EXcome) {
@@ -6249,17 +6430,20 @@ function startCM() {
 }
 function endCM() {
     console.log("endCM");
-    if (bginfo[1].length != 0) { return; }
+    if (bginfo[1].length == 2) return;
     if (isCMBlack) { screenBlackSet(0); }
     if (isCMsoundoff) { soundSet(true); }
     if (CMsmall < 100) { movieZoomOut(0); }
 }
-function tryCM() {
-    if (bginfo[1].length != 0) { return; }
-    bginfo[2] = 0;
-    if (cmblockcd * 100 % 10 != -3) {
-        cmblockcd = 0;
-        endCM();
+function tryCM(retrycount) {
+    if (isFootcomeClickable()) {
+        bginfo[2] = 0;
+        if (cmblockcd * 100 % 10 != -3) {
+            cmblockcd = 0;
+            endCM();
+        }
+    } else if (retrycount > 0) {
+        setTimeout(tryCM, 500, retrycount - 1);
     }
 }
 function fastEyecatching(retrycount) {
@@ -6376,8 +6560,8 @@ function comehl(jo, hlsw) {
 }
 function copycome(d, hlsw) {
 //console.log("copycome d="+d);
-    if (isComelistMouseDown) { return; }//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
-    if (!EXcomelist) { return; }
+    if (isComelistMouseDown) return;//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
+    if (!EXcomelist) return;
     if (!isComelistNG) {
         $('#copycome').remove();
         $(EXcomelist).parent().css("display", "");
@@ -6398,7 +6582,7 @@ function copycome(d, hlsw) {
         if ((comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) return;
         //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
         var eofcc = $(eofc).prop("class");
-        if (eofc === undefined || !eofc.hasChildNodes()) { return; }
+        if (eofc === undefined || !eofc.hasChildNodes()) return;
         var em = eofc.children[0];
         var ecm = $(em).prop("class");
         var et = eofc.children[1];
@@ -6510,7 +6694,7 @@ function copycome(d, hlsw) {
             if (hlsw > 0) {
                 comehl(jc.slice(0, ma.length), hlsw);
             }
-            if ((isDelOldTime || isDelTime) && isComeOpen(3) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
+            if ((isDelOldTime || isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
         }
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
     } else if (d === undefined || copycomecount > 0) {
@@ -6549,7 +6733,7 @@ function copycome(d, hlsw) {
             }
         }
         //console.timeEnd('fullcp_loop')
-        if ((isDelOldTime || isDelTime) && isComeOpen(3) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
+        if ((isDelOldTime || isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
         if (--copycomecount > 0) {
             //番組ページ読込直後か番組開始直後でcopycomeに残ったままのコメントをfullcopyで上書き消去する
@@ -6562,6 +6746,7 @@ function comewidthfix(i, h) {
 // コメ欄のwidth:unsetによって文字列分の幅になっているコメントが右コントロールと被っていたら縮める
 // スクロールするごとに改行位置を変えるのは忙しすぎるのでスクロール状態は無視する
 // コメ欄がスクロール状態でも未スクロールと同様に動作させるためtopの使用は避けてheightを加算している
+    //微妙に閉じてる時に作動すると酷いことになるので注意する(呼出時に)
     if (!(i <= 100)) return;
     if (i == 0) {
         if (isInpWinBottom)
@@ -6595,13 +6780,11 @@ function comewidthfix(i, h) {
 }
 // コメ欄クリック時に呼び出され、NGワード追加画面表示
 function comecopy() {
-console.log("comecopy");
-    if (!isComelistClickNG) { return; }
+    console.log("comecopy");
+    if (!isComelistClickNG) return;
     var jo = $('.comem');
-    if (jo.length == 0) {
-        //jo = $(EXcomelist);
-        return;
-    }
+    if (jo.length == 0) return;
+
     //var eo = jo[0];
     var r = /rgba?\((\d+), (\d+), (\d+)(, \d?(?:\.\d+)?)?\)/;
     var s = "";
@@ -6646,7 +6829,7 @@ console.log("comecopy");
 }
 function paintcopyot(mode) {
     //mode 0:色除去 1:青 2:黄 3:赤
-    if ($('#copyot').length == 0) { return; }
+    if ($('#copyot').length == 0) return;
     if (mode == 0) {
         $('#copyot').css("color", "");
         return;
@@ -6677,7 +6860,7 @@ function paintcopyot(mode) {
 }
 function paintcopyotw(mode) {
     //mode 0:色除去 1:青 2:黄 3:赤
-    if ($('#copyotw').length == 0) { return; }
+    if ($('#copyotw').length == 0) return;
     if (mode == 0) {
         $('#copyotw').css("background-color", "");
         return;
@@ -6820,7 +7003,7 @@ function appendNGpermanent() {
 function copyotuncolor(mode) {
     //mode 1:一時登録 2:permanent
     //一時登録から呼んだ時(mode=1)にcomeNGmodeが1でない場合、NGボタンを2度押したのでmode=1での実行は中止する
-    if (mode == 1 && comeNGmode == 2) { return; }
+    if (mode == 1 && comeNGmode == 2) return;
     comeNGmode = 0;
     $('#copyot').val("");
     $('#textNG').css("pointer-events", "");
@@ -7153,9 +7336,11 @@ function onairBasefunc() {
         if (EXinfo) {
             var jo = $(EXinfo).contents().find('h2');
             if (jo.length > 0) {
-                if (proTitle != jo.first().text()) {//if ($('#tProtitle').text() != jo.first().text()) {
-                    proTitle = jo.first().text();
-                    if(isProtitleVisible){
+                var tp = jo.first().text();
+                if (tp && proTitle != tp) {
+                    //if (proTitle != jo.first().text()) {//if ($('#tProtitle').text() != jo.first().text()) {
+                    proTitle = tp;
+                    if (isProtitleVisible) {
                         $('#tProtitle').text(proTitle);
                     }
                     copycomecount = 2;
@@ -7164,7 +7349,7 @@ function onairBasefunc() {
                     $(EXinfo).children('#copyinfo').remove();
                     $(EXinfo).children().not('#copyinfo').first().clone().removeClass().addClass('usermade').prop("id", "copyinfo").appendTo($(EXinfo));
                     //番組情報のSNSボタンのイベント設定
-                    $('#copyinfo ul>li button').click(function (e){
+                    $('#copyinfo ul>li button').click(function (e) {
                         $(EXinfo).children().not('#copyinfo').first().find('ul>li button').eq($(e.target).parent().index()).trigger('click');
                     });
                 }
@@ -7283,7 +7468,7 @@ function onCommentChange(mutations){
                 isAnimationAdded = true;
             }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0) {
                 isAnimationAdded = true;
-            }else if (comelistClasses.animated && !comelistClasses.stabled && eo.childElementCount>1 && eo.children[1].tagName.toUpperCase() == "P" && (eo.children[1].innerText.indexOf("今")>=0 || eo.children[1].innerText.indexOf("秒前")>=0 || eo.children[1].innerText.indexOf("分前")>=0)) {
+            }else if (comelistClasses.animated && !comelistClasses.stabled && eo.childElementCount > 1 && eo.children[1].tagName.toUpperCase() == "P" && (eo.children[1].textContent.indexOf("今") >= 0 || eo.children[1].textContent.indexOf("秒前") >= 0 || eo.children[1].textContent.indexOf("分前") >= 0)) {
                 comelistClasses.stabled = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 comelistClasses.message = eo.children[0].className;
                 comelistClasses.posttime = eo.children[1].className;
@@ -7413,8 +7598,8 @@ function chkurl() {
         endCM();
         proStart = new Date();
         proEnd = new Date();
-        proTitle = "未取得";
-        $('#tProtitle').text(proTitle);
+        proTitle = "";
+        $('#tProtitle').text("未取得");
         $('#copycome').remove();
 
         checkUrlPattern(currentLocation);
@@ -7599,7 +7784,7 @@ function programTimeStrToTime(programTimeStr) {
     return programTime;
 }
 function putNotifyButton(url) {
-    if (checkUrlPattern(true) != 0) { return; }
+    if (checkUrlPattern(true) != 0) return;
     var divs = $("div");
     var contentsWrapper;
     var rightContents;
@@ -7628,7 +7813,7 @@ function putNotifyButton(url) {
     putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, leftContnts.children('div'));
 }
 function putSerachNotifyButtons() {
-    if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) { return; }
+    if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) return;
     var listWrapper = $('div[role=list]');
     var listItems = $('a[role=listitem]');
     var noContentText = '該当する放送予定の番組はありませんでした';
@@ -7652,7 +7837,7 @@ function putSerachNotifyButtons() {
     });
 }
 function putReminderNotifyButtons() {
-    if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) { return; }
+    if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) return;
     var listWrapper = $('div[role=list]');
     var listItems = $('a[role=listitem]');
     var featureText = '見たい番組を見逃さないためには';//公式通知登録一覧で何も登録してないときの機能紹介文
@@ -7682,7 +7867,7 @@ function putReminderNotifyButtons() {
 function putSideDetailNotifyButton(){
     //console.log('putSideDetailNotifyButton()');
     var sideDetailWrapper = $(EXTTsideR);
-    if(sideDetailWrapper.length == 0||sideDetailWrapper.offset().left>window.innerWidth-50){return;}
+    if (sideDetailWrapper.length == 0 || sideDetailWrapper.offset().left > window.innerWidth - 50) return;
     console.log('put side notify button');
     var fp=sideDetailWrapper.find('p');//番組詳細,タイトル,日時,見逃し云々?
     var progTitle;
@@ -7694,13 +7879,13 @@ function putSideDetailNotifyButton(){
         progTitle=$('zo_bq').text();
         progTime = programTimeStrToTime($('.zo_hs').text()); //todo
     }
-    var fa=sideDetailWrapper.find('a').map(function(i,e){if(e.innerHTML.indexOf("詳細")==0)return e;});//a 放送中なら放送画面リンク,詳細をもっとみる
+    var fa = sideDetailWrapper.find('a').map(function (i, e) { if (e.textContent.indexOf("詳細") == 0) return e; });//a 放送中なら放送画面リンク,詳細をもっとみる
     var progLinkArr;
     if(fa.length>0) progLinkArr = fa.first().attr("href").split('/');
     else progLinkArr=$('.zo_zu').attr("href").split('/'); //todo
 //    var channel = progLinkArr[2];
     var urlchan = progLinkArr.indexOf("channels");
-    if (urlchan < 0) { return; }
+    if (urlchan < 0) return;
     var channel = progLinkArr[urlchan + 1];
     var channelName = getChannelNameOnTimetable(channel);
 //    var progID = progLinkArr[4];
@@ -7716,68 +7901,43 @@ chrome.runtime.onMessage.addListener(function (r) {
     //console.log(r);
     if (r.name == "bgsend") {
         if (r.type == 0) {
-            //console.log("ts,"+r.value+"p");
             bginfo[0] = r.value;
-            if (bginfo[2] != 0) {
-                if (bginfo[2] == -1) {
-                    //console.log("tryCM bginfo[2]= -1");
-                    setTimeout(tryCM, 500);
-                }
-                if (bginfo[1].length > 0 && bginfo[1][2] - bginfo[1][1] > 5) {
-                    //console.log("bginfo[2]= "+bginfo[2]+" -> 3");
-                    bginfo[2] = 3;
-                }
-            }
+            if (bginfo[2] < 0) bginfo[2] = 0;
+            else if (bginfo[2] == 2) bginfo[2] = 3;
         } else if (r.type == 1) {
-            //console.log("nowcm#"+r.value[0]+","+r.value[1]+"/"+r.value[2]);
             if (r.value[1] < r.value[2]) {
                 var b = false;
-                if (bginfo[1].length == 0) {
-                    b = true;
-                } else {
-                    if (r.value[0] == bginfo[1][0] && r.value[1] > bginfo[1][1]) {
-                        b = true;
-                    } else if (r.value[0] > bginfo[1][0]) {
-                        b = true;
-                    }
+                if (bginfo[1].length == 0) b = true;
+                else {
+                    if (r.value[0] == bginfo[1][0] && r.value[1] > bginfo[1][1]) b = true;
+                    else if (r.value[0] > bginfo[1][0]) b = true;
                 }
                 if (b) {
                     bginfo[1] = [r.value[0], r.value[1], r.value[2]];
-                }
-                if (bginfo[2] <= 1) {
-                    //console.log("bginfo[2]= "+bginfo[2]+" -> 2");
-                    bginfo[2] = 2;
-                    if (cmblockcd * 100 % 10 != 3) {
-                        cmblockcd = 0;
-                        startCM();
+                    cmblockcd = r.value[1] - r.value[2] - 1;
+                    b = false;
+                    if (bginfo[2] <= 1) {
+                        bginfo[2] = 2;
+                        if (cmblockcd * 100 % 10 != 3) b = true;
                     }
+                    if (!isCMBkR && !isCMsoundR && !isCMsmlR) b = true;
+                    if (b) startCM();
+                    if (bginfo[1][0] > 0 && bginfo[1][1] == 0) setTimeout(tryCM, 500, 5);
                 }
-                cmblockcd = r.value[1] - r.value[2] - 1;
-                if (!isCMBkR && !isCMsoundR && !isCMsmlR) startCM();
             } else if (r.value[1] == r.value[2]) {
-                if (bginfo[1].length > 0 && r.value[0] == bginfo[1][0]) {
-                    bginfo[1] = [];
-                }
+                if (bginfo[1].length > 0 && r.value[0] == bginfo[1][0]) bginfo[1] = [];
                 if (bginfo[1].length == 0) {
                     if (bginfo[2] == 3) {
-                        //console.log("bginfo[2]= 3 -> 0");
                         bginfo[2] = 0;
                         if (cmblockcd * 100 % 10 != -3) {
                             cmblockcd = 0;
                             endCM();
                         }
-                    } else {
-                        //console.log("tryCM bginfo[2]= "+bginfo[2]);
-                        setTimeout(tryCM, 500);
-                    }
+                    } else setTimeout(tryCM, 500);
                 }
             }
         } else if (r.type == 2) {
-            //console.log("precm");
-            if (bginfo[1].length == 0) {
-                //console.log("bginfo[2]= "+bginfo[2]+" -> 1");
-                bginfo[2] = 1;
-            }
+            if (bginfo[2] < 1) bginfo[2] = 1;
         }
     } else if (r.name == "addNGword") {
         appendTextNG(null, r.word);
