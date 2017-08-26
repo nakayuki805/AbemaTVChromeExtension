@@ -36,7 +36,8 @@
 		"prognotifies.html",
 		"icon/gear.svg",
 		"icon/mastodon-icon.svg",
-		"icon/mastodon-icon-blue.svg"
+		"icon/mastodon-icon-blue.svg",
+		"page-injection.js"
 	],
 	"background": {
 		"scripts": ["jquery-2.2.3.min.js", "event.js"]

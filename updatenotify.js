@@ -9,11 +9,9 @@ if (typeof chrome === "undefined" || !chrome.extension) {
 var currentUpdateNotifyVersion = 14;//0.12.0の時
 var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
-    "仕様変更にとりあえず対応しましたがまだ不安定な可能性があります",
+    "仕様変更に対応しましたがまだ不安定な可能性があります",
     "最近追加された機能(※デフォルト無効):",
-    "通知ポップアップが自動で消えない設定※",
-    "音声停止から一定時間経つと再起動",
-    "メールやLINE Notifyへの番組開始通知に対応※",
+    "番組表を掴んで移動",
     "などの機能が追加されています。",
     "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
     "<span style='font-size:small'>コメント流しが<b>重い場合</b>はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を低めの値(数百)にすると軽減されます。",

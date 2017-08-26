@@ -29,7 +29,8 @@
 		"prognotifies.html",
 		"icon/gear.svg",
 		"icon/mastodon-icon.svg",
-		"icon/mastodon-icon-blue.svg"
+		"icon/mastodon-icon-blue.svg",
+		"page-injection.js"
 	],
 	"options_page": "option.html",
 	"background": {

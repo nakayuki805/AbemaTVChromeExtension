@@ -7034,6 +7034,8 @@ function mainfunc() { //初回に一度実行しておけば後でURL部分が�
     // jqueryを開発者コンソールから使う
     var jquerypath = chrome.extension.getURL("jquery-2.2.3.min.js");
     $("<script src='" + jquerypath + "'></script>").appendTo("head");
+    var injectionpath = chrome.extension.getURL("page-injection.js");
+    $("<script src='" + injectionpath + "'></script>").appendTo("head");
     //URLパターンチェック
     checkUrlPattern(location.href);
     //ウィンドウをリサイズ
@@ -7601,6 +7603,7 @@ function chkurl() {
         proTitle = "";
         $('#tProtitle').text("未取得");
         $('#copycome').remove();
+        location.href = 'javascript:injection_urlChanged();';//page-injection.jsの関数
 
         checkUrlPattern(currentLocation);
     }
