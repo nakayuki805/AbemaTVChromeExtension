@@ -634,8 +634,8 @@ function waitforloadtimetable(url) {
     }
 
     j=dd.map(function(i,e){
-        var b=e.getBoundingClientRect(); //ボディ探索　でかいやつ
-        if(b.top<window.innerHeight/4&&b.left<window.innerWidth/4&&b.width>window.innerWidth/2&&b.height>window.innerHeight/2&&$(e).children("div").length>5)return e;
+        var b=e.getBoundingClientRect(); //ボディ探索　でかいやつ left判定で左CHリスト幅の226を引く
+        if(b.top<window.innerHeight/4&&(b.left-226)<window.innerWidth/4&&b.width>window.innerWidth/2&&b.height>window.innerHeight/2&&$(e).children("div").length>5)return e;
     });
     if(j.length>=0) EXTTbody=j[0];
     else if(alt){
@@ -1304,7 +1304,7 @@ function onresize() {
     tar.css("width",zz+"%").css("height",zz+"%");
     //console.log("tar", tar,zz)
 
-    var r = tar[0].style.transform.replace(/\s*translate(X|Y)\(\d*(\.\d+)?(px|vw|%)\)/g, "").replace(/^\s+|\s+$/g, "");
+    var r = tar[0].style.transform.replace(/\s*translate(X|Y)\([-0-9]*(\.[-0-9e]+)?(px|vw|%)\)/g, "").replace(/^\s+|\s+$/g, "");
     switch (posiHType) {
         case 0: r += resizeType > 0 ? " translateX(" + ((window.innerWidth - t.v.w) / 2 - t.v.l) + "px)" : ""; break;
         case 1: r += " translateX(" + (-t.v.l) + "px)"; break;
@@ -1467,6 +1467,7 @@ function toggleFullscreen() {
     chrome.runtime.sendMessage({type: 'toggleFullscreen', mode: 'toggle', oldState: oldWindowState}, function(response){
         oldWindowState = response.oldState;
     });
+    setTimeout(onresize, 1000);
 }
 function getChannelByURL() {
     return (location.href.match(/https:\/\/abema\.tv\/now-on-air\/([-\w]+)/) || [null, null])[1];
@@ -5825,7 +5826,7 @@ function setOptionHead() {
     //黒帯パネルの透過
     if(selHead&&selFoot){
         t += selFoot+'>div>div:nth-child(3),'+selHead+'{background:rgba(0,0,0,' + (settings.panelOpacity/255) + ')}';
-        t += selFoot+'>div>div:nth-child(3)>*,'+selHead+'>*{opacity:' + (settings.panelOpacity/255) + '}';
+        t += selFoot+'>div>div:nth-child(3)>*,'+selHead+'>*{opacity:' + ((settings.panelOpacity/255<0.7)?0.7:(settings.panelOpacity/255)) + '}';
     }
  
     //t += selHead+'{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
