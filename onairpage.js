@@ -712,9 +712,9 @@ function waitforloadtimetable(url) {
         //番組表クリックで右詳細に通知登録ボタン設置
         $(EXTTbody).click(function(e){ // 掴んでスクロールした場合番組詳細は開かないことにする
             if(!timetableGrabbing.scrolled){
-                setTimeout(putSideDetailNotifyButton,50);
+                setTimeout(putSideDetailNotifyButton,100);
                 if (isPutSideDetailHighlight) {
-                    setTimeout(putSideDetailHighlight,50);
+                    setTimeout(putSideDetailHighlight,100);
                 }
             }else{
                 e.preventDefault();
@@ -2181,7 +2181,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
 }
 function delaysetNotOA(){
     var hoverContents = getMenuObject();
-    if(hoverContents==null) hoverContents=$('.Fb_Fi'); //todo
+    if(hoverContents==null) hoverContents=$('.zC_zJ'); //todo
     if (hoverContents.children().length == 0) {
         console.log("delaysetNotOA retry");
         setTimeout(delaysetNotOA, 1000);
@@ -2191,8 +2191,8 @@ function delaysetNotOA(){
     var hoverLinkClass = hoverContents.children('a')[0].className;
     var hoverSpanClass = hoverContents.children('a').children('span')[0].className;
     //console.log(hoverContents,hoverContents.children(),hoverLinkClass)
-    if ($(EXmenu).children('#extSettingLink').length == 0) {
-        $(EXmenu).append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
+    if (hoverContents.children('#extSettingLink').length == 0) {
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
             .append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>')
             ;
     }
@@ -4070,7 +4070,7 @@ function getMenuObject() {
         if (ilinkp == tlinkp) {
             tlinkc++;
         } else {
-            if (tlinkc > 0) {
+            if (tlinkc > 6) {//6以上のリンクを持つものに限る
                 alinks[alinks.length] = [tlinkp, tlinkc];
             }
             tlinkp = ilinkp;
@@ -7723,7 +7723,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
         var progNotifyName = "progNotify_" + channel + "_" + programID;
         var notifyButton = $('<div class="addNotify" data-prognotifyname="' + progNotifyName + '"></div>');
         if (!notifyButParent.children().is('.addNotify')) { //重複設置の防止
-            notifyButton.appendTo(notifyButParent);
+            notifyButton.prependTo(notifyButParent);
         }
         getStorage(progNotifyName, function (notifyData) {
             //console.log(notifyData, progNotifyName)
@@ -7792,9 +7792,9 @@ function putNotifyButton(url) {
     var contentsWrapper;
     var rightContents;
     var leftContnts;
-    var j=divs.map(function(i, e){//大きくて子要素が２つ
+    var j=divs.map(function(i, e){//大きくて子要素が２つでmain直下じゃないもの
         var rect = e.getBoundingClientRect();
-        if(rect.top<window.innerHeight/4&&rect.left<window.innerWidth/4&&rect.width>1000/2&&rect.height>window.innerHeight/2&&$(e).children().length==2)return e;
+        if(rect.top<window.innerHeight/4&&rect.left<window.innerWidth/4&&rect.width>1000/2&&rect.height>window.innerHeight/2&&$(e).children().length==2&&!$(e).parent().is('main'))return e;
     });
     if(j.length>0){contentsWrapper=j;}
     else{
@@ -7812,8 +7812,9 @@ function putNotifyButton(url) {
     var programTimeStr = titleElement.nextAll().eq(2).text();
     //console.log(programTimeStr, urlarray)
     var programTime = programTimeStrToTime(programTimeStr);
-    console.log(programTime)
-    putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, leftContnts.children('div'));
+    //console.log(programTime)
+    var butParent = $('<span class="addNotifyWrapper"></span>').insertAfter(leftContnts.children('div').children('div').eq(0));
+    putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
 }
 function putSerachNotifyButtons() {
     if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) return;
