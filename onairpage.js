@@ -139,6 +139,8 @@ var audibleReloadWait = 20; // タブの音声再生が停止してからタブ�
 var isDAR43 = false;//映像リサイズ4:3処理モード
 var isReplaceIcons = false; // 番組表のタイトル接頭接尾アイコンを開始時刻下に収納
 
+var changeDisableExtBtnVal = ''; //拡張機能の動作を停止するバージョン
+
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
 //chrome.storageの関数
@@ -279,6 +281,7 @@ getStorage(null, function (value) {
     audibleReloadWait = (value.audibleReloadWait !== undefined) ? value.audibleReloadWait : 20;
     isDAR43 = value.DAR43 || false;
     isReplaceIcons = value.replaceIcons || false;
+    disableExtVersion = value.disableExtVersion || "";
 });
 
 var currentLocation = window.location.href;
@@ -395,6 +398,7 @@ var isSoundFlag = true; //音が出ているか soundSet(isSound)のisSoundを�
 var timetableGrabbing = {value:false,cx:0,cy:0,test:false,sx:0,sy:0,scrolled:false,}; //番組表を掴む
 var comelistClasses = { stabled: "", animated: "", empty: "", message: "", posttime: "", };
 var timetableClasses = { arrow: "", timebar: "", };//ページ遷移直後に取得できないので初回取得時に保持する getSingleSelectorの結果を入れるので使用時は.を付けない
+var currentVersion = chrome.runtime.getManifest().version;
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -4070,7 +4074,7 @@ function getMenuObject() {
         if (ilinkp == tlinkp) {
             tlinkc++;
         } else {
-            if (tlinkc > 6) {//6以上のリンクを持つものに限る
+            if (tlinkc > 5) {//6以上のリンクを持つものに限る
                 alinks[alinks.length] = [tlinkp, tlinkc];
             }
             tlinkp = ilinkp;
@@ -7021,11 +7025,21 @@ function closecotwclick() {
     $(EXcomesendinp.parentElement).css("display", "");
     $(EXcomesend).css("padding-left", "");
 }
-if (isEdge) {
-    mainfunc();
-} else {
-    $(window).on('load', mainfunc);
-}
+
+getStorage(['disableExtVersion'], function(val){
+    if(val.disableExtVersion !== currentVersion){
+        if (isEdge) {
+            mainfunc();
+        } else {
+            $(window).on('load', mainfunc);
+        }
+    }else{
+        var csspath = chrome.extension.getURL("onairpage.css");
+        $("<link rel='stylesheet' href='" + csspath + "'>").appendTo("head");
+        toast('現在のバージョンの拡張機能は動作が停止されています。');
+    }
+});
+
 //URLによって実行内容を変更すべく各部を分離
 function mainfunc() { //初回に一度実行しておけば後でURL部分が変わっても大丈夫なやつ
     console.log("loaded");
@@ -7584,7 +7598,7 @@ $(window).on("resize", onresize);
 //event.jsでonHistoryStateUpdatedでページ推移を捕捉してるが念の為に10秒ポーリング(AbemaTV開いたまま拡張アップデートされたときとか)
 setInterval(chkurl, 10000);
 function chkurl() {
-    if (currentLocation != window.location.href) {
+    if (currentLocation != window.location.href && disableExtVersion !== currentVersion) {
         previousLocation = currentLocation;
         currentLocation = window.location.href;
         console.log("%curl changed", "background-color:yellow;");

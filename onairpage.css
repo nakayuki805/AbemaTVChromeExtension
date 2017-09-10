@@ -108,6 +108,7 @@ body{
     color: white;
     opacity: 0.8;
     border-radius: 20px;
+    border-color: white;
     position: fixed;
     top: 10%;
     left: 50%;
@@ -162,10 +163,10 @@ body{
     opacity: 0.7;
 }
 /*通知登録済み番組背景*/
-.registeredProgs [class*="style__status-future___"]{
+.registeredProgs>button>div{
     background-color:rgba(255,238,187,0.7);
 }
-.registeredProgs [class*="style__status-future___"]:hover{
+.registeredProgs>button>div:hover{
     background-color:rgba(250,233,182,0.7);
 }
 /*チャンネル別番組表で番組の枠を広げたときに途中までしかスクロールできない問題に対応*/

@@ -612,9 +612,10 @@ $(function(){
     });
     //通知登録番組一覧リンク書き換え
     $("#prognotifiesLink").attr("href", chrome.extension.getURL("prognotifies.html"));
-    //不具合報告フォーム
+    
    // $('#reportBugFormBtn').click(function(){
     chrome.storage.local.get(function(value){
+        //不具合報告フォーム
         var sendVal = {};
         for (var key in value) {
             if (key.indexOf("progNotify")<0) {//通知登録データは除外
@@ -638,6 +639,28 @@ $(function(){
         sendInfo += "\n***ここまで***";
         $('#atachedInfo').val(sendInfo);
         //$('#reportBugForm').submit();
+        
+        //バージョンによる拡張機能の動作停止
+        var disableExtVersion = value.disableExtVersion || '';
+        var currentVer = chrome.runtime.getManifest().version;
+        function changeDisableExtBtnVal(){
+            if(disableExtVersion==currentVer){
+                $('#disableExtensionBtn').val('現在のバージョンで拡張機能の動作を再開(停止中)');
+            }else{
+                $('#disableExtensionBtn').val('現在のバージョンで拡張機能の動作を停止');
+            }
+        }
+        changeDisableExtBtnVal();
+        $('#disableExtensionBtn').click(function(){
+            var btnStr = '現在のバージョンで拡張機能の動作を停止';
+            if(disableExtVersion==currentVer){
+                disableExtVersion = '';
+                chrome.storage.local.set({'disableExtVersion': ''}, changeDisableExtBtnVal);
+            }else{
+                disableExtVersion = currentVer;
+                chrome.storage.local.set({'disableExtVersion': currentVer}, changeDisableExtBtnVal);
+            }
+        });
     });
     //});
     //設定をエクスポート
