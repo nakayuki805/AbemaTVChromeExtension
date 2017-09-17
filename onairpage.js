@@ -634,8 +634,8 @@ function waitforloadtimetable(url) {
     }
 
     j=dd.map(function(i,e){
-        var b=e.getBoundingClientRect(); //ボディ探索　でかいやつ left判定で左CHリスト幅の226を引く
-        if(b.top<window.innerHeight/4&&(b.left-226)<window.innerWidth/4&&b.width>window.innerWidth/2&&b.height>window.innerHeight/2&&$(e).children("div").length>5)return e;
+        var b=e.getBoundingClientRect(); //ボディ探索　でかいやつ(ただしチャンネル選択時に幅を調整するので幅では判定しない)でdiv>div>articleがあるやつ left判定で左CHリスト幅の226を引く
+        if(b.top<window.innerHeight/4&&(b.left-226)<window.innerWidth/4&&b.height>window.innerHeight/2&&$(e).children("div").length>5&&$(e).find('div>div>article').length>0)return e;
     });
     if(j.length>=0) EXTTbody=j[0];
     else if(alt){
@@ -705,6 +705,13 @@ function waitforloadtimetable(url) {
     }
 
     if (EXTThead!=null && EXTTbody!=null && EXTTsideR!=null&&EXTTsideL!=null&&EXTTtime!=null &&EXTTbodyS!=null) {
+        addExtClass(EXTThead, 'tt-head');
+        addExtClass(EXTTbody, 'tt-body');
+        addExtClass(EXTTsideR, 'tt-side-r');
+        addExtClass(EXTTsideL, 'tt-side-l');
+        addExtClass(EXTTtime, 'tt-time');
+        addExtClass(EXTTbodyS, 'tt-body-s');
+        allowChannelNumMaker();
 //        if (currentLocation.indexOf("https://abema.tv/timetable/channels/") == 0) {
         if (c == 2) {
             setTimeout(timetablechfix, 100);
@@ -725,7 +732,6 @@ function waitforloadtimetable(url) {
                 e.stopImmediatePropagation();
             }
         });
-        allowChannelNumMaker();
         timetableCss();
         //$('div')を取ってきてあるのでここで使う
         dd.map(function(i,e){if($(e).css("z-index")>10 && e.className.indexOf('toast')<0)return e;}).css("z-index","-1");
@@ -795,6 +801,11 @@ function putSideDetailHighlight() {
     sideDetailWrapper.css("overflow-x", "hidden");
 }
 function timetabledtfix() {
+    if (EXTThead.childElementCount > EXTTbody.childElementCount){
+        console.log('retry timetabledtfix()');
+        setTimeout(timetabledtfix, 500);
+        return;
+    }
     //console.log("timetabledtfix");
     //日付別番組表
     //今はオプション1つのみだがチャンネル別のコピー
@@ -812,31 +823,52 @@ function timetabledtfix() {
         timetabledtloop();
     }
     console.log(allowChannelNum)
+    var channelLink = $(EXTThead).children('a').eq(0);
+    var chlinkWidth = 176;
+    var isTimetableScroll = false;
     if (timetableScroll != "") {
-        var channelLink = $(EXTThead).children('a[href$="/timetable/channels/' + timetableScroll + '"]');
+        channelLink = $(EXTThead).children('a[href$="/timetable/channels/' + timetableScroll + '"]');
         if (channelLink.length > 0) {
-            var chLinkIndex = channelLink.index();
-            var chLinkWidth = channelLink.width();
-            var visibleChLinkIndex = chLinkIndex;
-            if (allowChannelNum.length > 0) {
-                chLinkWidth = channelLink.siblings().eq(allowChannelNum[0]).width();//allowChannelに含まれないチャンネルのchannelLinkから幅を取得するとずれる
-                visibleChLinkIndex = 0;
-                for(var i = 0; i < allowChannelNum.length; i++){
-                    if (allowChannelNum[i] < chLinkIndex) {
-                        visibleChLinkIndex++;
-                    }else {
-                        break;
-                    }
-                }
-                $(EXTTbody).parent().parent().parent().parent().scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbody).width()+20));
-            }else{
-                $(EXTTbody).parent().parent().parent().parent().scrollLeft(chLinkWidth * visibleChLinkIndex);
-            }
-            //console.log(chLinkWidth,visibleChLinkIndex,chLinkWidth * visibleChLinkIndex, allowChannelNum);
+            isTimetableScroll = true;
         } else {
-            console.warn("timetable scroll failed. (channelLink not found: チャンネル名が正しくないか仕様変更)");
+            channelLink = $(EXTThead).children('a').eq(0);
+            console.warn("timetable scroll error. (channelLink not found: チャンネル名が正しくないか仕様変更)");
         }
     }
+    var chLinkIndex = channelLink.index();
+    chLinkWidth = $(EXTTbody).children().eq(chLinkIndex).outerWidth();//channelLink.width();
+    var visibleChLinkIndex = chLinkIndex;
+    var axisWidth = $(EXTTtime).width();
+    if (allowChannelNum.length > 0) {
+        //chLinkWidth = $(EXTTbody).children().eq(allowChannelNum[0]).width();//channelLink.siblings().eq(allowChannelNum[0]).width();//allowChannelに含まれないチャンネルのchannelLinkから幅を取得するとずれる
+        if (isTimetableScroll){
+            visibleChLinkIndex = 0;
+            for(var i = 0; i < allowChannelNum.length; i++){
+                if (allowChannelNum[i] < chLinkIndex) {
+                    visibleChLinkIndex++;
+                }else {
+                    break;
+                }
+            }
+            $(EXTTbody).parent().parent().parent().parent().scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbody).width()+axisWidth));
+        }
+        if (!isExpandFewChannels) {
+            var timetableWidth = axisWidth + chLinkWidth * allowChannelNum.length;
+        } else {
+            var timetableWidth = axisWidth + chlinkWidth * EXTThead.childElementCount;
+        }
+    } else {
+        if (isTimetableScroll) {
+            $(EXTTbody).parent().parent().parent().parent().scrollLeft(chLinkWidth * visibleChLinkIndex);
+        }
+        var timetableWidth = axisWidth + chlinkWidth * EXTThead.childElementCount;
+    }
+    //番組表幅の調整
+    //console.log(timetableWidth)
+    $(EXTThead).parent().innerWidth(timetableWidth);
+    $(EXTTbodyS).children().width(timetableWidth)
+        .children('div').last().width(timetableWidth);
+
     //左チャンネル一覧にチェックボックス設置
     var channelsli = $(EXTTsideL).children("li");
     if(channelsli.length == 0){console.warn('channelsli');}
@@ -1629,7 +1661,11 @@ function putComeArray(inp) {
     var comeoverflowlen = inplen + mclen - movingCommentLimit;
     //あふれる分を削除
     if (comeoverflowlen > 0) {
-        mcj.slice(0, comeoverflowlen).remove();
+        for(var cofi = 0; cofi < comeoverflowlen; cofi++){
+            setTimeout(function(cofi){
+                mcj.eq(cofi).remove();
+            }, 5000*cofi/comeoverflowlen, cofi);//あふれた分を1つずつ順番に5秒かけて消す
+        }
         //        mclen-=comeoverflowlen;
     }
 //    var jo = $("object,video").parent();
