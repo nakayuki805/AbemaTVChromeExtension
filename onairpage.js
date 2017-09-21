@@ -1296,7 +1296,7 @@ function onresize() {
     setTimeout(function(){
         if(EXcountview){
             $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
         }
     },2000);
 
@@ -1326,15 +1326,15 @@ function onresize() {
     var zz=resizeType==0?100:Math.min(100*(resizeType==1?o.w.w:window.innerWidth)/o.v.w,100*(window.innerHeight-hh)/o.v.h);
     t.v.w=o.v.w*zz/100;
     t.v.h=o.v.h*zz/100;
-    t.w.w=t.v.h*16/9;
-    t.w.h=t.v.h;
+    t.w.w=tar.width();//t.w.w=t.v.h*16/9;
+    t.w.h=tar.height();//t.w.h=t.v.h;
     t.w.l=o.w.l;
     t.w.t=o.w.t;
     t.v.l=t.w.l+(t.w.w-t.v.w)/2;
     t.v.t=t.w.t+(t.w.h-t.v.h)/2;
     //tar.css("width",t.w.w+"px").css("height",t.w.h+"px");//px指定だと各ウィンドウ開閉時の自動リサイズ時にズレる(movieWidthで監視するから問題無さそうだけど一応%指定にしておく)
     tar.css("width",zz+"%").css("height",zz+"%");
-    //console.log("tar", tar,zz)
+    //console.log("tar", tar, zz, o, t)
 
     var r = tar[0].style.transform.replace(/\s*translate(X|Y)\([-0-9]*(\.[-0-9e]+)?(px|vw|%)\)/g, "").replace(/^\s+|\s+$/g, "");
     switch (posiHType) {
@@ -1360,7 +1360,7 @@ function onresize() {
     setTimeout(function(){
         if(EXcountview){
             $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
         }
     },2000);
 
@@ -2115,7 +2115,12 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
     if (checkUrlPattern(true) != 3) return;
     if(!isOLS){
         if(!overlapSelector){//ページ遷移の再delayset時に本来のoverlapが無くなって映像枠が引っかかるので再探査しない
-            var jo=$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&parseInt($(e).css("opacity"))>0)return e;});
+            //var jo=$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&parseInt($(e).css("opacity"))>0)return e;});
+            var jo=$('div').map(function(i,e){
+                var b=e.getBoundingClientRect();
+                var bp=e.parentElement.getBoundingClientRect();
+                if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width==bp.width&&b.height==bp.height&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&$(e).css("opacity")==0)return e;
+            });
             if(jo.length>0)overlapSelector=getElementSingleSelector(jo[0]);
             //else{
             //    console.log('?overlapSelector');
@@ -2159,13 +2164,13 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
         }
         //視聴数の位置調整
         setTimeout(function () {
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
         }, 3000);//コメント数が表示されるまで待つ
         setTimeout(function () {
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
         }, 10000);//再度修正
         setInterval(function () {
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-100)});
+            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
         }, 30000);//30秒ごとに再調整
 
         //初期読込時にマウス反応の要素が閉じないのを直したい
@@ -6227,6 +6232,11 @@ function usereventFCclick() {
         if (!comeRefreshing) {
             pophideSelector(3, 0);
         }
+        if(settings.isResizeScreen){
+            setTimeout(function(){
+                $(EXobli).children().width(window.innerWidth);            
+            },500);//コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
+        }
     }
     var jo = getVideo();
     if (jo.length > 0 && !waitingforResize) {
@@ -7123,6 +7133,9 @@ function onairBasefunc() {
         // 1秒ごとに実行
         if($('.ext_abm-come').length==0){
             addExtClass(EXcome, 'come');
+        }
+        if($('.ext_abm-comelist').length==0){
+            addExtClass(EXcomelist, 'comelist');
         }
 
         if (EXcome && isAutoReload) {
