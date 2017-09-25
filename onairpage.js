@@ -54,6 +54,7 @@ var movingCommentLimit = 50;//同時コメント最大数
 //var isMoveByCSS = false;//CSSのanimationでコメントを動かす//デフォに
 var isComeNg = false;//流れるコメントのうち特定の文字列を削除or置き換えする
 var isComeDel = false;//流れるコメントのうちユーザー指定の文字列を含むものを流さない(この処理は↑の除去前に実行される)
+var isUserDel = false;//指定のユーザーIDのコメントを流さない
 var fullNg = "";//流れるコメントのうち特定の文字列を含む場合は流さない
 var isInpWinBottom = false; //コメントリストを非表示、かつコメント入力欄を下の方へ。
 var isCustomPostWin = false; //コメント投稿ボタン等を非表示、かつコメント入力欄を1行化。
@@ -282,6 +283,8 @@ getStorage(null, function (value) {
     isDAR43 = value.DAR43 || false;
     isReplaceIcons = value.replaceIcons || false;
     disableExtVersion = value.disableExtVersion || "";
+    isUserDel = value.isUserDel || false;
+    userNg = value.userNg || "";
 });
 
 var currentLocation = window.location.href;
@@ -306,6 +309,7 @@ for (var i = 0; i < comeLatestLen; i++) {
 //var comeLatestCount = 0; //画面右下で取得するコメント数
 isComeLatestClickable = true; //右下コメント数をクリックできるか
 var arFullNg = [];
+var arUserNg = [];
 //var retrytick=[1000,3000,6000,12000,18000];
 //var retrycount=0;
 var proStart = new Date(); //番組開始時刻として現在時刻を仮設定
@@ -389,7 +393,9 @@ var oldWindowState = "normal" // フルスクリーン切り替え前のウィ�
 var isTootEnabled = false; //コメントのトゥート有効か
 var onairSecCount = 0; //onairbasefuncでカウントアップされる
 var commentObserver = new MutationObserver(function(mutations) {
-    onCommentChange(mutations);
+    setTimeout(function(mutations){
+        onCommentChange(mutations);
+    }, 50, mutations);//injection.jsでdata属性のセットが終わるまで待つ
 }); //コメント欄DOM監視
 var isFirstComeAnimated = false; //最初に既存のコメがanimationしたか 最初に既存のコメが一気に画面に流れてくるのを防ぐためのフラグ
 var timetableRunning = false; //番組表表示時の10分インターバル
@@ -1585,6 +1591,17 @@ function arrayFullNgMaker() {
         postShareNGwords(arFullNg, getChannelByURL());
     }
 }
+function arrayUserNgMaker() {
+    arUserNg = [];
+    var splitedUserNg = userNg.split(/\r|\n|\r\n/);
+    for(var ngi = 0; ngi < splitedUserNg.length; ngi++) {
+        if (splitedUserNg[ngi].length == 0 || splitedUserNg[ngi].match(/^\/\//)) {
+            continue;
+        }
+        splitedUserNg[ngi] = splitedUserNg[ngi].replace(/\/\/.*$/, ""); //文中コメントを除去
+        arUserNg.push(splitedUserNg[ngi]);
+    }
+}
 
 function comeNG(prengcome) {
     //規定のNG処理
@@ -1623,7 +1640,7 @@ function comeNG(prengcome) {
     ngedcome = ngedcome.replace(/(...*?)\1*(...*?)(\1|\2){2,}/g, "$1$2");
     return ngedcome;
 }
-function comefilter(m) {
+function comefilter(m, uid) {
     //putComeArrayとcopycomeで同じNG処理を実行するので分離
     var n = m;
     if (isComeNg && m.length > 0) {
@@ -1640,6 +1657,12 @@ function comefilter(m) {
                 m = "";
                 break;
             }
+        }
+    }
+    if (isUserDel && m.length > 0 && uid) {
+        if (hasArray(arUserNg, uid)) {
+            console.log("userNG matched UserID:" + uid + " text:" + m);
+            m = "";
         }
     }
     if (isComeNg && m.length > 0) {
@@ -1725,7 +1748,7 @@ function putComeArray(inp) {
         }, 0, mck, waitsec, (-mcwidth - 2));
     }
 }
-function putComment(commentText, index, inmax, isSelf) {
+function putComment(commentText, userid, index, inmax, isSelf) {
     //console.log(commentText)
     var outflg = false;
     if (index == 0) {
@@ -1749,7 +1772,7 @@ function putComment(commentText, index, inmax, isSelf) {
         kakikomitxt = "";
         // console.log("kakikomitxt reset: putComment")
     }
-    commentText = comefilter(commentText);
+    commentText = comefilter(commentText, userid);
     var commentTopMargin = 50;
     var commentBottomMargin = 150;
     if (EXhead.style.visibility == "hidden") {
@@ -2020,6 +2043,8 @@ function openOption() {
     $('#isComeTriming').prop("checked", isComeTriming);
     $('#audibleReloadWait').val(audibleReloadWait);
     $('#isDAR43').prop("checked", isDAR43);
+    $('#isUserDel').prop("checked", isUserDel);
+    $('#userNg').val(userNg);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -2159,6 +2184,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
     if(!isInit&&$(EXfootcome).length>0&&$(EXcountview).length>0){
         createSettingWindow();
         arrayFullNgMaker();
+        arrayUserNgMaker();
         //映像のリサイズ
         onresize();
         volumecheck(); //1秒ごとに実行していた最大音量チェックを初回読込時の1回だけに変更
@@ -3148,8 +3174,11 @@ function setSaveClicked() {
     settings.mastodonFormat = $('#mastodonFormat').val();
     audibleReloadWait = Math.max(0, parseInt($('#audibleReloadWait').val()));
     isDAR43 = $('#isDAR43').prop("checked");
+    isUserDel = $('#isUserDel').prop("checked");
+    userNg = $('#userNg').val();
 
     arrayFullNgMaker();
+    arrayUserNgMaker();
     onresize();
     setOptionHead();
     setOptionElement();
@@ -5682,11 +5711,12 @@ function setOptionHead() {
     if(selComelist) t += selComelist+'{margin:0px}';
 
     //左上・左下の非表示
-    jo=getReceiveNotifyElement();
+    /*jo=getReceiveNotifyElement();
     if(!jo || !((to=getElementSingleSelector(jo))&&$(to).length==1)){
         console.log("?ad-reserve");
         to=alt?'.v3_wC':"";
-    }
+    }*/
+    to = getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 124px;"]'
     if(to){
         t += to+'{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
         if (isHidePopBL) {
@@ -6671,14 +6701,16 @@ function copycome(d, hlsw) {
         //console.log("copycome append:"+d);
         //d件をNG処理して追加した後にcomehl
         var ma = [];
-        for (var i = 0, e, m, n, t; i < d; i++) {
+        for (var i = 0, e, m, n, t, u; i < d; i++) {
             //console.log("ma loop")
             e = EXcomelistChildren[i];//eo.children[i];
             if(!e||e.childElementCount<2) continue;
-            m = comefilter(e.children[0].textContent);
+            u = e.getAttribute('data-ext-userid') || '';
+            m = comefilter(e.children[0].textContent, u);
             if (m.length > 0) {
                 t = e.children[1].textContent;
-                ma.push([m, t]);
+                u = 
+                ma.push([m, t, u]);
             }
         }
         //console.log("ma:",ma)
@@ -6716,9 +6748,11 @@ function copycome(d, hlsw) {
             }
             var malen = Math.min(ma.length, 100);
             //console.time('malen_loop')
-            for (var i = 0, m, t, d; i < malen; i++) {
+            for (var i = 0, m, t, d, u; i < malen; i++) {
                 //console.log("loop after malen")
                 m = ma[i][0];
+                u = ma[i][2];
+                jc.eq(i).attr('data-ext-userid', u);
                 if (isDelTime) {
                     jc.eq(i).children().first().text(m)
                         .css("width", "unset")
@@ -6758,10 +6792,12 @@ function copycome(d, hlsw) {
         jc.children().text("");
         $('.comeposttime').attr("name", "");
         //console.time('fullcp_loop')
-        for (var i = 0, j = 0, e, m, t, dt; (e = EXcomelist.children[i]) ; i++) {
+        for (var i = 0, j = 0, e, m, t, dt, u; (e = EXcomelist.children[i]) ; i++) {
             if (e.hasChildNodes() && e.childElementCount > 1) {
-                m = comefilter(e.children[0].textContent);
+                u = e.getAttribute('data-ext-userid');
+                m = comefilter(e.children[0].textContent, u);
                 if (m.length > 0) {
+                    jc.eq(j).attr('data-ext-userid', u);
                     if (isDelTime) {
                         jc.eq(j).children().first().text(m)
                             .css("width", "unset")
@@ -6843,27 +6879,34 @@ function comecopy() {
     //var eo = jo[0];
     var r = /rgba?\((\d+), (\d+), (\d+)(, \d?(?:\.\d+)?)?\)/;
     var s = "";
+    var uid = "";
     for (var i = 0, e, c, t; (e = jo.eq(i))&&(c=e.css("color"))&&r.test(c); i++) {
         //c = $(e.children[0]).css("color");
         //if (r.test(c)) {
             t = r.exec(c);
             if (t[2] == t[3] && +t[1] > +t[2]) {
                 s = e.text();
+                uid = e.parent().attr('data-ext-userid');
                 break;
             //}
         }
     }
     if (s.length > 0) {
         if ($('#copyotw').length == 0) {
-            var t = '<div id="copyotw" class="' + $(EXcomesendinp.parentElement).attr("class") + ' usermade" style="padding:5px 28px 5px 18px;">';
+            var t = '<div id="copyotw" class="' + $(EXcomesendinp.parentElement).attr("class") + ' usermade" style="padding:5px 28px 30px 18px;">';
             t += '<a style="position:absolute;top:10px;left:1px;cursor:pointer;"><svg id="closecopyotw" class="usermade" width="16" height="16" style="fill:rgba(255,255,255,0.5);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/icons/close.svg#svg-body"></use></svg></a>';
+            t += '<input type="hidden" id="copyotu" value="">';
             t += '<textarea id="copyot" class="' + $(EXcomesendinp).attr("class") + '" rows="1" maxlength="100" wrap="soft" style="height:24px;width:264px;padding-left:4px;"></textarea>';
             t += '<div style="height:24px;pointer-events:none;">　</div>';
-            t += '<a id="textNG" style="position:absolute;top:6px;right:1px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.5);padding:0px 1px;letter-spacing:1px;cursor:pointer;">NG</a>';
-            t += '</div>';
+            t += '<a id="textNG" style="position:absolute;top:6px;right:1px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.5);padding:0px 1px;letter-spacing:1px;cursor:pointer;">NG</a>';            
+            t += '<div style="position:absolute;top:32px;right:1px;">';
+            t += '<span id="copyotuDisp"></span>';
+            t += '<a id="useridNG" style="color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.5);padding:0px 1px;letter-spacing:1px;cursor:pointer;margin:1px;">ユーザーNG</a>';
+            t += '</div></div>';
             $(t).insertAfter(EXcomesendinp.parentElement);
             $('#closecopyotw').parent('a').on("click", closecotwclick);
             $('#textNG').on("click", appendTextNG);
+            $('#useridNG').on("click", appendUserNG);
         } else {
             $('#copyotw').insertAfter(EXcomesendinp.parentElement) //#copyotw作成後に投稿ボタン等が生成された場合の順序修正
                 .css("display", "")
@@ -6872,11 +6915,13 @@ function comecopy() {
         $(EXcomesendinp.parentElement).css("display", "none");
         $(EXcomesend).css("padding-left", "0px");
         $('#copyot').val(s);
+        $('#copyotu').val(uid) || '';
         var co = $(EXcomesendinp).css("color");
-        $('#textNG').css("color", co)
+        $('#textNG,#useridNG').css("color", co)
             .css("border-color", co)
             ;
         $('#closecopyotw').css("fill", co);
+        $('#copyotuDisp').text('ID: '+uid+' ').css("color", co);        
         paintcopyot(1);
         paintcopyotw(1);
     }
@@ -6948,7 +6993,7 @@ function appendTextNG(ev, inpstr) {
     //ev #textNGのclickの場合イベントが渡される
     //inpstr これ以外からNG追加する場合こっちに渡すようにする(複数なら配列可)
     if (ev && comeNGmode > 0) {
-        appendNGpermanent();
+        appendNGpermanent(1);
         return;
     }
     comeNGmode = 1;
@@ -7008,47 +7053,143 @@ function appendTextNG(ev, inpstr) {
         setTimeout(copyotuncolor, 800, 1);
     }
 }
-function addPermanentNG(word) {
-    //既存の(一時保存済の)fullNgをそのままsetStorageすると、一時保存したが永久保存しなかった単語まで永久保存されてしまうので、
-    //storageから持ってきて追加、setStorageする
-    var PfullNg;
-    var b = true;
-    getStorage(null, function (value) {
-        PfullNg = value.fullNg || fullNg;
-        var spPfullng = PfullNg.split(/\r|\n|\r\n/);
-        for (var ngi = 0; ngi < spPfullng.length; ngi++) {
-            if (spPfullng[ngi].length == 0 || spPfullng[ngi].match(/^\/\//)) {
-                continue;
-            }
-            spPfullng[ngi] = spPfullng[ngi].replace(/\/\/.*$/, ""); //文中コメントを除去
-            if (word == spPfullng[ngi]) {
+function appendUserNG(ev, inpstr){
+    //ユーザーID appendTextNgに準ずる
+    if (ev && comeNGmode > 0) {
+        appendNGpermanent(2);
+        return;
+    }
+    comeNGmode = 1;
+    var uid;
+    if (inpstr === undefined) {
+        uid = $('#copyotu').val();
+    } else {
+        uid = inpstr;
+    }
+    if (uid.length == 0) {
+        //空欄のままNGボタン押下時は何もしないように直ちに終了する
+        comeNGmode = 0;
+        return;
+    }
+    var uidArr = [];
+    if (Array.isArray(uid)) {
+        uidArr = uid;
+    } else {
+        uidArr = [uid];
+    }
+    var b = true,
+        ngsi;
+    var spuserng = userNg.split(/\r|\n|\r\n/);
+    for (var ngi = 0; ngi < spuserng.length; ngi++) {
+        if (spuserng[ngi].length == 0 || spuserng[ngi].match(/^\/\//)) {
+            continue;
+        }
+        spuserng[ngi] = spuserng[ngi].replace(/\/\/.*$/, ""); //文中コメントを除去
+        for (ngsi = 0; ngsi < uidArr.length; ngsi++){
+            if (uidArr[ngsi] == spuserng[ngi]) {
                 b = false;
                 break;
             }
         }
-        if (b) { //storage内のfullNgに無い場合のみ追加
-            if (/\r|\n/.test(PfullNg[fullNg.length - 1])) {
-                PfullNg += word;
+    }
+    if (b) { //既存のuserNgに無い場合のみ追加
+        for (ngsi = 0; ngsi < uidArr.length; ngsi++){
+            if (/\r|\n/.test(userNg[fullNg.length - 1])) {
+                userNg += uidArr[ngsi];
             } else {
-                PfullNg += "\n" + word;
+                userNg += "\n" + uidArr[ngsi];
             }
-            setStorage({
-                "fullNg": PfullNg
-            });
         }
+
+        arrayUserNgMaker();
+        copycome();
+    }
+    if (inpstr === undefined) {
+        if (isComeClickNGautoClose) {
+            $('#closecopyotw').parent('a').css("pointer-events", "none")
+                .css("visibility", "hidden")
+                ;
+        }
+        //NGボタン押下1回目(一時登録)は黄色
+        paintcopyot(2);
+        paintcopyotw(2);
+        setTimeout(copyotuncolor, 800, 1);
+    }
+}
+function addPermanentNG(word, userid) {
+    //既存の(一時保存済の)fullNgをそのままsetStorageすると、一時保存したが永久保存しなかった単語まで永久保存されてしまうので、
+    //storageから持ってきて追加、setStorageする
+    var PfullNg, PuserNg;
+    getStorage(null, function (value) {
+        var b = true;        
+        PfullNg = value.fullNg || fullNg;
+        PuserNg = value.userNg || userNg;
+        var spPfullng = PfullNg.split(/\r|\n|\r\n/);
+        var spPuserng = PuserNg.split(/\r|\n|\r\n/);
+        if (word) {
+            for (var ngi = 0; ngi < spPfullng.length; ngi++) {
+                if (spPfullng[ngi].length == 0 || spPfullng[ngi].match(/^\/\//)) {
+                    continue;
+                }
+                spPfullng[ngi] = spPfullng[ngi].replace(/\/\/.*$/, ""); //文中コメントを除去
+                if (word == spPfullng[ngi]) {
+                    b = false;
+                    break;
+                }
+            }
+            if (b) { //storage内のfullNgに無い場合のみ追加
+                if (/\r|\n/.test(PfullNg[fullNg.length - 1])) {
+                    PfullNg += word;
+                } else {
+                    PfullNg += "\n" + word;
+                }
+                setStorage({
+                    "fullNg": PfullNg
+                });
+            }
+        }
+        b = true;
+        if (userid) {
+            for (var ngi = 0; ngi < spPuserng.length; ngi++) {
+                if (spPuserng[ngi].length == 0 || spPuserng[ngi].match(/^\/\//)) {
+                    continue;
+                }
+                spPuserng[ngi] = spPuserng[ngi].replace(/\/\/.*$/, ""); //文中コメントを除去
+                if (userid == spPuserng[ngi]) {
+                    b = false;
+                    break;
+                }
+            }
+            if (b) { //storage内のfullNgに無い場合のみ追加
+                if (/\r|\n/.test(PuserNg[userNg.length - 1])) {
+                    PuserNg += userid;
+                } else {
+                    PuserNg += "\n" + userid;
+                }
+                setStorage({
+                    "userNg": PuserNg
+                });
+            }
+        }
+        
     });
 }
-function appendNGpermanent() {
-    console.log("appendNGpermanent");
+function appendNGpermanent(sw) { //sw= 1:ワード 2=ユーザーID
+    console.log("appendNGpermanent", sw);
     comeNGmode = 2;
-    $('#textNG').css("pointer-events", "none");
+    $('#textNG,#useridNG').css("pointer-events", "none");
     var s = $('#copyot').val();
-    if (s.length == 0) {
+    var uid = $('#copyotu').val();
+    if ((s.length == 0 && sw == 1) || (uid.length == 0 && sw == 2)) {
         comeNGmode = 0;
         return;
     }
     //storageへの追加部を外部関数へ
-    addPermanentNG(s);
+    if (sw == 1) {
+        addPermanentNG(s);        
+    }else if (sw == 2) {
+        addPermanentNG(null, uid);        
+    }
 
     //NGボタン押下2回目は赤
     paintcopyot(3);
@@ -7061,7 +7202,7 @@ function copyotuncolor(mode) {
     if (mode == 1 && comeNGmode == 2) return;
     comeNGmode = 0;
     $('#copyot').val("");
-    $('#textNG').css("pointer-events", "");
+    $('#textNG,#useridNG').css("pointer-events", "");
     paintcopyot(1);
     paintcopyotw(1);
     if (isComeClickNGautoClose) {
@@ -7516,6 +7657,7 @@ function onairBasefunc() {
 }
 function onCommentChange(mutations){
     //console.log('mutations', mutations)
+
     var isAnimationAdded = false,
         isCommentAdded = false,
         newCommentNum = 0,
@@ -7525,7 +7667,7 @@ function onCommentChange(mutations){
             eo = mutations[i].addedNodes[0];
             nodeClass = eo.className;
             //nextClass = jo.next().attr('class');
-            //console.log(nodeClass, jo.css("height"), jo.css("transition-property"))
+            //console.log(nodeClass, eo.getAttribute('data-ext-userid'),eo);
             if (!comelistClasses.animated && comelistClasses.empty && mutations[i].addedNodes.length == 1 && EXcomelist.childElementCount == 1) { //1つだけなら初回読込としてanimatedとする(emptyも1つだけだがEXcomelist取得時にempty取得済 だけど一応チェック)
                 comelistClasses.animated = nodeClass;
                 isAnimationAdded = true;
@@ -7571,7 +7713,7 @@ function onCommentChange(mutations){
         var commentDivs = EXcomelist.children;
         //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
         for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
-            comments.push(commentDivs[cdi].children[0].innerHTML);
+            comments.push([commentDivs[cdi].children[0].innerHTML, commentDivs[cdi].getAttribute('data-ext-userid')]);
         }
         //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
         //console.timeEnd('obf_getComment_beforeif')
@@ -7638,7 +7780,7 @@ function onCommentChange(mutations){
             for(var i = 0; i < animationCommentDivs.length; i++){
                 idx = animationCommentDivs.length - i - 1;
                 //console.log('pc',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
-                putComment(animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
+                putComment(animationCommentDivs[idx].children[0].innerHTML, animationCommentDivs[idx].getAttribute('data-ext-userid'), i, animationCommentDivs.length);
             }
         }
         if(!isFirstComeAnimated){
@@ -7686,6 +7828,8 @@ function chkurl() {
         proTitle = "";
         $('#tProtitle').text("未取得");
         $('#copycome').remove();
+        $('#copyotw').remove();
+        if(EXcomesendinp) $(EXcomesendinp.parentElement).css("display", "");
         location.href = 'javascript:injection_urlChanged();';//page-injection.jsの関数
 
         checkUrlPattern(currentLocation);

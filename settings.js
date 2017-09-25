@@ -294,6 +294,18 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
+                "name": "isUserDel",
+                "description": "以下で設定したユーザーIDのコメントは流さない(1行1つ)(コメント欄関連設定の「コメント一覧クリックでNG追加欄を表示」を同時に有効にするとコメント欄からNG登録できます。これもコメント欄関連設定の「NG設定をコメント一覧にも適用する」に準じます) ◇☆",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "userNg",
+                "description": "",
+                "type": "textarea",
+                "isInstantChangable": true
+            },
+            {
                 "name": "isShareNGword",
                 "description": "<a href='https://abema.nakayuki.net/ngshare/' target='_blank'>共有NGワード</a>を有効にする(現在実験的)(追加したNGワードがサーバーに送信され、追加数の多いワードが自動で一時的なNGワードに設定されます。)",
                 "type": "boolean",

@@ -452,7 +452,9 @@ $(function(){
         $('#notifyLNtoken').val(value.notifyLNtoken||"");
         $('#notifyPostUrl').val(value.notifyPostUrl||"");
         $('#isNotifyRemain').prop("checked", value.isNotifyRemain||false);
-
+        $('#isUserDel').prop("checked", value.isUserDel||false);
+        $('#userNg').val(value.userNg||"");
+        
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
     $("#saveBtn").click(function () {
@@ -568,7 +570,9 @@ $(function(){
             "audibleReloadWait": Math.max(0,parseInt($('#audibleReloadWait').val())),
             "isNotifyRemain": $('#isNotifyRemain').prop("checked"),
             "DAR43": $('#isDAR43').prop("checked"),
-            "replaceIcons": $('#isReplaceIcons').prop("checked")
+            "replaceIcons": $('#isReplaceIcons').prop("checked"),
+            "isUserDel": $('#isUserDel').prop("checked"),
+            "userNg": $('#userNg').val()
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
