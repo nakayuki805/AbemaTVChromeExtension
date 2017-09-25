@@ -245,6 +245,12 @@ var settingsList = [
                 "description": "新着コメント強調の強度",
                 "type": "number",
                 "isInstantChangable": true
+            },
+            {
+                "name": "isUserHighlight",
+                "description": "コメントにマウスオーバーで同一ユーザーのコメントの背景を黄色くする(同一人物のコメントを見分けるのに便利です。)",
+                "type": "boolean",
+                "isInstantChangable": true
             }
         ]
     },

@@ -56,6 +56,7 @@ var isComeNg = false;//流れるコメントのうち特定の文字列を削除
 var isComeDel = false;//流れるコメントのうちユーザー指定の文字列を含むものを流さない(この処理は↑の除去前に実行される)
 var isUserDel = false;//指定のユーザーIDのコメントを流さない
 var fullNg = "";//流れるコメントのうち特定の文字列を含む場合は流さない
+var userNg = "";//流れるコメントのうち特定のユーザーIDは流さない
 var isInpWinBottom = false; //コメントリストを非表示、かつコメント入力欄を下の方へ。
 var isCustomPostWin = false; //コメント投稿ボタン等を非表示、かつコメント入力欄を1行化。
 var isCancelWheel = false; //マウスホイールによるページ遷移を抑止する
@@ -139,6 +140,7 @@ settings.mastodonFormat = "{comment}\\n#AbemaTV\\n{onairpage}"; //mastodon投稿
 var audibleReloadWait = 20; // タブの音声再生が停止してからタブを更新するまでの秒数
 var isDAR43 = false;//映像リサイズ4:3処理モード
 var isReplaceIcons = false; // 番組表のタイトル接頭接尾アイコンを開始時刻下に収納
+var isUserHighlight = false; //コメントにマウスオーバーで同一ユーザーのコメントをハイライト
 
 var changeDisableExtBtnVal = ''; //拡張機能の動作を停止するバージョン
 
@@ -285,6 +287,7 @@ getStorage(null, function (value) {
     disableExtVersion = value.disableExtVersion || "";
     isUserDel = value.isUserDel || false;
     userNg = value.userNg || "";
+    isUserHighlight = value.isUserHighlight || false;
 });
 
 var currentLocation = window.location.href;
@@ -2045,6 +2048,7 @@ function openOption() {
     $('#isDAR43').prop("checked", isDAR43);
     $('#isUserDel').prop("checked", isUserDel);
     $('#userNg').val(userNg);
+    $('#isUserHighlight').prop("checked", isUserHighlight);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -3176,6 +3180,7 @@ function setSaveClicked() {
     isDAR43 = $('#isDAR43').prop("checked");
     isUserDel = $('#isUserDel').prop("checked");
     userNg = $('#userNg').val();
+    isUserHighlight = $('#isUserHighlight').prop("checked");
 
     arrayFullNgMaker();
     arrayUserNgMaker();
@@ -6643,6 +6648,65 @@ function comehl(jo, hlsw) {
         }
     }, 0, jo);
 }
+/*function comeUserColor(jo) {
+    console.log('comeUserColor', jo)
+    function char2rgb(c) {
+        var h = 22.5 * (c % 16), s = 0.1*(c/16) + 0.3, v = 1.0;
+        var h_i = Math.floor(h/60.0);
+        var f = (h/60.0) - h_i;
+        var p = v*(1-s), q = v*(1-f*s),  t = v*(1-(1-f)*s);
+        var rgb = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,q,v],[v,p,q]];
+        var r = ~~(255*(rgb[h_i][0])), g = ~~(255*(rgb[h_i][1])), b = ~~(255*(rgb[h_i][2]));
+    
+        return [r,g,b];
+    };
+    function str2rgb(str) {
+        var i,c,a;
+        var r = 0, g = 0, b = 0;
+        for (i = 0; i < str.length; i++) {
+            c = str.charCodeAt(i);
+            a = char2rgb(c);
+            r += a[0]; g += a[1]; b += a[2];
+        }
+    
+        r = ~~(r / str.length);
+        g = ~~(g / str.length);
+        b = ~~(b / str.length);
+    
+        return [r, g, b];
+    };
+    for (var i = 0; i < jo.length; i++) {
+        var uid = jo.eq(i).attr('data-ext-userid') || '';
+        var opacity = commentTextTrans/255;
+        var color = (uid.length>0)?str2rgb(uid):[0,0,0];
+        console.log(uid,color,jo.eq(i))
+        jo.eq(i).css('border-right', 'solid 4px rgba('+color[0]+','+color[1]+','+color[2]+','+opacity+')');
+    }
+}*/
+function comeUserHighlight(jo){
+    $(jo).mouseover(function(e){
+        var j=$(e.currentTarget);
+        var uid = j.attr('data-ext-userid') || '';
+        var opacity = commentTextTrans/255;
+        //console.log('mov',e,j,uid);
+        if(uid.length>0){
+            //console.log(j.siblings('[data-ext-userid='+uid+']'))
+            j.siblings('[data-ext-userid='+uid+']').css('background-color', 'rgba(255,255,0,'+opacity+')');
+        }
+        j.css('background-color', 'rgba(255,255,0,'+opacity+')');
+    });
+    $(jo).mouseout(function(e){
+        var j=$(e.currentTarget);
+        var uid = j.attr('data-ext-userid') || '';
+        //console.log('mou',e,uid);        
+        if(uid.length>0){
+            j.siblings('[data-ext-userid='+uid+']').css('background-color', '');
+        }else{
+            j.siblings().css('background-color', '');
+        }
+        j.css('background-color', '');
+    });
+}
 function copycome(d, hlsw) {
 //console.log("copycome d="+d);
     if (isComelistMouseDown) return;//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
@@ -6783,6 +6847,9 @@ function copycome(d, hlsw) {
             if (hlsw > 0) {
                 comehl(jc.slice(0, ma.length), hlsw);
             }
+            if (isUserHighlight) {
+                comeUserHighlight(jc.slice(0, ma.length));
+            }
             if ((isDelOldTime || isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
         }
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
@@ -6824,6 +6891,9 @@ function copycome(d, hlsw) {
             }
         }
         //console.timeEnd('fullcp_loop')
+        if (isUserHighlight) {
+            comeUserHighlight(jc);
+        }
         if ((isDelOldTime || isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
         if (--copycomecount > 0) {
@@ -7754,8 +7824,13 @@ function onCommentChange(mutations){
                 var hlsw = $('#settcont').css("display") == "none" ? highlightNewCome : parseInt($('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked').val());
                 if (isComelistNG) {
                     copycome(d, hlsw); //copycome内からcomehlを実行
-                } else if (hlsw > 0) {
-                    comehl($(EXcomelist).children().slice(0, d), hlsw);
+                } else {
+                    if (hlsw > 0) {
+                        comehl($(EXcomelist).children().slice(0, d), hlsw);
+                    }
+                    if (isUserHighlight) {
+                        comeUserHighlight($(EXcomelist).children().slice(0, d));
+                    }
                 }
             } else if (comeListLen < commentNum && !isAnimationIncluded) {
                 commentNum = 0;

@@ -453,6 +453,7 @@ $(function(){
         $('#notifyPostUrl').val(value.notifyPostUrl||"");
         $('#isNotifyRemain').prop("checked", value.isNotifyRemain||false);
         $('#isUserDel').prop("checked", value.isUserDel||false);
+        $('#isUserHighlight').prop("checked", value.isUserHighlight||false);
         $('#userNg').val(value.userNg||"");
         
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
@@ -572,7 +573,8 @@ $(function(){
             "DAR43": $('#isDAR43').prop("checked"),
             "replaceIcons": $('#isReplaceIcons').prop("checked"),
             "isUserDel": $('#isUserDel').prop("checked"),
-            "userNg": $('#userNg').val()
+            "userNg": $('#userNg').val(),
+            "isUserHighlight": $('#isUserHighlight').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
