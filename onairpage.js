@@ -399,6 +399,7 @@ var timetableGrabbing = {value:false,cx:0,cy:0,test:false,sx:0,sy:0,scrolled:fal
 var comelistClasses = { stabled: "", animated: "", empty: "", message: "", posttime: "", };
 var timetableClasses = { arrow: "", timebar: "", };//ページ遷移直後に取得できないので初回取得時に保持する getSingleSelectorの結果を入れるので使用時は.を付けない
 var currentVersion = chrome.runtime.getManifest().version;
+var resizeEventTimer = 0; //ウィンドウリサイズイベント用のタイマー
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -1827,8 +1828,9 @@ function soundSet(isSound) {
 function screenBlackSet(type) {
     //    var pwaku = $('[class^="style__overlap___"]'); //動画枠
     var pwaku = $('#ComeMukouMask');
-    if (pwaku.length == 0) { //delaysetから移動してきた
-        if ($(overlapSelector).length == 0) return;
+    if ($(overlapSelector).length == 0) return;
+    if (/*pwaku.length == 0*/ $(overlapSelector).siblings('#ComeMukouMask').length == 0) { //delaysetから移動してきた
+        $('#ComeMukouMask').remove();
         $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
         pwaku = $('#ComeMukouMask');
         pwaku[0].addEventListener("click", comemukouClick);
@@ -2128,7 +2130,8 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
             //}
         }
         if ($(overlapSelector).length>0){
-            if($('#ComeMukouMask').length == 0) { //delaysetにも設置
+            if(/*$('#ComeMukouMask').length == 0*/ $(overlapSelector).siblings('#ComeMukouMask').length == 0) { //delaysetにも設置
+                $('#ComeMukouMask').remove();
                 $('<div id="ComeMukouMask" style="position:absolute;width:100%;height:100%;">').insertAfter(overlapSelector);
                 document.getElementById('ComeMukouMask').addEventListener("click", comemukouClick);
                 document.getElementById('ComeMukouMask').addEventListener("dblclick", onScreenDblClick);
@@ -4592,6 +4595,7 @@ function isComeOpen(sw) {
     //console.trace('isComeOpen()')
     if (sw === undefined) { sw = 0; }
     var eo = EXcome;
+    if (!eo) return false;
     var jo = $(eo);
     var bs = jo.attr("aria-hidden");
     var bb;
@@ -5725,8 +5729,8 @@ function setOptionHead() {
         }
         //t += '[class*="styles__eyecatch-blind___"]{display:none;}';
     }
-    if (selObli) t += selObli + '>div{transition-delay:0.3s;}'; // onresizeで設定していたtransitionをheadに付けてみる fastrefreshでガクっとなるのを防ぐ
-    if (selCome) t += selCome + '{transition-delay:0.3s;}';
+    if (selObli) t += selObli + '>div{transition-delay:0.5s;}'; // onresizeで設定していたtransitionをheadに付けてみる fastrefreshでガクっとなるのを防ぐ
+    if (selCome) t += selCome + '{transition-delay:0.5s;}';
 
     //z-index調整、コメ流す範囲
     t += '#moveContainer{z-index:7;';
@@ -6234,7 +6238,7 @@ function usereventFCclick() {
         }
         if(settings.isResizeScreen){
             setTimeout(function(){
-                $(EXobli).children().width(window.innerWidth);            
+                $(EXobli).children().has(getVideo()).width(window.innerWidth).height(window.innerHeight);            
             },500);//コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
         }
     }
@@ -7643,7 +7647,22 @@ function onCommentChange(mutations){
     }
 }
 
-$(window).on("resize", onresize);
+$(window).on("resize", function (){
+    if (resizeEventTimer > 0) {
+        clearTimeout(resizeEventTimer);
+    }
+    resizeEventTimer = setTimeout(function(){
+        //ウィンドウのリサイズ完了時の処理
+        if(settings.isResizeScreen && isComeOpen()){
+            setTimeout(function(){
+                //コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
+                $(EXobli).children().has(getVideo()).width(window.innerWidth).height(window.innerHeight);
+                setTimeout(onresize, 1000);//1秒後にリサイズをかける
+                setTimeout(onresize, 1500);//たまに映像がずれるので再度リサイズかけると落ち着く
+            },200);
+        }
+    }, 200);
+});
 
 //event.jsでonHistoryStateUpdatedでページ推移を捕捉してるが念の為に10秒ポーリング(AbemaTV開いたまま拡張アップデートされたときとか)
 setInterval(chkurl, 10000);
