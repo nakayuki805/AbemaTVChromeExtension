@@ -141,6 +141,7 @@ var audibleReloadWait = 20; // タブの音声再生が停止してからタブ�
 var isDAR43 = false;//映像リサイズ4:3処理モード
 var isReplaceIcons = false; // 番組表のタイトル接頭接尾アイコンを開始時刻下に収納
 var isUserHighlight = false; //コメントにマウスオーバーで同一ユーザーのコメントをハイライト
+var isShareNGuser = false; //共有NGユーザー
 
 var changeDisableExtBtnVal = ''; //拡張機能の動作を停止するバージョン
 
@@ -288,6 +289,7 @@ getStorage(null, function (value) {
     isUserDel = value.isUserDel || false;
     userNg = value.userNg || "";
     isUserHighlight = value.isUserHighlight || false;
+    isShareNGuser = value.isShareNGuser || false;
 });
 
 var currentLocation = window.location.href;
@@ -382,8 +384,9 @@ var onairRunning = false; //映像ページの定期実行のやつの複数起�
 var comeNGmode = 0; //NG追加先の分岐用
 var NGshareURLbase = "https://abema.nakayuki.net/ngshare/v1/"; //共有NGワードAPI
 var APIclientName = "AbemaTVChromeExtension"; //↑のクライアント名
-var isNGwordShareInterval = false; //applySharedNGwordがinterval状態か
+var isNGShareInterval = false; //applySharedNGwordがinterval状態か
 var postedNGwords = []; //送信済みNGワード
+var postedNGusers = []; //送信済みNGユーザー
 var isComelistMouseDown = false;
 var movieWidth = 0; //.TVContainer__resize-screenの大きさ(onresize発火用)
 //var movieHeight = 0;
@@ -1540,26 +1543,66 @@ function postShareNGwords(words, channel) {
         console.log("postShareNGwords post error");
     }});
 }
-function applySharedNGword() {
-    var channel = getChannelByURL();
-    isNGwordShareInterval = true;
-    $.get(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
-        var sharedNGwords = data.ngword;
-        var appendNGwords = [];
-        console.log("got shared NG words ");
-        console.table(sharedNGwords);
-        for (var asni = 0; asni < sharedNGwords.length; asni++) {
-            if (!hasArray(postedNGwords, sharedNGwords[asni].word)) {
-                postedNGwords.push(sharedNGwords[asni].word);
-            }
-            appendNGwords.push(sharedNGwords[asni].word);
+function postShareNGusers(users, channel) {
+    var postUsers = [];
+    for(var i=0; i < users.length; i++) {
+        if (!hasArray(postedNGusers, users[i].toString())) {
+            postUsers.push(users[i].toString());
         }
-        appendTextNG(null, appendNGwords);
+    }
+    if (postUsers.length == 0) return;
+
+    var postData = {
+        "client": APIclientName,
+        "channel": channel,
+        "users": postUsers
+    };
+    postedNGusers = postedNGusers.concat(postUsers);//重複送信防止のため送信前にpostedに追加する
+    $.ajax({url: NGshareURLbase + 'add_json.php', type: 'POST', data: JSON.stringify(postData), contentType: 'application/json', dataType: 'json', success: function(result) {
+        if (result.status == "success") {
+            console.log("postShareNGusers success", postUsers, channel);
+        } else {
+            console.log("postShareNGusers failed", result);
+        }
+    }, error: function() {
+        console.log("postShareNGusers post error");
+    }});
+}
+function applySharedNG() {
+    var channel = getChannelByURL();
+    isNGShareInterval = true;
+    $.get(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
+        if (settings.isShareNGword) {
+            var sharedNGwords = data.ngword;
+            var appendNGwords = [];
+            console.log("got shared NG words ");
+            console.table(sharedNGwords);
+            for (var asni = 0; asni < sharedNGwords.length; asni++) {
+                if (!hasArray(postedNGwords, sharedNGwords[asni].word)) {
+                    postedNGwords.push(sharedNGwords[asni].word);
+                }
+                appendNGwords.push(sharedNGwords[asni].word);
+            }
+            appendTextNG(null, appendNGwords);
+        }
+        if (isShareNGuser) {
+            var sharedNGusers = data.nguser;
+            var appendNGusers = [];
+            console.log("got shared NG users ");
+            console.table(sharedNGusers);
+            for (var asni = 0; asni < sharedNGusers.length; asni++) {
+                if (!hasArray(postedNGusers, sharedNGusers[asni].userid)) {
+                    postedNGusers.push(sharedNGusers[asni].userid);
+                }
+                appendNGusers.push(sharedNGusers[asni].userid);
+            }
+            appendUserNG(null, appendNGusers);
+        }
     })
     if (channel) {
-        setTimeout(applySharedNGword, 300000); //5分毎
+        setTimeout(applySharedNG, 300000); //5分毎
     } else {
-        isNGwordShareInterval = false;
+        isNGShareInterval = false;
     }
 }
 function arrayFullNgMaker() {
@@ -1603,6 +1646,9 @@ function arrayUserNgMaker() {
         }
         splitedUserNg[ngi] = splitedUserNg[ngi].replace(/\/\/.*$/, ""); //文中コメントを除去
         arUserNg.push(splitedUserNg[ngi]);
+    }
+    if (isShareNGuser) {
+        postShareNGusers(arUserNg, getChannelByURL());
     }
 }
 
@@ -2049,6 +2095,7 @@ function openOption() {
     $('#isUserDel').prop("checked", isUserDel);
     $('#userNg').val(userNg);
     $('#isUserHighlight').prop("checked", isUserHighlight);
+    $('#isShareNGuser').prop("checked", isShareNGuser);
 
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
@@ -3181,6 +3228,7 @@ function setSaveClicked() {
     isUserDel = $('#isUserDel').prop("checked");
     userNg = $('#userNg').val();
     isUserHighlight = $('#isUserHighlight').prop("checked");
+    isShareNGuser = $('#isShareNGuser').prop("checked");
 
     arrayFullNgMaker();
     arrayUserNgMaker();
@@ -3188,7 +3236,7 @@ function setSaveClicked() {
     setOptionHead();
     setOptionElement();
     pophideSelector(-1, 0);
-    if (settings.isShareNGword && !isNGwordShareInterval) { applySharedNGword(); }
+    if ((settings.isShareNGword || isShareNGuser) && !isNGShareInterval) { applySharedNG(); }
     optionHeightFix();
     var sm = parseInt($('#movieheight input[type="radio"][name="movieheight"]:checked').val());
     var sw = parseInt($('#windowheight input[type="radio"][name="windowheight"]:checked').val());
@@ -7333,8 +7381,8 @@ function onairfunc() {
     }
 
     setTimeout(onresize, 5000);
-    if (settings.isShareNGword && !isNGwordShareInterval) {
-        setTimeout(applySharedNGword, 1000);
+    if ((settings.isShareNGword || isShareNGuser) && !isNGShareInterval) {
+        setTimeout(applySharedNG, 1000);
     }
     copycomecount = 2;
     if (settings.mastodonInstance && settings.mastodonToken){

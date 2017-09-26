@@ -455,6 +455,7 @@ $(function(){
         $('#isUserDel').prop("checked", value.isUserDel||false);
         $('#isUserHighlight').prop("checked", value.isUserHighlight||false);
         $('#userNg').val(value.userNg||"");
+        $('#isShareNGuser').prop("checked", value.isShareNGuser||false);
         
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -574,7 +575,8 @@ $(function(){
             "replaceIcons": $('#isReplaceIcons').prop("checked"),
             "isUserDel": $('#isUserDel').prop("checked"),
             "userNg": $('#userNg').val(),
-            "isUserHighlight": $('#isUserHighlight').prop("checked")
+            "isUserHighlight": $('#isUserHighlight').prop("checked"),
+            "isShareNGuser": $('#isShareNGuser').prop("checked")
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
