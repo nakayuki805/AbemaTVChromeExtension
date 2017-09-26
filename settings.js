@@ -209,38 +209,6 @@ var settingsList = [
 //                "isInstantChangable": true
             },
             {
-                "name": "isComelistNG",
-//                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
-                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで<s>、投稿時刻は新着のみ表示</s>となります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isDelOldTime",
-                "description": "↑で各コメントの投稿時刻の表示を新着のみとし、古いコメントの投稿時刻は非表示にする。",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isDelTime",
-                "description": "↑で各コメントの投稿時刻を全て非表示にする。",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isComelistClickNG",
-//                "description": "コメント一覧クリックでNG追加欄を表示(このNG追加欄による保存は一時的です。永久保存は設定画面へ。)",
-                "description": "コメント一覧クリックでNG追加欄を表示(NGボタン1回クリックで一時保存(黄色)、短時間で2回クリックすると永久保存(赤色)になります。)",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isComeClickNGautoClose",
-                "description": "↑でNG登録後、自動的にNG追加欄を閉じる",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
                 "name": "highlightComePower",
                 "description": "新着コメント強調の強度",
                 "type": "number",
@@ -276,48 +244,6 @@ var settingsList = [
                 "isInstantChangable": true
             },
             {
-                "name": "isComeNg",
-                "description": "流れるコメントから規定の単語を除去(顔文字,連続する単語など)",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isDeleteStrangeCaps",
-                "description": "↑に加えて、一般的な文字以外を全て削除する(英数字や漢字、ひらがな、一部の記号などは削除されません)",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isComeDel",
-                "description": "以下で設定した単語が含まれるコメントは流さない(1行1つ、/正規表現/も可、//コメント)(<s>流れるコメントにのみ有効、右のコメ欄には反映されません</s> 上の設定で適用可能になりました。コメント欄関連設定の「NG設定をコメント一覧にも適用する」を有効にしてください) ◇☆",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "fullNg",
-                "description": "",
-                "type": "textarea",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isUserDel",
-                "description": "以下で設定したユーザーIDのコメントは流さない(1行1つ)(コメント欄関連設定の「コメント一覧クリックでNG追加欄を表示」を同時に有効にするとコメント欄からNG登録できます。これもコメント欄関連設定の「NG設定をコメント一覧にも適用する」に準じます) ◇☆",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
-                "name": "userNg",
-                "description": "",
-                "type": "textarea",
-                "isInstantChangable": true
-            },
-            {
-                "name": "isShareNGword",
-                "description": "<a href='https://abema.nakayuki.net/ngshare/' target='_blank'>共有NGワード</a>を有効にする(現在実験的)(追加したNGワードがサーバーに送信され、追加数の多いワードが自動で一時的なNGワードに設定されます。)",
-                "type": "boolean",
-                "isInstantChangable": true
-            },
-            {
                 "name": "kakikomiwait",
                 "description": "自分のコメントを流すまでの待ち時間(秒)マイナスだと流れない",
                 "type": "number",
@@ -338,6 +264,86 @@ var settingsList = [
             {
                 "name": "comeFontsizeV",
                 "description": "流れるコメントの文字の大きさをウィンドウ縦長さに追従させる",
+                "type": "boolean",
+                "isInstantChangable": true
+            }
+        ]
+    },
+    {
+        "description": "コメントNG関連設定",
+        "header": "コメントNG、ユーザーNGを利用したいときはそれぞれ「指定した〜流さない」を有効にしてください。また、「<b>NG設定を右コメント一覧にも適用する</b>」も忘れずに有効にしてください。ユーザーNG追加には「コメント一覧クリックでNG追加欄を表示」も必要です。<br>",
+        "settings": [
+            {
+                "name": "isComeNg",
+                "description": "流れるコメントから規定の単語を除去(顔文字,連続する単語など)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isDeleteStrangeCaps",
+                "description": "↑に加えて、一般的な文字以外を全て削除する(英数字や漢字、ひらがな、一部の記号などは削除されません)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isComeDel",
+                "description": "指定した単語が含まれるコメントは流さない(ワードNG)(「NG設定をコメント一覧にも適用する」も有効にしないとコメント欄には反映されません) ◇☆",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "fullNg",
+                "description": "NGワード(1行1つ、/正規表現/も可、//コメント)",
+                "type": "textarea",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isUserDel",
+                "description": "指定したユーザーIDのコメントを流さない(ユーザーNG)(「NG設定をコメント一覧にも適用する」も有効にしないとコメント欄には反映されません。それと同時に「コメント一覧クリックでNG追加欄を表示」を有効にするとコメント欄からNG登録できます。) ◇☆",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "userNg",
+                "description": "流さないユーザーID(1行1つ)",
+                "type": "textarea",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isShareNGword",
+                "description": "<a href='https://abema.nakayuki.net/ngshare/' target='_blank'>共有NGワード</a>を有効にする(現在実験的)(追加したNGワードがサーバーに送信され、追加数の多いワードが自動で一時的なNGワードに設定されます。)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isComelistNG",
+//                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
+                "description": "NG設定を右コメント一覧にも適用する(これを有効にしないと流れるコメントにしかNGが効きません。ただし、一覧のコメント表示数は直近100件まで<s>、投稿時刻は新着のみ表示</s>となります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isDelOldTime",
+                "description": "↑で各コメントの投稿時刻の表示を新着のみとし、古いコメントの投稿時刻は非表示にする。",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isDelTime",
+                "description": "↑で各コメントの投稿時刻を全て非表示にする。",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isComelistClickNG",
+//                "description": "コメント一覧クリックでNG追加欄を表示(このNG追加欄による保存は一時的です。永久保存は設定画面へ。)",
+                "description": "↑でコメント一覧クリックでNG追加欄を表示(「<b>NG設定を右コメント一覧にも適用する</b>」も有効にしてください。)(NGボタン1回クリックで一時保存(黄色)、短時間で2回クリックすると永久保存(赤色)になります。)",
+                "type": "boolean",
+                "isInstantChangable": true
+            },
+            {
+                "name": "isComeClickNGautoClose",
+                "description": "↑でNG登録後、自動的にNG追加欄を閉じる",
                 "type": "boolean",
                 "isInstantChangable": true
             }
@@ -817,9 +823,9 @@ function generateOptionInput(settingsArr, isPermanent) {
                 inputHTML += '<input type="number" id="' + settingsArr[i].name + '" ' + disabled + '>';
                 inputHTML += "<br/>"
             } else if (settingsArr[i].type === "textarea") {
-                inputHTML += description;
-                inputHTML += isNotChangable ? NCTEXT : "" + ":";
                 inputHTML += '<textarea id="' + settingsArr[i].name + '" rows=3 cols=40 wrap=off ' + disabled + '></textarea>';
+                inputHTML += ':' + description;
+                inputHTML += isNotChangable ? NCTEXT : "";                
                 inputHTML += "<br/>"
             } else if (settingsArr[i].type === "range") {
                 inputHTML += '<div><span class="desc">'+description;

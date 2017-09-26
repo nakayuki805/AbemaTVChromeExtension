@@ -6,11 +6,10 @@ if (typeof chrome === "undefined" || !chrome.extension) {
     var chrome = browser;
 }
 
-var currentUpdateNotifyVersion = 14;//0.12.0の時
+var currentUpdateNotifyVersion = 15;//0.13.1の時
 var optionUrl = chrome.extension.getURL("option.html");
 var notifyContent = [
-    "仕様変更に対応しましたがまだ不安定な可能性があります",
-    "最近追加された機能(※デフォルト無効):",
+    "最近追加された機能(※デフォルト無効):",//表示させたいときはcurrentUpdateNotifyVersionの更新を忘れずに
     "コメントマウスオーバーで同一ユーザーのコメントをハイライト※",
     "ユーザーIDによるNG※",
     "拡張機能を一時停止させる(設定画面の下のボタン)",

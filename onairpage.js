@@ -6687,23 +6687,24 @@ function comeUserHighlight(jo){
     $(jo).mouseover(function(e){
         var j=$(e.currentTarget);
         var uid = j.attr('data-ext-userid') || '';
-        var opacity = commentTextTrans/255;
+        //var opacity = commentTextTrans/255;
         //console.log('mov',e,j,uid);
         if(uid.length>0){
             //console.log(j.siblings('[data-ext-userid='+uid+']'))
-            j.siblings('[data-ext-userid='+uid+']').css('background-color', 'rgba(255,255,0,'+opacity+')');
+            j.siblings('[data-ext-userid='+uid+']').css('background-color', 'rgba(255,255,0,0.6)');
+            j.siblings(':not([data-ext-userid='+uid+'])').css('background-color', '');
         }
-        j.css('background-color', 'rgba(255,255,0,'+opacity+')');
+        j.css('background-color', 'rgba(255,255,0,0.6)');
     });
     $(jo).mouseout(function(e){
         var j=$(e.currentTarget);
         var uid = j.attr('data-ext-userid') || '';
         //console.log('mou',e,uid);        
-        if(uid.length>0){
-            j.siblings('[data-ext-userid='+uid+']').css('background-color', '');
-        }else{
+        //if(uid.length>0){
+        //    j.siblings('[data-ext-userid='+uid+']').css('background-color', '');
+        //}else{
             j.siblings().css('background-color', '');
-        }
+        //}
         j.css('background-color', '');
     });
 }
@@ -6781,9 +6782,10 @@ function copycome(d, hlsw) {
         if (ma.length > 0) {
             if (ma.length <= 100) {
                 //console.time('ma100_loop')
-                for (var i = ec.childElementCount - 1, e, m, t, n, d, s; (e = ec.children[i - ma.length]) ; i--) {
+                for (var i = ec.childElementCount - 1, e, m, t, n, d, s, u; (e = ec.children[i - ma.length]) ; i--) {
                     //console.log("loop ma<100")
                     m = e.children[0].textContent;
+                    u = e.getAttribute('data-ext-userid') || '';
                     if (isDelOldTime || isDelTime) {
                         jc.eq(i).children().first().text(m)
                             .css("width", (isComeOpen(3) && isSideOpen(3)) ? e.children[0].style.width : "unset")
@@ -6807,6 +6809,7 @@ function copycome(d, hlsw) {
                             .next().attr("name", n);
                         ;
                     }
+                    jc.eq(i).attr('data-ext-userid', u);
                 }
                 //console.timeEnd('ma100_loop')
             }
@@ -7189,6 +7192,7 @@ function appendUserNG(ev, inpstr){
 function addPermanentNG(word, userid) {
     //既存の(一時保存済の)fullNgをそのままsetStorageすると、一時保存したが永久保存しなかった単語まで永久保存されてしまうので、
     //storageから持ってきて追加、setStorageする
+    //console.log('addPermanentNG',word,userid)
     var PfullNg, PuserNg;
     getStorage(null, function (value) {
         var b = true;        
@@ -7251,6 +7255,7 @@ function appendNGpermanent(sw) { //sw= 1:ワード 2=ユーザーID
     var s = $('#copyot').val();
     var uid = $('#copyotu').val();
     if ((s.length == 0 && sw == 1) || (uid.length == 0 && sw == 2)) {
+        //console.log(s,uid,sw)
         comeNGmode = 0;
         return;
     }
