@@ -297,8 +297,8 @@ var previousLocation = currentLocation;//URL変化前のURL
 //var urlchangedtick=Date.now();
 var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
 var isEdge = window.navigator.userAgent.toLowerCase().indexOf("edge") != -1;
-var headerHeight = 44;
-var footerHeight = 70;
+var headerHeight = 80;
+var footerHeight = 69;
 var commentNum = 0;
 var comeLatestPosi = [];
 var comeTTLmin = 3;
@@ -736,14 +736,26 @@ function waitforloadtimetable(url) {
         //番組表クリックで右詳細に通知登録ボタン設置
         $(EXTTbody).click(function(e){ // 掴んでスクロールした場合番組詳細は開かないことにする
             if(!timetableGrabbing.scrolled){
-                setTimeout(putSideDetailNotifyButton,100);
-                if (isPutSideDetailHighlight) {
-                    setTimeout(putSideDetailHighlight,100);
-                }
+                setTimeout(function(){
+                    var jSideR1 = $(EXTTsideR); 
+                    var sideDetailDivClass = jSideR1.children().attr('class');
+                    var jSideR2 = jSideR1.siblings(':has(div.'+sideDetailDivClass+')');
+                    if (jSideR1.css('z-index')<jSideR2.css('z-index')){
+                        EXTTsideR = jSideR2[0];
+                        addExtClass(EXTTsideR, 'tt-side-r');
+                    }
+                    putSideDetailNotifyButton();
+                    if (isPutSideDetailHighlight) {
+                        putSideDetailHighlight();
+                    }
+                },100);
+
+                //console.log("putSideDetail*");
             }else{
                 e.preventDefault();
                 e.stopImmediatePropagation();
             }
+            //console.log('EXTTbody clicked',e,timetableGrabbing.scrolled)
         });
         timetableCss();
         //$('div')を取ってきてあるのでここで使う
@@ -792,7 +804,7 @@ function waitforloadtimetable(url) {
     }
 }
 function putSideDetailHighlight() {
-    var sideDetailWrapper = $(EXTTsideR);
+    var sideDetailWrapper = $(EXTTsideR); 
     if (sideDetailWrapper.length == 0 || sideDetailWrapper.offset().left > window.innerWidth - 50) return;
     sideDetailWrapper.css("overflow-x", "").find('p[class="addedHighlight"]').remove();
     var fp = sideDetailWrapper.find('p');//番組詳細,タイトル,日時,見逃し云々?
@@ -1302,7 +1314,7 @@ function getVideo() {
     }
     return jp;
 }
-function onresize() {
+function onresize(oldTranslate) {
     if (checkUrlPattern(true) != 3) return;
     //console.log("onresize()");
     //視聴数の位置調整
@@ -1362,8 +1374,12 @@ function onresize() {
     r = r.replace(/^\s+|\s+$/g, "");
 
     tar.css("transform",r);
-    console.log("screen resized");
+    var isVideoResized = r != oldTranslate; ///translate[XY]\([^0][-0-9e\.]*px\)/.test(r);
+    console.log("screen resized");//,isVideoResized,r);
     movieWidth=parseInt(tar.width());
+    if(isVideoResized){//映像のリサイズが落ち着くまで(translateが落ち着くまで)リトライする
+        setTimeout(onresize, 1000, r);
+    }
 }
 /*
 function onresize() {
@@ -2196,8 +2212,8 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
             //var jo=$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&parseInt($(e).css("opacity"))>0)return e;});
             var jo=$('div').map(function(i,e){
                 var b=e.getBoundingClientRect();
-                var bp=e.parentElement.getBoundingClientRect();
-                if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width==bp.width&&b.height==bp.height&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&$(e).css("opacity")==0)return e;
+                var bp=e.parentElement.getBoundingClientRect();//↓縦長ウィンドウでも反応するようtop判定はやめる
+                if($(e).css("position")=="absolute"&&/*b.top<5&&*/b.left<5&&b.width==bp.width&&b.height==bp.height&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&$(e).css("opacity")==0)return e;
             });
             if(jo.length>0)overlapSelector=getElementSingleSelector(jo[0]);
             //else{
@@ -4180,6 +4196,7 @@ function getMenuElement(returnSingleSelector){
             lc=0;
         }
     }
+    if(lc>0) la[ac++]=[et,lc];//上のループがet==jp[0]で終わった時用
     for(var i=0,m=0;i<la.length;i++){
         if(m<la[i][1]){
             m=la[i][1];
@@ -6767,7 +6784,11 @@ function copycome(d, hlsw) {
     }
     //console.time('copycome')
     var eo = EXcomelist;
-    var isAnimationIncluded = (comelistClasses.animated && eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0);// || parseInt($(eo.firstElementChild).css('height')) < 10;//height判定もうまくいかなくなった
+    var isAnimationIncluded = false;
+    if (comelistClasses.animated) {isAnimationIncluded = eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0}
+    else if (eo.childElementCount>2) {
+        isAnimationIncluded = eo.firstElementChild.className!=eo.childNodes[1].className
+    } else return;
     //console.log('copycome isA:',isAnimationIncluded,eo.firstElementChild)
     var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(0)' : ''));
     //console.log("EXCLChi",EXcomelistChildren)
@@ -6776,7 +6797,7 @@ function copycome(d, hlsw) {
         //console.log("copycome leng=0");
         var t = '<div id="copycome" class="' + jo.parent().attr("class") + ' usermade"><div id="copycomec" class="'+jo.attr("class")+' usermade">';
         var eofc = EXcomelistChildren[0];
-        //console.log(eofc)
+        //console.log(eofc,isAnimationIncluded,eo.firstElementChild,EXcomelistChildren)
         if ((comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) return;
         //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
         var eofcc = $(eofc).prop("class");
@@ -7923,12 +7944,12 @@ $(window).on("resize", function (){
     }
     resizeEventTimer = setTimeout(function(){
         //ウィンドウのリサイズ完了時の処理
-        if(settings.isResizeScreen && isComeOpen()){
+        if(settings.isResizeScreen/* && isComeOpen()*/){
             setTimeout(function(){
                 //コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
                 $(EXobli).children().has(getVideo()).width(window.innerWidth).height(window.innerHeight);
                 setTimeout(onresize, 1000);//1秒後にリサイズをかける
-                setTimeout(onresize, 1500);//たまに映像がずれるので再度リサイズかけると落ち着く
+                //setTimeout(onresize, 1500);//たまに映像がずれるので再度リサイズかけると落ち着く
             },200);
         }
     }, 200);
@@ -8076,10 +8097,8 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
     var now = new Date();
     if (notifyTime > now) {
         var progNotifyName = "progNotify_" + channel + "_" + programID;
-        var notifyButton = $('<div class="addNotify" data-prognotifyname="' + progNotifyName + '"></div>');
-        if (!notifyButParent.children().is('.addNotify')) { //重複設置の防止
-            notifyButton.prependTo(notifyButParent);
-        }
+        notifyButParent.children('.addNotify').remove();
+        var notifyButton = $('<div class="addNotify" data-prognotifyname="' + progNotifyName + '"></div>').prependTo(notifyButParent);        
         getStorage(progNotifyName, function (notifyData) {
             //console.log(notifyData, progNotifyName)
             notifyButtonData[progNotifyName] = {
@@ -8226,8 +8245,8 @@ function putReminderNotifyButtons() {
 function putSideDetailNotifyButton(){
     //console.log('putSideDetailNotifyButton()');
     var sideDetailWrapper = $(EXTTsideR);
+    console.log('put side notify button');//, sideDetailWrapper, sideDetailWrapper.offset().left);    
     if (sideDetailWrapper.length == 0 || sideDetailWrapper.offset().left > window.innerWidth - 50) return;
-    console.log('put side notify button');
     var fp=sideDetailWrapper.find('p');//番組詳細,タイトル,日時,見逃し云々?
     var progTitle;
     var progTime = programTimeStrToTime(fp.eq(2).text());
@@ -8253,6 +8272,7 @@ function putSideDetailNotifyButton(){
     if(fp.length>=3&&fa.length>0&&fp.eq(2).next("div").is(fa.first().prev("div")))//fp2のすぐ下かつfa0のすぐ上のやつ
         notifyButParent=fp.eq(2).next("div").children("div").first();
     else notifyButParent=sideDetailWrapper.find('.zo_zw>div'); //todo
+    //console.log(progTitle,progTime,channel,channelName,progID,notifyButParent)
     putNotifyButtonElement(channel, channelName, progID, progTitle, progTime, notifyButParent);
 }
 
