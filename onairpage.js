@@ -431,6 +431,24 @@ function onairCleaner() {
     pophideElement({head:1}); //allresetしてもヘッダーが表示されないので
     //変数クリア
     EXcomemodule = null;
+    //放送画面のEX*をクリアする　一旦非放送画面に移った後放送画面に戻ると再利用できないため再度setEXsで取得する必要がある
+    EXhead = null;
+    EXmenu = null;
+    EXfoot = null;
+    EXfootcome = null;
+    EXcountview = null;
+    EXfootcountcome = null;
+    EXside = null;
+    EXchli = null;
+    EXinfo = null;
+    EXcomesendinp = null;
+    EXcomesend = null;
+    EXcome = null;
+    EXvolume = null;
+    EXfullscr = null;
+    EXobli = null;
+    EXcomelist = null;
+    EXfootcount = null;
     //DOM監視停止
     commentObserver.disconnect();
 }
@@ -1115,22 +1133,46 @@ function timetablechloop() {
 }
 function PlaybuttonEditor() {
     if (!isChTimetablePlaybutton) return;
+    //放送中の緑枠のclassを取得
+    var fisrtChDivs = EXTTbody.firstElementChild.childNodes;
+    var presentClass = '';
+    var clsArr = [];
+    //一つのチャンネルの一日分番組divを取得しそのarticle>button>divのclass名が仲間はずれのものが放送中のclass
+    for (var i=0,cls,flg=true; i<fisrtChDivs.length; i++) {
+        cls=$(fisrtChDivs[i]).find('article>button>div').attr('class');
+        flg=true;
+        for (var j=0; j<clsArr.length; j++) {
+            if (clsArr[j][0]==cls) {clsArr[j][1]++;flg=false;}
+        }
+        if (flg) {
+            clsArr.push([cls,1]);
+        }
+    }
+    if (clsArr.length==3&&clsArr[1][1]==1) {
+        presentClass = clsArr[1][0];
+    } else if (clsArr.length==2) {
+        if (clsArr[0][1]==1) presentClass = clsArr[0][0];
+        else if (clsArr[1][1]==1) presentClass = clsArr[1][0];
+    }
+    if (presentClass.length==0) {console.warn('?presentClass failed');return;}
+    var presentSelector = '.'+presentClass.split(' ').join('.');
     //放送中の緑枠の移動に合わせて再生ボタンを削除、設置する
-    var p = $('[class*="style__status-present___"]'); //放送中の緑色枠 //todo
+    var p = $(presentSelector); //放送中の緑色枠
     var b = $('.playbutton');
-    var c = $('[class*="styles__channel-link___"]'); //todo
+    var c = $(EXTThead).children(); //channel link
     var cr = /^https:\/\/abema\.tv\/timetable\/channels\/(.+)$/;
     var dr = /^https:\/\/abema\.tv\/timetable(?:\/dates\/.+)?$/;
     var umc = currentLocation.match(cr);
     var umd = currentLocation.match(dr);
     var pn = -1;
     var bn = -2;
+    var titleClass = getTTProgramTitleClass();
     for (var i = b.length - 1, d, s; i >= 0; i--) {
         d = b.eq(i).parent('a');
         s = d.siblings();
-        if (!s.is('[class*="style__status-present___"]')) { //todo
+        if (!s.is(presentSelector)) {
             //設置済ボタン位置が緑枠でなければボタン削除
-            s.find('[class^="style__title___"]').css("width", ""); //todo
+            s.find('.'+titleClass).parents('p').css("width", "");
             d.remove();
         }
     }
@@ -1141,7 +1183,7 @@ function PlaybuttonEditor() {
             u = '/now-on-air/' + umc[1];
         } else if (umd && umd.length > 0 && c.length > 0) {
             //日付別番組表ならアイコンのリンクから取得
-            j = q.parents('[class*="styles__col___"]').index(); //todo
+            j = $(EXTTbody).children().has(q).index(); //列のindex
             iumc = c.eq(j).prop("href").match(cr);
             if (iumc && iumc.length > 1 && iumc[1].length > 0) {
                 u = '/now-on-air/' + iumc[1];
@@ -1154,11 +1196,11 @@ function PlaybuttonEditor() {
         }
         if (!q.siblings().children().is('.playbutton')) {
             //緑枠にボタンがなければ設置
-            q.find('[class*="style__title___"]').css("width", "130px"); //todo
+            q.find('.'+titleClass).parents('p').css("width", "86px");
             a = '<a href="javascript:location.href=\'https://abema.tv' + u + '\';" title="放送中画面へ移動">';
-            a += '<div class="playbutton" style="position:absolute;right:4px;top:4px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">';
+            a += '<div class="playbutton" style="position:absolute;right:30px;top:4px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">';
             a += '<svg width="10" height="14" style="fill:#6fb900;transform:translate(1px,3px)">';// 以前は7px,3px
-            a += '<use xlink:href="/svg/images/icons/playback.svg#svg-body">';
+            a += '<use xlink:href="/images/icons/playback.svg#svg-body">';
             a += '</use></svg></div>';
             a += '</a>';
             $(a).insertAfter(q);
@@ -1172,8 +1214,9 @@ function PlaybuttonEditor() {
                     //clickPlaybuttonBack(e.currentTarget);//←↓この2関数はコメントアウトされている
                     //waitformakelink(50);
                     //再生ボタンのある番組をクリックして右詳細の番組画像をクリック
+                    //console.log(e.currentTarget);
                     clickElement($(e.currentTarget).parents('button'));
-                    setTimeout(clickElement,10,$('[class*="SlotCard__thumbnail___"]')); //todo
+                    setTimeout(clickElement,10,$(EXTTsideR).find('a[href^="/now-on-air/"]')); //todo
                 }
             });
         }
@@ -2210,7 +2253,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
     if(!isOLS){
         if(!overlapSelector){//ページ遷移の再delayset時に本来のoverlapが無くなって映像枠が引っかかるので再探査しない
             //var jo=$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&parseInt($(e).css("opacity"))>0)return e;});
-            var jo=$('div').map(function(i,e){
+            var jo=$('button').map(function(i,e){
                 var b=e.getBoundingClientRect();
                 var bp=e.parentElement.getBoundingClientRect();//↓縦長ウィンドウでも反応するようtop判定はやめる
                 if($(e).css("position")=="absolute"&&/*b.top<5&&*/b.left<5&&b.width==bp.width&&b.height==bp.height&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&$(e).css("opacity")==0)return e;
@@ -3832,9 +3875,7 @@ function setEXs() {
         //setEX2(); 残ってたchli.scrollをdelaysetに移動させてsetex2を空にした
         setOptionHead();    //各オプションをhead内に記述
         setOptionElement(); //各オプションを要素に直接適用
-        if (!eventAdded) {
-            setOptionEvent();   //各オプションによるイベントを作成
-        }
+        setOptionEvent();   //各オプションによるイベントを作成
     } else {
         console.log("setEXs retry "+(EXhead?".":"H")+(EXmenu?".":"M")+(EXfoot?".":"F")+(EXfootcome?"..":"Fc")+(EXcountview?".":"V")+(EXfootcountcome?"..":"Fb")+(EXside?".":"S")+(EXchli?"..":"L")+(EXcomesendinp?"..":"Ct")+(EXcomesend?"..":"Cf")+(EXcome?".":"C")+(EXvolume?"..":"Vo")+(EXfullscr?"..":"Fs")+(EXobli?".":"O")+(EXcomelist?"..":"Cl"));
         setTimeout(setEXs, 1000);
@@ -3863,7 +3904,7 @@ function setEXs() {
 function getHeaderElement(returnSingleSelector) {
     //console.log("?head");
     //左上のロゴを孫にもち上方にあるものをheaderとする
-    var ret = $('[*|href$="/logo.svg#svg-body"]:not([href])').get(0);
+    var ret = $('[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])').get(0);
     if(!ret){console.log("?head");return null;}
     var rep=ret.parentElement;
     var b=rep.getBoundingClientRect();
@@ -3944,7 +3985,7 @@ function getFootcomeElement(returnSingleSelector) {
     if (!cn){console.log("?footcome(!cn)");return null;}
     var reb = $(EXfoot).find('img[src*="/channels/logo/' + cn + '"]').get(0);
     if(!reb){console.log("?footcome(!reb)");return null;}
-    var ret = $(EXfoot).find($('[*|href$="/comment.svg#svg-body"]:not([href])')).get(0);
+    var ret = $(EXfoot).find($('[*|href*="/comment.svg"][*|href$="#svg-body"]:not([href])')).get(0);
     if(!ret){console.log("?footcome(!ret)");return null;}
     var rep=ret.parentElement;
     while(!$(ret).is(EXfoot)&&$(rep).find(reb).length==0){
@@ -3985,7 +4026,7 @@ function getFootcomeBtnElement(returnSingleSelector){
 function getSideElement(returnSingleSelector) {
     //console.log("?side");
     //リストアイコンを孫にもち右方にあるものをsideとする
-    var ret = $('[*|href$="/list.svg#svg-body"]:not([href])').get(0);
+    var ret = $('[*|href*="/list.svg"][*|href$="#svg-body"]:not([href])').get(0);
     if(!ret){console.log("?side");return null;}
     var rep=ret.parentElement;
     var b=rep.getBoundingClientRect();
@@ -4125,7 +4166,7 @@ function getComeListElement(returnSingleSelector){
 function getVolElement(returnSingleSelector){
     //console.log("?vol");
     //音声アイコンを含んで右下のをvolとする
-    var ret = $('[*|href$="/volume_on.svg#svg-body"]:not([href])').add('[*|href$="/volume_off.svg#svg-body"]:not([href])').get(0);
+    var ret = $('[*|href*="/volume_on.svg"][*|href$="#svg-body"]:not([href])').add('[*|href*="/volume_off.svg"][*|href$="#svg-body"]:not([href])').get(0);
     if(!ret){console.log("?getvol");return null;}
     var rep=ret.parentElement;
     var b=rep.getBoundingClientRect();
@@ -4176,7 +4217,7 @@ function getObliElement(returnSingleSelector){
 }*/
 function getFullScreenElement(returnSingleSelector){
     //console.log("?fullscreen");
-    var ret = $('[*|href$="/full_screen.svg#svg-body"]:not([href])').first().parentsUntil("button").parent().get(0);
+    var ret = $('[*|href*="/full_screen.svg"][*|href$="#svg-body"]:not([href])').first().parentsUntil("button").parent().get(0);
     if(!ret){console.log("?fullscreen");return null;}
     return returnSingleSelector?getElementSingleSelector(ret):ret;
 }
@@ -4278,7 +4319,7 @@ function getReceiveNotifyElement(returnSingleSelector){
 }
 function getReceiveTwtElement(returnSingleSelector){
     //左下にあるtwtアイコンの親で左下のを選ぶ
-    var jo=$('[*|href$="/images/icons/twitter.svg#svg-body"]:not([href])');
+    var jo=$('[*|href*="/images/icons/twitter.svg"][*|href$="#svg-body"]:not([href])');
     var ret=null;
     for(var i=0;i<jo.length;i++){
         if(jo.eq(i).offset().top<window.innerHeight*2/3||jo.eq(i).offset().left>window.innerWidth*2/3) continue;
@@ -4315,7 +4356,7 @@ function getComeModuleElements(returnSingleSelector){
     }
     if(!ret[0]) return ret;
 
-    var jo=$(ret[0]).find($('[*|href$="/images/icons/twitter.svg#svg-body"]:not([href])'));
+    var jo=$(ret[0]).find($('[*|href*="/images/icons/twitter.svg"][*|href$="#svg-body"]:not([href])'));
     if(jo.length==0) return null;
     var jp=jo.first().parentsUntil(ret[0]);
     for(var r=0,js,jd;r<jp.length;r++){
@@ -6416,7 +6457,6 @@ function setOptionEvent() {//放送画面用イベント設定
     if (checkUrlPattern(true) != 3) return;
     //自作要素のイベントは自作部分で対応
     //console.log("setOptionEvent() eventAdded:", eventAdded);
-    if (eventAdded) return;
     var butfs;
     var pwaku;
     if (((butfs = EXfullscr) == null) || ((pwaku = $(overlapSelector)[0]) == null) || !EXcome) {
@@ -6424,6 +6464,13 @@ function setOptionEvent() {//放送画面用イベント設定
         setTimeout(setOptionEvent, 1000);
         return;
     }
+    if (pwaku.getAttribute('data-ext-event-added')!='true') {
+        pwaku.addEventListener("click", usereventWakuclick);
+        //ダブルクリックでフルスクリーン
+        pwaku.addEventListener("dblclick", onScreenDblClick);
+        pwaku.setAttribute('data-ext-event-added', 'true');
+    }
+    if (eventAdded) return;       
     //    $(window).on("click",usereventWindowclick);
     //マウスホイール無効か音量操作
     var mousewheelEvtName = isFirefox ? 'DOMMouseScroll' : 'mousewheel';
@@ -6467,9 +6514,6 @@ function setOptionEvent() {//放送画面用イベント設定
     });
     window.addEventListener("mousemove", usereventMouseover, true);
     window.addEventListener("keydown", usereventMouseover, true); //コメント入力時などキー入力時もマウスが動いたのと同じ扱いにしてelementをhideするカウントダウンをさせない
-    pwaku.addEventListener("click", usereventWakuclick);
-    //ダブルクリックでフルスクリーン
-    pwaku.addEventListener("dblclick", onScreenDblClick);
     //pwakuと同じイベントを#ComeMukouMaskにも設置
     $(EXvolume).on("mousemove", usereventVolMousemove)
         .on("mouseout", usereventVolMouseout)
@@ -6774,7 +6818,7 @@ function comeUserHighlight(jo){
     });
 }
 function copycome(d, hlsw) {
-//console.log("copycome d="+d);
+//console.log("copycome d="+d,isComelistMouseDown);
     if (isComelistMouseDown) return;//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
     if (!EXcomelist) return;
     if (!isComelistNG) {
@@ -7142,6 +7186,7 @@ function appendTextNG(ev, inpstr) {
     var s;
     if (inpstr === undefined) {
         s = $('#copyot').val();
+        isComelistMouseDown = false;        
     } else {
         s = inpstr;
     }
@@ -7205,6 +7250,7 @@ function appendUserNG(ev, inpstr){
     var uid;
     if (inpstr === undefined) {
         uid = $('#copyotu').val();
+        isComelistMouseDown = false;        
     } else {
         uid = inpstr;
     }
@@ -7230,6 +7276,7 @@ function appendUserNG(ev, inpstr){
         for (ngsi = 0; ngsi < uidArr.length; ngsi++){
             if (uidArr[ngsi] == spuserng[ngi]) {
                 b = false;
+                //console.log('apUsNg already added', uidArr,ngsi,spuserng,ngi)
                 break;
             }
         }
@@ -7242,7 +7289,7 @@ function appendUserNG(ev, inpstr){
                 userNg += "\n" + uidArr[ngsi];
             }
         }
-
+        console.log('apUsNg append')
         arrayUserNgMaker();
         copycome();
     }
@@ -8146,6 +8193,8 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
                 });
             }
         });
+    } else {
+        notifyButParent.children('.addNotify').remove();
     }
 }
 function programTimeStrToTime(programTimeStr) {
@@ -8245,7 +8294,7 @@ function putReminderNotifyButtons() {
 function putSideDetailNotifyButton(){
     //console.log('putSideDetailNotifyButton()');
     var sideDetailWrapper = $(EXTTsideR);
-    console.log('put side notify button');//, sideDetailWrapper, sideDetailWrapper.offset().left);    
+    console.log('put side notify button', sideDetailWrapper);    
     if (sideDetailWrapper.length == 0 || sideDetailWrapper.offset().left > window.innerWidth - 50) return;
     var fp=sideDetailWrapper.find('p');//番組詳細,タイトル,日時,見逃し云々?
     var progTitle;
