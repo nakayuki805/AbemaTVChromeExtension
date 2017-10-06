@@ -427,8 +427,10 @@ function onairCleaner() {
     console.log("onairCleaner");
     //onairfunc以降に作成した要素を削除
     $('.usermade').remove();
-    pophideElement({ allreset: true });
-    pophideElement({head:1}); //allresetしてもヘッダーが表示されないので
+    if (EXhead && EXfoot) {
+        pophideElement({ allreset: true });
+        pophideElement({head:1}); //allresetしてもヘッダーが表示されないので    
+    }
     //変数クリア
     EXcomemodule = null;
     //放送画面のEX*をクリアする　一旦非放送画面に移った後放送画面に戻ると再利用できないため再度setEXsで取得する必要がある
@@ -1364,7 +1366,7 @@ function onresize(oldTranslate) {
     setTimeout(function(){
         if(EXcountview){
             $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
+            $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
         }
     },2000);
 
@@ -2253,7 +2255,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
     if(!isOLS){
         if(!overlapSelector){//ページ遷移の再delayset時に本来のoverlapが無くなって映像枠が引っかかるので再探査しない
             //var jo=$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&parseInt($(e).css("opacity"))>0)return e;});
-            var jo=$('button').map(function(i,e){
+            var jo=$('div,button').map(function(i,e){
                 var b=e.getBoundingClientRect();
                 var bp=e.parentElement.getBoundingClientRect();//↓縦長ウィンドウでも反応するようtop判定はやめる
                 if($(e).css("position")=="absolute"&&/*b.top<5&&*/b.left<5&&b.width==bp.width&&b.height==bp.height&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&$(e).css("opacity")==0)return e;
@@ -2303,13 +2305,13 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo) {
         }
         //視聴数の位置調整
         setTimeout(function () {
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
+            $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
         }, 3000);//コメント数が表示されるまで待つ
         setTimeout(function () {
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
+            $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
         }, 10000);//再度修正
         setInterval(function () {
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
+            $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
         }, 30000);//30秒ごとに再調整
 
         //初期読込時にマウス反応の要素が閉じないのを直したい
@@ -6792,9 +6794,10 @@ function comehl(jo, hlsw) {
         jo.eq(i).css('border-right', 'solid 4px rgba('+color[0]+','+color[1]+','+color[2]+','+opacity+')');
     }
 }*/
+var comeUserHlInterval = null;
 function comeUserHighlight(jo){
-    $(jo).mouseover(function(e){
-        var j=$(e.currentTarget);
+    function userHl(e) {
+        var j=$(e);
         var uid = j.attr('data-ext-userid') || '';
         //var opacity = commentTextTrans/255;
         //console.log('mov',e,j,uid);
@@ -6804,6 +6807,14 @@ function comeUserHighlight(jo){
             j.siblings(':not([data-ext-userid='+uid+'])').css('background-color', '');
         }
         j.css('background-color', 'rgba(255,255,0,0.6)');
+    }
+    $(jo).mouseover(function(e){
+        if (comeUserHlInterval !== null) {
+            clearInterval(comeUserHlInterval);
+            comeUserHlInterval = null;
+        }
+        userHl(e.currentTarget);
+        comeUserHlInterval = setInterval(userHl, 1000, e.currentTarget);
     });
     $(jo).mouseout(function(e){
         var j=$(e.currentTarget);
@@ -6815,6 +6826,8 @@ function comeUserHighlight(jo){
             j.siblings().css('background-color', '');
         //}
         j.css('background-color', '');
+        clearInterval(comeUserHlInterval);
+        comeUserHlInterval = null;
     });
 }
 function copycome(d, hlsw) {
