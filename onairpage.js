@@ -2361,7 +2361,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         //if($(EXcomelist).length>0){
         EXcomments = $(EXcomelist).find('p').map(function(i,e){if($(e).index()==0)return e;});
         //コメ欄のDOM変更監視
-        commentObserver.observe(EXcomelist, { childList: true});
+        commentObserver.observe(EXcomelist, {childList: true/*, subtree: true, attributes: true*/});
 //        console.log("setOptionHead delayset(EXcomelist)");
 //        resetOptionHead=true;
         isEXC=true;
@@ -4184,7 +4184,7 @@ function getComeListElement(returnSingleSelector){
     }
     if(!ret){console.log("?comelist(time notfound)");return null;}
     ret=null;
-    console.log(jo)
+    //console.log(jo)
     for(var i=jo.length-1,j;i>=0;i--){
         j=jo.eq(i);
         if(j.find(EXcomesend).length>0) continue;
@@ -7955,6 +7955,9 @@ function onCommentChange(mutations){
             }else{
                 console.warn('unexpected onCommentChange()', mutations[i]);
             }
+            //console.log(nodeClass,comelistClasses.animated,isAnimationAdded)                    
+        }else{
+            //console.log('other mutation', mutations[i].type, mutations[i])
         }
     }
     //console.log(isAnimationAdded,isCommentAdded);
@@ -8027,10 +8030,21 @@ function onCommentChange(mutations){
                 comeHealth = 100;
             }
         }
+        //下のanimation追加で処理すると何故か取りこぼしがあるのでコメ流しもとりあえずここでやる //Todo
+        if (isMovingComment && isFirstComeAnimated) {
+            var idx;
+            for(var i = 0; i < d; i++){
+                idx = d - i - 1;
+                putComment(comments[idx][0], comments[idx][1], i, d);
+            }
+        }
+        if(!isFirstComeAnimated){
+            isFirstComeAnimated = true;
+        }
     }
-    if(isAnimationAdded){
+    if(false&&isAnimationAdded){
         //console.log(isFirstComeAnimated,mutations)
-        //animation部の新着コメのコメ流し
+        //animation部の新着コメのコメ流し//上に仮移動
         if (isMovingComment && isFirstComeAnimated) {
             //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
             //                            putComment(comments[i]);
@@ -8044,7 +8058,7 @@ function onCommentChange(mutations){
             //console.log(animationCommentDivs)
             for(var i = 0; i < animationCommentDivs.length; i++){
                 idx = animationCommentDivs.length - i - 1;
-                //console.log('pc',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
+                console.log('pc(animation)',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
                 putComment(animationCommentDivs[idx].children[0].innerHTML, animationCommentDivs[idx].getAttribute('data-ext-userid'), i, animationCommentDivs.length);
             }
         }
