@@ -15,10 +15,49 @@ function injection_urlChanged(){
     }
     inj_currentLocation = location.href;
     inj_commentObserver.disconnect();
+    inj_setRefClass();
     //放送画面
     if(inj_currentLocation.indexOf('https://abema.tv/now-on-air/')>=0){
-        inj_delaysetComment();
+        setTimeout(inj_delaysetComment,1000);
+    }else if(inj_currentLocation.indexOf('https://abema.tv/timetable')>=0){
+        //番組表
+        setTimeout(function setTTRefClass(){
+            var EXTTbody = $('.ext_abm-tt-body')[0];
+            if(!EXTTbody){
+                EXTTbody = $('article').parent().parent().parent()[0];
+            }
+            var EXTThead = $('.ext_abm-tt-head')[0];
+            if(!EXTThead){
+                EXTThead = $('.ext_ref-channel-content-header').children()[0];
+            }
+            if(!EXTThead){
+                EXTThead = $(EXTTbody).parent().parent().prev().children().children()[0];
+            }
+            if (EXTThead.childElementCount > EXTTbody.childElementCount){
+                console.log('retry setTTRefClass()');
+                setTimeout(setTTRefClass, 500, );
+                return;
+            }
+            inj_setRefClass();
+        },1000);
     }
+}
+
+function inj_setRefClass(parent){
+    //refsからclassを設定
+    (parent?$(parent).find('div'):$('div')).each(function(i,e){
+        try{
+            var r=inj_findReact(e);
+            if(r&&r.refs){
+                for(var ref in r.refs){
+                    if(r.refs[ref] instanceof HTMLElement){
+                        inj_addRefClass(r.refs[ref], ref);
+                        //console.log(ref,r.refs[ref]);                        
+                    }
+                }
+            }
+        }catch(er){}
+    });
 }
 
 function inj_delaysetComment(){
@@ -30,6 +69,7 @@ function inj_delaysetComment(){
     if(comelistInstance !== null){
         //console.log('comelistInstance:', comelistInstance);
         inj_EXcomelist = jComelist.get(0);
+        inj_commentObserver.disconnect();
         inj_commentObserver.observe(inj_EXcomelist, {childList: true});
     }else{
         console.log('waitng inj_delaysetComment()');
@@ -82,6 +122,11 @@ function inj_findReact(dom) {
     }
     return null;
 };
+function inj_addRefClass(elm, refName){
+    className = 'ext_ref-'+refName;
+    //$('.'+className).removeClass(className);
+    $(elm).addClass(className).attr('data-ext-ref',refName);
+}
 
 setTimeout(function inj_jqwait(){
     //jqueryが使えるまで待機
