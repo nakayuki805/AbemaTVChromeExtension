@@ -412,6 +412,7 @@ var comelistClasses = { stabled: "", animated: "", empty: "", progress: "", mess
 var timetableClasses = { arrow: "", timebar: "", };//ページ遷移直後に取得できないので初回取得時に保持する getSingleSelectorの結果を入れるので使用時は.を付けない
 var currentVersion = chrome.runtime.getManifest().version;
 var resizeEventTimer = 0; //ウィンドウリサイズイベント用のタイマー
+var isBottomScrolled = false; //コメ欄逆順時初回で下にスクロールしたか
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -1798,7 +1799,7 @@ function putComeArray(inp) {
         for(var cofi = 0; cofi < comeoverflowlen; cofi++){
             setTimeout(function(cofi){
                 mcj.eq(cofi).remove();
-            }, 5000*cofi/comeoverflowlen, cofi);//あふれた分を1つずつ順番に5秒かけて消す
+            }, 7000*cofi/comeoverflowlen, cofi);//あふれた分を1つずつ順番に7秒かけて消す
         }
         //        mclen-=comeoverflowlen;
     }
@@ -1910,7 +1911,7 @@ function putComment(commentText, userid, index, inmax, isSelf) {
             i += 1;
         }
     }
-    var maxLeftOffset = window.innerWidth * 5 / settings.movingCommentSecond; //5秒の移動長さ
+    var maxLeftOffset = window.innerWidth * 7 / settings.movingCommentSecond; //7秒の移動長さ
     var leftOffset = Math.floor(maxLeftOffset * index / inmax);
     if (commentText.length > 0) {
         comeArray.push([commentText, commentTop, leftOffset, isSelf]);
@@ -6885,6 +6886,7 @@ function copycome(d, hlsw) {
     //console.time('copycome')
     var eo = EXcomelist;
     var isAnimationIncluded = false;
+    var isCopycomeCreated = false;
     if (comelistClasses.animated) {isAnimationIncluded = eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0}
     else if (eo.childElementCount>2) {
         isAnimationIncluded = eo.firstElementChild.className!=eo.childNodes[1].className
@@ -6897,11 +6899,12 @@ function copycome(d, hlsw) {
         //console.log("copycome leng=0");
         var t = '<div id="copycome" class="' + jo.parent().attr("class") + ' usermade"><div id="copycomec" class="'+jo.attr("class")+' usermade">';
         var eofc = EXcomelistChildren[0];
-        //console.log(eofc,isAnimationIncluded,eo.firstElementChild,EXcomelistChildren)
+        //console.log(eofc,isAnimationIncluded,eo.firstElementChild,EXcomelistChildren, comelistClasses)
         if ((comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) return;
         //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
-        var eofcc = $(eofc).prop("class");
         if (eofc === undefined || !eofc.hasChildNodes()) return;
+        var eofcc = $(eofc).prop("class");        
+        if (eofcc === undefined || (comelistClasses.progress&&eofcc.indexOf(comelistClasses.progress)>=0)) return;
         var em = eofc.children[0];
         var ecm = $(em).prop("class");
         var et = eofc.children[1];
@@ -6919,6 +6922,7 @@ function copycome(d, hlsw) {
         //コメ欄でマウスが押されているか
         $('#copycome').mousedown(function (e) { if (e.button != 2) { isComelistMouseDown = true; } });//右クリックには反応しない
         $('#copycome').mouseup(function () { setTimeout(function () { isComelistMouseDown = false; }, 3000) });//選択し終わってから右クリまで3秒の猶予
+        isCopycomeCreated = true;
     }
     var jc = $('#copycomec').children();
     var ec = $('#copycomec')[0];
@@ -7073,6 +7077,7 @@ function copycome(d, hlsw) {
             setTimeout(copycome, 800);
         }
     }
+ 
     //console.timeEnd('copycome');
 }
 function comewidthfix(i, h) {
@@ -7497,6 +7502,7 @@ function mainfunc() { //初回に一度実行しておけば後でURL部分が�
 function onairfunc() {
     //変数リセット
     isFirstComeAnimated = false;
+    isBottomScrolled = false;
     //要素チェック
     setEXs();
     delayset();
@@ -7512,6 +7518,12 @@ function onairfunc() {
     if (settings.mastodonInstance && settings.mastodonToken){
         isTootEnabled = localStorage.getItem('isTootEnabled') == 'true';
     }
+    //何らかの不具合で放送ページに推移したのに放送画面が構築されない場合は5秒待って再読み込み
+    setTimeout(function(){
+        if (checkUrlPattern(true) != 3) return;
+        if (previousLocation.indexOf('now-on-air')>=0) return;
+        if (!EXfoot && !EXcome && !EXside) location.href = location.href;
+    }, 5000);
 }
 //    setInterval(function () {
 function onairBasefunc() {
@@ -7978,13 +7990,13 @@ function onCommentChange(mutations){
         for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
             comments.push([commentDivs[cdi].children[0].innerHTML, commentDivs[cdi].getAttribute('data-ext-userid')]);
         }
+        var d = newCommentNum;        
         //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
         //console.timeEnd('obf_getComment_beforeif')
         if (EXcomelist && isComeOpen()) {
             var comeListLen = comments.length;//EXcomelist.childElementCount;
             //var d = comeListLen - commentNum;//一定数(500)に達するとコメント数の総数は増えなくなるので左式は0になる
-            var d = newCommentNum;
-            //console.log(comeListLen,commentNum,d)
+            //console.log('cl,cn,d', comeListLen,commentNum,d)
             //            if(comeListLen>commentNum){ //コメ増加あり
             //                if(!comeRefreshing||!isSureReadComment){
             var commentDivParentV = (isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : commentDivParent;
@@ -8029,6 +8041,14 @@ function onCommentChange(mutations){
                 commentNum = 0;
                 comeHealth = 100;
             }
+            //コメ欄逆順で初回スクロール
+            //console.log('ibs,sh', isBottomScrolled,commentDivParentV[0].scrollHeight);
+            
+            if (!isBottomScrolled && commentDivParentV[0].scrollHeight>0) {
+                commentDivParentV.scrollTop(commentDivParentV[0].scrollHeight);
+                isBottomScrolled = true;
+            }
+
         }
         //下のanimation追加で処理すると何故か取りこぼしがあるのでコメ流しもとりあえずここでやる //Todo
         if (isMovingComment && isFirstComeAnimated) {
@@ -8038,7 +8058,8 @@ function onCommentChange(mutations){
                 putComment(comments[idx][0], comments[idx][1], i, d);
             }
         }
-        if(!isFirstComeAnimated){
+        //console.log('newcome', comments, isFirstComeAnimated, d);                    
+        if(!isFirstComeAnimated && isComeOpen()){
             isFirstComeAnimated = true;
         }
     }

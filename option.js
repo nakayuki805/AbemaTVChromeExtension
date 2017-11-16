@@ -635,6 +635,7 @@ $(function(){
                 }
             }
         }
+        
         var sendInfo = "***設定***\n";
         sendInfo += JSON.stringify(sendVal, null, 4);
         sendInfo += "\n***UserAgent***\n";
