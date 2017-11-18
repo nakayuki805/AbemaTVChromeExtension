@@ -1850,13 +1850,15 @@ function putComeArray(inp) {
         }
 
         var waitsec = settings.movingCommentSecond * (mcleft + mcwidth) / (winwidth + mcfixedwidth);
-        setTimeout(function (jo, w, l) {
+        var movingDelta = (-mcwidth - 2)-(inp[i][2] + winwidth);
+
+        setTimeout(function (jo, w, delta) {
             if (isEdge) { jo = $(jo); }
-            jo.css("transition", "left " + w + "s linear")
-                .css("left", l + "px")
+            jo.css("transition", "transform " + w + "s linear")
+                .css("transform", "translateX(" + delta + "px)")
                 .attr('data-createdSec', onairSecCount)
                 ;
-        }, 0, mck, waitsec, (-mcwidth - 2));
+        }, 0, mck, waitsec, movingDelta);
     }
 }
 function putComment(commentText, userid, index, inmax, isSelf) {
@@ -5873,7 +5875,8 @@ function setOptionHead() {
         console.log("?ad-reserve");
         to=alt?'.v3_wC':"";
     }*/
-    to = getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 124px;"]'
+    to = getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 124px;"],';
+    to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 104px;"]'
     if(to){
         t += to+'{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
         if (isHidePopBL) {
@@ -7981,6 +7984,7 @@ function onCommentChange(mutations){
         var isAnimationIncluded = false;//parseInt(commentDivParent.children().eq(0).css("height"))<10;//EXcomelist.children[0].className.indexOf('uo_k') >= 0;
         if(comelistClasses.animated && firstChild.attr('class').indexOf(comelistClasses.animated)>=0){
             isAnimationIncluded = true;
+            isAnimationAdded = true;//コメントが追加されてanimationも含まれていればaimatonも追加されたとみなす
         }
         //console.log("isA",isAnimationIncluded,EXcomelist.children[0],commentDivParent.children().eq(0).css("height"))
         //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
@@ -8050,22 +8054,9 @@ function onCommentChange(mutations){
             }
 
         }
-        //下のanimation追加で処理すると何故か取りこぼしがあるのでコメ流しもとりあえずここでやる //Todo
-        if (isMovingComment && isFirstComeAnimated) {
-            var idx;
-            for(var i = 0; i < d; i++){
-                idx = d - i - 1;
-                putComment(comments[idx][0], comments[idx][1], i, d);
-            }
-        }
-        //console.log('newcome', comments, isFirstComeAnimated, d);                    
-        if(!isFirstComeAnimated && isComeOpen()){
-            isFirstComeAnimated = true;
-        }
     }
-    if(false&&isAnimationAdded){
+    if(isAnimationAdded){
         //console.log(isFirstComeAnimated,mutations)
-        //animation部の新着コメのコメ流し//上に仮移動
         if (isMovingComment && isFirstComeAnimated) {
             //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
             //                            putComment(comments[i]);
@@ -8079,7 +8070,7 @@ function onCommentChange(mutations){
             //console.log(animationCommentDivs)
             for(var i = 0; i < animationCommentDivs.length; i++){
                 idx = animationCommentDivs.length - i - 1;
-                console.log('pc(animation)',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
+                //console.log('pc(animation)',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
                 putComment(animationCommentDivs[idx].children[0].innerHTML, animationCommentDivs[idx].getAttribute('data-ext-userid'), i, animationCommentDivs.length);
             }
         }

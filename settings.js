@@ -870,7 +870,7 @@ function generateRadioInput(settingsArr){
 function generateOptionHTML(isPermanent) {
     var htmlstr = "";
     for (var i=0; i < settingsList.length; i++) {
-        htmlstr += "<fieldset><legend>" + settingsList[i].description + "</legend>";
+        htmlstr += "<fieldset style='border: 1px solid silver;margin: 0 2px;padding: .35em .625em .75em;'><legend>" + settingsList[i].description + "</legend>";
         if(isPermanent){htmlstr += settingsList[i].header || '';}else{htmlstr += settingsList[i].instantHeader || settingsList[i].header || '';}
         htmlstr += generateOptionInput(settingsList[i].settings, isPermanent);
         if(isPermanent){htmlstr += settingsList[i].footer || '';}else{htmlstr += settingsList[i].instantFooter || settingsList[i].footer || '';}
