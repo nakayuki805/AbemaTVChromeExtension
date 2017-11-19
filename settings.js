@@ -819,29 +819,35 @@ function generateOptionInput(settingsArr, isPermanent) {
         isNotChangable = !isPermanent && !settingsArr[i].isInstantChangable;
         disabled = isNotChangable ? " disabled" : "";
         if (settingsArr[i].type === "boolean") {
-            inputHTML += '<input type="checkbox" id="' + settingsArr[i].name + '" ' + disabled + '>:' + description;
+            inputHTML += '<div class="toggle-switch" id="' + settingsArr[i].name + '-switch"><input type="checkbox" id="' + settingsArr[i].name + '" ' + disabled + '><label for="' + settingsArr[i].name + '"></label></div><label for="' + settingsArr[i].name + '">:' + description + '</label>';
             inputHTML += isNotChangable ? NCTEXT : "";
             inputHTML += "<br/>"
         } else {
             if (settingsArr[i].type === "number") {
+                inputHTML += '<label for="' + settingsArr[i].name + '">'
                 inputHTML += description;
                 inputHTML += isNotChangable ? NCTEXT : "" + ":";
+                inputHTML += '</label>';
                 inputHTML += '<input type="number" id="' + settingsArr[i].name + '" ' + disabled + '>';
                 inputHTML += "<br/>"
             } else if (settingsArr[i].type === "textarea") {
+                inputHTML += '<label for="' + settingsArr[i].name + '">'                
                 inputHTML += '<textarea id="' + settingsArr[i].name + '" rows=3 cols=40 wrap=off ' + disabled + '></textarea>';
                 inputHTML += ':' + description;
+                inputHTML += '</label>';                
                 inputHTML += isNotChangable ? NCTEXT : "";                
                 inputHTML += "<br/>"
             } else if (settingsArr[i].type === "range") {
-                inputHTML += '<div><span class="desc">'+description;
-                inputHTML += isNotChangable ? NCTEXT : "" + "</span>:";
+                inputHTML += '<div><span class="desc"><label for="' + settingsArr[i].name + '">'+description;
+                inputHTML += isNotChangable ? NCTEXT : "" + "</label></span>:";
                 inputHTML += '<span class="prop">-</span>';
                 inputHTML += '<input type="range" id="' + settingsArr[i].name + '" max=255 ' + disabled + '></div>';
             } else if (settingsArr[i].type === "text"){
                 defaultVal = settingsArr[i].default || "";
+                inputHTML += '<label for="' + settingsArr[i].name + '">'                
                 inputHTML += description;
                 inputHTML += isNotChangable ? NCTEXT : "" + ":";
+                inputHTML += '</label>';
                 inputHTML += '<input type="input" id="' + settingsArr[i].name + '" ' + disabled + ' placeholder=' + defaultVal + '>';
                 inputHTML += "<br/>"
             }
@@ -856,10 +862,11 @@ function generateRadioInput(settingsArr){
         for(var j=0;j<settingsArr[i].list.length;j++){
             inputHTML+='<div>';
             for(var k=0;k<settingsArr[i].list[j].length;k++){
+                var radioID = 'radio-'+settingsArr[i].name+'-'+settingsArr[i].list[j][k][0];
                 inputHTML+='<div>';
-                inputHTML+='<input type="radio" name="'+settingsArr[i].name+'" value="'+settingsArr[i].list[j][k][0]+'">';
+                inputHTML+='<input type="radio" name="'+settingsArr[i].name+'" value="'+settingsArr[i].list[j][k][0]+'" id="'+radioID+'"><label for="'+radioID+'">';
                 inputHTML+=settingsArr[i].list[j][k][1];
-                inputHTML+='</div>';
+                inputHTML+='</label></div>';
             }
             inputHTML+='</div>';
         }

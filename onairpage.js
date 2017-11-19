@@ -2168,6 +2168,7 @@ function openOption() {
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
 
     $('#panelOpacity').val(settings.panelOpacity);
+    $('#panelOpacity').siblings('.prop').text(settings.panelOpacity);    
     $('#comeFontsizeV').prop("checked", comeFontsizeV);
     $('#proTitleFontC').prop("checked", proTitleFontC);
     $('#isDelTime').prop("checked", isDelTime);
@@ -2640,6 +2641,7 @@ function createSettingWindow() {
         $('#iproSamePosition').change(setProSamePosiChanged);
         $('#isProTextLarge').change(setProTextSizeChanged);
         $('#highlightComePower').change(setHighlightComePowerChanged);
+        $('#panelOpacity').change(setPanelOpacityChanged);
         $('#comeFontsize').change(setComeFontsizeChanged);
     }
     $("#CommentMukouSettings").hide();
@@ -2651,7 +2653,7 @@ function createSettingWindow() {
         .next('span.prop').css("padding", "0px 4px")
         .next('input[type="range"]').css("float", "right")
         ;
-    $("#itimePosition").insertBefore("#isTimeVisible+*")
+    $("#itimePosition").insertAfter("#isTimeVisible-switch+*")
         .css("border", "1px solid black")
         .css("margin-left", "16px")
         .css("display", "flex")
@@ -2662,7 +2664,7 @@ function createSettingWindow() {
         .css("margin", "1px 0px")
         .children().css("margin-left", "4px")
         ;
-    $("#iprotitlePosition").insertBefore("#isProtitleVisible+*")
+    $("#iprotitlePosition").insertAfter("#isProtitleVisible-switch+*")
         .css("border", "black solid 1px")
         .css("margin-left", "16px")
         .css("display", "flex")
@@ -2672,7 +2674,7 @@ function createSettingWindow() {
         .css("margin", "1px 0px")
         .children().css("margin-left", "4px")
         ;
-    $("#iproSamePosition").insertBefore("#isProtitleVisible")
+    $("#iproSamePosition").insertBefore("#isProtitleVisible-switch")
         .css("border", "black solid 1px")
         .children().css("display", "flex")
         .css("flex-direction", "row")
@@ -2863,7 +2865,7 @@ function createSettingWindow() {
         //        s+='<div style="margin-left:16px;">末尾調整(分)<input type="number" name="epfix" min=0 max=60 disabled></div>';
         s += '<div style="margin-left:16px;">末尾調整(分)<input type="number" name="epfix" min=0 max=60></div>';
         s += '</div>';
-        $(s).insertBefore("#isTimeVisible+*");
+        $(s).insertAfter("#isTimeVisible-switch+*");
         var epnume = $('#epnumedit').contents().find('input[type="number"]');
         epnume.filter('[name="epcount"]').val(2)
             .change(epcountchange)
@@ -2901,8 +2903,8 @@ function createSettingWindow() {
         for (var i = 0; i < 4; i++) {
             for (var j = 0; j < 3; j++) {
                 for (var k = 0; k < 3; k++) {
-                    $('<input type="radio" name="d' + i + '' + j + '" value=' + k + '>').appendTo('#panelcustomTable tr:eq(' + (i + 1) + ')>td:eq(' + (j + 1) + ')')
-                        .after(rd[k])
+                    $('<input type="radio" name="d' + i + '' + j + '" value="' + k + '" id="radio-d'+i+j+'-'+k+'">').appendTo('#panelcustomTable tr:eq(' + (i + 1) + ')>td:eq(' + (j + 1) + ')')
+                        .after('<label for="radio-d'+i+j+'-'+k+'">'+rd[k]+'</label>')
                         ;
                 }
             }
@@ -2918,19 +2920,19 @@ function createSettingWindow() {
         $('#panelcustomTable').change(panelTableUpdateT);
     }
     if ($('#movieResizeContainer').length == 0) {
-        var jo = $('#isResizeScreen');
+        var jo = $('#isResizeScreen-switch');
         var ja = jo.parent().contents();
         //        var jm=$('#isMovieMaximize');
-        var jm = $('#isDAR43');
+        var jm = $('#isDAR43-switch');
         ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll('<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">');
         //        $('<input id="movieResizeChkA" type="checkbox">').prependTo('#movieResizeContainer')
         //            .after(':映像リサイズ (ウィンドウに合わせます。映像がウィンドウの外にハミ出なくなり、コメ欄などを開いても映像の大きさは変わらず、コメ欄などは映像の上に重なります。)<br>　映像の上下位置<br>')
         //            .change(movieResizeChkChanged)
         //        ;
         var tres = '';
-        tres += '<br><input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:<span id="movieResizeDesc">'+(isDAR43?'左枠サイズに合わせる(左詰め推奨)':'デフォルト')+'</span>';
-        tres += '<br><input type="radio" name="movieResizeType" value=1 style="margin-left:16px;">:ウィンドウ全体に最大化';
-        $('#isResizeScreen').css("display", "none")
+        tres += '<br><input type="radio" name="movieResizeType" value=0 style="margin-left:16px;" id="radio-movieResizeType-0">:<label for="radio-movieResizeType-0"><span id="movieResizeDesc">'+(isDAR43?'左枠サイズに合わせる(左詰め推奨)':'デフォルト')+'</span></label>';
+        tres += '<br><input type="radio" name="movieResizeType" value=1 style="margin-left:16px;" id="radio-movieResizeType-1">:<label for="radio-movieResizeType-1">ウィンドウ全体に最大化</label>';
+        $('#isResizeScreen-switch').css("display", "none")
             //            .before('<input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:上に詰める (空き無し)')
             .before(tres)
             ;
@@ -2941,48 +2943,49 @@ function createSettingWindow() {
         //            .before('<input type="radio" name="movieResizeType" value=2 style="margin-left:16px;">:画面中央')
         //        ;
         var jc = $('#movieResizeContainer').contents();
-        jc.eq(jc.index($('#isResizeScreen')) + 1)
+        jc.eq(jc.index($('#isResizeScreen-switch')) + 1)
             //            .add(jc.eq(jc.index($('#isResizeSpacing'))+1))
             //            .add(jc.eq(jc.index($('#isMovieMaximize'))+1))
-            .add(jc.eq(jc.index($('#isDAR43'))+1))
+            .add(jc.eq(jc.index($('#isDAR43-switch'))+1))
             .remove()
             ;
-        $('#isDAR43').prependTo("#movieResizeContainer").before('映像の大きさ　').after(" 映像4:3モード");
+        $('#isDAR43-switch').prependTo("#movieResizeContainer").before('映像の大きさ　').after(" <label for='isDAR43'>映像4:3モード</label>");
         $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').add("#isDAR43").change(movieResizeTypeChanged);
     }
     if ($('#moviePositionContainer').length == 0) {
-        var jo = $('#isMovieSpacingZeroTop');
+        var jo = $('#isMovieSpacingZeroTop-switch');
         var ja = jo.parent().contents();
-        var jm = $('#isMovieSpacingZeroLeft');
+        var jm = $('#isMovieSpacingZeroLeft-switch');
         ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll('<div id="moviePositionContainer" style="margin:8px;padding:8px;border:1px solid black;">');
         var tres = '映像の上下位置';
-        tres += '<br><input type="radio" name="moviePositionVType" value=0 style="margin-left:16px;">:デフォルト (中央)';
-        tres += '<br><input type="radio" name="moviePositionVType" value=1 style="margin-left:16px;">:上に詰める (空き無し) ※額縁は詰まりません';
-        $('#isMovieSpacingZeroTop').css("display", "none")
+        tres += '<br><input type="radio" name="moviePositionVType" value=0 style="margin-left:16px;" id="radio-moviePositionVType-0"><label for="radio-moviePositionVType-0">:デフォルト (中央)</label>';
+        tres += '<br><input type="radio" name="moviePositionVType" value=1 style="margin-left:16px;" id="radio-moviePositionVType-1"><label for="radio-moviePositionVType-1">:上に詰める (空き無し) ※額縁は詰まりません</label>';
+        $('#isMovieSpacingZeroTop-switch').css("display", "none")
             .before(tres)
             ;
-        $('#isResizeSpacing').css("display", "none")
-            .before('<input type="radio" name="moviePositionVType" value=2 style="margin-left:16px;">:上に詰めるが、上の黒帯の分だけ空ける ※額縁は詰まりません')
+        $('#isResizeSpacing-switch').css("display", "none")
+            .before('<input type="radio" name="moviePositionVType" value=2 style="margin-left:16px;" id="radio-moviePositionVType-2"><label for="radio-moviePositionVType-2">:上に詰めるが、上の黒帯の分だけ空ける ※額縁は詰まりません</label>')
             ;
         tres = '映像の左右位置';
-        tres += '<br><input type="radio" name="moviePositionHType" value=0 style="margin-left:16px;">:デフォルト <span id="moviePosiHDesc"></span>';
-        tres += '<br><input type="radio" name="moviePositionHType" value=1 style="margin-left:16px;">:左に詰める (空き無し)';
-        $('#isMovieSpacingZeroLeft').css("display", "none")
+        tres += '<br><input type="radio" name="moviePositionHType" value=0 style="margin-left:16px;" id="radio-moviePositionHType-0"><label for="radio-moviePositionHType-0">:デフォルト <span id="moviePosiHDesc"></span></label>';
+        tres += '<br><input type="radio" name="moviePositionHType" value=1 style="margin-left:16px;" id="radio-moviePositionHType-1"><label for="radio-moviePositionHType-1">:左に詰める (空き無し)</label>';
+        $('#isMovieSpacingZeroLeft-switch').css("display", "none")
             .before(tres)
             ;
         $('#moviePosiHDesc').text(settings.isResizeScreen ? "(ウィンドウ全体の中央)" : "(ウィンドウ左側内の中央)");
         var jc = $('#moviePositionContainer').contents();
-        jc.eq(jc.index($('#isMovieSpacingZeroTop')) + 1)
-            .add(jc.eq(jc.index($('#isResizeSpacing')) + 1))
-            .add(jc.eq(jc.index($('#isMovieSpacingZeroLeft')) + 1))
+        jc.eq(jc.index($('#isMovieSpacingZeroTop-switch')) + 1)
+            .add(jc.eq(jc.index($('#isResizeSpacing-switch')) + 1))
+            .add(jc.eq(jc.index($('#isMovieSpacingZeroLeft-switch')) + 1))
             .remove()
             ;
         $('#moviePositionContainer input[type="radio"][name="moviePositionVType"]').change(moviePositionVTypeChanged);
         $('#moviePositionContainer input[type="radio"][name="moviePositionHType"]').change(moviePositionHTypeChanged);
-        $('#moviePositionContainer').prev("br").remove();
+        $('#movieResizeContainer,#moviePositionContainer').next('label').remove();
+        $('#movieResizeContainer,#moviePositionContainer').next("br").remove();
     }
     if ($('#highlightdesc').length == 0) {
-        $("#ihighlightNewCome").insertBefore("#isCommentWide")
+        $("#ihighlightNewCome").insertBefore("#isCommentWide-switch")
             .css("border", "black solid 1px")
             .children().css("display", "flex")
             .css("flex-direction", "row")
@@ -2993,7 +2996,7 @@ function createSettingWindow() {
             ;
     }
     if ($('#highlightCdesc').length == 0) {
-        $("#ihighlightComeColor").insertBefore("#isCommentWide")
+        $("#ihighlightComeColor").insertBefore("#isCommentWide-switch")
             .css("border", "black solid 1px")
             .children().css("display", "flex")
             .css("flex-direction", "row")
@@ -3031,6 +3034,9 @@ function setComeFontsizeChanged() {
 }
 function setHighlightComePowerChanged() {
     $('#highlightPdesc').text("背景濃さ:" + $('#highlightComePower').val());
+}
+function setPanelOpacityChanged() {
+    $('#panelOpacity').siblings('.prop').text($('#panelOpacity').val());
 }
 function moviePositionVTypeChanged() {
     switch (+$('#moviePositionContainer input[type="radio"][name="moviePositionVType"]:checked').val()) {

@@ -15,7 +15,7 @@ $(function(){
         .css("padding","0px 4px")
         .next('input[type="range"]').css("float","right")
     ;
-    $("#itimePosition").insertBefore("#isTimeVisible+*")
+    $("#itimePosition").insertAfter("#isTimeVisible-switch+*")
         .css("border","black solid 1px")
         .css("margin-left","16px")
         .css("display","flex")
@@ -25,7 +25,7 @@ $(function(){
         .css("margin","1px 0px")
         .children().css("margin-left","4px")
     ;
-    $("#iprotitlePosition").insertBefore("#isProtitleVisible+*")
+    $("#iprotitlePosition").insertAfter("#isProtitleVisible-switch+*")
         .css("border","black solid 1px")
         .css("margin-left","16px")
         .css("display","flex")
@@ -35,7 +35,7 @@ $(function(){
         .css("margin","1px 0px")
         .children().css("margin-left","4px")
     ;
-    $("#iproSamePosition").insertBefore("#isProtitleVisible")
+    $("#iproSamePosition").insertBefore("#isProtitleVisible-switch")
         .css("border","black solid 1px")
         .children().css("display","flex")
         .css("flex-direction","row")
@@ -155,8 +155,8 @@ $(function(){
         for(var i=0;i<4;i++){
             for(var j=0;j<3;j++){
                 for(var k=0;k<3;k++){
-                    $('<input type="radio" name="d'+i+''+j+'" value='+k+'>').appendTo('#panelcustomTable tr:eq('+(i+1)+')>td:eq('+(j+1)+')')
-                        .after(rd[k])
+                    $('<input type="radio" name="d'+i+''+j+'" value="'+k+'" id="radio-d'+i+j+'-'+k+'">').appendTo('#panelcustomTable tr:eq('+(i+1)+')>td:eq('+(j+1)+')')
+                        .after('<label for="radio-d'+i+j+'-'+k+'">'+rd[k]+'</label>');
                     ;
                 }
             }
@@ -435,6 +435,7 @@ $(function(){
         $('#isHideArrowButton').prop("checked",isHideArrowButton);
         $('#isPutSideDetailHighlight').prop("checked",isPutSideDetailHighlight);
         $('#panelOpacity').val(panelOpacity);
+        $('#panelOpacity').siblings('.prop').text(panelOpacity);
         $('#comeFontsizeV').prop("checked",comeFontsizeV);
         $('#proTitleFontC').prop("checked",proTitleFontC);
         $('#isDelTime').prop("checked",isDelTime);
@@ -598,6 +599,9 @@ $(function(){
     });
     $('#highlightComePower').change(function(){
         $('#highlightPdesc').text("背景濃さ"+$('#highlightComePower').val());
+    });
+    $('#panelOpacity').change(function(){
+        $('#panelOpacity').siblings('.prop').text($('#panelOpacity').val());
     });
     //$('#alwaysShowPanelB').on("click",panelTableUpdateA);
     //$('#openPanelwComeB').on("click",panelTableUpdateO);

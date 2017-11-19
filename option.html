@@ -7,10 +7,61 @@
     <script src="settings.js"></script>
     <script src="option.js"></script>
     <style type="text/css">
-    /* firefoxでは背景を指定しないとrangeが見えなくなる */
-    input[type="range"]{background-color: transparent;}
-    /* ChromeとFirefoxで文字の大きさを合わせる */
-    body{font-size: 75%;}
+/* firefoxでは背景を指定しないとrangeが見えなくなる */
+input[type="range"]{background-color: transparent;}
+/* ChromeとFirefoxで文字の大きさを合わせる */
+body{font-size: 75%;}
+/* トグルスイッチ */
+.toggle-switch{
+    display: inline-block;
+}
+.toggle-switch input[type="checkbox"]{
+    appearance: none;
+    -webkit-appearance: none;
+    -ms-appearance: none;
+    -moz-appearance: none;
+    display: inline-block;
+    position: relative;
+    margin: 5px;
+    top: 5px;
+    width: 32px;
+    height: 10px;
+    border: 0px solid rgba(0,0,0,0.0);
+    border-radius: 50px;
+    background-color: #ddd;
+    transition: background-color .4s ease;
+}
+.toggle-switch input[type="checkbox"] + label {
+    position: relative;
+    display: inline-block;
+    top: 2px;
+    left: -38px;
+    width: 14px;
+    height: 14px;
+    border: 0px solid rgba(0,0,0,0.0);
+    border-radius: 50%;
+    background-color: #eee;
+    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    transition: left .4s ease, background-color .4s ease;
+}
+.toggle-switch input[type="checkbox"]:checked + label {
+    position: relative;
+    display: inline-block;
+    top: 2px;
+    left: -18px;
+    width: 14px;
+    height: 14px;
+    border: 0px solid rgba(0,0,0,0.0);
+    border-radius: 50%;
+    background-color: #00bbd3;
+    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+}
+.toggle-switch input[type="checkbox"]:checked {
+    background-color: #bbb;
+}
+.toggle-switch input[type="checkbox"]:focus {
+    outline: none;
+}
     </style>
 </head>
 <body>
