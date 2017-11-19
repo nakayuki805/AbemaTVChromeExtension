@@ -608,7 +608,7 @@ function timetableCss() {
     }
     if (selBodyS) t += selBodyS + '{user-select:none;}';//選択テキストを掴むと移動できないので選択不可にしておく
 
-    $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURI(t) + "'>").appendTo("head");
+    $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURIComponent(t) + "'>").appendTo("head");
 }
 function toggleChannel(targetUrl) {
 //console.log("toggleChannel url="+targetUrl);
@@ -6819,41 +6819,7 @@ function comehl(jo, hlsw) {
         }
     }, 0, jo);
 }
-/*function comeUserColor(jo) {
-    console.log('comeUserColor', jo)
-    function char2rgb(c) {
-        var h = 22.5 * (c % 16), s = 0.1*(c/16) + 0.3, v = 1.0;
-        var h_i = Math.floor(h/60.0);
-        var f = (h/60.0) - h_i;
-        var p = v*(1-s), q = v*(1-f*s),  t = v*(1-(1-f)*s);
-        var rgb = [[v,t,p],[q,v,p],[p,v,t],[p,q,v],[t,q,v],[v,p,q]];
-        var r = ~~(255*(rgb[h_i][0])), g = ~~(255*(rgb[h_i][1])), b = ~~(255*(rgb[h_i][2]));
-    
-        return [r,g,b];
-    };
-    function str2rgb(str) {
-        var i,c,a;
-        var r = 0, g = 0, b = 0;
-        for (i = 0; i < str.length; i++) {
-            c = str.charCodeAt(i);
-            a = char2rgb(c);
-            r += a[0]; g += a[1]; b += a[2];
-        }
-    
-        r = ~~(r / str.length);
-        g = ~~(g / str.length);
-        b = ~~(b / str.length);
-    
-        return [r, g, b];
-    };
-    for (var i = 0; i < jo.length; i++) {
-        var uid = jo.eq(i).attr('data-ext-userid') || '';
-        var opacity = commentTextTrans/255;
-        var color = (uid.length>0)?str2rgb(uid):[0,0,0];
-        console.log(uid,color,jo.eq(i))
-        jo.eq(i).css('border-right', 'solid 4px rgba('+color[0]+','+color[1]+','+color[2]+','+opacity+')');
-    }
-}*/
+
 var comeUserHlInterval = null;
 function comeUserHighlight(jo){
     function userHl(e) {

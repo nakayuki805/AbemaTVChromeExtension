@@ -625,33 +625,54 @@ $(function(){
     //通知登録番組一覧リンク書き換え
     $("#prognotifiesLink").attr("href", chrome.extension.getURL("prognotifies.html"));
     
-   // $('#reportBugFormBtn').click(function(){
     chrome.storage.local.get(function(value){
         //不具合報告フォーム
-        var sendVal = {};
-        for (var key in value) {
-            if (key.indexOf("progNotify")<0) {//通知登録データは除外
-                sendVal[key] = value[key];
-                if (key == 'mastodonToken') {
-                    sendVal[key] = value[key].replace(/./g, '*');//Mastodonトークンは*に置き換え
-                }else if(key == 'notifyMailAddress' || key == 'notifyLNtoken' || key == 'notifyPostUrl'){
-                    sendVal[key] = value[key].replace(/[a-z]/g, 'a').replace(/[A-Z]/g, 'A').replace(/\d/g, '0');
+        $('#reportBugFormBtn').click(function(){
+            var sendVal = {};
+            for (var key in value) {
+                if (key.indexOf("progNotify")<0) {//通知登録データは除外
+                    sendVal[key] = value[key];
+                    if (key == 'mastodonToken') {
+                        sendVal[key] = value[key].replace(/./g, '*');//Mastodonトークンは*に置き換え
+                    }else if(key == 'notifyMailAddress' || key == 'notifyLNtoken' || key == 'notifyPostUrl'){
+                        sendVal[key] = value[key].replace(/[a-z]/g, 'a').replace(/[A-Z]/g, 'A').replace(/\d/g, '0');
+                    }else if(key == 'fullNg') {
+                        sendVal[key] = value[key].replace(/.+/g, 'dummy-word');
+                    }else if(key == 'userNg') {
+                        sendVal[key] = value[key].replace(/.+/g, 'dummy-userid');
+                    }
                 }
             }
-        }
-        
-        var sendInfo = "***設定***\n";
-        sendInfo += JSON.stringify(sendVal, null, 4);
-        sendInfo += "\n***UserAgent***\n";
-        sendInfo += window.navigator.userAgent;
-        sendInfo += "\n***画面***\n";
-        sendInfo += "スクリーン w:"+window.parent.screen.width+",h:"+window.parent.screen.height;
-        sendInfo += "\nウィンドウ(設定画面) w:"+window.innerWidth+",h:"+window.innerHeight;
-        sendInfo += "\n***拡張機能バージョン***\n";
-        sendInfo += chrome.runtime.getManifest().version;
-        sendInfo += "\n***ここまで***";
-        $('#atachedInfo').val(sendInfo);
-        //$('#reportBugForm').submit();
+            
+            var sendInfo = "***設定***\n";
+            sendInfo += JSON.stringify(sendVal, null, 4);
+            sendInfo += "\n***UserAgent***\n";
+            sendInfo += window.navigator.userAgent;
+            sendInfo += "\n***画面***\n";
+            sendInfo += "スクリーン w:"+window.parent.screen.width+",h:"+window.parent.screen.height;
+            sendInfo += "\nウィンドウ(設定画面) w:"+window.innerWidth+",h:"+window.innerHeight;
+            sendInfo += "\n***拡張機能バージョン***\n";
+            sendInfo += chrome.runtime.getManifest().version;
+            sendInfo += "\n***ここまで***";
+            $('#atachedInfo').val(sendInfo);
+            //$('#reportBugForm').submit();
+            var submitjs = 'window.addEventListener("load",function(){document.getElementById("reportForm").submit();});';
+            var jsblob = new Blob([submitjs], {type: "text/javascript"});
+            var dataform = '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><script type="text/javascript" src="'+window.URL.createObjectURL(jsblob)+'"></script></head><body><form method="POST" action="https://abema.nakayuki.net/abema-ext/report.php" id="reportForm"><input type="hidden" name="info" value="';
+            dataform += sendInfo.replace(/[&'`"<>]/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    "'": '&#x27;',
+                    '`': '&#x60;',
+                    '"': '&quot;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                }[match]
+            });
+            dataform += '"><input type="submit" value="画面が切り替わらない場合はクリックして続行"></form></body></html>';
+            var blob = new Blob([dataform], {type: "text/html"})
+            window.open(window.URL.createObjectURL(blob));
+        });
         
         //バージョンによる拡張機能の動作停止
         var disableExtVersion = value.disableExtVersion || '';
