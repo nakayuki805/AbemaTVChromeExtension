@@ -7,7 +7,7 @@ var inj_commentObserver = new MutationObserver(function(mutations) {
     inj_onCommentChange(mutations);
 }); //コメント欄DOM監視
 
-//URLが変わった時にonairpage.jsからjavascript:スキーマ経由で呼ぶ
+//URLが変わった時に実行される
 function injection_urlChanged(){
     console.log("urlChanged() @injection");
     if(inj_currentLocation === location.href){
@@ -136,3 +136,7 @@ setTimeout(function inj_jqwait(){
         injection_urlChanged();
     }
 }, 500);
+
+//イベント
+window.addEventListener('urlChange', injection_urlChanged);
+window.addEventListener('commentListReady', inj_delaysetComment);

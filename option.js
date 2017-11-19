@@ -234,7 +234,7 @@ $(function(){
 //        var isMovieResize = value.movieResize || false;
 //        var isMovieMaximize = value.movieMaximize || false;
         var commentBackColor = (value.commentBackColor!==undefined)?value.commentBackColor : 255;
-        var commentBackTrans = (value.commentBackTrans!==undefined)?value.commentBackTrans : 127;
+        var commentBackTrans = (value.commentBackTrans!==undefined)?value.commentBackTrans : 191;
         var commentTextColor = (value.commentTextColor!==undefined)?value.commentTextColor : 0;
         var commentTextTrans = (value.commentTextTrans!==undefined)?value.commentTextTrans : 255;
         var isCommentPadZero = value.commentPadZero || false;
@@ -273,8 +273,8 @@ $(function(){
         // var isChTimetableExpand=value.chTimetableExpand||false;
         var isHidePopFresh = value.hidePopFresh||false;
         var isChTimetableBreak=value.chTimetableBreak||false;
-        var isChTimetableWeekend=value.chTimetableWeekend||true;
-        var isChTimetablePlaybutton=value.chTimetablePlaybutton||true;
+        var isChTimetableWeekend=(value.chTimetableWeekend!==undefined)?value.chTimetableWeekend:true;
+        var isChTimetablePlaybutton=(value.chTimetablePlaybutton!==undefined)?value.chTimetablePlaybutton:true;
         var timetableScroll = value.timetableScroll||"";
         var isHideTwitterPanel=value.hideTwitterPanel||false;
         var isHideTodayHighlight=value.hideTodayHighlight||false;
@@ -295,7 +295,7 @@ $(function(){
         var isExpandLastItem=value.expandLastItem||false;
         var isExpandFewChannels=value.expandFewChannels||false;
         var isHideArrowButton=value.hideArrowButton||false;
-        var isPutSideDetailHighlight=value.putSideDetailHighlight||true;
+        var isPutSideDetailHighlight=(value.putSideDetailHighlight!==undefined)?value.putSideDetailHighlight:true;
         var panelOpacity = (value.panelOpacity!==undefined)?value.panelOpacity : 127;
         var comeFontsizeV = value.comeFontsizeV || false;
         var proTitleFontC = value.proTitleFontC || false;

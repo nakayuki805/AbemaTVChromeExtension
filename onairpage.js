@@ -70,7 +70,7 @@ var sureReadRefreshx = 500; //コメ欄開きっ放しの時にコメ数がこ�
 //var isMovieResize = false; //映像を枠に合わせて縮小
 //var isMovieMaximize = false; //映像最大化
 var commentBackColor = 255; //コメント一覧の背景色
-var commentBackTrans = 127; //コメント一覧の背景透過
+var commentBackTrans = 191; //コメント一覧の背景透過
 var commentTextColor = 0; //コメント一覧の文字色
 var commentTextTrans = 255; //コメント一覧の文字透過
 var isCommentPadZero = false; //コメント一覧のコメ間の間隔を詰める
@@ -252,8 +252,8 @@ getStorage(null, function (value) {
     // isChTimetableExpand = value.chTimetableExpand || false;
     isHidePopFresh = value.hidePopFresh || false;
     isChTimetableBreak = value.chTimetableBreak || false;
-    isChTimetableWeekend = value.chTimetableWeekend || false;
-    isChTimetablePlaybutton = value.chTimetablePlaybutton || false;
+    isChTimetableWeekend = (value.chTimetableWeekend!==undefined)?value.chTimetableWeekend:isChTimetableWeekend;
+    isChTimetablePlaybutton = (value.chTimetablePlaybutton!==undefined)?value.chTimetablePlaybutton:isChTimetablePlaybutton;
     timetableScroll = value.timetableScroll || "";
     isHideTwitterPanel = value.hideTwitterPanel || false;
     isHideTodayHighlight = value.hideTodayHighlight || false;
@@ -274,7 +274,7 @@ getStorage(null, function (value) {
     isExpandLastItem = value.expandLastItem || false;
     isExpandFewChannels = value.expandFewChannels || false;
     isHideArrowButton = value.hideArrowButton || false;
-    isPutSideDetailHighlight = value.putSideDetailHighlight || false;
+    isPutSideDetailHighlight = (value.putSideDetailHighlight!==undefined)?value.putSideDetailHighlight:isPutSideDetailHighlight;
     settings.panelOpacity = (value.panelOpacity!==undefined)?value.panelOpacity : 127;
     comeFontsizeV = value.comeFontsizeV || false;
     proTitleFontC = value.proTitleFontC || false;
@@ -413,6 +413,9 @@ var timetableClasses = { arrow: "", timebar: "", };//ページ遷移直後に取
 var currentVersion = chrome.runtime.getManifest().version;
 var resizeEventTimer = 0; //ウィンドウリサイズイベント用のタイマー
 var isBottomScrolled = false; //コメ欄逆順時初回で下にスクロールしたか
+var urlChangeEvent = new Event('urlChange');
+var comelistReadyEvent = new Event('commentListReady');
+var delaysetConsoleStr = "";
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -2381,7 +2384,11 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
 
     if(isInit&&isOLS&&isEXC&&isInfo&&isTwT&&isVideo&&isChli&&isComeli)console.log("delayset ok");
     else{
-        console.log("delayset retry "+(isInit?".":"I")+(isOLS?".":"O")+(isEXC?".":"C")+(isInfo?".":"F")+(isTwT?".":"T")+(isVideo?".":"V")+(isChli?".":"L")+(isComeli?".":"Cl"));
+        var cstr = "delayset retry "+(isInit?".":"I")+(isOLS?".":"O")+(isEXC?".":"C")+(isInfo?".":"F")+(isTwT?".":"T")+(isVideo?".":"V")+(isChli?".":"L")+(isComeli?".":"Cl");
+        if(delaysetConsoleStr!==cstr){
+            console.log(cstr);
+            delaysetConsoleStr=cstr;         
+        }
         setTimeout(delayset, 1000,isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli);
         return;
     }
@@ -4103,7 +4110,7 @@ function getChannelListElement(returnSingleSelector) {
         break;
     }
     //if(!ret)ret=$('.ext_ref-programList')[0];
-    if(!ret){console.log("?chli");return null;}
+    if(!ret){/*console.log("?chli");*/return null;}
     var rep=ret.parentElement;
     var b=rep.getBoundingClientRect();
     while(rep.tagName.toUpperCase()!="BODY"&&b.left>window.innerWidth/2){
@@ -7548,7 +7555,7 @@ function onairBasefunc() {
             EXcomelist = getComeListElement();
             addExtClass(EXcomelist, 'comelist');
             setOptionHead();
-            location.href = 'javascript:inj_delaysetComment();';//page-injection.jsの関数
+            window.dispatchEvent(comelistReadyEvent);
             commentObserver.disconnect();
             commentObserver.observe(EXcomelist, { childList: true});
         }
@@ -8073,6 +8080,8 @@ function onCommentChange(mutations){
                 //console.log('pc(animation)',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
                 putComment(animationCommentDivs[idx].children[0].innerHTML, animationCommentDivs[idx].getAttribute('data-ext-userid'), i, animationCommentDivs.length);
             }
+            if(animationCommentDivs.length>40)console.log('mc Aadded>40', animationCommentDivs, animationCommentDivs.length, newCommentNum, EXcomelist.childElementCount);
+            
         }
         if(!isFirstComeAnimated){
             isFirstComeAnimated = true;
@@ -8121,7 +8130,7 @@ function chkurl() {
         $('#copycome').remove();
         $('#copyotw').remove();
         if(EXcomesendinp) $(EXcomesendinp.parentElement).css("display", "");
-        location.href = 'javascript:injection_urlChanged();';//page-injection.jsの関数
+        window.dispatchEvent(urlChangeEvent);
 
         checkUrlPattern(currentLocation);
     }
