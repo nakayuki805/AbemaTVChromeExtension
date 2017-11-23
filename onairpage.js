@@ -426,6 +426,30 @@ function hasArray(array, item) {//配列arrayにitemが含まれているか
     }
     return hasFlg;
 }
+function postJson(url, data, headers, callback, errorCallback) {
+    if(isFirefox){
+        chrome.runtime.sendMessage({ type: "postJson", url: url, data: data, headers: headers}, function (response) {
+            if (response.status == 'success') {
+                callback(response.result);                
+            }else {
+                errorCallback();
+            }
+        });
+    }else{
+        $.ajax({url: url, type: 'POST', data: JSON.stringify(data), headers: headers, contentType: 'application/json', dataType: 'json', success: callback, error: errorCallback});
+    }
+}
+function getJson(url, data, callback) {
+    if(isFirefox){
+        chrome.runtime.sendMessage({ type: "getJson", url: url, data: data}, function (response) {
+            if (response.status == 'success') {
+                callback(response.result);                
+            }
+        });
+    }else{
+        $.get(url, data, callback);
+    }
+}
 
 function onairCleaner() {
     console.log("onairCleaner");
@@ -1597,16 +1621,16 @@ function postShareNGwords(words, channel) {
         "words": postWords
     };
     postedNGwords = postedNGwords.concat(postWords);//重複送信防止のため送信前にpostedに追加する
-    $.ajax({url: NGshareURLbase + 'add_json.php', type: 'POST', data: JSON.stringify(postData), contentType: 'application/json', dataType: 'json', success: function(result) {
+    postJson(NGshareURLbase + 'add_json.php', postData, {}, function(result) {
         if (result.status == "success") {
             console.log("postShareNGwords success", postWords, channel);
             //postedNGwords = postedNGwords.concat(postWords);
         } else {
             console.log("postShareNGwords failed", result);
         }
-    }, error: function() {
+    }, function() {
         console.log("postShareNGwords post error");
-    }});
+    });
 }
 function postShareNGusers(users, channel) {
     var postUsers = [];
@@ -1623,20 +1647,20 @@ function postShareNGusers(users, channel) {
         "users": postUsers
     };
     postedNGusers = postedNGusers.concat(postUsers);//重複送信防止のため送信前にpostedに追加する
-    $.ajax({url: NGshareURLbase + 'add_json.php', type: 'POST', data: JSON.stringify(postData), contentType: 'application/json', dataType: 'json', success: function(result) {
+    postJson(NGshareURLbase + 'add_json.php', postData, {}, function(result) {
         if (result.status == "success") {
             console.log("postShareNGusers success", postUsers, channel);
         } else {
             console.log("postShareNGusers failed", result);
         }
-    }, error: function() {
+    }, function() {
         console.log("postShareNGusers post error");
-    }});
+    });
 }
 function applySharedNG() {
     var channel = getChannelByURL();
     isNGShareInterval = true;
-    $.get(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
+    getJson(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
         if (settings.isShareNGword) {
             var sharedNGwords = data.ngword;
             var appendNGwords = [];
@@ -6407,11 +6431,11 @@ function usercommentposted(inptxt) {
         // toot
         var tootText = settings.mastodonFormat;
         tootText = tootText.replace('{comment}', inptxt).replace('{onairpage}', location.href).replace(/\\n/g,"\n");
-        $.ajax({url: 'https://' + settings.mastodonInstance + '/api/v1/statuses', type: 'POST', data: {status: tootText}, headers:{'Authorization': 'Bearer ' + settings.mastodonToken}, dataType: 'json', success: function(result) {
+        postJson('https://' + settings.mastodonInstance + '/api/v1/statuses', {status: tootText}, {'Authorization': 'Bearer ' + settings.mastodonToken}, function(result) {
             console.log('toot:', tootText);
-        }, error: function() {
+        }, function() {
             toast('Mastodon投稿エラー');
-        }});
+        });
     }
 }
 function waitforinperase(retrycount, inptxt) {
@@ -6535,16 +6559,15 @@ function setOptionEvent() {//放送画面用イベント設定
     if (eventAdded) return;       
     //    $(window).on("click",usereventWindowclick);
     //マウスホイール無効か音量操作
-    var mousewheelEvtName = isFirefox ? 'DOMMouseScroll' : 'mousewheel';
-    window.addEventListener(mousewheelEvtName, function (e) {
+    window.addEventListener('wheel', function (e) {
         if (e.target.id == "ComeMukouMask") {
             console.log("onmousewheel on ComeMukouMask",e);
                 //        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
             if (isVolumeWheel && e.target.id == "ComeMukouMask") {
                 if (EXvolume && $(EXvolume).contents().find('svg').css("zoom") == "1") {
-                    otoSize(e.wheelDelta < 0 ? 0.8 : 1.2);
+                    otoSize(e.deltaY > 0 ? 0.8 : 1.2);
                 }
-                moVol(e.wheelDelta < 0 ? -5 : 5);
+                moVol(e.deltaY > 0 ? -5 : 5);
             }
             if (isCancelWheel || isVolumeWheel) { //設定ウィンドウ反映用
                 //console.log("cancelling wheel")
@@ -7523,7 +7546,7 @@ function onairBasefunc() {
         if($('.ext_abm-comelist').length==0){
             addExtClass(EXcomelist, 'comelist');
         }
-        if (EXcomelist && (!EXcomelist.parentElement || !EXcomelist.parentElement.parentElement)) {
+        if (!EXcomelist || !EXcomelist.parentElement || !EXcomelist.parentElement.parentElement) {
             EXcomelist = getComeListElement();
             addExtClass(EXcomelist, 'comelist');
             setOptionHead();

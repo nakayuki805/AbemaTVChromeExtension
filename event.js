@@ -281,6 +281,16 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         chrome.tabs.get(sender.tab.id,function(t){
           sendResponse({audible:t.audible});
         });
+    } else if (request.type === "postJson"){
+        $.ajax({url: request.url, type: 'POST', data: JSON.stringify(request.data), headers: request.headers, contentType: 'application/json', dataType: 'json', success: function(result) {
+            sendResponse({status: 'success', result: result});
+        }, error: function() {
+            sendResponse({status: 'error'});
+        }});
+    }else if (request.type === "getJson"){
+        $.get(request.url, request.data, function (result) {
+            sendResponse({status: 'success', result: result});
+        });
     } else {
         console.warn("message type not match:", request.type);
     }
