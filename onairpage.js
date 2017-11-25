@@ -4200,6 +4200,7 @@ function getComeListElement(returnSingleSelector){
             if(ji.text().indexOf("まだ投稿がありません")<0) continue;
             comelistClasses.empty=ji.prop("class");
             ret=ji.parent("div")[0];
+            console.log('indexOf投稿なし>=0 @getComeListElement emptyC=',ji.prop("class"));
             break;
         }
         if(!ret){
@@ -4208,6 +4209,7 @@ function getComeListElement(returnSingleSelector){
             if(jpd.length>0){
                 comelistClasses.progress=jpd.prop('class');
                 ret=jpd.parent('div')[0];
+                console.log('div[role=progressbar].l>0 @getComeListElement emptyC=',jpd.prop("class"));                
             }
         }
         if(!ret){console.log("?comelist(emptylist or progress notfound)");return null;}
@@ -4242,6 +4244,7 @@ function getComeListElement(returnSingleSelector){
         if(jgpp.siblings('form').length>0||jgpp.attr('data-ext-ref')=='container'){
             comelistClasses.animated = $(ret).parent().attr('class');
             ret=gp;
+            console.log('jgpp.sib(form).l>0||jgppExtRef==container @getComeListElement aniC=',comelistClasses.animated);
         }
     }
     if(!ret){console.log("?comelist(children notfound)");return null;}
@@ -6099,6 +6102,9 @@ function setOptionHead() {
     if(selHead&&selFoot){
         t += selFoot+'>div>div:nth-child(3),'+selHead+'{background:rgba(0,0,0,' + (settings.panelOpacity/255) + ')}';
         t += selFoot+'>div>div:nth-child(3)>*,'+selHead+'>*{opacity:' + ((settings.panelOpacity/255<0.7)?0.7:(settings.panelOpacity/255)) + '}';
+        //フッターチャンネルアイコンの背景を透過
+        var selChLogoDiv = getElementSingleSelector($(EXfoot).find('img').parent().get(0));
+        t += selChLogoDiv+'{background-color:transparent !important;}';
     }
  
     //t += selHead+'{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
@@ -7943,16 +7949,20 @@ function onCommentChange(mutations){
             if (!comelistClasses.animated && comelistClasses.empty && mutations[i].addedNodes.length == 1 && EXcomelist.childElementCount == 1) { //1つだけなら初回読込としてanimatedとする(emptyも1つだけだがEXcomelist取得時にempty取得済 だけど一応チェック)
                 comelistClasses.animated = nodeClass;
                 isAnimationAdded = true;
+                console.log('!aniC&&emp&&added.l==1&&EXcomeli.chi.l==1 aniC=',nodeClass);
             }else if (!comelistClasses.animated && eo.firstElementChild.tagName.toUpperCase() == "DIV") { //直下のコメ本文がpじゃなければanimatedとする
                 comelistClasses.animated = nodeClass;
                 isAnimationAdded = true;
+                console.log('!aniC&&eo.1stChi==div aniC=',nodeClass);
             }else if(!comelistClasses.animated && parseInt(eo.style.height)<10){//jo.css("transition-property")=="height"だと反応しないっぽい
                 //console.log('mutation added: animation');
                 comelistClasses.animated = nodeClass;
                 isAnimationAdded = true;
+                console.log('!aniC&&eo.style.height<10 aniC=',nodeClass,' height=',eo.style.height);                
             }else if(!comelistClasses.animated && EXcomelist.getAttribute('data-ext-hascommentanimation')=='true'){
                 comelistClasses.animated = nodeClass;
                 isAnimationAdded = true;
+                console.log('!aniC&&hasComeAni==true aniC=',nodeClass);
             }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0) {
                 isAnimationAdded = true;
             }else if (comelistClasses.animated && !comelistClasses.stabled && eo.childElementCount > 1 && eo.children[1].tagName.toUpperCase() == "P" && (eo.children[1].textContent.indexOf("今") >= 0 || eo.children[1].textContent.indexOf("秒前") >= 0 || eo.children[1].textContent.indexOf("分前") >= 0)) {
@@ -7966,11 +7976,12 @@ function onCommentChange(mutations){
                 newCommentNum++;
             }else if (!comelistClasses.progress && eo.getAttribute('role')=='progressbar') {
                 comelistClasses.progress = nodeClass;
-            }else if((comelistClasses.empty && nodeClass.indexOf(comelistClasses.empty) >= 0) || (comelistClasses.progress && nodeClass.indexOf(comelistClasses.progress) >= 0) || ((eo.tagName.toUpperCase() == "P" || eo.tagName.toUpperCase() == "SPAN") && eo.textContent.indexOf('この番組にはまだ投稿がありません')>=0)){
+                console.log('!progC&&eoRole==progressbar progC=',nodeClass);
+            }else if((comelistClasses.empty && nodeClass.indexOf(comelistClasses.empty) >= 0) || (comelistClasses.progress && nodeClass.indexOf(comelistClasses.progress) >= 0) || ((eo.tagName.toUpperCase() == "P" || eo.tagName.toUpperCase() == "SPAN") && eo.textContent.indexOf('この番組にはまだ投稿がありません')>=0) || eo.firstElementChild.getAttribute('role')=='progressbar'){
                 //CH切り替え等でコメ欄が空になった時 何もしない
                 console.log('mutation added: no comment');
             }else{
-                console.warn('unexpected onCommentChange()', mutations[i]);
+                console.warn('unexpected onCommentChange()', mutations[i], eo.parentElement, eo, nodeClass, eo.innerHTML);
             }
             //console.log(nodeClass,comelistClasses.animated,isAnimationAdded)                    
         }else{
