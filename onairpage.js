@@ -408,7 +408,7 @@ var timetableRunning = false; //番組表表示時の10分インターバル
 var audibleReloadCount = -1;
 var isSoundFlag = true; //音が出ているか soundSet(isSound)のisSoundを保持したり音量クリック時にミュートチェック
 var timetableGrabbing = {value:false,cx:0,cy:0,test:false,sx:0,sy:0,scrolled:false,}; //番組表を掴む
-var comelistClasses = { stabled: "", animated: "", empty: "", progress: "", message: "", posttime: "", };
+var comelistClasses = { stabled: "", animated: "", empty: "", progress: "", message: "", posttime: ""};
 var timetableClasses = { arrow: "", timebar: "", };//ページ遷移直後に取得できないので初回取得時に保持する getSingleSelectorの結果を入れるので使用時は.を付けない
 var currentVersion = chrome.runtime.getManifest().version;
 var resizeEventTimer = 0; //ウィンドウリサイズイベント用のタイマー
@@ -5782,7 +5782,9 @@ function setOptionHead() {
     if(selComelist){
         t += selComelist+'>div{background-color:' + bc + ';color:' + tc + ';}';
         t += selComelist+'>div:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので)
-        t += selComelist+'>div>p:nth-child(1){color:' + tc + ';}';//コメント文字色
+        t += selComelist+'>div>div>p>span{color:' + tc + ' !important;}';//コメント文字色
+        t += selComelist+'>div>div{background-color: transparent;}';
+        t += selComelist+'>div>div:hover{background-color: transparent;}';
     }
 
     //    //映像最大化
@@ -5840,8 +5842,8 @@ function setOptionHead() {
         //        t+='[class^="TVContainer__right-comment-area___"] textarea+div{height:18px!important;}';
         //    }
         if (isCommentPadZero) { //コメ間隔詰め
-            t += selComelist+'>div{padding-top:0px;padding-bottom:0px;}';
-            t += selComelist+'>div>*{margin-top:0px;margin-bottom:0px!important;}';//bottomはあったり無かったりする(これより強い)ので付けておく
+            t += selComelist+'>div>div{padding-top:0px;padding-bottom:0px;}';
+            t += selComelist+'>div>div>*{margin-top:0px;margin-bottom:0px!important;}';//bottomはあったり無かったりする(これより強い)ので付けておく
         }
         if (isCommentTBorder) { //コメ区切り線
             t += selComelist+'>div{border-top:1px solid ' + vc + ';}';
@@ -6885,6 +6887,41 @@ function comeUserHighlight(jo){
         comeUserHlInterval = null;
     });
 }
+//copycomeで作ったコメ欄のcomepにコメントをセットする
+function setCopycome(comep, msg, uid, datetime, timeStr, msgWidth){
+    var div = $(comep).children().eq(0);
+    div.children('p').children('span').text(msg);
+    div.children('p').css('width', msgWidth);
+    $(comep).attr('data-ext-userid', uid);
+    var time = div.children('div').children('time');
+    time.attr('datetime', datetime);
+    time.children('span').text(timeStr);
+    div.children('.comeposttime').attr('name', 'n'+datetime*1000);
+}
+function getComeInfo(wdiv){
+    var uid = $(wdiv).attr('data-ext-userid');
+    var div = $(wdiv).children().eq(0);
+    var msg = div.children('p').text();
+    var timeElem = div.children('div').children('time');
+    var timeStr = timeElem.text();
+    var datetime = timeElem.attr('datetime');
+    var mwidth = div.children('p').css('width');
+    /*
+    var nt = Date.now();
+    var rn = /^今$/;
+    var rs = /^(\d+) *秒前$/;
+    var rm = /^(\d+) *分前$/;
+    var datetime;
+    if (rn.test(t)) {
+        datetime = nt;
+    } else if (rs.test(t)) {
+        datetime = nt - (+rs.exec(t)[1]) * 1000;
+    } else if (rm.test(t)) {
+        datetime = nt - (+rm.exec(t)[1]) * 60000;
+    }
+    */
+    return {message: msg, datetime: datetime, timeStr: timeStr, userid: uid};
+}
 function copycome(d, hlsw) {
 //console.log("copycome d="+d,isComelistMouseDown);
     if (isComelistMouseDown) return;//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
@@ -6910,18 +6947,26 @@ function copycome(d, hlsw) {
         //console.log("copycome leng=0");
         var t = '<div id="copycome" class="' + jo.parent().attr("class") + ' usermade"><div id="copycomec" class="'+jo.attr("class")+' usermade">';
         var eofc = EXcomelistChildren[0];
+        var eofcfc = eofc.firstElementChild;
         //console.log(eofc,isAnimationIncluded,eo.firstElementChild,EXcomelistChildren, comelistClasses)
         if ((comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) return;
         //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
-        if (eofc === undefined || !eofc.hasChildNodes()) return;
-        var eofcc = $(eofc).prop("class");        
-        if (eofcc === undefined || (comelistClasses.progress&&eofcc.indexOf(comelistClasses.progress)>=0)) return;
-        var em = eofc.children[0];
+        if (eofc === undefined || eofcfc === undefined || !eofcfc.hasChildNodes()) return;
+        var eofcc = $(eofc).prop("class");
+        var eofcfcc = $(eofcfc).prop("class");
+        if (eofcfcc === undefined || (comelistClasses.progress&&eofcc.indexOf(comelistClasses.progress)>=0)) return;
+        var em = eofcfc.children[0];
         var ecm = $(em).prop("class");
-        var et = eofc.children[1];
+        var ems = eofcfc.children[0].firstElementChild;
+        var ecms = $(ems).prop("class");
+        var ebtw = eofcfc.children[1];//ブロックボタンと時間の親div
+        var ecbtw = $(ebtw).prop("class");
+        var et = ebtw.children[1];
         var ect = $(et).prop("class");
+        var ets = ebtw.children[1].firstElementChild;
+        var ects = $(ets).prop("class");
         for (var i = 0; i < 100; i++) {
-            t += '<div class="' + eofcc + ' comep usermade"><p class="' + ecm + ' comem usermade"></p><p class="' + ect + ' comet usermade"></p><p class="comeposttime usermade" style="display:none;"></p></div>';
+            t += '<div class="comew"><div class="' + eofcfcc + ' comep usermade"><p class="' + ecm + ' comem usermade"><span class="'+ecms+'"></span></p><div class="'+ecbtw+' btwrapper"> <time class="' + ect + ' comet usermade"><span class="'+ects+'"></span></time></div><p class="comeposttime usermade" style="display:none;"></p></div></div>';
         }
         t += '</div></div>';
         $(t).insertAfter(jo.parent());
@@ -6944,42 +6989,43 @@ function copycome(d, hlsw) {
 
     if (d < 0 || (comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) { //全消去
         console.log("copycome allerase");
-        jc.children().text("");
+        jc.find('span').text("");
         $('.comeposttime').attr("name", "");
+        $('.comet').attr("datetime", "");
     } else if (d > 0 && copycomecount <= 0) {
         //console.log("copycome append:"+d);
         //d件をNG処理して追加した後にcomehl
         var ma = [];
-        for (var i = 0, e, m, n, t, u; i < d; i++) {
+        for (var i = 0, e, efc, m, n, t, u, cinfo; i < d; i++) {
             //console.log("ma loop")
             e = EXcomelistChildren[i];//eo.children[i];
-            if(!e||e.childElementCount<2) continue;
-            u = e.getAttribute('data-ext-userid') || '';
-            m = comefilter(e.children[0].textContent, u);
+            if(!e||!e.firstElementChild||e.firstElementChild.childElementCount<2||e.firstElementChild.firstElementChild.tagName.toUpperCase()!='P') continue;
+            cinfo = getComeInfo(e);
+            u = cinfo.userid;
+            m = comefilter(cinfo.message, u);
             if (m.length > 0) {
-                t = e.children[1].textContent;
-                u = 
-                ma.push([m, t, u]);
+                t = cinfo.timeStr;
+                dt = cinfo.datetime;
+                ma.push([m, t, u, dt]);
             }
         }
         //console.log("ma:",ma)
         if (ma.length > 0) {
             if (ma.length <= 100) {
                 //console.time('ma100_loop')
-                for (var i = ec.childElementCount - 1, e, m, t, n, d, s, u; (e = ec.children[i - ma.length]) ; i--) {
+                for (var i = ec.childElementCount - 1, e, m, t, n, d, s, u, efc, cinfo, mw; (e = ec.children[i - ma.length]) ; i--) {
                     //console.log("loop ma<100")
-                    m = e.children[0].textContent;
-                    u = e.getAttribute('data-ext-userid') || '';
+                    efc = e.firstElementChild;
+                    cinfo = getComeInfo(e);
+                    m = cinfo.message;
+                    u = cinfo.userid;
+                    mw = "";
+                    t = "";
                     if (isDelOldTime || isDelTime) {
-                        jc.eq(i).children().first().text(m)
-                            .css("width", (isComeOpen(3) && isSideOpen(3)) ? e.children[0].style.width : "unset")
-                            .next().text("")
-                        ;
+                        mw = (isComeOpen(3) && isSideOpen(3)) ? e.children[0].style.width : "unset";
                     } else {
-                        t = "";
-                        n = e.children[2].getAttribute("name") || "";
-                        if (/^t\d+$/.test(n)) {
-                            d = +(n.substr(1));
+                        d = cinfo.datetime;
+                        if (d>0) {
                             s = Math.floor((nt - d) / 1000);
                             if (s < 60) {
                                 t = s + "秒前";
@@ -6987,43 +7033,24 @@ function copycome(d, hlsw) {
                                 t = Math.floor(s / 60) + "分前";
                             }
                         }
-                        jc.eq(i).children().first().text(m)
-                            .css("width", "")
-                            .next().text(t)
-                            .next().attr("name", n);
-                        ;
                     }
-                    jc.eq(i).attr('data-ext-userid', u);
+                    //jc.eq(i).attr('data-ext-userid', u);
+                    setCopycome(jc.eq(i), m, u, cinfo.datetime, t, mw);
                 }
                 //console.timeEnd('ma100_loop')
             }
             var malen = Math.min(ma.length, 100);
             //console.time('malen_loop')
-            for (var i = 0, m, t, d, u; i < malen; i++) {
+            for (var i = 0, m, t, d, u, dt, mw; i < malen; i++) {
                 //console.log("loop after malen")
                 m = ma[i][0];
                 u = ma[i][2];
-                jc.eq(i).attr('data-ext-userid', u);
+                dt = ma[i][3];
+                mw = "";
                 if (isDelTime) {
-                    jc.eq(i).children().first().text(m)
-                        .css("width", "unset")
-                        .next().text("")
-                    ;
-                } else {
-                    t = ma[i][1];
-                    if (rn.test(t)) {
-                        d = nt;
-                    } else if (rs.test(t)) {
-                        d = nt - (+rs.exec(t)[1]) * 1000;
-                    } else if (rm.test(t)) {
-                        d = nt - (+rm.exec(t)[1]) * 60000;
-                    }
-                    jc.eq(i).children().first().text(m)
-                        .css("width", "")
-                        .next().text(t)
-                        .next().attr("name", "t" + d)
-                    ;
+                    mw = "unset";
                 }
+                setCopycome(jc.eq(i), m, u, dt, ma[i][1], mw);
             }
             //console.timeEnd('malen_loop')
             //            if(eo.childElementCount<100){
@@ -7043,36 +7070,24 @@ function copycome(d, hlsw) {
     } else if (d === undefined || copycomecount > 0) {
         console.log("copycome fullcopy");
         //100件全てを上書き
-        jc.children().text("");
+        jc.find('span').text("");
         $('.comeposttime').attr("name", "");
         //console.time('fullcp_loop')
-        for (var i = 0, j = 0, e, m, t, dt, u; (e = EXcomelist.children[i]) ; i++) {
-            if (e.hasChildNodes() && e.childElementCount > 1) {
-                u = e.getAttribute('data-ext-userid');
-                m = comefilter(e.children[0].textContent, u);
+        for (var i = 0, j = 0, e, m, t, dt, u, cinfo, mw; (e = EXcomelist.children[i]) ; i++) {
+            if (e.hasChildNodes() && e.firstElementChild.childElementCount > 1 && e.firstElementChild.firstElementChild.tagName.toUpperCase()!='P') {
+                cinfo = getComeInfo(e);
+                u = cinfo.userid;
+                m = comefilter(cinfo.message, u);
                 if (m.length > 0) {
-                    jc.eq(j).attr('data-ext-userid', u);
+                    mw = "";
                     if (isDelTime) {
-                        jc.eq(j).children().first().text(m)
-                            .css("width", "unset")
-                            .next().text("")
-                        ;
+                        mw = "unset";
+                        t = "";
                     } else {
-                        t = e.children[1].textContent;
-                        if (rn.test(t)) {
-                            dt = nt;
-                        } else if (rs.test(t)) {
-                            dt = nt - (+rs.exec(t)[1]) * 1000;
-                        } else if (rm.test(t)) {
-                            dt = nt - (+rm.exec(t)[1]) * 60000;
-                        }
-                        jc.eq(j).children().first().text(m)
-                            .css("width", "")
-                            .next().text(t)
-                            .next().attr("name", "t" + dt)
-                        ;
+                        t = cinfo.timeStr;
                     }
-                    j += 1;
+                    setCopycome(jc.eq(j), m, u, cinfo.datetime, t, mw);
+                    j += 1;                    
                     if (j >= 100) { break; }
                 }
             }
@@ -7144,7 +7159,7 @@ function comecopy() {
             t = r.exec(c);
             if (t[2] == t[3] && +t[1] > +t[2]) {
                 s = e.text();
-                uid = e.parent().attr('data-ext-userid');
+                uid = e.parent().parent().attr('data-ext-userid');
                 break;
             //}
         }
@@ -7942,38 +7957,43 @@ function onCommentChange(mutations){
         isCommentAdded = false,
         newCommentNum = 0,
         nodeClass;
-    for(var i=0,eo; i<mutations.length; i++){
+    for(var i=0,eo,eofc; i<mutations.length; i++){
         if(mutations[i].type == 'childList' && mutations[i].addedNodes.length > 0){
             eo = mutations[i].addedNodes[0];
+            eofc = eo.firstElementChild;
             nodeClass = eo.className;
+            firstChildClass = eofc.className;
             //nextClass = jo.next().attr('class');
             //console.log(nodeClass, eo.getAttribute('data-ext-userid'),eo);
             if (!comelistClasses.animated && comelistClasses.empty && mutations[i].addedNodes.length == 1 && EXcomelist.childElementCount == 1) { //1つだけなら初回読込としてanimatedとする(emptyも1つだけだがEXcomelist取得時にempty取得済 だけど一応チェック)
-                comelistClasses.animated = nodeClass;
+                comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
-                console.log('!aniC&&emp&&added.l==1&&EXcomeli.chi.l==1 aniC=',nodeClass);
-            }else if (!comelistClasses.animated && eo.firstElementChild.tagName.toUpperCase() == "DIV") { //直下のコメ本文がpじゃなければanimatedとする
-                comelistClasses.animated = nodeClass;
+                console.log('!aniC&&emp&&added.l==1&&EXcomeli.chi.l==1 aniC=',comelistClasses.animated);
+            }else if (!comelistClasses.animated && eofc.firstElementChild.tagName.toUpperCase() == "DIV") { //直下のコメ本文がpじゃなければanimatedとする
+                comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
-                console.log('!aniC&&eo.1stChi==div aniC=',nodeClass);
+                console.log('!aniC&&eo.1stChi==div aniC=',comelistClasses.animated);
             }else if(!comelistClasses.animated && parseInt(eo.style.height)<10){//jo.css("transition-property")=="height"だと反応しないっぽい
                 //console.log('mutation added: animation');
-                comelistClasses.animated = nodeClass;
+                comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
-                console.log('!aniC&&eo.style.height<10 aniC=',nodeClass,' height=',eo.style.height);                
+                console.log('!aniC&&eo.style.height<10 aniC=',comelistClasses.animated,' height=',eo.style.height);                
             }else if(!comelistClasses.animated && EXcomelist.getAttribute('data-ext-hascommentanimation')=='true'){
-                comelistClasses.animated = nodeClass;
+                comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
-                console.log('!aniC&&hasComeAni==true aniC=',nodeClass);
+                console.log('!aniC&&hasComeAni==true aniC=',comelistClasses.animated);
+            }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0 &&　comelistClasses.progress && nodeClass.indexOf(comelistClasses.progress) >= 0) {
+                //animation部がプログレスバー なにもしない
+                console.log('animation: progress');
             }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0) {
                 isAnimationAdded = true;
-            }else if (comelistClasses.animated && !comelistClasses.stabled && eo.childElementCount > 1 && eo.children[1].tagName.toUpperCase() == "P" && (eo.children[1].textContent.indexOf("今") >= 0 || eo.children[1].textContent.indexOf("秒前") >= 0 || eo.children[1].textContent.indexOf("分前") >= 0)) {
-                comelistClasses.stabled = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
-                comelistClasses.message = eo.children[0].className;
-                comelistClasses.posttime = eo.children[1].className;
+            }else if (comelistClasses.animated && !comelistClasses.stabled && eofc.childElementCount>1 && eofc.children[0].tagName.toUpperCase() == "P" && (eofc.children[1].children[1].textContent.indexOf("今") >= 0 || eofc.children[1].children[1].textContent.indexOf("秒前") >= 0 || eofc.children[1].children[1].textContent.indexOf("分前") >= 0)) {
+                comelistClasses.stabled = firstChildClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
+                comelistClasses.message = eofc.children[0].className;
+                comelistClasses.posttime = eofc.children[1].children[1].className;
                 isCommentAdded = true;
                 newCommentNum++;
-            }else if (comelistClasses.stabled&&nodeClass.indexOf(comelistClasses.stabled) >= 0){
+            }else if (comelistClasses.stabled&&firstChildClass.indexOf(comelistClasses.stabled) >= 0){
                 isCommentAdded = true;
                 newCommentNum++;
             }else if (!comelistClasses.progress && eo.getAttribute('role')=='progressbar') {
@@ -7997,7 +8017,7 @@ function onCommentChange(mutations){
         var commentDivParent = $(EXcomelist);//$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
         var firstChild = commentDivParent.children().eq(0);
         var isAnimationIncluded = false;//parseInt(commentDivParent.children().eq(0).css("height"))<10;//EXcomelist.children[0].className.indexOf('uo_k') >= 0;
-        if(comelistClasses.animated && firstChild.attr('class').indexOf(comelistClasses.animated)>=0){
+        if(comelistClasses.animated && firstChild.attr('class') && firstChild.attr('class').indexOf(comelistClasses.animated)>=0){
             isAnimationIncluded = true;
             isAnimationAdded = true;//コメントが追加されてanimationも含まれていればaimatonも追加されたとみなす
         }
@@ -8007,7 +8027,7 @@ function onCommentChange(mutations){
         var commentDivs = EXcomelist.children;
         //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
         for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
-            comments.push([commentDivs[cdi].children[0].innerHTML, commentDivs[cdi].getAttribute('data-ext-userid')]);
+            comments.push([commentDivs[cdi].firstElementChild.children[0].innerText, commentDivs[cdi].getAttribute('data-ext-userid')]);
         }
         var d = newCommentNum;        
         //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
@@ -8086,7 +8106,8 @@ function onCommentChange(mutations){
             for(var i = 0; i < animationCommentDivs.length; i++){
                 idx = animationCommentDivs.length - i - 1;
                 //console.log('pc(animation)',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
-                putComment(animationCommentDivs[idx].children[0].innerHTML, animationCommentDivs[idx].getAttribute('data-ext-userid'), i, animationCommentDivs.length);
+                if(!animationCommentDivs[idx].firstElementChild.children[0]){console.log(animationCommentDivs[idx], EXcomelist.innerHTML);continue;}
+                putComment(animationCommentDivs[idx].firstElementChild.children[0].innerText, animationCommentDivs[idx].getAttribute('data-ext-userid'), i, animationCommentDivs.length);
             }
             if(animationCommentDivs.length>40)console.log('mc Aadded>40', animationCommentDivs, animationCommentDivs.length, newCommentNum, EXcomelist.childElementCount);
             

@@ -167,7 +167,7 @@ $(function(){
         ;
         $('#panelcustomTable td:first-child').css("text-align","center");
     }
-    $("#ihighlightNewCome").insertBefore("#isCommentWide")
+    $("#ihighlightNewCome").insertBefore("#isCommentWide-switch")
         .css("border","black solid 1px")
         .children().css("display","flex")
         .css("flex-direction","row")
@@ -176,7 +176,7 @@ $(function(){
         .children().css("margin-left","4px")
         .first().before("新着コメントを少し強調する")
     ;
-    $("#ihighlightComeColor").insertBefore("#isCommentWide")
+    $("#ihighlightComeColor").insertBefore("#isCommentWide-switch")
         .css("border","black solid 1px")
         .children().css("display","flex")
         .css("flex-direction","row")

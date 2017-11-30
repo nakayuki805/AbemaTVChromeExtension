@@ -43,7 +43,7 @@ var inj_extXHRopen = function() {
             newRes = inj_minRes;
         }
         url = url.replace('/'+res+'/', '/'+newRes+'/');
-        console.log('m3u8 res=',res, newRes);
+        //console.log('m3u8 res=',res, newRes);
     }else if(m4sVideoPattern.test(url)){
         var res = parseInt(url.match(m4sVideoPattern)[1]);
         var newRes = res;
@@ -53,7 +53,7 @@ var inj_extXHRopen = function() {
             newRes = inj_minRes;
         }
         url = url.replace('/'+res+'p.1/', '/'+newRes+'p.1/');
-        console.log('m4svideo res=',res, newRes);
+        //console.log('m4svideo res=',res, newRes);
     }else if(m4sAdVideoPattern.test(url)){
         var repid = url.match(m4sAdVideoPattern)[1];
         var res = null;
@@ -85,7 +85,7 @@ var inj_extXHRopen = function() {
             }
         }
         
-        console.log('m4sAdvideo res=',res, newRes, ' repid=', repid, newRepid);
+        //console.log('m4sAdvideo res=',res, newRes, ' repid=', repid, newRepid);
     }
     arguments[1] = url;
     return inj_originalXHRopen.apply(this, arguments);
