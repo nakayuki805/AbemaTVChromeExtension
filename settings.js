@@ -850,6 +850,16 @@ function generateOptionInput(settingsArr, isPermanent) {
                 inputHTML += '</label>';
                 inputHTML += '<input type="input" id="' + settingsArr[i].name + '" ' + disabled + ' placeholder=' + defaultVal + '>';
                 inputHTML += "<br/>"
+            } else if (settingsArr[i].type === "select"){
+                inputHTML += '<label for="' + settingsArr[i].name + '">'
+                inputHTML += description;
+                inputHTML += isNotChangable ? NCTEXT : "" + ":";
+                inputHTML += '</label>';
+                inputHTML += '<select id="' + settingsArr[i].name + '" ' + disabled + ' >';
+                settingsArr[i].selections.forEach(function(item){
+                    inputHTML += '<option value="' + item + '">' + item + '</option>';
+                });
+                inputHTML += "</select><br/>"
             }
         }
     }

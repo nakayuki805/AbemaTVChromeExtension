@@ -7488,6 +7488,8 @@ getStorage(['disableExtVersion'], function(val){
         } else {
             $(window).on('load', mainfunc);
         }
+        var xhrinjectionpath = chrome.extension.getURL("xhr-injection.js");
+        $("<script src='" + xhrinjectionpath + "'></script>").appendTo("head");
     }else{
         var csspath = chrome.extension.getURL("onairpage.css");
         $("<link rel='stylesheet' href='" + csspath + "'>").appendTo("head");

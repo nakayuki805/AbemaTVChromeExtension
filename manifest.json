@@ -31,7 +31,8 @@
 		"icon/gear.svg",
 		"icon/mastodon-icon.svg",
 		"icon/mastodon-icon-blue.svg",
-		"page-injection.js"
+		"page-injection.js",
+		"xhr-injection.js"
 	],
 	"options_page": "option.html",
 	"background": {
