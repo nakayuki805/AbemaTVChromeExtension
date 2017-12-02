@@ -416,6 +416,7 @@ var isBottomScrolled = false; //コメ欄逆順時初回で下にスクロール
 var urlChangeEvent = new Event('urlChange');
 var comelistReadyEvent = new Event('commentListReady');
 var delaysetConsoleStr = "";
+var lastMovedCommentTime = 0;//最後に流れたコメントの時間(コメントが二重に流れるのを防ぐ)
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -5092,11 +5093,24 @@ function comeColor(jo, inp) {
         setTimeout(comeColor, 800, jo, -1);
     }
 }
+function waitforComeReady(){
+    var comeListLen = EXcomelist.childElementCount;
+    if (comelistClasses.animated&&EXcomelist.firstElementChild.className.indexOf(comelistClasses.animated) >= 0) { comeListLen--; }//冒頭のanimationは数から除外
+    else if(EXcomelist.firstElementChild.firstElementChild.firstElementChild.tagName.toUpperCase().indexOf('DIV')>=0) { comeListLen--;}
+    if (comeListLen>0){
+        if (isComelistNG) {
+            copycome();
+        }
+    }else{
+        console.log('waitforComeReady',comeListLen);
+        setTimeout(waitforComeReady, 500);
+    }
+}
 function chkcomelist(retrycount) {
     //console.log("chkcomelist#"+retrycount);
     if ($(EXcomelist).length == 0) return;
     var comeListLen = EXcomelist.childElementCount;
-    if (EXcomelist.firstElementChild.className.indexOf('styles__animation___') >= 0) { comeListLen--; }//冒頭のanimationは数から除外
+    if (comelistClasses.animated&&EXcomelist.firstElementChild.className.indexOf(comelistClasses.animated) >= 0) { comeListLen--; }//冒頭のanimationは数から除外
     //console.log("chkcomelist#"+retrycount+",comelistlen="+comeListLen);
     if (comeListLen <= sureReadRefreshx && (comeListLen > 1 || retrycount == 0)) {
         //console.log("comeRefreshed " + commentNum + "->" + comeListLen);
@@ -5105,9 +5119,8 @@ function chkcomelist(retrycount) {
         commentNum = comeListLen;
         comeHealth = Math.min(100, Math.max(0, commentNum));
         comeColor($(EXfootcountcome), comeHealth);
-        if (isComelistNG) {
-            copycome();
-        }
+        if(comeListLen<10){console.log('chkcomelist copycome ', EXcomelist.children)}
+        waitforComeReady();
     } else if (retrycount > 0) {
         setTimeout(chkcomelist, 200, retrycount - 1);
     } else {
@@ -6960,6 +6973,7 @@ function copycome(d, hlsw) {
         var ems = eofcfc.children[0].firstElementChild;
         var ecms = $(ems).prop("class");
         var ebtw = eofcfc.children[1];//ブロックボタンと時間の親div
+        if(!ebtw)return;
         var ecbtw = $(ebtw).prop("class");
         var et = ebtw.children[1];
         var ect = $(et).prop("class");
@@ -7074,10 +7088,11 @@ function copycome(d, hlsw) {
         $('.comeposttime').attr("name", "");
         //console.time('fullcp_loop')
         for (var i = 0, j = 0, e, m, t, dt, u, cinfo, mw; (e = EXcomelist.children[i]) ; i++) {
-            if (e.hasChildNodes() && e.firstElementChild.childElementCount > 1 && e.firstElementChild.firstElementChild.tagName.toUpperCase()!='P') {
+            if (e.hasChildNodes() && e.firstElementChild.childElementCount > 1 && e.firstElementChild.firstElementChild.tagName.toUpperCase()=='P') {
                 cinfo = getComeInfo(e);
                 u = cinfo.userid;
                 m = comefilter(cinfo.message, u);
+                //console.log(e,cinfo,m)
                 if (m.length > 0) {
                     mw = "";
                     if (isDelTime) {
@@ -7086,6 +7101,7 @@ function copycome(d, hlsw) {
                     } else {
                         t = cinfo.timeStr;
                     }
+                    //console.log(e,cinfo,m,jc.eq(j),j)
                     setCopycome(jc.eq(j), m, u, cinfo.datetime, t, mw);
                     j += 1;                    
                     if (j >= 100) { break; }
@@ -7636,7 +7652,7 @@ function onairBasefunc() {
             if ($('#copycome').length > 0) {
                 //番組切替直後などでcopycomeはある場合は中身があるか数件チェックする
                 for (var i = 0, c = $('#copycomec').children(), j; i < 5; i++) {
-                    if (c.eq(i).children().first().text().length > 0) {
+                    if (c.eq(i).children().children().first().text().length > 0) {
                         b = false;
                         break;
                     }
@@ -8102,14 +8118,30 @@ function onCommentChange(mutations){
             //animation部から新着コメを取得し流す
             var animationCommentDivs = EXcomelist.children[0].children[0].children;
             var idx;
+            var movingStarti = 0;
             //console.log(animationCommentDivs)
             for(var i = 0; i < animationCommentDivs.length; i++){
                 idx = animationCommentDivs.length - i - 1;
                 //console.log('pc(animation)',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
-                if(!animationCommentDivs[idx].firstElementChild.children[0]){console.log(animationCommentDivs[idx], EXcomelist.innerHTML);continue;}
-                putComment(animationCommentDivs[idx].firstElementChild.children[0].innerText, animationCommentDivs[idx].getAttribute('data-ext-userid'), i, animationCommentDivs.length);
+                if(!animationCommentDivs[idx].firstElementChild.children[0]){
+                    //プログレスバーがあるなどコメントが無いときはスキップ
+                    //console.log(animationCommentDivs[idx], EXcomelist.innerHTML);
+                    continue;
+                }
+                var cinfo = getComeInfo(animationCommentDivs[idx]);
+                var dt = parseInt(cinfo.datetime);
+                //console.log(cinfo)
+                if(dt<=lastMovedCommentTime){
+                    continue;
+                }else if(movingStarti==0){
+                    movingStarti = i;
+                }
+                putComment(cinfo.message, cinfo.userid, i-movingStarti, animationCommentDivs.length-movingStarti);                
+                if(i == animationCommentDivs.length-1){
+                    lastMovedCommentTime = dt;
+                }
             }
-            if(animationCommentDivs.length>40)console.log('mc Aadded>40', animationCommentDivs, animationCommentDivs.length, newCommentNum, EXcomelist.childElementCount);
+            //if(animationCommentDivs.length>40)console.log('mc Aadded>40', animationCommentDivs, animationCommentDivs.length, newCommentNum, EXcomelist.childElementCount);
             
         }
         if(!isFirstComeAnimated){
