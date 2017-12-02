@@ -5849,7 +5849,7 @@ function setOptionHead() {
                     t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
             }*/
         }
-        t += selComelist+'>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
+        //t += selComelist+'>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
         //    if(isCustomPostWin){ //1行化
         //        t+='[class^="TVContainer__right-comment-area___"] textarea{height:18px!important;}';
         //        t+='[class^="TVContainer__right-comment-area___"] textarea+div{height:18px!important;}';
@@ -8043,9 +8043,10 @@ function onCommentChange(mutations){
         var commentDivs = EXcomelist.children;
         //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
         for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
-            comments.push([commentDivs[cdi].firstElementChild.children[0].innerText, commentDivs[cdi].getAttribute('data-ext-userid')]);
+            var cinfo = getComeInfo(commentDivs[cdi]);
+            comments.push([cinfo.message, cinfo.userid, cinfo.datetime]);
         }
-        var d = newCommentNum;        
+        var d = newCommentNum;
         //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
         //console.timeEnd('obf_getComment_beforeif')
         if (EXcomelist && isComeOpen()) {
@@ -8103,10 +8104,31 @@ function onCommentChange(mutations){
                 commentDivParentV.scrollTop(commentDivParentV[0].scrollHeight);
                 isBottomScrolled = true;
             }
-
+            //新着コメがanimationされないときがあるのでコメ流しもとりあえずここでやる
+            if (isMovingComment && isFirstComeAnimated) {
+                    var idx, dt, movingStarti=0;
+                    for(var i = 0; i < d; i++){
+                        idx = d - i - 1;
+                        dt = parseInt(comments[idx][2]);
+                        if(dt<=lastMovedCommentTime){
+                            continue;
+                        }else if(movingStarti==0){
+                            movingStarti = i;
+                        }
+                        putComment(comments[idx][0], comments[idx][1], i-movingStarti, d-movingStarti);                
+                        if(i == d-1){
+                            lastMovedCommentTime = dt;
+                        }
+                    }
+                }
+                //console.log('newcome', comments, isFirstComeAnimated, d);                    
+                if(!isFirstComeAnimated && isComeOpen()){
+                    isFirstComeAnimated = true;
+                }
+            }
         }
-    }
-    if(isAnimationAdded){
+    if(false&&isAnimationAdded){
+        //animationが追加されたときの処理は一旦無効にして上でコメ流しもする
         //console.log(isFirstComeAnimated,mutations)
         if (isMovingComment && isFirstComeAnimated) {
             //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
