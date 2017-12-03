@@ -5103,7 +5103,7 @@ function waitforComeReady(){
         }
     }else{
         console.log('waitforComeReady',comeListLen);
-        setTimeout(waitforComeReady, 500);
+        setTimeout(waitforComeReady, 1000);
     }
 }
 function chkcomelist(retrycount) {
@@ -5119,7 +5119,7 @@ function chkcomelist(retrycount) {
         commentNum = comeListLen;
         comeHealth = Math.min(100, Math.max(0, commentNum));
         comeColor($(EXfootcountcome), comeHealth);
-        if(comeListLen<10){console.log('chkcomelist copycome ', EXcomelist.children)}
+        //if(comeListLen<10){console.log('chkcomelist copycome ', EXcomelist.children)}
         waitforComeReady();
     } else if (retrycount > 0) {
         setTimeout(chkcomelist, 200, retrycount - 1);
@@ -5794,7 +5794,7 @@ function setOptionHead() {
     }
     if(selComelist){
         t += selComelist+'>div{background-color:' + bc + ';color:' + tc + ';}';
-        t += selComelist+'>div:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので)
+        t += selComelist+':not(#copycomec)>div[class]:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので) EXcomelistの一番最初の子でclassが指定されてるやつ
         t += selComelist+'>div>div>p>span{color:' + tc + ' !important;}';//コメント文字色
         t += selComelist+'>div>div{background-color: transparent;}';
         t += selComelist+'>div>div:hover{background-color: transparent;}';
@@ -5865,8 +5865,8 @@ function setOptionHead() {
             }
         }
         if (isCommentWide) { //コメント部分をほんの少し広く
-            t += selComelist+'>div{padding-right:4px;padding-left:8px;}';
-            t += selComelist+'>div>p:first{width:' + (isHideOldComment ? 258 : 242) + 'px;}';
+            t += selComelist+'>div>div{padding-right:4px;padding-left:8px;}';
+            t += selComelist+'>div>div>p:first{width:' + (isHideOldComment ? 258 : 242) + 'px;}';
             //フォントによるがそれぞれ259,243でギリギリなので1だけ余裕をみる
             t += selComelist+'{margin:0;}';
         }
@@ -5931,7 +5931,8 @@ function setOptionHead() {
         to=alt?'.v3_wC':"";
     }*/
     to = getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 124px;"],';
-    to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 104px;"]'
+    to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 104px;"],';
+    to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 48px;"]'
     if(to){
         t += to+'{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
         if (isHidePopBL) {
@@ -6814,13 +6815,13 @@ function comehl(jo, hlsw) {
     }
     switch (hlsw) {
         case 1:
-            jo.css("padding-left", ((isCommentWide ? 8 : 15) - 4) + "px")
+            jo.children().css("padding-left", ((isCommentWide ? 8 : 15) - 4) + "px")
                 .css("border-left", "4px solid rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0.6)")
                 .css("transition", "")
                 ;
             break;
         case 3:
-            jo.css("padding-left", ((isCommentWide ? 8 : 15) - 4) + "px")
+            jo.children().css("padding-left", ((isCommentWide ? 8 : 15) - 4) + "px")
                 .css("border-left", "4px solid rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0.8)")
                 .css("transition", "")
                 ;
@@ -6843,7 +6844,7 @@ function comehl(jo, hlsw) {
             //console.log(jo,i)
             switch (hlsw) {
                 case 1:
-                    jo.eq(i).css("border-left-color", "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0)")
+                    jo.eq(i).children().css("border-left-color", "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0)")
                         .css("transition", "border-left-color 1s linear " + (3 + 0.02 * j) + "s")
                         ;
                     break;
@@ -6853,9 +6854,11 @@ function comehl(jo, hlsw) {
                         ;
                     break;
                 case 3:
-                    jo.eq(i).css("border-left-color", "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0)")
-                        .css("background-color", "rgba(" + hlbc + "," + hlbc + "," + hlbc + "," + (hlbt / 255) + ")")
-                        .css("transition", "border-left-color 1s linear " + (3 + 0.02 * j) + "s,background-color 1s linear " + (2 + 0.02 * j) + "s")
+                    jo.eq(i).children().css("border-left-color", "rgba(" + c[0] + "," + c[1] + "," + c[2] + ",0)")
+                        .css("transition", "border-left-color 1s linear " + (3 + 0.02 * j) + "s")
+                        ;
+                    jo.eq(i).css("background-color", "rgba(" + hlbc + "," + hlbc + "," + hlbc + "," + (hlbt / 255) + ")")
+                        .css("transition", "background-color 1s linear " + (2 + 0.02 * j) + "s")
                         ;
                     break;
                 default:
@@ -6873,10 +6876,10 @@ function comeUserHighlight(jo){
         //console.log('mov',e,j,uid);
         if(uid.length>0){
             //console.log(j.siblings('[data-ext-userid='+uid+']'))
-            j.siblings('[data-ext-userid='+uid+']').css('background-color', 'rgba(255,255,0,0.6)');
-            j.siblings(':not([data-ext-userid='+uid+'])').css('background-color', '');
+            j.siblings('[data-ext-userid='+uid+']').children().css('background-color', 'rgba(255,255,0,0.6)');
+            j.siblings(':not([data-ext-userid='+uid+'])').children().css('background-color', '');
         }
-        j.css('background-color', 'rgba(255,255,0,0.6)');
+        j.children().css('background-color', 'rgba(255,255,0,0.6)');
     }
     $(jo).mouseover(function(e){
         if (comeUserHlInterval !== null) {
@@ -6893,9 +6896,9 @@ function comeUserHighlight(jo){
         //if(uid.length>0){
         //    j.siblings('[data-ext-userid='+uid+']').css('background-color', '');
         //}else{
-            j.siblings().css('background-color', '');
+            j.siblings().children().css('background-color', '');
         //}
-        j.css('background-color', '');
+        j.children().css('background-color', '');
         clearInterval(comeUserHlInterval);
         comeUserHlInterval = null;
     });
@@ -6906,10 +6909,16 @@ function setCopycome(comep, msg, uid, datetime, timeStr, msgWidth){
     div.children('p').children('span').text(msg);
     div.children('p').css('width', msgWidth);
     $(comep).attr('data-ext-userid', uid);
-    var time = div.children('div').children('time');
+    var btdiv = div.children('div');
+    var time = btdiv.children('time');
     time.attr('datetime', datetime);
     time.children('span').text(timeStr);
     div.children('.comeposttime').attr('name', 'n'+datetime*1000);
+    if(timeStr==""){
+        btdiv.css('width', '0px');
+    }else{
+        btdiv.css('width', '');
+    }
 }
 function getComeInfo(wdiv){
     var uid = $(wdiv).attr('data-ext-userid');
@@ -7059,12 +7068,14 @@ function copycome(d, hlsw) {
                 //console.log("loop after malen")
                 m = ma[i][0];
                 u = ma[i][2];
+                t = ma[i][1];
                 dt = ma[i][3];
                 mw = "";
                 if (isDelTime) {
                     mw = "unset";
+                    t = "";
                 }
-                setCopycome(jc.eq(i), m, u, dt, ma[i][1], mw);
+                setCopycome(jc.eq(i), m, u, dt, t, mw);
             }
             //console.timeEnd('malen_loop')
             //            if(eo.childElementCount<100){

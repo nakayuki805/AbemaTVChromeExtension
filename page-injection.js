@@ -97,6 +97,8 @@ function inj_onCommentChange(mutations){
             //.attr('data-ext-origmsg', jComments.eq(0).children('div').children('div').eq(i).text());
     }
     //コメントリスト本体部
+    //hasCommentAnimationがtrueなのにanimation部が無いことがあるので本当にあるのかここでチェック
+    if(hasCommentAnimation&&jComments.eq(0).children().children('p').length>0){hasCommentAnimation=false;}
     for(i=(hasCommentAnimation?1:0); i<jComments.length; i++){
         if(!jComments.eq(i).attr('data-ext-id')){
             var comment = comments[i + newCommentCount - (hasCommentAnimation?1:0)];
@@ -106,7 +108,7 @@ function inj_onCommentChange(mutations){
                 .attr('data-ext-createdatms', comment.createdAtMs)
                 .attr('data-ext-id', comment.id)
                 .attr('data-ext-userid', comment.userId);
-                //.attr('data-ext-origmsg', jComments.eq(i).text());
+                //.attr('data-ext-origmsg', jComments.eq(i).find('p').text());
         }
     }
 }
