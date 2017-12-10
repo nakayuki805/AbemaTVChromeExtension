@@ -142,6 +142,8 @@ var isDAR43 = false;//映像リサイズ4:3処理モード
 var isReplaceIcons = false; // 番組表のタイトル接頭接尾アイコンを開始時刻下に収納
 var isUserHighlight = false; //コメントにマウスオーバーで同一ユーザーのコメントをハイライト
 var isShareNGuser = false; //共有NGユーザー
+var minResolution = 0;
+var maxResolution = 2160;
 
 var changeDisableExtBtnVal = ''; //拡張機能の動作を停止するバージョン
 
@@ -290,6 +292,8 @@ getStorage(null, function (value) {
     userNg = value.userNg || "";
     isUserHighlight = value.isUserHighlight || false;
     isShareNGuser = value.isShareNGuser || false;
+    minResolution = (value.minResolution!==undefined)?value.minResolution:0;
+    maxResolution = (value.maxResolution!==undefined)?value.maxResolution:0
 });
 
 var currentLocation = window.location.href;
@@ -415,6 +419,7 @@ var resizeEventTimer = 0; //ウィンドウリサイズイベント用のタイ�
 var isBottomScrolled = false; //コメ欄逆順時初回で下にスクロールしたか
 var urlChangeEvent = new Event('urlChange');
 var comelistReadyEvent = new Event('commentListReady');
+var resolutionSetEvent = new Event('resolutionSet');
 var delaysetConsoleStr = "";
 var lastMovedCommentTime = 0;//最後に流れたコメントの時間(コメントが二重に流れるのを防ぐ)
 
@@ -2200,6 +2205,8 @@ function openOption() {
     $('#proTitleFontC').prop("checked", proTitleFontC);
     $('#isDelTime').prop("checked", isDelTime);
     $('#mastodonFormat').val(settings.mastodonFormat);
+    $('#minResolution').val(minResolution);
+    $('#maxResolution').val(maxResolution);
 
     var panelopenses = 0;
     for (var i = 0; i < 4; i++) {
@@ -3350,6 +3357,8 @@ function setSaveClicked() {
     userNg = $('#userNg').val();
     isUserHighlight = $('#isUserHighlight').prop("checked");
     isShareNGuser = $('#isShareNGuser').prop("checked");
+    minResolution = parseInt($('#minResolution').val());
+    maxResolution = parseInt($('#maxResolution').val())
 
     arrayFullNgMaker();
     arrayUserNgMaker();
@@ -3371,6 +3380,10 @@ function setSaveClicked() {
             });
         }
     }
+    //解像度設定反映
+    localStorage.setItem('ext_minResolution', minResolution);
+    localStorage.setItem('ext_maxResolution', maxResolution);
+    window.dispatchEvent(resolutionSetEvent);
     $("#saveBtn").prop("disabled", true)
         .css("background-color", "lightyellow")
         .css("color", "gray")
@@ -7567,6 +7580,10 @@ function mainfunc() { //初回に一度実行しておけば後でURL部分が�
     checkUrlPattern(location.href);
     //ウィンドウをリサイズ
     setTimeout(onresize, 1000);
+    //解像度設定反映
+    localStorage.setItem('ext_minResolution', minResolution);
+    localStorage.setItem('ext_maxResolution', maxResolution);
+    window.dispatchEvent(resolutionSetEvent);
 }
 function onairfunc() {
     //変数リセット

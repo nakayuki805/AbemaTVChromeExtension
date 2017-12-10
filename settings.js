@@ -133,6 +133,27 @@ var settingsList = [
         ]
     },
     {
+        "description": "映像解像度設定(実験的)",
+        "header": "この設定はabemaの映像取得に介入して無理やり解像度を変えるため不具合が生じる可能性があり、あまり推奨できません。もし映像が映らなくなったり不具合が生じればこの設定をデフォルト(最小0最大2160)に戻してみてください。<br>",
+        "footer": "最小=0,最大=2160に設定すると解像度変更は動作しません。",
+        "settings": [
+            {
+                "name": "minResolution",
+                "description": "最小解像度",
+                "type": "select",
+                "selections": [0, 180, 240, 360, 480],
+                "isInstantChangable": true
+            },
+            {
+                "name": "maxResolution",
+                "description": "最大解像度",
+                "type": "select",
+                "selections": [180, 240, 360, 480, 720, 1080, 2160],
+                "isInstantChangable": true
+            }
+        ]
+    },
+    {
         "description": "コメント欄関連設定",
         "settings": [
             {

@@ -457,6 +457,8 @@ $(function(){
         $('#isUserHighlight').prop("checked", value.isUserHighlight||false);
         $('#userNg').val(value.userNg||"");
         $('#isShareNGuser').prop("checked", value.isShareNGuser||false);
+        $('#minResolution').val((value.minResolution!==undefined)?value.minResolution:0);
+        $('#maxResolution').val((value.maxResolution!==undefined)?value.maxResolution:2160);
         
         isCMSettingsEnabled = isCMBlack || isCMsoundoff || CMsmall!=100 || isHidePopTL || isHidePopBL || isHidePopFresh;
     });
@@ -577,7 +579,9 @@ $(function(){
             "isUserDel": $('#isUserDel').prop("checked"),
             "userNg": $('#userNg').val(),
             "isUserHighlight": $('#isUserHighlight').prop("checked"),
-            "isShareNGuser": $('#isShareNGuser').prop("checked")
+            "isShareNGuser": $('#isShareNGuser').prop("checked"),
+            "minResolution": parseInt($('#minResolution').val()),
+            "maxResolution": parseInt($('#maxResolution').val())
         }, function () {
             $("#info").show().text("設定保存しました").fadeOut(4000);
         });
