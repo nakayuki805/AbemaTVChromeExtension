@@ -3859,6 +3859,8 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     jccont.css("top", jcct)
         .css("height", "calc(100% - " + jcchd + "px)")
         ;
+    //AbemaTV Screen Comment Scrollerスクリプトによるコメ欄paddingをキャンセルする
+    jccont.children().css('padding-top', '0px');
     //console.log("form padding top, bottom", jfptop, jfpbot);
     if (isInpWinBottom) {
         jform.css("padding-top", jfptop)
@@ -4090,7 +4092,13 @@ function getFootcomeBtnElement(returnSingleSelector){
 function getSideElement(returnSingleSelector) {
     //console.log("?side");
     //リストアイコンを孫にもち右方にあるものをsideとする
-    var ret = $('[*|href*="/list.svg"][*|href$="#svg-body"]:not([href])').get(0);
+    var listIcon = $('[*|href*="/list.svg"][*|href$="#svg-body"]:not([href])');
+    //フッターにあるものを除外
+    if(!EXfoot){return null;}
+    var ret = null;
+    for(var i=0; i<listIcon.length; i++){
+        if($(EXfoot).has(listIcon.get(i)).length==0){ret = listIcon.get(i);}
+    }
     if(!ret){console.log("?side");return null;}
     var rep=ret.parentElement;
     var b=rep.getBoundingClientRect();
@@ -5850,6 +5858,8 @@ function setOptionHead() {
                     t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
                     t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
             }*/
+            //AbemaTV Screen Comment Scrollerスクリプトのコメントグラデーションを逆向きに
+            t += '[data-selector="commentPane"] > div {-webkit-mask-image: linear-gradient(transparent 0%, black 50%);mask-image: linear-gradient(transparent 0%, black 50%);}'
         }
         //t += selComelist+'>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
         //    if(isCustomPostWin){ //1行化
@@ -6115,6 +6125,7 @@ function setOptionHead() {
     if (isComeTriming && isSureReadComment) {
         if(selHead&&selFoot) t += selHead+','+selFoot+'{width:calc(100% - 310px);}';
         if(selHead) t += selHead+'>*{min-width:unset;}';
+        //
     }
     //黒帯パネルの透過
     if(selHead&&selFoot){
@@ -6584,10 +6595,10 @@ function setOptionEvent() {//放送画面用イベント設定
     //    $(window).on("click",usereventWindowclick);
     //マウスホイール無効か音量操作
     window.addEventListener('wheel', function (e) {
-        if (e.target.id == "ComeMukouMask") {
-            console.log("onmousewheel on ComeMukouMask",e);
+        if (e.target.id == "ComeMukouMask"||e.target.getAttribute('data-selector')=='closer') {//AbemaTV Screen Comment Scrollerスクリプトを併用しているとdiv[data-selector=closer]な要素が上にかぶさる(data-selectorはスクリプト側による属性)
+            console.log("onmousewheel on ComeMukouMask or [data-selector=closer]",e);
                 //        if (isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
-            if (isVolumeWheel && e.target.id == "ComeMukouMask") {
+            if (isVolumeWheel && (e.target.id == "ComeMukouMask"||e.target.getAttribute('data-selector')=='closer')) {
                 if (EXvolume && $(EXvolume).contents().find('svg').css("zoom") == "1") {
                     otoSize(e.deltaY > 0 ? 0.8 : 1.2);
                 }
