@@ -1907,7 +1907,7 @@ function putComment(commentText, userid, index, inmax, isSelf) {
         console.log("kakikomi match,wait="+kakikomiwait)
         isSelf = true;
         if (kakikomiwait > 0) { //waitがプラスなら後から単独で流す
-            setTimeout(putComment, kakikomiwait * 1000, commentText, 0, 1, true);
+            setTimeout(putComment, 'self', kakikomiwait * 1000, commentText, 0, 1, true);
             commentText = "";
         } else if (kakikomiwait < 0) {
             commentText = "";
@@ -8129,8 +8129,8 @@ function onCommentChange(mutations){
                 commentDivParentV.scrollTop(commentDivParentV[0].scrollHeight);
                 isBottomScrolled = true;
             }
-            //新着コメがanimationされないときがあるのでコメ流しもとりあえずここでやる
-            if (isMovingComment && isFirstComeAnimated) {
+            //新着コメがanimationされないときがあるのでanimationが含まれないときはコメ流しもここでやる(下でも同様にコメ流しの処理をしていて多分重複するけどlastMovedCommentTimeで弾けるはず)
+            if (isMovingComment && isFirstComeAnimated && !isAnimationAdded) {
                     var idx, dt, movingStarti=0;
                     for(var i = 0; i < d; i++){
                         idx = d - i - 1;
@@ -8152,8 +8152,8 @@ function onCommentChange(mutations){
                 }
             }
         }
-    if(false&&isAnimationAdded){
-        //animationが追加されたときの処理は一旦無効にして上でコメ流しもする
+    if(isAnimationAdded){
+        //上でも同様にコメ流しの処理をする
         //console.log(isFirstComeAnimated,mutations)
         if (isMovingComment && isFirstComeAnimated) {
             //                        for(var i=Math.min(movingCommentLimit,(comeListLen-commentNum))-1;i>=0;i--){
