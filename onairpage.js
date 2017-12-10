@@ -797,6 +797,8 @@ function waitforloadtimetable(url) {
                     if (isPutSideDetailHighlight) {
                         putSideDetailHighlight();
                     }
+                    //右詳細が溢れてもスクロールできるように
+                    $(EXTTsideR).css('overflow-y', 'auto');
                 },100);
 
                 //console.log("putSideDetail*");
@@ -808,7 +810,7 @@ function waitforloadtimetable(url) {
         });
         timetableCss();
         //$('div')を取ってきてあるのでここで使う
-        dd.map(function(i,e){if($(e).css("z-index")>10 && e.className.indexOf('toast')<0)return e;}).css("z-index","-1");
+        dd.map(function(i,e){if($(e).css("z-index")>10 && e.className.indexOf('ext-toast')<0)return e;}).css("z-index","-1");
 
         //番組表を掴んでドラッグする
         timetableGrabbing.test=false;
@@ -2277,7 +2279,7 @@ function optionHeightFix() {
     }
 }
 function toast(message) {
-    var toastElem = $("<div class='toast'><p>" + message + "</p></div>").appendTo("body");
+    var toastElem = $("<div class='ext-toast'><p>" + message + "</p></div>").appendTo("body");
     setTimeout(function () {
         toastElem.fadeOut(3000);
     }, 4000);
@@ -6969,6 +6971,7 @@ function copycome(d, hlsw) {
         //console.log("copycome leng=0");
         var t = '<div id="copycome" class="' + jo.parent().attr("class") + ' usermade"><div id="copycomec" class="'+jo.attr("class")+' usermade">';
         var eofc = EXcomelistChildren[0];
+        if(!eofc)return;
         var eofcfc = eofc.firstElementChild;
         //console.log(eofc,isAnimationIncluded,eo.firstElementChild,EXcomelistChildren, comelistClasses)
         if ((comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) return;

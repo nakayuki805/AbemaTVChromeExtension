@@ -102,7 +102,7 @@ body{
     z-index: 20;
     opacity: 0.7;
 }
-.toast {
+.ext-toast {
     z-index: 100;
     background-color: black;
     color: white;
@@ -115,7 +115,7 @@ body{
     margin-left: -200px;
     width: 400px;
 }
-.toast p{
+.ext-toast p{
     margin: 10px;
 }
 /* 音量ゲージ下部の吹き出しを下へ伸ばす */

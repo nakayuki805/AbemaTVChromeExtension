@@ -24,7 +24,7 @@ var notifyContent = [
 ].join("<br>");
 
 function updateInfo(message) {
-    var toastElem = $("<div class='toast' id='updateInfo' style='width:600px;top:20%;left:40%;'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
+    var toastElem = $("<div class='ext-toast' id='updateInfo' style='width:600px;top:20%;left:40%;'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
     setTimeout(function(){
         toastElem.fadeOut(10000);
     },50000);
