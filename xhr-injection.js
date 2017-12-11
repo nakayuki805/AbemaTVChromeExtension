@@ -38,6 +38,7 @@ var inj_extXHRopen = function() {
     var url = arguments[1];
     //console.log("XHR", method, url);
     if((inj_maxRes!=2160||inj_minRes!=0)&&inj_maxRes>=inj_minRes){
+        //console.log('resch enabled');
         if(hlsPlaylistPattern.test(url)){
             var res = parseInt(url.match(hlsPlaylistPattern)[1]);
             var newRes = res;

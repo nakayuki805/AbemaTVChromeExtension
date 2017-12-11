@@ -293,7 +293,7 @@ getStorage(null, function (value) {
     isUserHighlight = value.isUserHighlight || false;
     isShareNGuser = value.isShareNGuser || false;
     minResolution = (value.minResolution!==undefined)?value.minResolution:0;
-    maxResolution = (value.maxResolution!==undefined)?value.maxResolution:0
+    maxResolution = (value.maxResolution!==undefined)?value.maxResolution:2160;
 });
 
 var currentLocation = window.location.href;
@@ -8427,7 +8427,8 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
     }
 }
 function programTimeStrToTime(programTimeStr) {
-    var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日（[^ ~]+）(\d+):(\d+)/);
+    var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日[（\(][^ ~]+[）\)]\s*(\d+):(\d+)/);
+    if(programTimeArray===null){console.warn('programTimeStrToTime("'+programTimeStr+'") not match'); return new Date(0);}
     var now = new Date();
     var programYear = now.getFullYear();
     var programMonthNum = parseInt(programTimeArray[1]) - 1;
@@ -8462,7 +8463,7 @@ function putNotifyButton(url) {
     var programID = urlarray[3];
     var programTitle = titleElement.text();
     var programTimeStr = titleElement.nextAll().eq(2).text();
-    //console.log(programTimeStr, urlarray)
+    console.log(programID, programTitle, channel, channelName, programTimeStr, urlarray)
     var programTime = programTimeStrToTime(programTimeStr);
     //console.log(programTime)
     var butParent = $('<span class="addNotifyWrapper"></span>').insertAfter(leftContnts.children('div').children('div').eq(0));
