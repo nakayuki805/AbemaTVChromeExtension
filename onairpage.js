@@ -6954,20 +6954,20 @@ function getComeInfo(wdiv){
     var timeStr = timeElem.text();
     var datetime = timeElem.attr('datetime');
     var mwidth = div.children('p').css('width');
-    /*
-    var nt = Date.now();
-    var rn = /^今$/;
-    var rs = /^(\d+) *秒前$/;
-    var rm = /^(\d+) *分前$/;
-    var datetime;
-    if (rn.test(t)) {
-        datetime = nt;
-    } else if (rs.test(t)) {
-        datetime = nt - (+rs.exec(t)[1]) * 1000;
-    } else if (rm.test(t)) {
-        datetime = nt - (+rm.exec(t)[1]) * 60000;
+    if(!datetime){
+        var nt = Date.now();
+        var rn = /^今$/;
+        var rs = /^(\d+) *秒前$/;
+        var rm = /^(\d+) *分前$/;
+        var datetime;
+        if (rn.test(timeStr)) {
+            datetime = nt;
+        } else if (rs.test(timeStr)) {
+            datetime = nt - (+rs.exec(timeStr)[1]) * 1000;
+        } else if (rm.test(timeStr)) {
+            datetime = nt - (+rm.exec(timeStr)[1]) * 60000;
+        }
     }
-    */
     return {message: msg, datetime: datetime, timeStr: timeStr, userid: uid};
 }
 function copycome(d, hlsw) {
@@ -7213,7 +7213,7 @@ function comecopy() {
             t = r.exec(c);
             if (t[2] == t[3] && +t[1] > +t[2]) {
                 s = e.text();
-                uid = e.parent().parent().attr('data-ext-userid');
+                uid = e.parent().parent().attr('data-ext-userid') || '';
                 break;
             //}
         }
@@ -7898,7 +7898,7 @@ function onairBasefunc() {
 
         //番組タイトルの更新
         if (EXinfo) {
-            var jo = $(EXinfo).contents().find('h2');
+            var jo = $(EXinfo).children().not('#copyinfo').find('h2');
             if (jo.length > 0) {
                 var tp = jo.first().text();
                 if (tp && proTitle != tp) {
@@ -8151,14 +8151,14 @@ function onCommentChange(mutations){
                     var idx, dt, movingStarti=0;
                     for(var i = 0; i < d; i++){
                         idx = d - i - 1;
-                        dt = parseInt(comments[idx][2]);
+                        dt = comments[idx]?parseInt(comments[idx][2]):0;
                         if(dt<=lastMovedCommentTime){
                             continue;
                         }else if(movingStarti==0){
                             movingStarti = i;
                         }
                         putComment(comments[idx][0], comments[idx][1], i-movingStarti, d-movingStarti);                
-                        if(i == d-1){
+                        if(i == d-1 && dt > 0){
                             lastMovedCommentTime = dt;
                         }
                     }
@@ -8201,7 +8201,7 @@ function onCommentChange(mutations){
                     movingStarti = i;
                 }
                 putComment(cinfo.message, cinfo.userid, i-movingStarti, animationCommentDivs.length-movingStarti);                
-                if(i == animationCommentDivs.length-1){
+                if(i == animationCommentDivs.length-1 && dt > 0){
                     lastMovedCommentTime = dt;
                 }
             }
