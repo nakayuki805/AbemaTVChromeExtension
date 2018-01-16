@@ -2299,7 +2299,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
             var jo=$('div,button').map(function(i,e){
                 var b=e.getBoundingClientRect();
                 var bp=e.parentElement.getBoundingClientRect();//↓縦長ウィンドウでも反応するようtop判定はやめる
-                if($(e).css("position")=="absolute"&&/*b.top<5&&*/b.left<5&&b.width==bp.width&&b.height==bp.height&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&$(e).css("opacity")==0)return e;
+                if($(e).css("position")=="absolute"&&/*b.top<5&&*/b.left<5&&b.width==bp.width&&b.height==bp.height&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&$(e).css("opacity")==0&&$(e).siblings().length<10)return e;
             });
             if(jo.length>0)overlapSelector=getElementSingleSelector(jo[0]);
             //else{

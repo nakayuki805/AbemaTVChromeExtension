@@ -38,7 +38,7 @@ function injection_urlChanged(){
                 setTimeout(setTTRefClass, 500, );
                 return;
             }
-            inj_setRefClass();
+            //inj_setRefClass();
         },1000);
     }
 }
@@ -64,7 +64,7 @@ function inj_delaysetComment(){
     var comelistInstance = null;
     var jComelist = $('.ext_abm-comelist');
     if(jComelist.length>0){
-        comelistInstance = inj_findReact(jComelist.get(0));
+        comelistInstance = inj_findCommentReact(jComelist.parent().get(0));
     }
     if(comelistInstance !== null){
         //console.log('comelistInstance:', comelistInstance);
@@ -77,7 +77,7 @@ function inj_delaysetComment(){
     }
 }
 function inj_onCommentChange(mutations){
-    var comelistInstance = inj_findReact(inj_EXcomelist);
+    var comelistInstance = inj_findCommentReact(inj_EXcomelist.parentElement);
     //console.log('inj_occ comelistInstance:', comelistInstance);
     var newCommentCount = comelistInstance.state.newCommentCount;//animationのコメ数
     var hasCommentAnimation = comelistInstance.props.hasCommentAnimation;
@@ -117,13 +117,25 @@ function inj_findReact(dom) {
     for (var key in dom) {
         if (key.startsWith("__reactInternalInstance$")) {
             var compInternals = dom[key]._currentElement;
-            var compWrapper = compInternals._owner;
-            var comp = compWrapper._instance;
-            return comp;
+            if(!compInternals){
+
+            }else{
+                var compWrapper = compInternals._owner;
+                var comp = compWrapper._instance;
+                return comp;
+            }
         }
     }
     return null;
 };
+function inj_findCommentReact(comelist) {
+    for (var key in comelist) {
+        if (key.startsWith("__reactInternalInstance$")) {
+            return comelist[key].child.stateNode;
+        }
+    }
+    return null;
+}
 function inj_addRefClass(elm, refName){
     className = 'ext_ref-'+refName;
     //$('.'+className).removeClass(className);
