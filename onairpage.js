@@ -1455,6 +1455,7 @@ function onresize(oldTranslate) {
     r = r.replace(/^\s+|\s+$/g, "");
 
     tar.css("transform",r);
+    tar.css('transition-delay', '0.4s');
     var isVideoResized = r != oldTranslate; ///translate[XY]\([^0][-0-9e\.]*px\)/.test(r);
     console.log("screen resized");//,isVideoResized,r);
     movieWidth=parseInt(tar.width());
@@ -5785,8 +5786,8 @@ function setOptionHead() {
         t += selComesend+'{background-color:' + bc + ';}';
     }
 
-    selComesendinpp=getElementSingleSelector(EXcomesendinp.parentElement);
-    if($(selComesendinpp).length!=1){
+    selComesendinpp=getElementSingleSelector(EXcomesendinp.parentElement)||'.'+EXcomesendinp.parentElement.classList[0];
+    if($(selComesendinpp).not('#copyotw').length!=1){
         console.log("?EXcomesendinp.parentElement "+selComesendinpp);
         selComesendinpp=alt?".HH_HL":"";
     }
@@ -5794,8 +5795,8 @@ function setOptionHead() {
         t += selComesendinpp+'{background-color:' + uc + ';}';
     }
 
-    selComesendinp=getElementSingleSelector(EXcomesendinp);
-    if($(selComesendinp).length!=1){
+    selComesendinp=getElementSingleSelector(EXcomesendinp,2);
+    if($(selComesendinp).not('#copyot').length!=1){
         console.log("?EXcomesendinp "+selComesendinp);
         selComesendinp=alt?".HH_HN":"";
     }
@@ -7627,13 +7628,21 @@ function onairBasefunc() {
         if($('.ext_abm-comelist').length==0){
             addExtClass(EXcomelist, 'comelist');
         }
-        if (!EXcomelist || !EXcomelist.parentElement || !EXcomelist.parentElement.parentElement) {
+        if (!EXcomelist || $(document).has(EXcomelist).length==0) {
             EXcomelist = getComeListElement();
-            addExtClass(EXcomelist, 'comelist');
+            if(EXcomelist){
+                //console.log('ecl', EXcomelist, $('body').has(EXcomelist).length==0)
+                addExtClass(EXcomelist, 'comelist');
+                setOptionHead();
+                window.dispatchEvent(comelistReadyEvent);
+                commentObserver.disconnect();
+                commentObserver.observe(EXcomelist, { childList: true});
+            }
+        }
+        if (!EXinfo || $(document).has(EXinfo).length==0){
+            EXinfo = getInfoElement();
+            addExtClass(EXinfo, 'info');
             setOptionHead();
-            window.dispatchEvent(comelistReadyEvent);
-            commentObserver.disconnect();
-            commentObserver.observe(EXcomelist, { childList: true});
         }
 
         if (EXcome && isAutoReload) {
