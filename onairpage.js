@@ -814,8 +814,8 @@ function waitforloadtimetable(url) {
             //console.log('EXTTbody clicked',e,timetableGrabbing.scrolled)
         });
         timetableCss();
-        //$('div')を取ってきてあるのでここで使う
-        dd.map(function(i,e){if($(e).css("z-index")>10 && e.className.indexOf('ext-toast')<0)return e;}).css("z-index","-1");
+        //$('div')を取ってきてあるのでここで使う 拡張のtoastとTimetableViewerスクリプトは除外する
+        dd.map(function(i,e){if($(e).css("z-index")>10 && e.className.indexOf('ext-toast')<0 && e.id.indexOf('TimetableViewer')<0)return e;}).css("z-index","-1");
 
         //番組表を掴んでドラッグする
         timetableGrabbing.test=false;
@@ -8333,7 +8333,7 @@ function checkUrlPattern(url) {
         } else {
             onairfunc();
         }
-    } else if (/https:\/\/abema.tv\/search\/future\?q=.+/.test(url)) {
+    } else if (/https:\/\/abema.tv\/search\?q=.+/.test(url)) {
         //番組検索結果(放送予定の番組)
         if (output) {
             return 4;
@@ -8487,7 +8487,8 @@ function putSerachNotifyButtons() {
     if (listItems.length == 0 && noContentMessage.length == 0) { setTimeout(function () { putSerachNotifyButtons() }, 1000); console.log("putSerachNotifyButtons wait"); return; }
     listItems.each(function (i, elem) {
         var linkArea = $(elem);
-        var spans = linkArea.children().eq(1).find('span');
+        var spans = linkArea.children().eq(0).children().eq(1).children('span');
+        if($(elem).next('.listAddNotifyWrapper').length>0){return;}
         var butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
         var progUrl = linkArea.attr('href');
         var urlarray = progUrl.substring(1).split("/");
@@ -8501,6 +8502,11 @@ function putSerachNotifyButtons() {
         //console.log(linkArea, channel, channelName, programID, programTitle, programTime, butParent);
         putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
     });
+    //もっとみるボタンに対応
+    var moreBtn = listWrapper.next('button');
+    moreBtn.click(function(){
+        setTimeout(putSerachNotifyButtons, 500);
+    })
 }
 function putReminderNotifyButtons() {
     if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) return;
