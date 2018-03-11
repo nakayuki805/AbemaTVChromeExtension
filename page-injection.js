@@ -15,7 +15,7 @@ function injection_urlChanged(){
     }
     inj_currentLocation = location.href;
     inj_commentObserver.disconnect();
-    inj_setRefClass();
+    //inj_setRefClass();
     //放送画面
     if(inj_currentLocation.indexOf('https://abema.tv/now-on-air/')>=0){
         setTimeout(inj_delaysetComment,1000);
@@ -52,11 +52,13 @@ function inj_setRefClass(parent){
                 for(var ref in r.refs){
                     if(r.refs[ref] instanceof HTMLElement){
                         inj_addRefClass(r.refs[ref], ref);
-                        //console.log(ref,r.refs[ref]);                        
+                        console.log(ref,r.refs[ref]);                        
                     }
                 }
             }
-        }catch(er){}
+        }catch(er){
+            console.warn(er);
+        }
     });
 }
 
@@ -64,20 +66,25 @@ function inj_delaysetComment(){
     var comelistInstance = null;
     var jComelist = $('.ext_abm-comelist');
     if(jComelist.length>0){
-        comelistInstance = inj_findCommentReact(jComelist.parent().get(0));
+        comelistInstance = inj_findReact(jComelist.parent().get(0));
     }
     if(comelistInstance !== null){
         //console.log('comelistInstance:', comelistInstance);
         inj_EXcomelist = jComelist.get(0);
         inj_commentObserver.disconnect();
         inj_commentObserver.observe(inj_EXcomelist, {childList: true});
+        //放送画面→番組表推移時にAbemaがバグるのに対処
+        setTimeout(function(){
+            //なぜか存在しないrefs.animatableに対してremoveEventListenerしようとするのでダミーの要素いれておく
+            inj_findReact(inj_EXcomelist.parentElement).refs.animatable = document.createElement('div');
+        },1000);
     }else{
         console.log('waitng inj_delaysetComment()');
         setTimeout(inj_delaysetComment, 1000);
     }
 }
 function inj_onCommentChange(mutations){
-    var comelistInstance = inj_findCommentReact(inj_EXcomelist.parentElement);
+    var comelistInstance = inj_findReact(inj_EXcomelist.parentElement);
     //console.log('inj_occ comelistInstance:', comelistInstance);
     var newCommentCount = comelistInstance.state.newCommentCount;//animationのコメ数
     var hasCommentAnimation = comelistInstance.props.hasCommentAnimation;
@@ -113,28 +120,24 @@ function inj_onCommentChange(mutations){
     }
 }
 
-function inj_findReact(dom) {
-    for (var key in dom) {
+function inj_findReact(comelist) {
+    for (var key in comelist) {
         if (key.startsWith("__reactInternalInstance$")) {
-            var compInternals = dom[key]._currentElement;
-            if(!compInternals){
-
-            }else{
-                var compWrapper = compInternals._owner;
-                var comp = compWrapper._instance;
-                return comp;
+            if (comelist[key].child && comelist[key].child.stateNode){
+                return comelist[key].child.stateNode;
             }
         }
     }
     return null;
-};
-function inj_findCommentReact(comelist) {
+}
+function inj_setReact(comelist, key, value) {
     for (var key in comelist) {
         if (key.startsWith("__reactInternalInstance$")) {
-            return comelist[key].child.stateNode;
+            if (comelist[key].child && comelist[key].child.stateNode){
+                comelist[key].child.stateNode[key] = value;
+            }
         }
     }
-    return null;
 }
 function inj_addRefClass(elm, refName){
     className = 'ext_ref-'+refName;

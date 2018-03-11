@@ -163,6 +163,23 @@ body{
 .addNotify:hover{
     opacity: 0.7;
 }
+/*公式通知画面の通知一括登録ボタン*/
+.addAllNotifyButton{
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid orangered;
+    color: orangered;
+    display: block;
+    font-weight: 700;
+    padding: 16px 0;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+    margin-top: 16px;
+}
+.addAllNotifyButton:hover{
+    opacity: 0.7;
+}
 /*通知登録済み番組背景*/
 .registeredProgs>button>div{
     background-color:rgba(255,238,187,0.7);

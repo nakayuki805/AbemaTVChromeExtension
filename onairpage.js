@@ -959,7 +959,7 @@ function timetabledtfix() {
         li = $(li);
         var checkbox = li.children('input');
         if(checkbox.length == 0){
-            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="float:right;margin:'+(isFirefox?9:10)+'px;" title="拡張機能のチャンネル表示切替">').appendTo(li);
+            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="display:inline-block;margin:'+(isFirefox?7:8)+'px;height:12px;vertical-align:middle;" title="拡張機能のチャンネル表示切替">').appendTo(li);
             checkbox.click(function (e){
                 toggleChannel(e.currentTarget.previousElementSibling.getAttribute('href'));
             });
@@ -970,7 +970,7 @@ function timetabledtfix() {
         }else{
             checkbox.prop('checked', hasArray(allowChannelNum, i - 1));
         }
-        li.children('a').css('display', 'inline-block').css('width', 'calc(100% - '+(20+checkbox.width())+'px)');
+        li.children('a').css('display', 'inline-block').css('width', 'calc(100% - '+(16+checkbox.width())+'px)');
     });
 }
 function timetabledtloop() {
@@ -2442,6 +2442,7 @@ function delaysetNotOA(){
     var hoverSpanClass = hoverContents.children('a').children('span')[0].className;
     //console.log(hoverContents,hoverContents.children(),hoverLinkClass)
     if (hoverContents.children('#extSettingLink').length == 0) {
+        hoverContents.children(':last').css({'border-bottom':'1px solid #333', 'margin-bottom': '8px', 'padding-bottom': '12px'});
         hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
             .append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>')
             ;
@@ -4089,7 +4090,8 @@ function getViewCounterElement(returnSingleSelector) {
     if(!ret){console.log("?viewcounter");return null;}
     var rep=ret.parentElement;
     var b=rep.getBoundingClientRect();
-    while(rep.tagName.toUpperCase()!="BODY"&&b.width<window.innerWidth/2&&b.height<window.innerHeight/4){
+    while(rep.tagName.toUpperCase()!="BODY"&&b.width<window.innerWidth/2&&b.height<window.innerHeight/4&&$(rep).children('div').length<2){
+        //console.log(rep,b);
         ret=rep;
         rep=ret.parentElement;
         b=rep.getBoundingClientRect();
@@ -5118,6 +5120,7 @@ function comeColor(jo, inp) {
     }
 }
 function waitforComeReady(){
+    if(!EXcomelist){return;}
     var comeListLen = EXcomelist.childElementCount;
     if (comelistClasses.animated&&EXcomelist.firstElementChild.className.indexOf(comelistClasses.animated) >= 0) { comeListLen--; }//冒頭のanimationは数から除外
     else if(EXcomelist.firstElementChild.firstElementChild.firstElementChild.tagName.toUpperCase().indexOf('DIV')>=0) { comeListLen--;}
@@ -6114,7 +6117,8 @@ function setOptionHead() {
         selCountview=alt?".v3_wX":"";
     }
     if(selCountview){
-        t += selCountview+'{background-color:transparent;}';
+        t += selCountview+'{position:absolute;z-index:11;}';
+        t += selCountview+','+selCountview+'>div{background-color:transparent;}';
         t += selCountview+'>*{opacity:' + (settings.panelOpacity/255) + ';}';
     }
     //視聴数格納
@@ -6145,6 +6149,7 @@ function setOptionHead() {
     if(selHead&&selFoot){
         t += selFoot+'>div>div:nth-child(3),'+selHead+'{background:rgba(0,0,0,' + (settings.panelOpacity/255) + ')}';
         t += selFoot+'>div>div:nth-child(3)>*,'+selHead+'>*{opacity:' + ((settings.panelOpacity/255<0.7)?0.7:(settings.panelOpacity/255)) + '}';
+        t += selFoot+'>div>div:nth-child(3)>div:nth-child(1):hover{background:rgba(32,32,32,' + (settings.panelOpacity/255) + ')}';
         //フッターチャンネルアイコンの背景を透過
         var selChLogoDiv = getElementSingleSelector($(EXfoot).find('img').parent().get(0));
         t += selChLogoDiv+'{background-color:transparent !important;}';
@@ -6198,6 +6203,7 @@ function setOptionElement() {
     var hoverLinkClass = $(EXmenu).children('a')[0].className;
     var hoverSpanClass = $(EXmenu).children('a').children('span')[0].className;
     if ($(EXmenu).children('#extSettingLink').length == 0) {
+        $(EXmenu).children(':last').css({'border-bottom':'1px solid #333', 'margin-bottom': '8px', 'padding-bottom': '12px'});
         $(EXmenu).append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
                  .append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>')
         ;
@@ -8362,7 +8368,7 @@ function checkUrlPattern(url) {
                     putReminderNotifyButtons();
                     itemCount = count;
                 }
-            });
+            },500);
         }
     } else {
         // それ以外のページ
@@ -8383,7 +8389,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
     if (notifyTime > now) {
         var progNotifyName = "progNotify_" + channel + "_" + programID;
         notifyButParent.children('.addNotify').remove();
-        var notifyButton = $('<div class="addNotify" data-prognotifyname="' + progNotifyName + '"></div>').prependTo(notifyButParent);        
+        var notifyButton = $('<div class="addNotify" data-prognotifyname="' + progNotifyName + '" data-registered="false"></div>').prependTo(notifyButParent);        
         getStorage(progNotifyName, function (notifyData) {
             //console.log(notifyData, progNotifyName)
             notifyButtonData[progNotifyName] = {
@@ -8396,7 +8402,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
             };
             if (!notifyData[progNotifyName]) {
                 //未登録
-                notifyButton.text("拡張機能の通知登録").css('background-color', '#fff').click(function (e) {
+                notifyButton.text("拡張機能の通知登録").css('background-color', '#fff').attr('data-registered', 'false').click(function (e) {
                     var clickedButton = $(e.target);
                     var request = notifyButtonData[clickedButton.attr("data-prognotifyname")];
                     request.type = "addProgramNotifyAlarm";
@@ -8416,7 +8422,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
                 });
             } else {
                 //登録済み
-                notifyButton.text("拡張機能の通知登録解除").css('background-color', '#feb').click(function (e) {
+                notifyButton.text("拡張機能の通知登録解除").css('background-color', '#feb').attr('data-registered', 'true').click(function (e) {
                     var clickedButton = $(e.target);
                     var progData = notifyButtonData[clickedButton.attr("data-prognotifyname")];
                     chrome.runtime.sendMessage({ type: "removeProgramNotifyAlarm", progNotifyName: clickedButton.attr("data-prognotifyname") }, function (response) {
@@ -8535,6 +8541,12 @@ function putReminderNotifyButtons() {
         var programTime = programTimeStrToTime(spans.eq(2).text());
         putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
     });
+    //一括登録ボタン
+    if(listItems.length>1&&$('.addAllNotifyButton').length<1){
+        $('<div class="addAllNotifyButton" >以上の番組を全て拡張機能の通知登録する</div>').insertAfter(listWrapper).click(function(){
+            $('.addNotify[data-registered="false"]').trigger('click');
+        });
+    }
 }
 function putSideDetailNotifyButton(){
     //console.log('putSideDetailNotifyButton()');
