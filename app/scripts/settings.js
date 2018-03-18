@@ -1,9 +1,10 @@
-﻿// edge等ブラウザ対応
-if (typeof chrome === "undefined" || !chrome.extension) {
-    var chrome = browser;
-}
+// edge等ブラウザ対応
+// if (typeof chrome === "undefined" || !chrome.extension) {
+//     console.log('!ch',chrome)
+//     var chrome = browser;
+// }
 
-var settingsList = [
+export var settingsList = [
     {
         "description" : "映像・表示・操作関連設定",
         "settings": [
@@ -571,7 +572,7 @@ var settingsList = [
         ]
     }
     ];
-var ComeColorSettingList = [
+export var ComeColorSettingList = [
     {
         "name": "commentBackColor",
         "description": "コメント一覧の背景色(黒0～灰～255白)",
@@ -597,7 +598,7 @@ var ComeColorSettingList = [
         "isInstantChangable": true
     }
     ];
-var RadioSettingList = [
+export var RadioSettingList = [
     {
         "name": "timePosition",
         "list":[
@@ -667,7 +668,7 @@ var RadioSettingList = [
         ]]
     }
     ];
-var CMSettingList = [
+export var CMSettingList = [
         {
             "name": "isCMBlack",
             "description": "コメント数が表示されないとき画面真っ黒",
@@ -785,10 +786,10 @@ function removeIs(str) {
     var firtsLetter = afteris.substr(0,2)=="CM"?"C":afteris.substr(0,1).toLocaleLowerCase();
     return firtsLetter + afteris.slice(1);
 }
-function getSettings(callback) {
+export function getSettings(callback) {
     var res = {};
 }
-function resetSettings(callback) {
+export function resetSettings(callback) {
     chrome.storage.local.get(function(value){
         var keys = [];
         for (var key in value) {
@@ -800,7 +801,7 @@ function resetSettings(callback) {
     });
     
 }
-function resetCMSettings(callback) {
+export function resetCMSettings(callback) {
     var keys = [];
     for (var i=0; i<CMSettingList.length; i++) {
         keys.push(CMSettingList[i].name);
@@ -811,7 +812,7 @@ function resetCMSettings(callback) {
     chrome.storage.local.remove(keys, callback);
 
 }
-function removeCMsettings(obj){
+export function removeCMsettings(obj){
     var keys = [], i;
     for (i=0; i<CMSettingList.length; i++) {
         keys.push(CMSettingList[i].name);
@@ -834,6 +835,7 @@ function generateOptionInput(settingsArr, isPermanent) {
     var disabled;
     var description;
     var isNotChangable;
+    var defaultVal;
     var NCTEXT="　※この設定はここで変更不可";
     for (i = 0; i < settingsArr.length; i += 1) {
         description = (!isPermanent && settingsArr[i].instantDescription) ? settingsArr[i].instantDescription : settingsArr[i].description;
@@ -905,7 +907,7 @@ function generateRadioInput(settingsArr){
     }
     return inputHTML;
 }
-function generateOptionHTML(isPermanent) {
+export function generateOptionHTML(isPermanent) {
     var htmlstr = "";
     for (var i=0; i < settingsList.length; i++) {
         htmlstr += "<fieldset style='border: 1px solid silver;margin: 0 2px;padding: .35em .625em .75em;'><legend>" + settingsList[i].description + "</legend>";

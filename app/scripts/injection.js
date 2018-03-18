@@ -35,7 +35,7 @@ function injection_urlChanged(){
             }
             if (EXTThead.childElementCount > EXTTbody.childElementCount){
                 console.log('retry setTTRefClass()');
-                setTimeout(setTTRefClass, 500, );
+                setTimeout(setTTRefClass, 500);
                 return;
             }
             //inj_setRefClass();
@@ -92,10 +92,10 @@ function inj_onCommentChange(mutations){
     //console.log('inj_occ newComeC,hasComeAni,comeli[0]', newCommentCount, hasCommentAnimation, inj_EXcomelist.firstChild);
     $(inj_EXcomelist).attr('data-ext-hasCommentAnimation', hasCommentAnimation);
     var jComments = $(inj_EXcomelist).children();
-    var i;
+    var i, comment;
     //animation部
     for(i=0; i < newCommentCount; i++){
-        var comment = comments[i];
+        comment = comments[i];
         jComments.eq(0).children('div').children('div').eq(i)
             .attr('data-ext-message', comments[i].message)
             .attr('data-ext-createdatms', comments[i].createdAtMs)
@@ -108,7 +108,7 @@ function inj_onCommentChange(mutations){
     if(hasCommentAnimation&&jComments.eq(0).children().children('p').length>0){hasCommentAnimation=false;}
     for(i=(hasCommentAnimation?1:0); i<jComments.length; i++){
         if(!jComments.eq(i).attr('data-ext-id')){
-            var comment = comments[i + newCommentCount - (hasCommentAnimation?1:0)];
+            comment = comments[i + newCommentCount - (hasCommentAnimation?1:0)];
             if(!comment){continue;}
             jComments.eq(i)
                 .attr('data-ext-message', comment.message)
@@ -130,17 +130,17 @@ function inj_findReact(comelist) {
     }
     return null;
 }
-function inj_setReact(comelist, key, value) {
+function inj_setReact(comelist, vkey, value) {
     for (var key in comelist) {
         if (key.startsWith("__reactInternalInstance$")) {
             if (comelist[key].child && comelist[key].child.stateNode){
-                comelist[key].child.stateNode[key] = value;
+                comelist[key].child.stateNode[vkey] = value;
             }
         }
     }
 }
 function inj_addRefClass(elm, refName){
-    className = 'ext_ref-'+refName;
+    var className = 'ext_ref-'+refName;
     //$('.'+className).removeClass(className);
     $(elm).addClass(className).attr('data-ext-ref',refName);
 }

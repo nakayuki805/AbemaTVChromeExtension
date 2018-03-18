@@ -1,10 +1,17 @@
-﻿// edge等ブラウザ対応
-if (typeof chrome === "undefined" || !chrome.extension) {
-    var chrome = browser;
+'use strict';
+// Enable chromereload by uncommenting this line:
+import 'chromereload/devonly';
+
+import * as $ from 'jquery';
+import * as settings from './settings';
+
+// edge対応
+if ((typeof chrome === "undefined" || !chrome.extension) && typeof browser !== "undefined") {
+    this.chrome = chrome || browser;
 }
 
 $(function(){
-    $("#settingsArea").html(generateOptionHTML(true));
+    $("#settingsArea").html(settings.generateOptionHTML(true));
     $("#CommentMukouSettings").hide();
     $("#CommentColorSettings").css("width","600px")
         .css("background-color","darkgreen")
@@ -134,7 +141,7 @@ $(function(){
         $('#panelCustom').css("margin-top","8px")
             .css("padding","8px");
             //.css("border","1px solid black")
-        ;
+        
         // $('#isAlwaysShowPanel').appendTo('#panelCustom').prop("disabled",true).before("旧");
         // $('<input type="button" id="alwaysShowPanelB" value="下表に適用">').insertAfter('#isAlwaysShowPanel').before("常に黒帯パネルを表示する");
         // $('#isOpenPanelwCome').appendTo('#panelCustom').prop("disabled",true).before("<br>旧");
@@ -152,12 +159,12 @@ $(function(){
         $('<tr><td>放送中一覧<br>表示時</td><td></td><td></td><td></td></tr>').appendTo('#panelcustomTable');
         $('<tr><td>コメント<br>表示時</td><td></td><td></td><td></td></tr>').appendTo('#panelcustomTable');
         var rd=["非表示<br>","マウス反応<br>","常に表示"];
-        for(var i=0;i<4;i++){
-            for(var j=0;j<3;j++){
-                for(var k=0;k<3;k++){
+        for(let i=0;i<4;i++){
+            for(let j=0;j<3;j++){
+                for(let k=0;k<3;k++){
                     $('<input type="radio" name="d'+i+''+j+'" value="'+k+'" id="radio-d'+i+j+'-'+k+'">').appendTo('#panelcustomTable tr:eq('+(i+1)+')>td:eq('+(j+1)+')')
                         .after('<label for="radio-d'+i+j+'-'+k+'">'+rd[k]+'</label>');
-                    ;
+                    
                 }
             }
         }
@@ -189,7 +196,7 @@ $(function(){
     var jo=$('#highlightComePower');
     var i=c.index(jo);
     c.slice(i-2,i).remove();
-     $('#highlightComePower').appendTo($("#ihighlightComeColor").children().first())
+    $('#highlightComePower').appendTo($("#ihighlightComeColor").children().first())
         .prop("type","range")
         .prop("max","100")
         .prop("min","0")
@@ -217,7 +224,7 @@ $(function(){
         var isMovingComment = value.movingComment || false;
         var movingCommentSecond = Math.max(1,((value.movingCommentSecond!==undefined)?value.movingCommentSecond : 8));
         var movingCommentLimit = Math.max(0,((value.movingCommentLimit!==undefined)?value.movingCommentLimit : 50));
-//        var isMoveByCSS =　value.moveByCSS || false;
+//        var isMoveByCSS = value.moveByCSS || false;
         var isComeNg = value.comeNg || false;
         var isComeDel = value.comeDel || false;
         var valFullNg = value.fullNg || "";
@@ -614,20 +621,20 @@ $(function(){
     //クリアボタン
     $('#resetSettingsBtn').click(function(){
         if (window.confirm("設定をすべて削除しますか？")) {
-            resetSettings(function(){
+            settings.resetSettings(function(){
                 window.alert("設定をリセットしました。");
                 location.reload();
             });
         }
     });
     $("#resetCMSettingsBtn").click(function(){
-        resetCMSettings(function(){
+        settings.resetCMSettings(function(){
             window.alert("コメント無効時の情報をリセットしました。");
             location.reload();
         });
     });
     //通知登録番組一覧リンク書き換え
-    $("#prognotifiesLink").attr("href", chrome.extension.getURL("prognotifies.html"));
+    $("#prognotifiesLink").attr("href", chrome.extension.getURL("/pages/notifylist.html"));
     
     chrome.storage.local.get(function(value){
         //不具合報告フォーム
@@ -671,10 +678,10 @@ $(function(){
                     '"': '&quot;',
                     '<': '&lt;',
                     '>': '&gt;',
-                }[match]
+                }[match];
             });
             dataform += '"><input type="submit" value="画面が切り替わらない場合はクリックして続行"></form></body></html>';
-            var blob = new Blob([dataform], {type: "text/html"})
+            var blob = new Blob([dataform], {type: "text/html"});
             window.open(window.URL.createObjectURL(blob));
         });
         
@@ -711,10 +718,10 @@ $(function(){
                 }
             }
             if(isCMSettingsEnabled){
-                $("#exportInfo").text("※表示されている設定のみエクスポートされます")
+                $("#exportInfo").text("※表示されている設定のみエクスポートされます");
             }
             if(!isCMSettingsShow){
-                exportVal = removeCMsettings(exportVal);
+                exportVal = settings.removeCMsettings(exportVal);
             }
             var exportJson = JSON.stringify(exportVal, null, 4);
             $('#inexportArea').val(exportJson);
@@ -769,7 +776,7 @@ $(function(){
                                 console.log('add program notify by import error:'+key+', '+res.result);
                             }
                         });
-                    }else{console.log(key)}
+                    }else{console.log(key);}
                 }
             }
         });
@@ -825,7 +832,7 @@ function setCMzoomChangedR(){
             .prop("disabled",true)
         ;
     }else{
-      jo.prop("disabled",false);
+        jo.prop("disabled",false);
     }
 }
 function setCMsoundChangedB(){
@@ -873,7 +880,7 @@ function panelTableUpdateT(){
 }
 //Mastodon token取得 インスタンスホストに対する許可を得た後
 function getMastodonToken(baseUrl){
-    APIbase = baseUrl + 'api/v1/'
+    var APIbase = baseUrl + 'api/v1/';
     //app 登録
     $.post(APIbase + 'apps', {client_name: 'AbemaTVChromeExtension', redirect_uris: 'urn:ietf:wg:oauth:2.0:oob', scopes: 'write'}, function(data){
         var client_id = data.client_id;

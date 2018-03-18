@@ -1,5 +1,5 @@
 {
-  "name": "_bem_tv ext",
+  "name": "AbemaTVChromeExtension",
   "private": true,
   "version": "0.14.0",
   "description": "AbemaTVを快適にする非公式の拡張機能",

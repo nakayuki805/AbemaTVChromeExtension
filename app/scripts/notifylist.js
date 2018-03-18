@@ -1,6 +1,6 @@
-// edge等ブラウザ対応
-if (typeof chrome === "undefined" || !chrome.extension) {
-    var chrome = browser;
+// edge対応
+if ((typeof chrome === "undefined" || !chrome.extension) && typeof browser !== "undefined") {
+    this.chrome = chrome || browser;
 }
 
 function dateToStr(date){
@@ -33,11 +33,11 @@ $(function(){
                 trhtml += "<td><a href=\""+programUrl+"\" target=\"_blank\">"+notifies[i].programID+"</a></td>";
                 trhtml += "<td>"+dateToStr(notifies[i].programTime)+"</td>";
                 trhtml += "<td><input type='button' value='削除' id='delbtn_"+progNotifyName+"'></td>";
-                trhtml += "</tr>"
+                trhtml += "</tr>";
                 $("#notifyProgTable tbody").append(trhtml);
                 $("#delbtn_"+progNotifyName).click(function(e){
                     //console.log(e.target.id)
-                    progNotifyName = e.target.id.slice(7)
+                    progNotifyName = e.target.id.slice(7);
                     //console.log(progNotifyName)
                     chrome.runtime.sendMessage({type: "removeProgramNotifyAlarm", progNotifyName: progNotifyName}, function(response) {
                         if(response.result==="removed"){

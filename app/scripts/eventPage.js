@@ -9,9 +9,11 @@ chrome.runtime.sendMessage(req, function(response) {
 time=(new Date());req = {type:"addProgramNotifyAlarm",channel:"abema-news", channelName:"AbemaNews", programID: "P2Z4XVYyzAo", programTitle: "AbemaNews夜①／芸能もういっちょ", programTime: time.setMinutes(time.getMinutes()+3), notifyTime: time.setMinutes(time.getMinutes()-4)};
 chrome.runtime.sendMessage(req, function(response) {console.log(response);})
 */
-// edge等ブラウザ対応
-if (typeof chrome === "undefined" || !chrome.extension) {
-    var chrome = browser;
+import 'chromereload/devonly';
+import * as $ from "jquery";
+// edge対応
+if ((typeof chrome === "undefined" || !chrome.extension) && typeof browser !== "undefined") {
+    this.chrome = chrome || browser;
 }
 var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
 
@@ -30,7 +32,7 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
             var channelUrl = "https://abema.tv/now-on-air/" + programData.channel;
             chrome.notifications.create(alarm.name, {
                 type: 'basic',
-                iconUrl: 'icon/notify.png',
+                iconUrl: '/images/notify.png',
                 title: isPastNotify?('「' + programData.programTitle +'」通知時刻を過ぎました'):('「' + programData.programTitle +'」開始' + progStartSecStr + '秒前'),
                 message: isPastNotify?("ブラウザが起動してない間にAbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」(" + programTimeStr + ")が通知時間になりました。(番組開始から1時間以上経過)"):("AbemaTVの" + programData.channelName + "チャンネルの番組「" + programData.programTitle + "」が" + progStartSecStr + "秒後の" + programTimeStr + "に始まります。"),
                 eventTime: programData.programTime-0,
@@ -98,7 +100,7 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
             });
             //音を鳴らす
             if (storeObj.isNotifySound) {
-                var audio = new Audio("notify.mp3");
+                var audio = new Audio("/sounds/notify.mp3");
                 audio.play();
             }    
         });
@@ -144,7 +146,7 @@ function registOnlineNotify(programID, progNotifyName){
                     //エラー
                     chrome.notifications.create("notifyRegistFailed", {
                         type: 'basic',
-                        iconUrl: 'icon/abemaexticon.png',
+                        iconUrl: '/images/icon.png',
                         title: "通知登録失敗",
                         message: "メール等の通知登録に失敗しました。拡張機能自体の通知登録には影響ありません。\nエラー: "+res.error
                     }, function(notificationID){});
@@ -155,7 +157,7 @@ function registOnlineNotify(programID, progNotifyName){
 
 }
 function deleteOnlineNotify(token){
-    postUrl = "https://abema.nakayuki.net/notify/delete.php";
+    var postUrl = "https://abema.nakayuki.net/notify/delete.php";
     $.post(postUrl, {'token': token}, function(res){
         if(res.status=="OK"){
             //削除成功
@@ -163,7 +165,7 @@ function deleteOnlineNotify(token){
             //削除失敗
             chrome.notifications.create("notifyRegistFailed", {
                 type: 'basic',
-                iconUrl: 'icon/abemaexticon.png',
+                iconUrl: '/images/icon.png',
                 title: "通知登録削除失敗",
                 message: "メール等の通知登録解除に失敗しました。拡張機能自体の通知登録解除には影響ありません。\nエラー: "+res.error
             }, function(notificationID){});
@@ -279,7 +281,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         });
     } else if (request.type === "getTabAudible"){
         chrome.tabs.get(sender.tab.id,function(t){
-          sendResponse({audible:t.audible});
+            sendResponse({audible:t.audible});
         });
     } else if (request.type === "postJson"){
         $.ajax({url: request.url, type: 'POST', data: JSON.stringify(request.data), headers: request.headers, contentType: 'application/json', dataType: 'json', success: function(result) {
@@ -308,7 +310,7 @@ chrome.runtime.onMessageExternal && chrome.runtime.onMessageExternal.addListener
             addProgramNotify(request.programID, request.channel, request.channelName, request.programTime, notifyTime, request.programTitle, function(){
                 chrome.notifications.create("add_"+request.programID, {
                     type: 'basic',
-                    iconUrl: 'icon/add.png',
+                    iconUrl: '/images/add.png',
                     title: request.site + 'から「' + request.programTitle +'」を通知登録しました。',
                     message: "AbemaTVの" + request.channelName + "チャンネルの番組「" + request.programTitle + "」(" + programTimeStr + ")が通知登録されました。"
                 }, function(notificationID)  {
@@ -319,7 +321,7 @@ chrome.runtime.onMessageExternal && chrome.runtime.onMessageExternal.addListener
             });
         });
     }else if(request.name==="checkProgramNotify"){
-        var progNotifyName = "progNotify_"+request.channel+"_"+request.programID;
+        let progNotifyName = "progNotify_"+request.channel+"_"+request.programID;
         chrome.storage.local.get(progNotifyName,function(value){
             if(value[progNotifyName]){
                 sendResponse({result: "registered"});
@@ -328,14 +330,14 @@ chrome.runtime.onMessageExternal && chrome.runtime.onMessageExternal.addListener
             }
         });
     }else if(request.name==="removeProgramNotify"){
-        var progNotifyName = "progNotify_"+request.channel+"_"+request.programID;
+        let progNotifyName = "progNotify_"+request.channel+"_"+request.programID;
         chrome.storage.local.get(progNotifyName, function(value){
             var programTimeDate = new Date(value[progNotifyName].programTime);
             var programTimeStr = programTimeDate.getMonth()+1 + "/" + programTimeDate.getDate() + " " + programTimeDate.getHours() + "時" + programTimeDate.getMinutes() + "分";
             removeProgramNotify(progNotifyName, function(){
                 chrome.notifications.create("remove_"+progNotifyName, {
                     type: 'basic',
-                    iconUrl: 'icon/remove.png',
+                    iconUrl: '/images/remove.png',
                     title: request.site + 'から「' + value[progNotifyName].programTitle +'」を通知解除しました。',
                     message: "AbemaTVの番組「" + value[progNotifyName].programTitle + "」(" + programTimeStr + ")が通知登録解除されました。"
                 }, function(notificationID)  {
@@ -394,11 +396,11 @@ function putContextMenu(){
 }
 function onContextMenuClick(info, tab){
     if(info.menuItemId.indexOf("addNGwordMenu")===0){
-        var word = info.selectionText;
+        let word = info.selectionText;
         var isPermanent = info.menuItemId=="addNGwordMenuPermanent";
         chrome.tabs.sendMessage(tab.id,{"name": "addNGword", "word": word, "isPermanent": isPermanent});
     }else if(info.menuItemId == "searchAbemaTVTimetable"){
-        var word = info.selectionText;
+        let word = info.selectionText;
         //chrome.tabs.create({url: "https://abema.tv/search/future?q="+encodeURIComponent(word)});
         window.open("https://abema.tv/search/future?q="+encodeURIComponent(word));
     }else if(info.menuItemId == "toggleChannel"){
@@ -424,7 +426,7 @@ chrome.runtime.onInstalled.addListener(() => {
             //通知
             chrome.notifications.create('extUpdated', {
                 type: 'basic',
-                iconUrl: 'abemaexticon.png',
+                iconUrl: '/images/icon.png',
                 title: chrome.runtime.getManifest().name + 'が更新されました',
                 message: "現在開いているAbemaTVのタブを再読込してください。\nクリックで再読み込みします。",
                 isClickable: true
@@ -438,9 +440,9 @@ chrome.runtime.onInstalled.addListener(() => {
         putContextMenu();
     }
     // 番組通知のalarmが消えていれば再登録
-    reRegistAlarms()
+    reRegistAlarms();
 });
-chrome.runtime.onStartup.addListener(reRegistAlarms)
+chrome.runtime.onStartup.addListener(reRegistAlarms);
 
 function reRegistAlarms(){
     chrome.storage.local.get(function(val){

@@ -1,9 +1,10 @@
 //webストア版向けに拡張機能の新機能等お知らせをアップデート後初回のみtoast状に表示
 //webストア公開版、firefoxパッケージ版のmanifest.jsonにはcontent_scriptsのjsの最後にこのファイルが加えられる
 //github版では不使用
-// edge等ブラウザ対応
-if (typeof chrome === "undefined" || !chrome.extension) {
-    var chrome = browser;
+import * as $ from "jquery";
+// edge対応
+if ((typeof chrome === "undefined" || !chrome.extension) && typeof browser !== "undefined") {
+    this.chrome = chrome || browser;
 }
 
 var currentUpdateNotifyVersion = 15;//0.13.1の時

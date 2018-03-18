@@ -1,6 +1,11 @@
-// edge等ブラウザ対応
-if (typeof chrome === "undefined" || !chrome.extension) {
-    var chrome = browser;
+import 'chromereload/devonly';
+import * as $ from "jquery";
+import "./lib/jquery-lib";
+import * as settingslib from './settings';
+
+// edge対応
+if ((typeof chrome === "undefined" || !chrome.extension) && typeof browser !== "undefined") {
+    this.chrome = chrome || browser;
 }
 
 var settings = {};
@@ -34,6 +39,10 @@ $.fn.children = $.extend(function children(){
     return oldchildren.apply(this, arguments);
 }, oldchildren);
 */
+//devtoolのコンソールから呼び出せる関数
+window.logVar = function(varName){
+    console.log(this[varName]);
+};
 /*設定
 拡張機能のオプション画面から設定できます。
 以下の変数のコメントにある機能を利用する場合はtrue、利用しない場合はfalseを代入してください。
@@ -145,7 +154,7 @@ var isShareNGuser = false; //共有NGユーザー
 var minResolution = 0;
 var maxResolution = 2160;
 
-var changeDisableExtBtnVal = ''; //拡張機能の動作を停止するバージョン
+var disableExtVersion = ''; //拡張機能の動作を停止するバージョン
 
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
@@ -186,7 +195,7 @@ getStorage(null, function (value) {
     isMovingComment = value.movingComment || false;
     settings.movingCommentSecond = (value.movingCommentSecond !== undefined) ? value.movingCommentSecond : settings.movingCommentSecond;
     movingCommentLimit = (value.movingCommentLimit !== undefined) ? value.movingCommentLimit : movingCommentLimit;
-    //isMoveByCSS =　value.moveByCSS || false;
+    //isMoveByCSS = value.moveByCSS || false;
     isComeNg = value.comeNg || false;
     isComeDel = value.comeDel || false;
     fullNg = value.fullNg || fullNg;
@@ -209,7 +218,7 @@ getStorage(null, function (value) {
     isCommentPadZero = value.commentPadZero || false;
     isCommentTBorder = value.commentTBorder || false;
     timePosition = value.timePosition || timePosition;
-    notifySeconds = (value.notifySeconds !== undefined) ? value.notifySeconds : notifySeconds
+    notifySeconds = (value.notifySeconds !== undefined) ? value.notifySeconds : notifySeconds;
     cmblockia = Math.max(1, ((value.beforeCMWait !== undefined) ? (1 + value.beforeCMWait) : cmblockia));
     cmblockib = -Math.max(1, ((value.afterCMWait !== undefined) ? (1 + value.afterCMWait) : (-cmblockib)));
     isManualKeyCtrlR = value.manualKeyCtrlR || false;
@@ -256,7 +265,7 @@ getStorage(null, function (value) {
     isChTimetableBreak = value.chTimetableBreak || false;
     isChTimetableWeekend = (value.chTimetableWeekend!==undefined)?value.chTimetableWeekend:isChTimetableWeekend;
     isChTimetablePlaybutton = (value.chTimetablePlaybutton!==undefined)?value.chTimetablePlaybutton:isChTimetablePlaybutton;
-    timetableScroll = value.timetableScroll || "";
+    settings.timetableScroll = value.timetableScroll || "";
     isHideTwitterPanel = value.hideTwitterPanel || false;
     isHideTodayHighlight = value.hideTodayHighlight || false;
     isComelistNG = value.comelistNG || false;
@@ -310,13 +319,13 @@ var comeTTLmax = 13;
 var comeLatestLen = 10;
 comeLatestPosi.length = comeLatestLen;
 for (var i = 0; i < comeLatestLen; i++) {
-    comeLatestPosi[i] = []
+    comeLatestPosi[i] = [];
     comeLatestPosi[i][0] = 0;
     comeLatestPosi[i][1] = comeTTLmin;
 }
 //var playtick=0;
 //var comeLatestCount = 0; //画面右下で取得するコメント数
-isComeLatestClickable = true; //右下コメント数をクリックできるか
+var isComeLatestClickable = true; //右下コメント数をクリックできるか
 var arFullNg = [];
 var arUserNg = [];
 //var retrytick=[1000,3000,6000,12000,18000];
@@ -399,7 +408,7 @@ var copycomecount = 2; //番組移動直後にcopycomeをfullcopyする回数
 var notifyButtonData = {}; //通知登録ボタンの番組情報格納
 var allowChannelNum = []; //Namesを元にした表示列番号
 //var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
-var oldWindowState = "normal" // フルスクリーン切り替え前のウィンドウのstate
+var oldWindowState = "normal"; // フルスクリーン切り替え前のウィンドウのstate
 var isTootEnabled = false; //コメントのトゥート有効か
 var onairSecCount = 0; //onairbasefuncでカウントアップされる
 var commentObserver = new MutationObserver(function(mutations) {
@@ -496,7 +505,7 @@ function allowChannelNumMaker() {
     var eaHead=$(EXTThead).children("a");
     if (eaHead.length == 0) return -2;
     var n = [];
-    for (var i = 0, b, f, h, c; i < eaHead.length; i++) {
+    for (var i = 0, f, h, c; i < eaHead.length; i++) {
         if ((h = eaHead.eq(i).prop("href")) && h.indexOf(u) == 0) {
             c = h.replace(u, "");
 //console.log("c="+c);
@@ -509,7 +518,7 @@ function allowChannelNumMaker() {
     var b = false;
     if (n.length == allowChannelNum.length) {
         b = true;
-        for (var i = 0; i < n.length; i++) {
+        for (let i = 0; i < n.length; i++) {
             if (n[i] != allowChannelNum[i]) {
                 b = false;
                 break;
@@ -673,7 +682,7 @@ function waitforloadtimetable(url) {
     if (timetableRunning === false) {
         timetableRunning = setInterval(waitforloadtimetable, 600000, url);
     }
-    //if (!isChTimetableExpand && !isChTimetableBreak && !isChTimetableWeekend && !isChTimetablePlaybutton && !timetableScroll) { return; }
+    //if (!isChTimetableExpand && !isChTimetableBreak && !isChTimetableWeekend && !isChTimetablePlaybutton && !settings.timetableScroll) { return; }
     var b = false;
     //    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
 //    if ($('[class*="styles__channel-content-header-wrapper___"]').next('[class*="styles__time-table___"]').length > 0) {
@@ -903,12 +912,12 @@ function timetabledtfix() {
     if (ce) {
         timetabledtloop();
     }
-    console.log(allowChannelNum)
+    console.log(allowChannelNum);
     var channelLink = $(EXTThead).children('a').eq(0);
-    var chlinkWidth = 176;
+    var chLinkWidth = 176;
     var isTimetableScroll = false;
-    if (timetableScroll != "") {
-        channelLink = $(EXTThead).children('a[href$="/timetable/channels/' + timetableScroll + '"]');
+    if (settings.timetableScroll != "") {
+        channelLink = $(EXTThead).children('a[href$="/timetable/channels/' + settings.timetableScroll + '"]');
         if (channelLink.length > 0) {
             isTimetableScroll = true;
         } else {
@@ -920,6 +929,7 @@ function timetabledtfix() {
     chLinkWidth = $(EXTTbody).children().eq(chLinkIndex).outerWidth();//channelLink.width();
     var visibleChLinkIndex = chLinkIndex;
     var axisWidth = $(EXTTtime).width();
+    let timetableWidth;
     if (allowChannelNum.length > 0) {
         //chLinkWidth = $(EXTTbody).children().eq(allowChannelNum[0]).width();//channelLink.siblings().eq(allowChannelNum[0]).width();//allowChannelに含まれないチャンネルのchannelLinkから幅を取得するとずれる
         if (isTimetableScroll){
@@ -934,15 +944,15 @@ function timetabledtfix() {
             $(EXTTbody).parent().parent().parent().parent().scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbody).width()+axisWidth));
         }
         if (!isExpandFewChannels) {
-            var timetableWidth = axisWidth + chLinkWidth * allowChannelNum.length;
+            timetableWidth = axisWidth + chLinkWidth * allowChannelNum.length;
         } else {
-            var timetableWidth = axisWidth + chlinkWidth * EXTThead.childElementCount;
+            timetableWidth = axisWidth + chLinkWidth * EXTThead.childElementCount;
         }
     } else {
         if (isTimetableScroll) {
             $(EXTTbody).parent().parent().parent().parent().scrollLeft(chLinkWidth * visibleChLinkIndex);
         }
-        var timetableWidth = axisWidth + chlinkWidth * EXTThead.childElementCount;
+        timetableWidth = axisWidth + chLinkWidth * EXTThead.childElementCount;
     }
     //番組表幅の調整
     //console.log(timetableWidth)
@@ -1011,34 +1021,34 @@ function timetablechfix() {
 function getSatSun() {
 //    if (isChTimetableWeekend) {
 //        var h = $('[class*="styles__date-list-header___"]').children();//styles__date-list-header-inner___
-        var h = $(EXTThead).children('a[href*="/timetable/dates/"]');
-        var sat = -1;
-        var sun = -1;
-        for (var i = 0; i < h.length; i++) {
-            if (/[(（]土[)）]/.test(h.eq(i).text())) {
-                sat = i;
-                if (i < h.length - 1) {
-                    sun = i + 1;
+    var h = $(EXTThead).children('a[href*="/timetable/dates/"]');
+    var sat = -1;
+    var sun = -1;
+    for (var i = 0; i < h.length; i++) {
+        if (/[(（]土[)）]/.test(h.eq(i).text())) {
+            sat = i;
+            if (i < h.length - 1) {
+                sun = i + 1;
+                break;
+            }
+        } else if (/[(（]日[)）]/.test(h.eq(i).text())) {
+            sun = i;
+            if (i > 0) {
+                sat = i - 1;
+                break;
+            }
+        } else if (/[(（]月[)）]/.test(h.eq(i).text())) {
+            if (i > 0) {
+                sun = i - 1;
+                if (i - 1 == 0) {
                     break;
-                }
-            } else if (/[(（]日[)）]/.test(h.eq(i).text())) {
-                sun = i;
-                if (i > 0) {
-                    sat = i - 1;
+                } else if (i > 1) {
+                    sat = i - 2;
                     break;
-                }
-            } else if (/[(（]月[)）]/.test(h.eq(i).text())) {
-                if (i > 0) {
-                    sun = i - 1;
-                    if (i - 1 == 0) {
-                        break;
-                    } else if (i > 1) {
-                        sat = i - 2;
-                        break;
-                    }
                 }
             }
         }
+    }
 //        if (sat >= 0) {
 //            t += '[class^="styles__timetable-wrapper"]>div[class^="styles__col___"]:nth-child(' + (sat + 1) + ') [class*="style__status-future___"]{background-color:rgba(227,238,255,0.7);}';
 //            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sat + 1) + ') [class*="style__status-future___"]:hover{background-color:rgba(222,233,250,0.7);}';
@@ -1688,7 +1698,7 @@ function applySharedNG() {
             var appendNGusers = [];
             console.log("got shared NG users ");
             console.table(sharedNGusers);
-            for (var asni = 0; asni < sharedNGusers.length; asni++) {
+            for (let asni = 0; asni < sharedNGusers.length; asni++) {
                 if (!hasArray(postedNGusers, sharedNGusers[asni].userid)) {
                     postedNGusers.push(sharedNGusers[asni].userid);
                 }
@@ -1867,7 +1877,7 @@ function putComeArray(inp) {
     //    mclen+=inplen;
     mcj = mci.children('.movingComment');
     mclen = mcj.length;
-    for (var i = 0; i < inplen; i++) {
+    for (let i = 0; i < inplen; i++) {
         var mck = mcj.eq(-inplen + i);
         var mcwidth = mck.width();
         var mcleft = inp[i][2] + winwidth;
@@ -1910,7 +1920,7 @@ function putComment(commentText, userid, index, inmax, isSelf) {
     //kakikomiwaitが0でない時は自分の書き込みをputCommentから除外する
     //console.log("commentText="+commentText+", kakikomitxt="+kakikomitxt);
     if (commentText.length > 0 && commentText == kakikomitxt) {
-        console.log("kakikomi match,wait="+kakikomiwait)
+        console.log("kakikomi match,wait="+kakikomiwait);
         isSelf = true;
         if (kakikomiwait > 0) { //waitがプラスなら後から単独で流す
             setTimeout(putComment, 'self', kakikomiwait * 1000, commentText, 0, 1, true);
@@ -2346,15 +2356,14 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
             $('<div id="moveContainer" class="usermade">').appendTo('body');
         }
         //視聴数の位置調整
-        setTimeout(function () {
-            $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
-        }, 3000);//コメント数が表示されるまで待つ
-        setTimeout(function () {
-            $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
-        }, 10000);//再度修正
-        setInterval(function () {
-            $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
-        }, 30000);//30秒ごとに再調整
+        var fixCountViewLeft = function () {
+            if (EXcountview) {
+                $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
+            }
+        }
+        setTimeout(fixCountViewLeft, 3000);//コメント数が表示されるまで待つ
+        setTimeout(fixCountViewLeft, 10000);//再度修正
+        setInterval(fixCountViewLeft, 30000);//30秒ごとに再調整
 
         //初期読込時にマウス反応の要素が閉じないのを直したい
         forElementClose=1;
@@ -2371,7 +2380,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
 
         //放送中一覧のスクロール
         //すぐだと失敗する？からinfo読んでからやる
-        var cn = getChannelByURL();
+        let cn = getChannelByURL();
         if (cn&&EXchli) $(EXchli).scrollTop($(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
     }
     if(!isChli&&(EXchli=getChannelListElement())){
@@ -2381,7 +2390,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         isChli=true;
         //放送中一覧のスクロール
         //↑のinfoと同じもの
-        var cn = getChannelByURL();
+        let cn = getChannelByURL();
         if (cn&&isInfo) $(EXchli).scrollTop($(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
 
     }
@@ -2415,7 +2424,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         isVideo=true;
     }
     try{//タイミングによってはsetEXsが完了する前にここでsetOptionHead()が実行されエラーになってdelaysetが完遂されないのでとりあえずtryで囲む
-    if(resetOptionHead) setOptionHead();
+        if(resetOptionHead) setOptionHead();
     }catch(e){console.warn(e);}
 
     if(isInit&&isOLS&&isEXC&&isInfo&&isTwT&&isVideo&&isChli&&isComeli)console.log("delayset ok");
@@ -2443,8 +2452,8 @@ function delaysetNotOA(){
     //console.log(hoverContents,hoverContents.children(),hoverLinkClass)
     if (hoverContents.children('#extSettingLink').length == 0) {
         hoverContents.children(':last').css({'border-bottom':'1px solid #333', 'margin-bottom': '8px', 'padding-bottom': '12px'});
-        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
-            .append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>')
+        hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("/pages/option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
+            .append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("/pages/notifylist.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>')
             ;
     }
 }
@@ -2549,56 +2558,56 @@ function optionStatsUpdate(outflg) {
         var rnpt = ropt;
         var sw = parseInt($('#windowheight input[type="radio"][name="windowheight"]:checked').val());
         switch (sw) {
-            case 0: //変更なし
-                //                if(settings.isResizeScreen||isMovieMaximize){
-                if (settings.isResizeScreen) {
-                    rnpt = ropt;
-                    rnpb = owh - rnmh - rnpt;
-                    if (rnpt != 0 || rnpb != 0) {
-                        rnpw = 0;
-                    }
-                } else {
-                    //                    npb=Math.floor((owh-nmh)/2);
-                    //                    npt=owh-nmh-npb;
-                    npt = opt;
-                    npb = owh - nmh - npt;
-                }
-                break;
-            case 1: //映像の縦長さに合わせる
-                //                if(settings.isResizeScreen||isMovieMaximize){
-                if (settings.isResizeScreen) {
-                    rnpt = 0;
-                    rnpb = 0;
-                } else {
-                    npb = 0;
-                    npt = 0;
-                }
-                break;
-            case 2: //黒枠の分だけ空ける
-                if (settings.isResizeScreen) {
+        case 0: //変更なし
+            //                if(settings.isResizeScreen||isMovieMaximize){
+            if (settings.isResizeScreen) {
+                rnpt = ropt;
+                rnpb = owh - rnmh - rnpt;
+                if (rnpt != 0 || rnpb != 0) {
                     rnpw = 0;
-                    rnpt = headerHeight;
-                    rnpb = footerHeight;
-                    //                }else if(isMovieMaximize){
-                    //                    rnpw=0;
-                    //                    rnpb=64;
-                    //                    rnpt=64;
-                } else {
-                    npb = footerHeight;
-                    npt = headerHeight;
                 }
-                break;
-            case 3: //現在の空きを維持
-                //                if(settings.isResizeScreen||isMovieMaximize){
-                if (settings.isResizeScreen) {
-                    rnpt = ropt;
-                    rnpb = ropb;
-                } else {
-                    npb = opb;
-                    npt = opt;
-                }
-                break;
-            default:
+            } else {
+                //                    npb=Math.floor((owh-nmh)/2);
+                //                    npt=owh-nmh-npb;
+                npt = opt;
+                npb = owh - nmh - npt;
+            }
+            break;
+        case 1: //映像の縦長さに合わせる
+            //                if(settings.isResizeScreen||isMovieMaximize){
+            if (settings.isResizeScreen) {
+                rnpt = 0;
+                rnpb = 0;
+            } else {
+                npb = 0;
+                npt = 0;
+            }
+            break;
+        case 2: //黒枠の分だけ空ける
+            if (settings.isResizeScreen) {
+                rnpw = 0;
+                rnpt = headerHeight;
+                rnpb = footerHeight;
+                //                }else if(isMovieMaximize){
+                //                    rnpw=0;
+                //                    rnpb=64;
+                //                    rnpt=64;
+            } else {
+                npb = footerHeight;
+                npt = headerHeight;
+            }
+            break;
+        case 3: //現在の空きを維持
+            //                if(settings.isResizeScreen||isMovieMaximize){
+            if (settings.isResizeScreen) {
+                rnpt = ropt;
+                rnpb = ropb;
+            } else {
+                npb = opb;
+                npt = opt;
+            }
+            break;
+        default:
         }
         var nww = nmw + npw;
         var nwh = nmh + npb + npt;
@@ -2635,13 +2644,13 @@ function createSettingWindow() {
         setTimeout(createSettingWindow, 1000);
         return;
     }
-    var slidecont = EXside
+    var slidecont = EXside;
     //設定ウィンドウ・開くボタン設置
     if ($(EXside).children('#optionbutton').length == 0) {
         var optionbutton = document.createElement("div");
         optionbutton.id = "optionbutton";
         optionbutton.setAttribute("style", "width:40px;height:40px;position:relative;background-color:#ddd;opacity:0.5;cursor:pointer;");
-        optionbutton.innerHTML = "<img src='" + chrome.extension.getURL("icon/gear.svg") + "' alt='拡張設定' style='margin: auto;position: absolute;left: 0;top: 0;right: 0;bottom: 0;height:20px;width:20px;'>";
+        optionbutton.innerHTML = "<img src='" + chrome.extension.getURL("/images/gear.svg") + "' alt='拡張設定' style='margin: auto;position: absolute;left: 0;top: 0;right: 0;bottom: 0;height:20px;width:20px;'>";
         slidecont.appendChild(optionbutton);
         $("#optionbutton").on("click", function () {
             if ($("#settcont").css("display") == "none") {
@@ -2652,21 +2661,21 @@ function createSettingWindow() {
         });
     }
     if ($('#settcont').length == 0) {
-        var settcont = '<div id="settcont" class="usermade" style="';
+        let settcont = '<div id="settcont" class="usermade" style="';
         settcont += 'width:670px;position:absolute;right:40px;top:' + headerHeight + 'px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;';//head11より上の残り時間12,13,14より上の番組情報等15より上
         //ピッタリの658pxから少し余裕を見る
         settcont += '">';
         //設定ウィンドウの中身
         settcont += '<span style="font-weight:bold;">拡張機能一時設定画面</span><br>';
         settcont += '<input type="button" class="closeBtn" value="閉じる" style="position:absolute;top:10px;right:10px;">';
-        settcont += '<a href="' + chrome.extension.getURL('option.html') + '" target="_blank">永久設定オプション画面はこちら</a><br>';
-        settcont += generateOptionHTML(false) + '<br>';
+        settcont += '<a href="' + chrome.extension.getURL('/pages/option.html') + '" target="_blank">永久設定オプション画面はこちら</a><br>';
+        settcont += settingslib.generateOptionHTML(false) + '<br>';
         settcont += '<input type="button" id="saveBtn" value="一時保存"> ';
         settcont += '<input type="button" class="closeBtn" value="閉じる"><br>';
         settcont += '※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr>';
         settcont += '<input type="button" id="clearLocalStorage" value="localStorageクリア"><br>';
         settcont += '<span style="word-wrap: break-word; color: #444; font-size: smaller;">UserID:' + localStorage.getItem('abm_userId') + ' token:' + localStorage.getItem('abm_token') + '</span>';
-        settcont += '</div>'
+        settcont += '</div>';
         $(settcont).prependTo('body');
         $('#CommentColorSettings').change(setComeColorChanged);
         $('#itimePosition,#isTimeVisible').change(setTimePosiChanged);
@@ -2956,16 +2965,16 @@ function createSettingWindow() {
         $('#panelcustomTable').change(panelTableUpdateT);
     }
     if ($('#movieResizeContainer').length == 0) {
-        var jo = $('#isResizeScreen-switch');
-        var ja = jo.parent().contents();
+        let jo = $('#isResizeScreen-switch');
+        let ja = jo.parent().contents();
         //        var jm=$('#isMovieMaximize');
-        var jm = $('#isDAR43-switch');
+        let jm = $('#isDAR43-switch');
         ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll('<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">');
         //        $('<input id="movieResizeChkA" type="checkbox">').prependTo('#movieResizeContainer')
         //            .after(':映像リサイズ (ウィンドウに合わせます。映像がウィンドウの外にハミ出なくなり、コメ欄などを開いても映像の大きさは変わらず、コメ欄などは映像の上に重なります。)<br>　映像の上下位置<br>')
         //            .change(movieResizeChkChanged)
         //        ;
-        var tres = '';
+        let tres = '';
         tres += '<br><input type="radio" name="movieResizeType" value=0 style="margin-left:16px;" id="radio-movieResizeType-0">:<label for="radio-movieResizeType-0"><span id="movieResizeDesc">'+(isDAR43?'左枠サイズに合わせる(左詰め推奨)':'デフォルト')+'</span></label>';
         tres += '<br><input type="radio" name="movieResizeType" value=1 style="margin-left:16px;" id="radio-movieResizeType-1">:<label for="radio-movieResizeType-1">ウィンドウ全体に最大化</label>';
         $('#isResizeScreen-switch').css("display", "none")
@@ -2978,7 +2987,7 @@ function createSettingWindow() {
         //        $('#isMovieMaximize').css("display","none")
         //            .before('<input type="radio" name="movieResizeType" value=2 style="margin-left:16px;">:画面中央')
         //        ;
-        var jc = $('#movieResizeContainer').contents();
+        let jc = $('#movieResizeContainer').contents();
         jc.eq(jc.index($('#isResizeScreen-switch')) + 1)
             //            .add(jc.eq(jc.index($('#isResizeSpacing'))+1))
             //            .add(jc.eq(jc.index($('#isMovieMaximize'))+1))
@@ -2989,11 +2998,11 @@ function createSettingWindow() {
         $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').add("#isDAR43").change(movieResizeTypeChanged);
     }
     if ($('#moviePositionContainer').length == 0) {
-        var jo = $('#isMovieSpacingZeroTop-switch');
-        var ja = jo.parent().contents();
-        var jm = $('#isMovieSpacingZeroLeft-switch');
+        let jo = $('#isMovieSpacingZeroTop-switch');
+        let ja = jo.parent().contents();
+        let jm = $('#isMovieSpacingZeroLeft-switch');
         ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll('<div id="moviePositionContainer" style="margin:8px;padding:8px;border:1px solid black;">');
-        var tres = '映像の上下位置';
+        let tres = '映像の上下位置';
         tres += '<br><input type="radio" name="moviePositionVType" value=0 style="margin-left:16px;" id="radio-moviePositionVType-0"><label for="radio-moviePositionVType-0">:デフォルト (中央)</label>';
         tres += '<br><input type="radio" name="moviePositionVType" value=1 style="margin-left:16px;" id="radio-moviePositionVType-1"><label for="radio-moviePositionVType-1">:上に詰める (空き無し) ※額縁は詰まりません</label>';
         $('#isMovieSpacingZeroTop-switch').css("display", "none")
@@ -3041,9 +3050,9 @@ function createSettingWindow() {
             .children().css("margin-left", "4px")
             .first().before('<span id="highlightCdesc">↑の色</span>')
             ;
-        var c = $('#highlightComePower').parent().contents();
-        var jo = $('#highlightComePower');
-        var i = c.index(jo);
+        let c = $('#highlightComePower').parent().contents();
+        let jo = $('#highlightComePower');
+        let i = c.index(jo);
         c.slice(i - 2, i).remove();
         $('#highlightComePower').appendTo($("#ihighlightComeColor").children().first())
             .prop("type", "range")
@@ -3076,31 +3085,31 @@ function setPanelOpacityChanged() {
 }
 function moviePositionVTypeChanged() {
     switch (+$('#moviePositionContainer input[type="radio"][name="moviePositionVType"]:checked').val()) {
-        case 0:
-            $('#isMovieSpacingZeroTop').prop("checked", false);
-            $('#isResizeSpacing').prop("checked", false);
-            break;
-        case 1:
-            $('#isMovieSpacingZeroTop').prop("checked", true);
-            $('#isResizeSpacing').prop("checked", false);
-            break;
-        case 2:
-            $('#isMovieSpacingZeroTop').prop("checked", false);
-            $('#isResizeSpacing').prop("checked", true);
-            break;
-        default:
+    case 0:
+        $('#isMovieSpacingZeroTop').prop("checked", false);
+        $('#isResizeSpacing').prop("checked", false);
+        break;
+    case 1:
+        $('#isMovieSpacingZeroTop').prop("checked", true);
+        $('#isResizeSpacing').prop("checked", false);
+        break;
+    case 2:
+        $('#isMovieSpacingZeroTop').prop("checked", false);
+        $('#isResizeSpacing').prop("checked", true);
+        break;
+    default:
     }
     onresize();
 }
 function moviePositionHTypeChanged() {
     switch (+$('#moviePositionContainer input[type="radio"][name="moviePositionHType"]:checked').val()) {
-        case 0:
-            $('#isMovieSpacingZeroLeft').prop("checked", false);
-            break;
-        case 1:
-            $('#isMovieSpacingZeroLeft').prop("checked", true);
-            break;
-        default:
+    case 0:
+        $('#isMovieSpacingZeroLeft').prop("checked", false);
+        break;
+    case 1:
+        $('#isMovieSpacingZeroLeft').prop("checked", true);
+        break;
+    default:
     }
     onresize();
 }
@@ -3208,7 +3217,7 @@ function setClearStorageClicked() {
 }
 function moveComeTopFilter() {
     var jo = $('.movingComment');
-    var i = jo.length - 1
+    var i = jo.length - 1;
     while (i >= 0) {
         if (jo.eq(i).position().top > window.innerHeight - headerHeight - footerHeight) {
             jo.eq(i).remove();
@@ -3764,7 +3773,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
             jcct = jcmtop;
             jcchd += jcmtop;
         } else { //jftop
-            var margincut = 0;
+            let margincut = 0;
             if ((ptime == "windowtop" || ptitle == "windowtopright") && (ptime != "commentinputtop" && ptitle != "commentinputtopright" && ptitle != "commentinputtopleft")) {
                 //ウィンドウ右上に何かあり、入力欄の上には何も無いとき
                 margincut = 15;
@@ -3792,9 +3801,9 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     }
     //フッタ表示かつコメ入力下の場合は音量ボタン等の下位置を上げる
     var volshift = false;
-    $(EXvolume).css("bottom", "")
-    $(EXfullscr).css("bottom", "")
-        ;
+    $(EXvolume).css("bottom", "");
+    $(EXfullscr).css("bottom", "");
+    
     if (!(isComeTriming && isSureReadComment) && $(EXfoot).css("visibility") == "visible") {
         //フッタ表示時
         if (isInpWinBottom) { // jctop,jfbot
@@ -3819,7 +3828,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     } else {
         //フッタ非表示時
         if (isInpWinBottom) { // jctop,jfbot
-            var margincut = 0;
+            let margincut = 0;
             if ((ptime == "windowbottom" || ptitle == "windowbottomright") && (ptime != "commentinputbottom" && ptitle != "commentinputbottomright" && ptitle != "commentinputbottomleft")) {
                 //ウィンドウ右下に何かあり、入力欄の下には何も無いとき
                 margincut = 15;
@@ -4043,7 +4052,7 @@ function getFooterElement(returnSingleSelector) {
     if (!cn){console.log("?footer");return null;}
     var jo = $('img[src*="/channels/logo/' + cn + '"]');
     var ret = null;
-    for (var i = 0,e,b;(e=jo.get(i))&&(b=e.getBoundingClientRect()); i++) {
+    for (let i = 0,e,b;(e=jo.get(i))&&(b=e.getBoundingClientRect()); i++) {
         if (b.top < window.innerHeight * 3 / 4 || b.left+b.width > window.innerWidth / 4) continue;
         ret=e;
         break;
@@ -4160,7 +4169,7 @@ function getChannelListElement(returnSingleSelector) {
     //右下にある番組表リンクを孫にもち右にあるのをchliとする //元々は直下がaリストだったけどその上のfooter,info等と同じ階層のを選ぶようにする
     var ret = null;
     var links = document.links;
-    for (var i = links.length - 1,b; i >= 0; i--) {
+    for (let i = links.length - 1,b; i >= 0; i--) {
         b=links[i].getBoundingClientRect();
         if (links[i].href.indexOf("/timetable") < 0 || b.top < window.innerHeight * 3 / 4||b.left<window.innerWidth/2) continue;
         ret = links[i];
@@ -4199,8 +4208,8 @@ function getComeFormElement(sw,returnSingleSelector) {
         if(e.tagName.toUpperCase()=="BODY"){console.log("?comeform"+sw+"(e=BODY)");return null;}
         ret=e;
     }else if(sw==2){
-        var p=e.parentElement;
-        var b=p.getBoundingClientRect();
+        let p=e.parentElement;
+        let b=p.getBoundingClientRect();
         while(p.tagName.toUpperCase()!="BODY"&&b.left>window.innerWidth*2/3){
             e=p;
             p=e.parentElement;
@@ -4243,7 +4252,7 @@ function getComeListElement(returnSingleSelector){
         return returnSingleSelector?getElementSingleSelector(ret):ret;
     }
 
-    for(var i=0,t,ji;i<jo.length;i++){
+    for(let i=0,t,ji;i<jo.length;i++){
         ji=jo.eq(i);
         t=ji.text();
         if(t.indexOf("今")<0&&t.indexOf("秒前")<0&&t.indexOf("分前")<0) continue; //この辺でcomelistClassesを取得したいがまだ分離が不完全
@@ -4254,7 +4263,7 @@ function getComeListElement(returnSingleSelector){
     if(!ret){console.log("?comelist(time notfound)");return null;}
     ret=null;
     //console.log(jo)
-    for(var i=jo.length-1,j;i>=0;i--){
+    for(let i=jo.length-1,j;i>=0;i--){
         j=jo.eq(i);
         if(j.find(EXcomesend).length>0) continue;
         //console.log(j,j.children(),j.css('height'),j.css('transition'))        
@@ -4352,7 +4361,7 @@ function getMenuElement(returnSingleSelector){
         }
     }
     if(lc>0) la[ac++]=[et,lc];//上のループがet==jp[0]で終わった時用
-    for(var i=0,m=0;i<la.length;i++){
+    for(let i=0,m=0;i<la.length;i++){
         if(m<la[i][1]){
             m=la[i][1];
             ret=la[i][0];
@@ -4384,7 +4393,7 @@ function getMenuObject() {
         ret = $(alinks[0][0]);
     } else if (alinks.length > 1) {
         var si = -1;
-        for (var i = alinks.length - 1, m = 0, mi = -1; i >= 0; i--) {
+        for (let i = alinks.length - 1, m = 0, mi = -1; i >= 0; i--) {
             if (m < alinks[i][1]) {
                 si = mi;
                 m = alinks[i][1];
@@ -4453,7 +4462,7 @@ function getReceiveTwtElement(returnSingleSelector){
 }
 function getComeModuleElements(returnSingleSelector){
     //投稿ボタンの祖先でtextareaと共通の祖先の子 と投稿ボタン とtwtコンテナを返す
-    var jo=$(EXcomesend).find("button");
+    let jo=$(EXcomesend).find("button");
     var ret=[null,null,null];
     for(var i=0;i<jo.length;i++){
         if(jo.eq(i).text().indexOf("投稿")<0) continue;
@@ -4463,14 +4472,14 @@ function getComeModuleElements(returnSingleSelector){
     }
     if(!ret[1]) return ret;
     if(jo.length<2) return ret;
-    for(var i=1;i<jo.length;i++){
+    for(let i=1;i<jo.length;i++){
         if(jo.eq(i).find(EXcomesendinp).length==0) continue;
         ret[0]=jo[i-1];
         break;
     }
     if(!ret[0]) return ret;
 
-    var jo=$(ret[0]).find($('[*|href*="/images/icons/twitter.svg"][*|href$="#svg-body"]:not([href])'));
+    jo=$(ret[0]).find($('[*|href*="/images/icons/twitter.svg"][*|href$="#svg-body"]:not([href])'));
     if(jo.length==0) return null;
     var jp=jo.first().parentsUntil(ret[0]);
     for(var r=0,js,jd;r<jp.length;r++){
@@ -4543,16 +4552,16 @@ function getTTTimeClassesFromPT(proTitleClass) {
 
     // timetable/dates/など全部過去、全部未来の場合(1つしか取れてない)はクラスが該当する要素が同数で判別できない
     var nc = 0;
-    for (var i = 0; i < 3; i++) if (!classes[i]) nc++;
+    for (let i = 0; i < 3; i++) if (!classes[i]) nc++;
     if (nc == 3 || nc == 2) return ret;
     //(2以上の要素内で)重複クラスを削除して1つにならなければ全体の該当要素が少ないのを選ぶ
-    for (var i = 0; i < 3; i++) {
+    for (let i = 0; i < 3; i++) {
 
     }
     var jc = 9999;
     var eq = true;
-    var ret = null;
-    for (var i = 0, ci, cl; i < classes.length; i++) {
+    ret = null;
+    for (let i = 0, ci, cl; i < classes.length; i++) {
         ci = classes[i].replace(rr, "");
         if (!ci) continue;
         cl = jb.find('.' + ci).length;
@@ -4593,7 +4602,7 @@ function getTTLRArrowContainerElement(returnSingleSelector) {
     if (jo.length == 0) return null;
     else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
 
-    for (var i = 0, z; i < jo.length; i++) {
+    for (let i = 0, z; i < jo.length; i++) {
         if (jo.eq(i).offset().left > 50) jo = jo.not(jo.eq(i));
     }
     if (jo.length == 0) return null;
@@ -4603,7 +4612,7 @@ function getTTLRArrowContainerElement(returnSingleSelector) {
 }
 function getTTtimebarElement(returnSingleSelector) {
     //横に長くて縦が短くtopが直接指定されてるのを選ぶ
-    var jo = $('div').map(function (i, e) { if (e.clientWidth > window.innerWidth / 2 && e.clientHeight < 30 && e.style.top != "") return e; });
+    let jo = $('div').map(function (i, e) { if (e.clientWidth > window.innerWidth / 2 && e.clientHeight < 30 && e.style.top != "") return e; });
     if (jo.length == 0) return null;
     else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
 
@@ -4615,7 +4624,7 @@ function getTTtimebarElement(returnSingleSelector) {
 
     //この時点でまだ取りきれないなら背景を使う
     var rt = /rgba? *\( *(\d+) *, *(\d+) *, *(\d+)(?: *,\d+ *,?)? *\)/;
-    var jo = $('p').map(function (i, e) { if (e.offsetHeight > 0 && e.offsetHeight < 30 && re.test(e.textContent)) return e; });
+    jo = $('p').map(function (i, e) { if (e.offsetHeight > 0 && e.offsetHeight < 30 && re.test(e.textContent)) return e; });
     var ret = null;
     for (var i = 0, c, e, r, g, b; i < jo.length; i++) {
         c = jo.eq(i).css("background-color");
@@ -4661,7 +4670,7 @@ function getTTProgramTimeClasses() {
     if (ja.length == 0) return ret;
     var t = ja[0][0];
     var m = ja[0][1];
-    for (var i = 1; i < ja.length; i++) {
+    for (let i = 1; i < ja.length; i++) {
         if (m > ja[i][1]) continue;
         t = ja[i][0];
         m = ja[i][1];
@@ -4669,13 +4678,13 @@ function getTTProgramTimeClasses() {
     ret[0] = t;
 
     //時刻の後ろでtable-cellなdivのclassを選ぶ
-    var jo = $('.' + t);
-    for (var i = 0, ji; i < jo.length; i++) {
+    jo = $('.' + t);
+    for (let i = 0, ji; i < jo.length; i++) {
         ji = jo.eq(i).contents();
-        for (var j = 0, jp; j < ji.length; j++) {
+        for (let j = 0, jp; j < ji.length; j++) {
             if (!/^\d{2}$/.test(ji.eq(j).text())) continue;
             jp = ji.eq(j).nextAll("div");
-            for (var k = 0, c; k < jp.length; k++) {
+            for (let k = 0, c; k < jp.length; k++) {
                 if (jp.eq(k).css("display") != "table-cell") continue;
                 c = jp.eq(k).prop("class");
                 if (!/\w/.test(c)) continue;
@@ -4744,14 +4753,14 @@ function getElementSelector(inpElm,includeID,includeClass,includeIndex,remove){
         if(ns[0][1].length>0){
             ts=ts+"#"+ns[0][1];
         }
-        for(var j=0;j<ns[0][3].length;j++){
+        for(let j=0;j<ns[0][3].length;j++){
             ts=ts+"."+ns[0][3][j];
         }
         ns[0][2]=ta.prevAll(ts).length;
     }else{
         ns[0][2]=0;
     }
-    for(var i=0;i<pa.length;i++){
+    for(let i=0;i<pa.length;i++){
         ns[i+1]=[];
         ns[i+1][0]=pa.eq(i).prop("nodeName");
         if(includeID){
@@ -4787,7 +4796,7 @@ function getElementSelector(inpElm,includeID,includeClass,includeIndex,remove){
             if(ns[i+1][1].length>0){
                 ts=ts+"#"+ns[i+1][1];
             }
-            for(var j=0;j<ns[i+1][3].length;j++){
+            for(let j=0;j<ns[i+1][3].length;j++){
                 ts=ts+"."+ns[i+1][3][j];
             }
             ns[i+1][2]=pa.eq(i).prevAll(ts).length;
@@ -4824,7 +4833,7 @@ function getElementSelector(inpElm,includeID,includeClass,includeIndex,remove){
             ts=ts+"#"+ns[i][1];
         }
         if(includeClass>0){
-            for(var j=0;j<ns[i][3].length;j++){
+            for(let j=0;j<ns[i][3].length;j++){
                 ts=ts+"."+ns[i][3][j];
             }
         }
@@ -4862,11 +4871,11 @@ function isComeOpen(sw) {
     var bd = jo.offset().left < window.innerWidth; //少しでも開いてるとtrue
     var be = jo.offset().left + jo.width() < window.innerWidth + 50; //ほぼ開いてたらtrue
     switch (sw) {
-        case 0: return bb; break;
-        case 1: return bc; break;
-        case 2: return bb || bc; break;
-        case 3: return bd; break;
-        case 4: return be; break;
+    case 0: return bb; break;
+    case 1: return bc; break;
+    case 2: return bb || bc; break;
+    case 3: return bd; break;
+    case 4: return be; break;
     }
     return false;
 }
@@ -4893,23 +4902,23 @@ function isInfoOpen(sw) {
     var bc = (eo.style.transform == "translateX(0px)");
     var bd = (jo.offset().left < window.innerWidth);
     switch (sw) {
-        case 0:
-            //            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]');
-            return bb;
-            break;
-        case 1:
-            //            return (EXinfo.style.transform=="translateX(0px)");
-            return bc;
-            break;
-        case 2:
-            //            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')||(EXinfo.style.transform=="translateX(0px)");
-            return bb || bc;
-            break;
-        case 3:
-            //            return ($(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')&&EXinfo.style.transform!="translateX(100%)")||(EXinfo.style.transform=="translateX(0px)");
-            return bd;
-            break;
-        default:
+    case 0:
+        //            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]');
+        return bb;
+        break;
+    case 1:
+        //            return (EXinfo.style.transform=="translateX(0px)");
+        return bc;
+        break;
+    case 2:
+        //            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')||(EXinfo.style.transform=="translateX(0px)");
+        return bb || bc;
+        break;
+    case 3:
+        //            return ($(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')&&EXinfo.style.transform!="translateX(100%)")||(EXinfo.style.transform=="translateX(0px)");
+        return bd;
+        break;
+    default:
     }
 }
 function isChliOpen(sw) {
@@ -4928,23 +4937,23 @@ function isChliOpen(sw) {
     var bc = (eo.style.transform == "translateX(0px)");
     var bd = (jo.offset().left < window.innerWidth);
     switch (sw) {
-        case 0:
-            //            return $(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]');
-            return bb;
-            break;
-        case 1:
-            //            return (EXchli.parentElement.style.transform=="translateX(0px)");
-            return bc;
-            break;
-        case 2:
-            //            return $(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]')||(EXchli.parentElement.style.transform=="translateX(0px)");
-            return bb || bc;
-            break;
-        case 3:
-            //            return ($(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]')&&EXchli.parentElement.style.transform!="translateX(100%)")||(EXchli.parentElement.style.transform=="translateX(0px)");
-            return bd;
-            break;
-        default:
+    case 0:
+        //            return $(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]');
+        return bb;
+        break;
+    case 1:
+        //            return (EXchli.parentElement.style.transform=="translateX(0px)");
+        return bc;
+        break;
+    case 2:
+        //            return $(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]')||(EXchli.parentElement.style.transform=="translateX(0px)");
+        return bb || bc;
+        break;
+    case 3:
+        //            return ($(EXchli.parentElement).is('[class*="TVContainer__right-slide--shown___"]')&&EXchli.parentElement.style.transform!="translateX(100%)")||(EXchli.parentElement.style.transform=="translateX(0px)");
+        return bd;
+        break;
+    default:
     }
 }
 function isSideOpen(sw) {
@@ -4961,19 +4970,19 @@ function isSideOpen(sw) {
     var bc = (eo.style.transform == "translateY(-50%)");
     var bd = (jo.offset().left < window.innerWidth);
     switch (sw) {
-        case 0:
-            return bb;
-            break;
-        case 1:
-            return bc;
-            break;
-        case 2:
-            return bb || bc;
-            break;
-        case 3:
-            return bd;
-            break;
-        default:
+    case 0:
+        return bb;
+        break;
+    case 1:
+        return bc;
+        break;
+    case 2:
+        return bb || bc;
+        break;
+    case 3:
+        return bd;
+        break;
+    default:
     }
 }
 function otosageru() {
@@ -5295,95 +5304,95 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
     //console.log("fix timeshown:"+timeshown+",titleshown:"+titleshown);
     if (timeshown == "windowtop" && titleshown == "windowtopright") {
         switch (inpsame) {
-            case "over":
-                tpro.css("right", "310px")
-                    .css("transform", "translateX(100%)")
+        case "over":
+            tpro.css("right", "310px")
+                .css("transform", "translateX(100%)")
+                ;
+            break;
+        case "vertical":
+            forpros.css("top", (tproh - 4) + "px");
+            if (tprow <= 320) {
+                prehoverContents.css("margin-right", (isComeTriming && isSureReadComment)?"":"310px")
+                    .css("margin-top", "")
+                    .css("margin-left", "12px")
+                    .prev().css("margin-top", "")
+                    .contents().find('li').slice(1).css("margin-left", "12px")
                     ;
-                break;
-            case "vertical":
-                forpros.css("top", (tproh - 4) + "px");
-                if (tprow <= 320) {
-                    prehoverContents.css("margin-right", (isComeTriming && isSureReadComment)?"":"310px")
-                        .css("margin-top", "")
-                        .css("margin-left", "12px")
-                        .prev().css("margin-top", "")
-                        .contents().find('li').slice(1).css("margin-left", "12px")
-                        ;
-                } else {
-                    prehoverContents.css("margin-right", (isComeTriming && isSureReadComment)?"":"310px")
-                        .css("margin-left", "12px")
-                        .prev().contents().find('li').slice(1).css("margin-left", "12px")
-                        ;
-                }
-                break;
-            case "horizontal":
-                tpro.css("right", "310px");
-                break;
-            case "horizshort":
-                tpro.css("right", (fprow + 8) + "px");
-                break;
-            default:
+            } else {
+                prehoverContents.css("margin-right", (isComeTriming && isSureReadComment)?"":"310px")
+                    .css("margin-left", "12px")
+                    .prev().contents().find('li').slice(1).css("margin-left", "12px")
+                    ;
+            }
+            break;
+        case "horizontal":
+            tpro.css("right", "310px");
+            break;
+        case "horizshort":
+            tpro.css("right", (fprow + 8) + "px");
+            break;
+        default:
         }
     } else if (timeshown == "windowbottom" && titleshown == "windowbottomright") {
         switch (inpsame) {
-            case "over":
-                tpro.css("right", "310px")
-                    .css("transform", "translateX(100%)")
+        case "over":
+            tpro.css("right", "310px")
+                .css("transform", "translateX(100%)")
+                ;
+            break;
+        case "vertical":
+            tpro.css("bottom", (fproh - 4) + "px");
+            $(EXfootcome).css("margin-right", "310px");
+            if (tprow <= 320) {
+                parexfootcount.css("margin-bottom", "");
+                $(EXfootcome).css("border-left", "")
+                    .prev().css("border-right", "")
                     ;
-                break;
-            case "vertical":
-                tpro.css("bottom", (fproh - 4) + "px");
-                $(EXfootcome).css("margin-right", "310px");
-                if (tprow <= 320) {
-                    parexfootcount.css("margin-bottom", "");
-                    $(EXfootcome).css("border-left", "")
-                        .prev().css("border-right", "")
-                        ;
-                } else { //タイトルが長い場合はmargin-bottomをtopに入れ替えてタイトルを避ける
-                    var fcmb = parseInt(parexfootcount.css("margin-bottom"));
-                    parexfootcount.css("margin-bottom", "");
-                    parexfootcount.css("margin-top", fcmb + "px");
-                }
-                break;
-            case "horizontal":
-                tpro.css("right", "310px");
-                break;
-            case "horizshort":
-                tpro.css("right", (fprow + 8) + "px");
-                break;
-            default:
+            } else { //タイトルが長い場合はmargin-bottomをtopに入れ替えてタイトルを避ける
+                var fcmb = parseInt(parexfootcount.css("margin-bottom"));
+                parexfootcount.css("margin-bottom", "");
+                parexfootcount.css("margin-top", fcmb + "px");
+            }
+            break;
+        case "horizontal":
+            tpro.css("right", "310px");
+            break;
+        case "horizshort":
+            tpro.css("right", (fprow + 8) + "px");
+            break;
+        default:
         }
     } else if (timeshown == "commentinputtop" && titleshown == "commentinputtopright") {
         switch (inpsame) {
-            case "over":
-            case "horizontal":
-                tpro.css("right", "")
-                    .css("left", 0)
-                    ;
-                break;
-            case "vertical":
-                forpros.css("top", (tproh - 4) + "px");
-                break;
-            case "horizshort":
-                tpro.css("right", (fprow + 8) + "px");
-                break;
-            default:
+        case "over":
+        case "horizontal":
+            tpro.css("right", "")
+                .css("left", 0)
+                ;
+            break;
+        case "vertical":
+            forpros.css("top", (tproh - 4) + "px");
+            break;
+        case "horizshort":
+            tpro.css("right", (fprow + 8) + "px");
+            break;
+        default:
         }
     } else if (timeshown == "commentinputbottom" && titleshown == "commentinputbottomright") {
         switch (inpsame) {
-            case "over":
-            case "horizontal":
-                tpro.css("right", "")
-                    .css("left", 0)
-                    ;
-                break;
-            case "vertical":
-                tpro.css("bottom", (fproh - 4) + "px");
-                break;
-            case "horizshort":
-                tpro.css("right", (fprow + 8) + "px");
-                break;
-            default:
+        case "over":
+        case "horizontal":
+            tpro.css("right", "")
+                .css("left", 0)
+                ;
+            break;
+        case "vertical":
+            tpro.css("bottom", (fproh - 4) + "px");
+            break;
+        case "horizshort":
+            tpro.css("right", (fprow + 8) + "px");
+            break;
+        default:
         }
     }
 }
@@ -5435,140 +5444,140 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     var tprow = tpro.width() + parseInt(tpro.css("padding-left")) + parseInt(tpro.css("padding-right")) + parseInt(tpro.css("margin-left")) + parseInt(tpro.css("margin-right"));
     var par = titlepar;
     switch (par) {
-        case "windowtopleft":
-        case "windowtopright":
-        case "commentinputtopleft":
-        case "commentinputtopright":
-        case "headerleft":
-        case "headerright":
-            tpro.css("bottom", "")
-                .css("top", 0)
-                ;
-            break;
-        case "windowbottomleft":
-        case "windowbottomright":
-        case "commentinputbottomleft":
-        case "commentinputbottomright":
-        case "footerleft":
-        case "footerright":
-            tpro.css("top", "")
-                .css("bottom", 0)
-                ;
-            break;
-        default:
+    case "windowtopleft":
+    case "windowtopright":
+    case "commentinputtopleft":
+    case "commentinputtopright":
+    case "headerleft":
+    case "headerright":
+        tpro.css("bottom", "")
+            .css("top", 0)
+            ;
+        break;
+    case "windowbottomleft":
+    case "windowbottomright":
+    case "commentinputbottomleft":
+    case "commentinputbottomright":
+    case "footerleft":
+    case "footerright":
+        tpro.css("top", "")
+            .css("bottom", 0)
+            ;
+        break;
+    default:
     }
     switch (par) {
-        case "windowtopleft":
-        case "windowbottomleft":
-        case "commentinputtopleft":
-        case "commentinputbottomleft":
-        case "headerleft":
-        case "footerleft":
-            tpro.css("right", "")
-                .css("left", 0)
-                ;
-            break;
-        case "windowtopright":
-        case "windowbottomright":
-        case "commentinputtopright":
-        case "commentinputbottomright":
-        case "headerright":
-        case "footerright":
-            tpro.css("left", "")
-                .css("right", 0)
-                ;
-            break;
-        default:
+    case "windowtopleft":
+    case "windowbottomleft":
+    case "commentinputtopleft":
+    case "commentinputbottomleft":
+    case "headerleft":
+    case "footerleft":
+        tpro.css("right", "")
+            .css("left", 0)
+            ;
+        break;
+    case "windowtopright":
+    case "windowbottomright":
+    case "commentinputtopright":
+    case "commentinputbottomright":
+    case "headerright":
+    case "footerright":
+        tpro.css("left", "")
+            .css("right", 0)
+            ;
+        break;
+    default:
     }
     switch (par) {
-        case "windowtopright":
-        case "headerright":
-            if ((isComeTriming && isSureReadComment) && tprow <= 320) break;
-            var hmt = (tproh - 12) + Math.floor((headh - tproh - 12) / 2);
-            prehoverContents.css("margin-top", hmt + "px")
-                .prev().css("margin-top", hmt + "px")
-                ;
-            break;
-        default:
+    case "windowtopright":
+    case "headerright":
+        if ((isComeTriming && isSureReadComment) && tprow <= 320) break;
+        var hmt = (tproh - 12) + Math.floor((headh - tproh - 12) / 2);
+        prehoverContents.css("margin-top", hmt + "px")
+            .prev().css("margin-top", hmt + "px")
+            ;
+        break;
+    default:
     }
     switch (par) {
-        case "windowtopleft":
-        case "headerleft":
-            var hmt = (tproh + 8 - 18) + Math.floor((headh - tproh - 8 - 18) / 2);
-            headlogo.css("margin-top", hmt + "px")
-                .next().css("margin-top", hmt + "px")
-                ;
-            if (bigpar)
-                headlogo.next().find('[class*="styles__default-input-text___"]').css("height", (headh - tprouc) + "px"); //todo
-            break;
-        default:
+    case "windowtopleft":
+    case "headerleft":
+        var hmt = (tproh + 8 - 18) + Math.floor((headh - tproh - 8 - 18) / 2);
+        headlogo.css("margin-top", hmt + "px")
+            .next().css("margin-top", hmt + "px")
+            ;
+        if (bigpar)
+            headlogo.next().find('[class*="styles__default-input-text___"]').css("height", (headh - tprouc) + "px"); //todo
+        break;
+    default:
     }
     switch (par) {
-        case "windowbottomright":
-        case "footerright":
-            var fmb = tproh;
-            parexfootcount.css("margin-bottom", fmb + "px")
-                .css("height", "unset")
-                ;
-            $(EXfootcome).css("border-left", "1px solid #444")
-                .prev().css("border-right", "none")
-                ;
-            break;
-        default:
+    case "windowbottomright":
+    case "footerright":
+        var fmb = tproh;
+        parexfootcount.css("margin-bottom", fmb + "px")
+            .css("height", "unset")
+            ;
+        $(EXfootcome).css("border-left", "1px solid #444")
+            .prev().css("border-right", "none")
+            ;
+        break;
+    default:
     }
     switch (par) {
-        case "windowbottomleft":
-        case "footerleft":
-            var fmb = tproh;
-            footlogo.css("margin-bottom", fmb + "px")
-                .next().css("margin-bottom", fmb + "px")
-                ;
-            break;
-        default:
+    case "windowbottomleft":
+    case "footerleft":
+        var fmb = tproh;
+        footlogo.css("margin-bottom", fmb + "px")
+            .next().css("margin-bottom", fmb + "px")
+            ;
+        break;
+    default:
     }
     switch (par) {
-        case "windowtopleft":
-        case "windowtopright":
-        case "windowbottomleft":
-        case "windowbottomright":
-            if (!$('body').children().is(tpro)) {
-                tpro.prependTo('body');
-            }
-            break;
-        case "commentinputtopleft":
-        case "commentinputtopright":
-        case "commentinputbottomleft":
-        case "commentinputbottomright":
-            if (!$(EXcomesend).children().is(tpro)) {
-                tpro.prependTo(EXcomesend);
-            }
-            break;
-        case "headerleft":
-        case "headerright":
-            if (!$(EXhead).children().is(tpro)) {
-                tpro.prependTo(EXhead);
-            }
-            break;
-        case "footerleft":
-        case "footerright":
-            if (!$(EXfoot).children().is(tpro)) {
-                tpro.prependTo(EXfoot);
-            }
-            break;
-        default:
+    case "windowtopleft":
+    case "windowtopright":
+    case "windowbottomleft":
+    case "windowbottomright":
+        if (!$('body').children().is(tpro)) {
+            tpro.prependTo('body');
+        }
+        break;
+    case "commentinputtopleft":
+    case "commentinputtopright":
+    case "commentinputbottomleft":
+    case "commentinputbottomright":
+        if (!$(EXcomesend).children().is(tpro)) {
+            tpro.prependTo(EXcomesend);
+        }
+        break;
+    case "headerleft":
+    case "headerright":
+        if (!$(EXhead).children().is(tpro)) {
+            tpro.prependTo(EXhead);
+        }
+        break;
+    case "footerleft":
+    case "footerright":
+        if (!$(EXfoot).children().is(tpro)) {
+            tpro.prependTo(EXfoot);
+        }
+        break;
+    default:
     }
 
     var b = false;
     if (proTitleFontC) {
         switch (par) {
-            case "commentinputtopleft":
-            case "commentinputtopright":
-            case "commentinputbottomleft":
-            case "commentinputbottomright":
-                b = true;
-                break;
+        case "commentinputtopleft":
+        case "commentinputtopright":
+        case "commentinputbottomleft":
+        case "commentinputbottomright":
+            b = true;
+            break;
 // コメ入力欄周辺でない場合でも、ウィンドウ右下かつコメ入力欄下かつコメ欄表示中などによりコメ入力欄周辺に設置される場合があるけどそこまでは未設定
-            default:
+        default:
         }
     }
     if (b)
@@ -5742,7 +5751,7 @@ function setOptionHead() {
     var jo,jp;
     var eo;
     var to="";
-    var selCome,selComesend,selComesendinpp,selComesendinp,selComelist,selComelistp,selHead,selFoot,selSide,selChli,selInfo,selObli,selFootcome;
+    var selCome,selComesend,selComesendinpp,selComesendinp,selComelist,selComelistp,selHead,selFoot,selSide,selChli,selInfo,selObli,selFootcome,selCountview;
     var alt=false;
 
     //投稿ボタン削除（入力欄1行化はこの下のコメ見た目のほうとoptionElementでやる）
@@ -6204,8 +6213,8 @@ function setOptionElement() {
     var hoverSpanClass = $(EXmenu).children('a').children('span')[0].className;
     if ($(EXmenu).children('#extSettingLink').length == 0) {
         $(EXmenu).children(':last').css({'border-bottom':'1px solid #333', 'margin-bottom': '8px', 'padding-bottom': '12px'});
-        $(EXmenu).append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
-                 .append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>')
+        $(EXmenu).append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("/pages/option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>')
+                 .append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("/pages/notifylist.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>')
         ;
     }
 
@@ -6586,11 +6595,11 @@ function comeModuleEditor() {
     var twitterWrapper = $(ret[2]);
     if (settings.mastodonInstance && settings.mastodonToken){
         isTootEnabled = localStorage.getItem('isTootEnabled') == 'true';
-        twitterWrapper.css('float', 'left').after('<div class="usermade" id="mastodon-btn" style="float:left;margin-left:10px;padding:2px;cursor:pointer;background-color:#ddd;border-radius:2px;"><img src="' + chrome.extension.getURL("icon/mastodon-icon" + (isTootEnabled?'-blue':'') + ".svg") + '" style="" height="25" width="25" id="mastodon-icon"></div>');
+        twitterWrapper.css('float', 'left').after('<div class="usermade" id="mastodon-btn" style="float:left;margin-left:10px;padding:2px;cursor:pointer;background-color:#ddd;border-radius:2px;"><img src="' + chrome.extension.getURL("/images/mastodon-icon" + (isTootEnabled?'-blue':'') + ".svg") + '" style="" height="25" width="25" id="mastodon-icon"></div>');
         $('#mastodon-btn').click(function(){
             isTootEnabled = !isTootEnabled;
             localStorage.setItem('isTootEnabled', isTootEnabled.toString());
-            $('#mastodon-icon').attr('src', chrome.extension.getURL("icon/mastodon-icon" + (isTootEnabled?'-blue':'') + ".svg"));
+            $('#mastodon-icon').attr('src', chrome.extension.getURL("/images/mastodon-icon" + (isTootEnabled?'-blue':'') + ".svg"));
         });   
     }
 }
@@ -7053,7 +7062,7 @@ function copycome(d, hlsw) {
         //console.log("copycome append:"+d);
         //d件をNG処理して追加した後にcomehl
         var ma = [];
-        for (var i = 0, e, efc, m, n, t, u, cinfo; i < d; i++) {
+        for (let i = 0, e, dt, m, n, t, u, cinfo; i < d; i++) {
             //console.log("ma loop")
             e = EXcomelistChildren[i];//eo.children[i];
             if(!e||!e.firstElementChild||e.firstElementChild.childElementCount<2||e.firstElementChild.firstElementChild.tagName.toUpperCase()!='P') continue;
@@ -7070,7 +7079,7 @@ function copycome(d, hlsw) {
         if (ma.length > 0) {
             if (ma.length <= 100) {
                 //console.time('ma100_loop')
-                for (var i = ec.childElementCount - 1, e, m, t, n, d, s, u, efc, cinfo, mw; (e = ec.children[i - ma.length]) ; i--) {
+                for (let i = ec.childElementCount - 1, e, m, t, n, d, s, u, efc, cinfo, mw; (e = ec.children[i - ma.length]) ; i--) {
                     //console.log("loop ma<100")
                     efc = e.firstElementChild;
                     cinfo = getComeInfo(e);
@@ -7098,7 +7107,7 @@ function copycome(d, hlsw) {
             }
             var malen = Math.min(ma.length, 100);
             //console.time('malen_loop')
-            for (var i = 0, m, t, d, u, dt, mw; i < malen; i++) {
+            for (let i = 0, m, t, d, u, dt, mw; i < malen; i++) {
                 //console.log("loop after malen")
                 m = ma[i][0];
                 u = ma[i][2];
@@ -7132,7 +7141,7 @@ function copycome(d, hlsw) {
         jc.find('span').text("");
         $('.comeposttime').attr("name", "");
         //console.time('fullcp_loop')
-        for (var i = 0, j = 0, e, m, t, dt, u, cinfo, mw; (e = EXcomelist.children[i]) ; i++) {
+        for (let i = 0, j = 0, e, m, t, dt, u, cinfo, mw; (e = EXcomelist.children[i]) ; i++) {
             if (e.hasChildNodes() && e.firstElementChild.childElementCount > 1 && e.firstElementChild.firstElementChild.tagName.toUpperCase()=='P') {
                 cinfo = getComeInfo(e);
                 u = cinfo.userid;
@@ -7217,17 +7226,17 @@ function comecopy() {
     for (var i = 0, e, c, t; (e = jo.eq(i))&&(c=e.css("color"))&&r.test(c); i++) {
         //c = $(e.children[0]).css("color");
         //if (r.test(c)) {
-            t = r.exec(c);
-            if (t[2] == t[3] && +t[1] > +t[2]) {
-                s = e.text();
-                uid = e.parent().parent().attr('data-ext-userid') || '';
-                break;
-            //}
+        t = r.exec(c);
+        if (t[2] == t[3] && +t[1] > +t[2]) {
+            s = e.text();
+            uid = e.parent().parent().attr('data-ext-userid') || '';
+            break;
+        //}
         }
     }
     if (s.length > 0) {
         if ($('#copyotw').length == 0) {
-            var t = '<div id="copyotw" class="' + $(EXcomesendinp.parentElement).attr("class") + ' usermade" style="padding:5px 28px 30px 18px;">';
+            let t = '<div id="copyotw" class="' + $(EXcomesendinp.parentElement).attr("class") + ' usermade" style="padding:5px 28px 30px 18px;">';
             t += '<a style="position:absolute;top:10px;left:1px;cursor:pointer;"><svg id="closecopyotw" class="usermade" width="16" height="16" style="fill:rgba(255,255,255,0.5);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/icons/close.svg#svg-body"></use></svg></a>';
             t += '<input type="hidden" id="copyotu" value="">';
             t += '<textarea id="copyot" class="' + $(EXcomesendinp).attr("class") + '" rows="1" maxlength="100" wrap="soft" style="height:24px;width:264px;padding-left:4px;"></textarea>';
@@ -7564,10 +7573,10 @@ getStorage(['disableExtVersion'], function(val){
         } else {
             $(window).on('load', mainfunc);
         }
-        var xhrinjectionpath = chrome.extension.getURL("xhr-injection.js");
+        var xhrinjectionpath = chrome.extension.getURL("/scripts/injection-xhr.js");
         $("<script src='" + xhrinjectionpath + "'></script>").appendTo("head");
     }else{
-        var csspath = chrome.extension.getURL("onairpage.css");
+        var csspath = chrome.extension.getURL("/styles/content.css");
         $("<link rel='stylesheet' href='" + csspath + "'>").appendTo("head");
         toast('現在のバージョンの拡張機能は動作が停止されています。');
     }
@@ -7576,12 +7585,12 @@ getStorage(['disableExtVersion'], function(val){
 //URLによって実行内容を変更すべく各部を分離
 function mainfunc() { //初回に一度実行しておけば後でURL部分が変わっても大丈夫なやつ
     console.log("loaded");
-    var csspath = chrome.extension.getURL("onairpage.css");
+    var csspath = chrome.extension.getURL("/styles/content.css");
     $("<link rel='stylesheet' href='" + csspath + "'>").appendTo("head");
     // jqueryを開発者コンソールから使う
-    var jquerypath = chrome.extension.getURL("jquery-2.2.3.min.js");
+    var jquerypath = chrome.extension.getURL("/scripts/jquery-3.2.1.min.js");
     $("<script src='" + jquerypath + "'></script>").appendTo("head");
-    var injectionpath = chrome.extension.getURL("page-injection.js");
+    var injectionpath = chrome.extension.getURL("/scripts/injection.js");
     $("<script src='" + injectionpath + "'></script>").appendTo("head");
     //URLパターンチェック
     checkUrlPattern(location.href);
@@ -8029,7 +8038,8 @@ function onCommentChange(mutations){
     var isAnimationAdded = false,
         isCommentAdded = false,
         newCommentNum = 0,
-        nodeClass;
+        nodeClass,
+        firstChildClass;
     for(var i=0,eo,eofc; i<mutations.length; i++){
         if(mutations[i].type == 'childList' && mutations[i].addedNodes.length > 0){
             eo = mutations[i].addedNodes[0];
@@ -8372,7 +8382,7 @@ function checkUrlPattern(url) {
         }
     } else {
         // それ以外のページ
-         if (output) {
+        if (output) {
             return -1;
         } else {
             onairCleaner();
@@ -8418,7 +8428,7 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
                         } else if (response.result === "pastTimeError") {
                             toast("既に開始された番組です")
                         }
-                    })
+                    });
                 });
             } else {
                 //登録済み
@@ -8466,7 +8476,7 @@ function putNotifyButton(url) {
     });
     if(j.length>0){contentsWrapper=j;}
     else{
-        contentsWrapper=$('.tZ_o') //todo
+        contentsWrapper=$('.tZ_o'); //todo
     }
     rightContents = contentsWrapper.children().eq(1);
     leftContnts = contentsWrapper.children().eq(0);
@@ -8512,15 +8522,15 @@ function putSerachNotifyButtons() {
     var moreBtn = listWrapper.next('button');
     moreBtn.click(function(){
         setTimeout(putSerachNotifyButtons, 500);
-    })
+    });
 }
 function putReminderNotifyButtons() {
     if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) return;
     var listWrapper = $('div[role=list]');
     var listItems = $('a[role=listitem]');
     var featureText = '見たい番組を見逃さないためには';//公式通知登録一覧で何も登録してないときの機能紹介文
-    var featureMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(featureText)>=0){return e}});
-    if (listItems.length == 0 && featureMessage.length == 0) { setTimeout(function () { putReminderNotifyButtons() }, 1000); console.log("putReminderNotifyButtons wait"); return; }
+    var featureMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(featureText)>=0){return e;}});
+    if (listItems.length == 0 && featureMessage.length == 0) { setTimeout(function () { putReminderNotifyButtons(); }, 1000); console.log("putReminderNotifyButtons wait"); return; }
     listItems.each(function (i, elem) {
         var linkArea = $(elem);
         var spans = linkArea.children().eq(1).find('span');
@@ -8634,6 +8644,6 @@ chrome.runtime.onMessage.addListener(function (r) {
     } else if (r.name == "historyStateUpdated") {
         chkurl();
     } else {
-        console.warn("message not match")
+        console.warn("message not match");
     }
 });
