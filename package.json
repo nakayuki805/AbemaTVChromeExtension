@@ -1,0 +1,69 @@
+{
+  "name": "_bem_tv ext",
+  "private": true,
+  "version": "0.14.0",
+  "description": "AbemaTVを快適にする非公式の拡張機能",
+  "scripts": {
+    "start": "npm run dev:chrome",
+    "build": "npm run build:chrome",
+    "build:chrome": "gulp pack --production --vendor=chrome",
+    "build:firefox": "gulp pack --production --vendor=firefox",
+    "build:opera": "gulp pack --production --vendor=opera",
+    "build:edge": "gulp pack --production --vendor=edge",
+    "dev": "npm run dev:chrome",
+    "dev:chrome": "gulp --watch --vendor=chrome",
+    "dev:firefox": "gulp --watch --vendor=firefox",
+    "dev:opera": "gulp --watch --vendor=opera",
+    "dev:edge": "gulp --watch --vendor=edge",
+    "lint": "standard"
+  },
+  "standard": {
+    "globals": [
+      "chrome"
+    ]
+  },
+  "devDependencies": {
+    "@types/chrome": "0.0.54",
+    "@types/jquery": "^3.2.16",
+    "@types/node": "^8.0.54",
+    "babel-cli": "6.x.x",
+    "babel-core": "6.x.x",
+    "babel-loader": "7.x.x",
+    "babel-preset-env": "1.x.x",
+    "chai": "4.x.x",
+    "chromereload": "0.x.x",
+    "debounce": "1.x.x",
+    "del": "3.x.x",
+    "gulp": "3.x.x",
+    "gulp-bump": "2.x.x",
+    "gulp-cache": "0.x.x",
+    "gulp-clean-css": "^3.x.x",
+    "gulp-filter": "^5.x.x",
+    "gulp-git": "^2.x.x",
+    "gulp-if": "2.x.x",
+    "gulp-imagemin": "3.x.x",
+    "gulp-json-transform": "0.x.x",
+    "gulp-less": "3.x.x",
+    "gulp-livereload": "3.x.x",
+    "gulp-plumber": "1.x.x",
+    "gulp-sass": "^3.x.x",
+    "gulp-sequence": "0.x.x",
+    "gulp-sourcemaps": "^2.x.x",
+    "gulp-tag-version": "1.x.x",
+    "gulp-util": "3.x.x",
+    "gulp-zip": "^4.x.x",
+    "require-dir": "0.x.x",
+    "standard": "^10.0.2",
+    "ts-loader": "^2.x.x",
+    "tslint": "^5.x.x",
+    "vinyl-named": "1.x.x",
+    "webpack": "3.x.x",
+    "webpack-stream": "3.x.x",
+    "yargs": "^8.x.x"
+  },
+  "dependencies": {
+    "cw-log": "^0.2.0",
+    "jquery": "^3.2.1",
+    "typescript": "^2.6.2"
+  }
+}

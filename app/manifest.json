@@ -1,17 +1,11 @@
 {
 	"manifest_version": 2,
-	"name": "abematv ext",
-	"version": "0.13.18",
+	"name": "_bem_tv ext",
+	"version": "0.14.0",
 	"description": "abematvを快適にする非公式の拡張機能(番組通知自動再生、コメントNGワード、映像上コメント流し、映像サイズ固定など様々な機能を柔軟に設定できます)",
+	"author": "AbemaTVChromeExtension on github",
 	"icons": {
 		"128": "abemaexticon.png"
-	},
-	"applications": {
-		"gecko": {
-			"id": "abematvextension@nakayuki.net",
-			"strict_min_version": "47.0",
-			"update_url": "https://www.nakayuki.net/abema-ext/update.json"
-		}
 	},
 	"permissions": [
 		"storage",
@@ -24,7 +18,7 @@
 	"content_scripts": [
 		{
 			"matches": ["https://abema.tv/*"],
-			"js": ["jquery-2.2.3.min.js", "settings.js", "onairpage.js", "updatenotify.js"],
+			"js": ["jquery-2.2.3.min.js", "settings.js", "onairpage.js"],
 			"run_at": "document_start"
 	}
 	],
@@ -40,7 +34,9 @@
 		"page-injection.js",
 		"xhr-injection.js"
 	],
+	"options_page": "option.html",
 	"background": {
-		"scripts": ["jquery-2.2.3.min.js", "event.js"]
+		"scripts": ["jquery-2.2.3.min.js", "event.js"],
+		"persistent": false
 	}
 }
