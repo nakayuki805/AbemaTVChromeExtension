@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-      "module": "commonjs",
+      "module": "es6",
       "target": "es5",
       "noImplicitAny": true,
       "noImplicitUseStrict": true,
@@ -11,7 +11,10 @@
       "traceResolution": true,
       "baseUrl": ".",
       "paths": {
-        "cw-log": ["types/*"]
+        "*": ["node_modules/@types/*","types/*"]
       }
-  }
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

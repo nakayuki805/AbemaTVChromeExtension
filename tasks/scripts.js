@@ -20,6 +20,7 @@ gulp.task('scripts', (cb) => {
     .pipe(gulpWebpack({
       devtool: args.sourcemaps ? 'inline-source-map' : false,
       watch: args.watch,
+      mode: ENV,
       plugins: [
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify(ENV),
@@ -30,7 +31,6 @@ gulp.task('scripts', (cb) => {
           $: 'jquery'
         })
       ].concat(args.production ? [
-        new webpack.optimize.UglifyJsPlugin(),
         new webpack.optimize.ModuleConcatenationPlugin()
       ] : []),
       module: {
@@ -38,14 +38,14 @@ gulp.task('scripts', (cb) => {
           {
             test: /\.ts$/,
             loader: 'ts-loader',
-            exclude: /node_modules/
+            exclude: /node_modules/,
           }
         ]
       },
       resolve: {
         extensions: ['.ts', '.js'],
         modules: [
-          'node_modules/',
+          'node_modules',
           'app/scripts/'
         ]
       }

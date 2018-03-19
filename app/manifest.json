@@ -42,7 +42,9 @@
 		"scripts/injection.js",
 		"scripts/injection-xhr.js"
 	],
-	"options_page": "pages/option.html",
+	"__chrome__options_page": "pages/option.html",
+	"__opera__options_page": "pages/option.html",
+	"__edge__options_page": "pages/option.html",
 	"background": {
 		"scripts": ["scripts/eventPage.js"],
 		"__chrome__persistent": false,
