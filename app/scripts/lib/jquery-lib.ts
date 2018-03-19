@@ -12,6 +12,9 @@ import * as $ from 'jquery';
             return $(this).isContainedBy(containerElement);
         });
     }
+    $.fn.isEmpty = function() {
+        return this.length==0;
+    }
     $.fn.rectFilter = function(option) {
         // 要素の位置等で絞り込む
         // option = {left14l: true, ...} left14lはleft座標が1/4より左側(l)であるということ
@@ -31,6 +34,10 @@ import * as $ from 'jquery';
             if (option.top12u && b.top>window.innerHeight/2) return false;
             if (option.top12d && b.top<window.innerHeight/2) return false;
             if (option.top34d && b.top<window.innerHeight*3/4) return false;
+            if (option.bottom14u && b.top+b.height>window.innerHeight/4) return false;
+            if (option.bottom12u && b.top+b.height>window.innerHeight/2) return false;
+            if (option.bottom12d && b.top+b.height<window.innerHeight/2) return false;
+            if (option.bottom34d && b.top+b.height<window.innerHeight*3/4) return false;
             if (option.width12s && b.width>window.innerWidth/2) return false;//幅が画面の半分より小さいか(大きいとfalse)
             if (option.width12b && b.width<window.innerWidth/2) return false;//〃大きいか
             if (option.width14s && b.width>window.innerWidth/4) return false;
@@ -44,7 +51,15 @@ import * as $ from 'jquery';
             if (option.height34s && b.height>window.innerHeight*3/4) return false;
             if (option.height34b && b.height<window.innerHeight*3/4) return false;
             if (option.notBodyParent && $(this).parent().is('body,html')) return false;
-
+            if (option.display && $(this).css('display') !== option.display) return false;
+            if (option.displayNot && $(this).css('display') === option.displayNot) return false;
+            if (option.filters && option.filters.length>0) {
+                let flag = true;
+                option.filters.forEach(filter => {
+                    if (flag) {flag = filter(this)}
+                });
+                if (!flag) return false;
+            }
             return true;
         });
     }

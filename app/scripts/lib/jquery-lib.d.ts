@@ -3,6 +3,7 @@ interface JQuery {
     isContainedBy(containerElement: string|HTMLElement|JQuery): boolean;
     containedBy(containerElement: string|HTMLElement|JQuery): JQuery;
     rectFilter(rectFilterOption: rectFilterOption): JQuery;
+    isEmpty(): boolean;
     //jqueryの型定義が.has(jqueryオブジェクト)を受け付けないのでここで定義しておく
     has(selector: string|Element|JQuery): JQuery;
 }
@@ -19,6 +20,10 @@ interface rectFilterOption{
     top12u?: boolean;
     top12d?: boolean;
     top34d?: boolean;
+    bottom14u?: boolean;
+    bottom12u?: boolean;
+    bottom12d?: boolean;
+    bottom34d?: boolean;
     width12s?: boolean;
     width12b?: boolean;
     width14s?: boolean;
@@ -32,4 +37,7 @@ interface rectFilterOption{
     height34s?: boolean;
     height34b?: boolean;
     notBodyParent?: boolean;
+    display?: string;
+    displayNot?: string;
+    filters?: Array<(element: HTMLElement) => boolean>;
 }
