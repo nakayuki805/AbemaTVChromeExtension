@@ -479,7 +479,7 @@ function onairCleaner() {
     }
     //変数クリア
     EXcomemodule = null;
-    //放送画面のEX*をクリアする　一旦非放送画面に移った後放送画面に戻ると再利用できないため再度setEXsで取得する必要がある
+    //放送画面のEX*をクリアする、一旦非放送画面に移った後放送画面に戻ると再利用できないため再度setEXsで取得する必要がある
     EXhead = null;
     EXmenu = null;
     EXfoot = null;
@@ -698,7 +698,7 @@ function waitforloadtimetable(url) {
     var dd=$('div');
     var alt=false;
     $('head>link[title="usermade"]').remove();//要素がdisplay:noneだと探索で大きさが取れないのでまず元に戻す
-    var j=dd.map(function(i,e){ //ヘッダ探索　上の方にあって横長くて列の数は7日分くらいより多いやつ
+    var j=dd.map(function(i,e){ //ヘッダ探索、上の方にあって横長くて列の数は7日分くらいより多いやつ
         var b=e.getBoundingClientRect();
         if(b.top<window.innerHeight/4&&b.top>5&&b.left<window.innerWidth/3&&b.width>window.innerWidth/2&&b.height<window.innerHeight/3&&e.childElementCount>5)return e;
     });
@@ -713,7 +713,7 @@ function waitforloadtimetable(url) {
     }
 
     j=dd.map(function(i,e){
-        var b=e.getBoundingClientRect(); //ボディ探索　でかいやつ(ただしチャンネル選択時に幅を調整するので幅では判定しない)でdiv>div>articleがあるやつ left判定で左CHリスト幅の226を引く
+        var b=e.getBoundingClientRect(); //ボディ探索、でかいやつ(ただしチャンネル選択時に幅を調整するので幅では判定しない)でdiv>div>articleがあるやつ left判定で左CHリスト幅の226を引く
         if(b.top<window.innerHeight/4&&(b.left-226)<window.innerWidth/4&&b.height>window.innerHeight/2&&$(e).children("div").length>5&&$(e).find('div>div>article').length>0)return e;
     });
     if(j.length>=0) EXTTbody=j[0];
@@ -726,7 +726,7 @@ function waitforloadtimetable(url) {
         EXTTbody=null;
     }
 
-    j=dd.map(function(i,e){ //番組詳細探索　右にあるやつ
+    j=dd.map(function(i,e){ //番組詳細探索、右にあるやつ
         var b=e.getBoundingClientRect();
         if($(e).css("position")=="fixed"&&!isNaN(parseInt($(e).css("z-index")))&&parseInt($(e).css("z-index"))>0&&b.top<window.innerHeight/4&&b.left>window.innerWidth/2&&b.width<window.innerWidth/2&&b.width>50&&b.height>window.innerHeight*2/3)return e;
     });
@@ -979,7 +979,7 @@ function timetabledtfix() {
         }
         if(i == 0){
             checkbox.prop('checked', allowChannelNum.length == 0);
-            checkbox.prop('disabled', allowChannelNum.length == 0)
+            checkbox.prop('disabled', allowChannelNum.length == 0);
         }else{
             checkbox.prop('checked', hasArray(allowChannelNum, i - 1));
         }
@@ -1694,7 +1694,7 @@ function applySharedNG() {
             }
             appendUserNG(null, appendNGusers);
         }
-    })
+    });
     if (channel) {
         setTimeout(applySharedNG, 300000); //5分毎
     } else {
@@ -1794,11 +1794,11 @@ function comefilter(m, uid) {
     if (isComeDel && m.length > 0) {
         for (var ngi = 0; ngi < arFullNg.length; ngi++) {
             if (arFullNg[ngi].test(m)) {
-                console.log("userNG matched text:" + m + " ngword:" + arFullNg[ngi].toString())
+                console.log("userNG matched text:" + m + " ngword:" + arFullNg[ngi].toString());
                 m = "";
                 break;
             } else if (arFullNg[ngi].test(n)) {
-                console.log("userNG matched text:" + n + "(ori:" + m + ") ngword:" + arFullNg[ngi].toString())
+                console.log("userNG matched text:" + n + "(ori:" + m + ") ngword:" + arFullNg[ngi].toString());
                 m = "";
                 break;
             }
@@ -2349,7 +2349,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
             if (EXcountview) {
                 $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
             }
-        }
+        };
         setTimeout(fixCountViewLeft, 3000);//コメント数が表示されるまで待つ
         setTimeout(fixCountViewLeft, 10000);//再度修正
         setInterval(fixCountViewLeft, 30000);//30秒ごとに再調整
@@ -2966,7 +2966,7 @@ function createSettingWindow() {
         let jm = $('#isDAR43-switch');
         ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll('<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">');
         //        $('<input id="movieResizeChkA" type="checkbox">').prependTo('#movieResizeContainer')
-        //            .after(':映像リサイズ (ウィンドウに合わせます。映像がウィンドウの外にハミ出なくなり、コメ欄などを開いても映像の大きさは変わらず、コメ欄などは映像の上に重なります。)<br>　映像の上下位置<br>')
+        //            .after(':映像リサイズ (ウィンドウに合わせます。映像がウィンドウの外にハミ出なくなり、コメ欄などを開いても映像の大きさは変わらず、コメ欄などは映像の上に重なります。)<br>映像の上下位置<br>')
         //            .change(movieResizeChkChanged)
         //        ;
         let tres = '';
@@ -3364,7 +3364,7 @@ function setSaveClicked() {
     isUserHighlight = $('#isUserHighlight').prop("checked");
     isShareNGuser = $('#isShareNGuser').prop("checked");
     minResolution = parseInt($('#minResolution').val());
-    maxResolution = parseInt($('#maxResolution').val())
+    maxResolution = parseInt($('#maxResolution').val());
 
     arrayFullNgMaker();
     arrayUserNgMaker();
@@ -3500,7 +3500,7 @@ function setCMsoundChangedB() {
         ;
 }
 function setCMBKChangedB() {
-    var b = $("#isCMBlack").prop("checked")
+    var b = $("#isCMBlack").prop("checked");
     $('#CommentMukouSettings input[type="radio"][name="cmbktype"]').prop("disabled", !b);
     $('#isCMBkR').prop("checked", false)
         .prop("disabled", !b)
@@ -3910,7 +3910,7 @@ function addExtClass(elm, className){
     //return ;
     className = 'ext_abm-'+className;
     $('.'+className).removeClass(className);
-    $(elm).addClass(className)
+    $(elm).addClass(className);
 }
 function setEXs() {
     //ロード直後に取得が期待できるやつ
@@ -4500,7 +4500,7 @@ function getTTProgramTitleClass(){
 function getTTTimeClassesFromPT(proTitleClass) {
     // return[] 0:過去 1:放送中 2:放送予定 の背景を司るクラスを番組タイトルクラスから探す
     // programtitleの親の(articleの子の)buttonの子のdivが灰/緑/白の背景を持っているのでそれを探す
-    //　'.'を付けたクラス名で受ける(ここでは付けない)
+    // '.'を付けたクラス名で受ける(ここでは付けない)
     var ret = [null, null, null];
     if (!proTitleClass) {
         proTitleClass = getTTProgramTitleClass();
@@ -5869,7 +5869,7 @@ function setOptionHead() {
                     t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
             }*/
             //AbemaTV Screen Comment Scrollerスクリプトのコメントグラデーションを逆向きに
-            t += '[data-selector="commentPane"] > div {-webkit-mask-image: linear-gradient(transparent 0%, black 50%);mask-image: linear-gradient(transparent 0%, black 50%);}'
+            t += '[data-selector="commentPane"] > div {-webkit-mask-image: linear-gradient(transparent 0%, black 50%);mask-image: linear-gradient(transparent 0%, black 50%);}';
         }
         //t += selComelist+'>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
         //    if(isCustomPostWin){ //1行化
@@ -5954,7 +5954,7 @@ function setOptionHead() {
     }*/
     to = getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 124px;"],';
     to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 104px;"],';
-    to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 48px;"]'
+    to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 48px;"]';
     if(to){
         t += to+'{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
         if (isHidePopBL) {
@@ -6468,7 +6468,7 @@ function usereventFootInfoButClick() {
 function delkakikomitxt(inptxt) {
     if (kakikomitxt == inptxt) {
         kakikomitxt = "";
-        console.log("kakikomitxt reset: inptxt")
+        console.log("kakikomitxt reset: inptxt");
     }
 }
 function usercommentposted(inptxt) {
@@ -6983,9 +6983,9 @@ function copycome(d, hlsw) {
     var eo = EXcomelist;
     var isAnimationIncluded = false;
     var isCopycomeCreated = false;
-    if (comelistClasses.animated) {isAnimationIncluded = eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0}
+    if (comelistClasses.animated) {isAnimationIncluded = eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0;}
     else if (eo.childElementCount>2) {
-        isAnimationIncluded = eo.firstElementChild.className!=eo.childNodes[1].className
+        isAnimationIncluded = eo.firstElementChild.className!=eo.childNodes[1].className;
     } else return;
     //console.log('copycome isA:',isAnimationIncluded,eo.firstElementChild)
     var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(0)' : ''));
@@ -7027,7 +7027,7 @@ function copycome(d, hlsw) {
         d = undefined; //新規作成した場合は全コピー
         //コメ欄でマウスが押されているか
         $('#copycome').mousedown(function (e) { if (e.button != 2) { isComelistMouseDown = true; } });//右クリックには反応しない
-        $('#copycome').mouseup(function () { setTimeout(function () { isComelistMouseDown = false; }, 3000) });//選択し終わってから右クリまで3秒の猶予
+        $('#copycome').mouseup(function () { setTimeout(function () { isComelistMouseDown = false; }, 3000); });//選択し終わってから右クリまで3秒の猶予
         isCopycomeCreated = true;
     }
     var jc = $('#copycomec').children();
@@ -7116,7 +7116,7 @@ function copycome(d, hlsw) {
             if (isUserHighlight) {
                 comeUserHighlight(jc.slice(0, ma.length));
             }
-            if ((isDelOldTime || isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
+            if ((isDelOldTime || isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0);
         }
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
     } else if (d === undefined || copycomecount > 0) {
@@ -7150,7 +7150,7 @@ function copycome(d, hlsw) {
         if (isUserHighlight) {
             comeUserHighlight(jc);
         }
-        if ((isDelOldTime || isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0)
+        if ((isDelOldTime || isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0);
         commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
         if (--copycomecount > 0) {
             //番組ページ読込直後か番組開始直後でcopycomeに残ったままのコメントをfullcopyで上書き消去する
@@ -7430,7 +7430,7 @@ function appendUserNG(ev, inpstr){
                 userNg += "\n" + uidArr[ngsi];
             }
         }
-        console.log('apUsNg append')
+        console.log('apUsNg append');
         arrayUserNgMaker();
         copycome();
     }
@@ -7526,7 +7526,7 @@ function appendNGpermanent(sw) { //sw= 1:ワード 2=ユーザーID
     //NGボタン押下2回目は赤
     paintcopyot(3);
     paintcopyotw(3);
-    setTimeout(copyotuncolor, 800, 2)
+    setTimeout(copyotuncolor, 800, 2);
 }
 function copyotuncolor(mode) {
     //mode 1:一時登録 2:permanent
@@ -8049,7 +8049,7 @@ function onCommentChange(mutations){
                 comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
                 console.log('!aniC&&hasComeAni==true aniC=',comelistClasses.animated);
-            }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0 &&　comelistClasses.progress && nodeClass.indexOf(comelistClasses.progress) >= 0) {
+            }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0 && comelistClasses.progress && nodeClass.indexOf(comelistClasses.progress) >= 0) {
                 //animation部がプログレスバー なにもしない
                 console.log('animation: progress');
             }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0) {
@@ -8408,9 +8408,9 @@ function putNotifyButtonElement(channel, channelName, programID, programTitle, p
                             putNotifyButtonElement(request.channel, request.channelName, request.programID, request.programTitle, request.programTime, clickedButtonParent);
                             if(checkUrlPattern(true) == 1 || checkUrlPattern(true) == 2){setRegistProgsBackground();}
                         } else if (response.result === "notificationDined") {
-                            toast("拡張機能からの通知が拒否されているので通知できません")
+                            toast("拡張機能からの通知が拒否されているので通知できません");
                         } else if (response.result === "pastTimeError") {
-                            toast("既に開始された番組です")
+                            toast("既に開始された番組です");
                         }
                     });
                 });
@@ -8465,14 +8465,14 @@ function putNotifyButton(url) {
     rightContents = contentsWrapper.children().eq(1);
     leftContnts = contentsWrapper.children().eq(0);
     var titleElement = rightContents.find('h2').eq(0);
-    if (titleElement.text() == "") { setTimeout(function () { putNotifyButton(url) }, 1000); console.log("putNotifyButton wait"); return; }
+    if (titleElement.text() == "") { setTimeout(function () { putNotifyButton(url); }, 1000); console.log("putNotifyButton wait"); return; }
     var urlarray = url.substring(17).split("/");
     var channel = urlarray[1];
     var channelName = titleElement.next().text();
     var programID = urlarray[3];
     var programTitle = titleElement.text();
     var programTimeStr = titleElement.nextAll().eq(2).text();
-    console.log(programID, programTitle, channel, channelName, programTimeStr, urlarray)
+    console.log(programID, programTitle, channel, channelName, programTimeStr, urlarray);
     var programTime = programTimeStrToTime(programTimeStr);
     //console.log(programTime)
     var butParent = $('<span class="addNotifyWrapper"></span>').insertAfter(leftContnts.children('div').children('div').eq(0));
@@ -8483,8 +8483,8 @@ function putSerachNotifyButtons() {
     var listWrapper = $('div[role=list]');
     var listItems = $('a[role=listitem]');
     var noContentText = '該当する放送予定の番組はありませんでした';
-    var noContentMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(noContentText)>=0){return e}});
-    if (listItems.length == 0 && noContentMessage.length == 0) { setTimeout(function () { putSerachNotifyButtons() }, 1000); console.log("putSerachNotifyButtons wait"); return; }
+    var noContentMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(noContentText)>=0){return e;}});
+    if (listItems.length == 0 && noContentMessage.length == 0) { setTimeout(function () { putSerachNotifyButtons(); }, 1000); console.log("putSerachNotifyButtons wait"); return; }
     listItems.each(function (i, elem) {
         var linkArea = $(elem);
         var spans = linkArea.children().eq(0).children().eq(1).children('span');
