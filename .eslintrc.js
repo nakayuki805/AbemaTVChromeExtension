@@ -30,12 +30,15 @@ module.exports = {
         "no-unreachable": "off",
         "no-redeclare": "warn",
         "no-empty": "warn",
-        "no-fallthrough": "warn"
+        "no-fallthrough": "warn",
+        "no-useless-escape": "warn",
+        "no-constant-condition": "warn"
     },
     "globals": {
         "$": false,
         "console": false,
         "chrome": false,
-        "browser": false
+        "browser": false,
+        "process": false
     }
 };

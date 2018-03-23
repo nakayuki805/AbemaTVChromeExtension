@@ -3,6 +3,7 @@ import * as $ from "jquery";
 import "./lib/jquery-lib";
 import * as settingslib from './settings';
 import * as getElm from './lib/getAbemaElement';
+import './updatenotify.js';
 
 // edge対応
 if ((typeof chrome === "undefined" || !chrome.extension) && typeof browser !== "undefined") {
@@ -5792,8 +5793,12 @@ function setOptionHead() {
         selComesendinp=alt?".HH_HN":"";
     }
     if(selComesendinp){
-        t += selComesendinp+'{background-color:' + uc + ';color:' + tc + ';}';
-        t += selComesendinp+'+*{background-color:' + cc + ';color:' + tc + ';}';
+        //t += selComesendinp+'{background-color:' + uc + ';color:' + tc + ';}';
+        //t += selComesendinp+'+*{background-color:' + uc + ';color:' + tc + ';}';
+        //↓コメント入力欄が二重枠にならないようにtextareaとその兄弟の背景は透明にしておく
+        t += selComesendinp+'{background-color: transparent;color:' + tc + ';}';
+        t += selComesendinp+'+*{background-color: transparent;color:' + tc + ';}';
+
     }
 
     //EXcomelistのコピー#copycomecがあるので注意する
