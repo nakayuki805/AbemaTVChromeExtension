@@ -1218,7 +1218,7 @@ function PlaybuttonEditor() {
     var pn = -1;
     var bn = -2;
     var titleClass = getTTProgramTitleClass();
-    for (var i = b.length - 1, d, s; i >= 0; i--) {
+    for (let i = b.length - 1, d, s; i >= 0; i--) {
         d = b.eq(i).parent('a');
         s = d.siblings();
         if (!s.is(presentSelector)) {
@@ -1227,7 +1227,7 @@ function PlaybuttonEditor() {
             d.remove();
         }
     }
-    for (var i = 0, j, q, a, u, iumc; i < p.length; i++) {
+    for (let i = 0, j, q, a, u, iumc; i < p.length; i++) {
         q = p.eq(i);
         if (umc && umc.length > 1 && umc[1].length > 0) {
             //チャンネル別番組表ならボタンのリンク先はURLから取得
@@ -2228,8 +2228,8 @@ function openOption() {
         cancelPopacti();
     }
     // var sp = panelopenses.split('');
-    for (var i = 0; i < 4; i++) {
-        for (var j = 0; j < 3; j++) {
+    for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 3; j++) {
             $('#panelcustomTable [type="radio"][name="d' + i + '' + j + '"]').val([panelopenset[i][j]]);
         }
     }
@@ -4009,7 +4009,7 @@ function getElementSingleSelector(ret,sw,remove){
         for(var i=1;i<remove.length;i++) jr=jr.add(remove[i]);
     }
     var tma=tms.replace(rt,"").split(rs);
-    for(var i=0;i<tma.length;i++){
+    for(let i=0;i<tma.length;i++){
         if(!rw.test(tma[i]) && tma[i].indexOf('ext_abm-')<0) continue; //拡張機能が付与したclassは除外
         tms=ren+'.'+tma[i].replace(rt,"");
         jo=$(tms).not(jr);
@@ -4569,13 +4569,13 @@ function getTTLRArrowContainerElement(returnSingleSelector) {
         if (jo.length == 0) return null;
         else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
     }
-    for (var i = 0; i < jo.length; i++) {
+    for (let i = 0; i < jo.length; i++) {
         if ($(EXTTtime).find(jo.eq(i)).length > 0) jo = jo.not(jo.eq(i));
     }
     if (jo.length == 0) return null;
     else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
 
-    for (var i = 0, z; i < jo.length; i++) {
+    for (let i = 0, z; i < jo.length; i++) {
         z = jo.eq(i).css("z-index");
         if (z == "auto" || isNaN(parseInt(z)) || parseInt(z) <= 0) jo = jo.not(jo.eq(i));
     }
@@ -4752,7 +4752,7 @@ function getElementSelector(inpElm,includeID,includeClass,includeIndex,remove){
         ts=pa.eq(i).prop("class");
         if(re.test(ts)){
             tt=ts.split(rd);
-            for(var j=0,k=0;j<tt.length;j++){
+            for(let j=0,k=0;j<tt.length;j++){
                 ts=tt[j].replace(rc,"");
                 if(re.test(ts) && ts.indexOf('ext_abm-')<0){
                     if(includeClass==1){
@@ -4795,7 +4795,7 @@ function getElementSelector(inpElm,includeID,includeClass,includeIndex,remove){
         ts=ts+"#"+ns[0][1];
     }
     if(includeClass>0){
-        for(var j=0;j<ns[0][3].length;j++){
+        for(let j=0;j<ns[0][3].length;j++){
             ts=ts+"."+ns[0][3][j];
         }
     }
@@ -4803,7 +4803,7 @@ function getElementSelector(inpElm,includeID,includeClass,includeIndex,remove){
         ts=ts+":eq("+ns[0][2]+")";
     }
     ps=ts;
-    for(var i=1;i<ns.length-1;i++){
+    for(let i=1;i<ns.length-1;i++){
         if(includeIndex==2){
             ts="*";
         }else{
@@ -5423,6 +5423,7 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     var headh = $(EXhead).height();
     var tprow = tpro.width() + parseInt(tpro.css("padding-left")) + parseInt(tpro.css("padding-right")) + parseInt(tpro.css("margin-left")) + parseInt(tpro.css("margin-right"));
     var par = titlepar;
+    let hmt, fmb;
     switch (par) {
     case "windowtopleft":
     case "windowtopright":
@@ -5473,7 +5474,7 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     case "windowtopright":
     case "headerright":
         if ((isComeTriming && isSureReadComment) && tprow <= 320) break;
-        var hmt = (tproh - 12) + Math.floor((headh - tproh - 12) / 2);
+        hmt = (tproh - 12) + Math.floor((headh - tproh - 12) / 2);
         prehoverContents.css("margin-top", hmt + "px")
             .prev().css("margin-top", hmt + "px")
             ;
@@ -5483,7 +5484,7 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
     case "windowtopleft":
     case "headerleft":
-        var hmt = (tproh + 8 - 18) + Math.floor((headh - tproh - 8 - 18) / 2);
+        hmt = (tproh + 8 - 18) + Math.floor((headh - tproh - 8 - 18) / 2);
         headlogo.css("margin-top", hmt + "px")
             .next().css("margin-top", hmt + "px")
             ;
@@ -5495,7 +5496,7 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
     case "windowbottomright":
     case "footerright":
-        var fmb = tproh;
+        fmb = tproh;
         parexfootcount.css("margin-bottom", fmb + "px")
             .css("height", "unset")
             ;
@@ -5508,7 +5509,7 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
     case "windowbottomleft":
     case "footerleft":
-        var fmb = tproh;
+        fmb = tproh;
         footlogo.css("margin-bottom", fmb + "px")
             .next().css("margin-bottom", fmb + "px")
             ;
@@ -6959,7 +6960,6 @@ function getComeInfo(wdiv){
         var rn = /^今$/;
         var rs = /^(\d+) *秒前$/;
         var rm = /^(\d+) *分前$/;
-        var datetime;
         if (rn.test(timeStr)) {
             datetime = nt;
         } else if (rs.test(timeStr)) {
@@ -7458,7 +7458,7 @@ function addPermanentNG(word, userid) {
         var spPfullng = PfullNg.split(/\r|\n|\r\n/);
         var spPuserng = PuserNg.split(/\r|\n|\r\n/);
         if (word) {
-            for (var ngi = 0; ngi < spPfullng.length; ngi++) {
+            for (let ngi = 0; ngi < spPfullng.length; ngi++) {
                 if (spPfullng[ngi].length == 0 || spPfullng[ngi].match(/^\/\//)) {
                     continue;
                 }
@@ -7481,7 +7481,7 @@ function addPermanentNG(word, userid) {
         }
         b = true;
         if (userid) {
-            for (var ngi = 0; ngi < spPuserng.length; ngi++) {
+            for (let ngi = 0; ngi < spPuserng.length; ngi++) {
                 if (spPuserng[ngi].length == 0 || spPuserng[ngi].match(/^\/\//)) {
                     continue;
                 }
@@ -7716,7 +7716,7 @@ function onairBasefunc() {
         //流れるコメントのうちmovingCommentSecond*2経過したものを削除
         if (isMovingComment) {
             var arMovingComment = $('.movingComment');
-            for (var j = 0; j < arMovingComment.length; j++) {
+            for (let j = 0; j < arMovingComment.length; j++) {
                 //                if(arMovingComment.eq(j).offset().left + arMovingComment.eq(j).width()<=0){
                 //if (arMovingComment.eq(j).offset().left - parseInt(arMovingComment.eq(j)[0].style.left) < 1) {
                 if (parseInt(arMovingComment[j].getAttribute('data-createdSec')) < (onairSecCount - settings.movingCommentSecond*2)) {
@@ -7895,7 +7895,7 @@ function onairBasefunc() {
         }
 
         //コメント位置のTTLを減らす
-        for (var i = 0; i < comeLatestLen; i++) {
+        for (let i = 0; i < comeLatestLen; i++) {
             if (comeLatestPosi[i][1] > 0) {
                 comeLatestPosi[i][1] -= 1;
                 if (comeLatestPosi[i][1] <= 0) {
@@ -7906,7 +7906,7 @@ function onairBasefunc() {
 
         //番組タイトルの更新
         if (EXinfo) {
-            var jo = $(EXinfo).children().not('#copyinfo').find('h2');
+            let jo = $(EXinfo).children().not('#copyinfo').find('h2');
             if (jo.length > 0) {
                 var tp = jo.first().text();
                 if (tp && proTitle != tp) {
@@ -7930,7 +7930,7 @@ function onairBasefunc() {
 
         if (comeMovingAreaTrim) {
 //            var jo = $("object,video").parent();
-            var jo = getElm.getVideo();
+            let jo = getElm.getVideo();
 //            if (jo.length > 0) {
             if (!jo.isEmpty()) {
                 var er = jo[0].getBoundingClientRect();
@@ -8157,8 +8157,8 @@ function onCommentChange(mutations){
             }
             //新着コメがanimationされないときがあるのでanimationが含まれないときはコメ流しもここでやる(下でも同様にコメ流しの処理をしていて多分重複するけどlastMovedCommentTimeで弾けるはず)
             if (isMovingComment && isFirstComeAnimated && !isAnimationAdded) {
-                    var idx, dt, movingStarti=0;
-                    for(var i = 0; i < d; i++){
+                    let idx, dt, movingStarti=0;
+                    for(let i = 0; i < d; i++){
                         idx = d - i - 1;
                         dt = comments[idx]?parseInt(comments[idx][2]):0;
                         if(dt<=lastMovedCommentTime){
@@ -8189,11 +8189,11 @@ function onCommentChange(mutations){
                 putComment(comments[d - i - 1], i, d);
             }*/
             //animation部から新着コメを取得し流す
-            var animationCommentDivs = EXcomelist.children[0].children[0].children;
-            var idx;
-            var movingStarti = 0;
+            let animationCommentDivs = EXcomelist.children[0].children[0].children;
+            let idx;
+            let movingStarti = 0;
             //console.log(animationCommentDivs)
-            for(var i = 0; i < animationCommentDivs.length; i++){
+            for(let i = 0; i < animationCommentDivs.length; i++){
                 idx = animationCommentDivs.length - i - 1;
                 //console.log('pc(animation)',animationCommentDivs[idx].children[0].innerHTML, i, animationCommentDivs.length);
                 if(!animationCommentDivs[idx].firstElementChild.children[0]){
@@ -8201,7 +8201,7 @@ function onCommentChange(mutations){
                     //console.log(animationCommentDivs[idx], EXcomelist.innerHTML);
                     continue;
                 }
-                var cinfo = getComeInfo(animationCommentDivs[idx]);
+                let cinfo = getComeInfo(animationCommentDivs[idx]);
                 var dt = parseInt(cinfo.datetime);
                 //console.log(cinfo)
                 if(dt<=lastMovedCommentTime){

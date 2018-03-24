@@ -25,9 +25,9 @@ module.exports = {
             "always"
         ],
         "no-console": "off",
-        "no-unused-vars": "off",
+        "no-unused-vars": "warn",
         "no-irregular-whitespace": "warn",
-        "no-unreachable": "off",
+        "no-unreachable": "warn",
         "no-redeclare": "warn",
         "no-empty": "warn",
         "no-fallthrough": "warn",

@@ -8,7 +8,7 @@ if ((typeof chrome === "undefined" || !chrome.extension) && typeof browser !== "
 }
 
 var currentUpdateNotifyVersion = 15;//0.13.1の時
-var optionUrl = chrome.extension.getURL("option.html");
+var optionUrl = chrome.extension.getURL("/pages/option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",//表示させたいときはcurrentUpdateNotifyVersionの更新を忘れずに
     "コメントマウスオーバーで同一ユーザーのコメントをハイライト※",
@@ -25,10 +25,13 @@ var notifyContent = [
 ].join("<br>");
 
 function updateInfo(message) {
-    var toastElem = $("<div class='ext-toast' id='updateInfo' style='width:600px;top:20%;left:40%;'><p>" + message + "<br><input type='button' value='閉じる' onclick='$(\"#updateInfo\").hide()' style='color:black;'></p></div>").appendTo("body");
+    var toastElem = $("<div class='ext-toast' id='updateInfo' style='width:600px;top:20%;left:40%;'><p>" + message + "<br><input type='button' value='閉じる' style='color:black;' id='updateInfoCloseBtn'></p></div>").appendTo("body");
     setTimeout(function(){
         toastElem.fadeOut(10000);
     },50000);
+    $('#updateInfoCloseBtn').click(function(){
+        $("#updateInfo").hide();
+    });
 }
 //updateInfo(notifyContent);
 $(function(){
