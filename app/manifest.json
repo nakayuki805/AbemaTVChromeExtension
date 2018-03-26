@@ -33,7 +33,7 @@
 	"web_accessible_resources": [
 		"scripts/contentScript.js",
 		"styles/content.css",
-		"scripts/jquery-3.2.1.min.js",
+		"jquery-3.2.1.min.js",
 		"pages/option.html",
 		"pages/notifylist.html",
 		"images/gear.svg",

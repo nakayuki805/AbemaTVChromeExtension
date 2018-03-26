@@ -7572,7 +7572,7 @@ function mainfunc() { //初回に一度実行しておけば後でURL部分が�
     var csspath = chrome.extension.getURL("/styles/content.css");
     $("<link rel='stylesheet' href='" + csspath + "'>").appendTo("head");
     // jqueryを開発者コンソールから使う
-    var jquerypath = chrome.extension.getURL("/scripts/jquery-3.2.1.min.js");
+    var jquerypath = chrome.extension.getURL("/jquery-3.2.1.min.js");
     $("<script src='" + jquerypath + "'></script>").appendTo("head");
     var injectionpath = chrome.extension.getURL("/scripts/injection.js");
     $("<script src='" + injectionpath + "'></script>").appendTo("head");

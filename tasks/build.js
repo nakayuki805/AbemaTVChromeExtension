@@ -11,6 +11,7 @@ gulp.task('build', gulpSequence(
     'images',
     'fonts',
     'sounds',
+    'rootfiles',
     'chromereload'
   ]
 ))
