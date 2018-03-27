@@ -1399,8 +1399,11 @@ function onresize(oldTranslate) {
     //視聴数の位置調整
     setTimeout(function(){
         if(EXcountview){
-            $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
-            $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
+            $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) - 2 })
+            .offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50})
+            .height($(EXfootcome).parent()[0].getBoundingClientRect().height);
+            $(EXfootcome).parent().addClass('countviewtrans');
+            setOptionHead();
         }
     },2000);
 
@@ -2347,7 +2350,12 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         //視聴数の位置調整
         var fixCountViewLeft = function () {
             if (EXcountview) {
+                let oldLeft = EXcountview.getBoundingClientRect().left;
                 $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
+                $(EXfootcome).parent().addClass('countviewtrans');
+                if(oldLeft != EXcountview.getBoundingClientRect().left){
+                    setOptionHead();
+                }
             }
         };
         setTimeout(fixCountViewLeft, 3000);//コメント数が表示されるまで待つ
@@ -6112,8 +6120,12 @@ function setOptionHead() {
     }
     if(selCountview){
         t += selCountview+'{position:absolute;z-index:11;}';
-        t += selCountview+','+selCountview+'>div{background-color:transparent;}';
-        t += selCountview+'>*{opacity:' + (settings.panelOpacity/255) + ';}';
+        t += selCountview+'{background:rgba(0,0,0,' + (settings.panelOpacity/255) + ');}';
+        t += selCountview+'>div{background:transparent;}';
+
+        t += selCountview+'>div>*{opacity:' + (settings.panelOpacity/255) + ';}';
+        //下から出てくるアニメーション
+        t += selCountview+'{transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);}';
     }
     //視聴数格納
     if (isStoreViewCounter&&selFoot) {
@@ -6142,11 +6154,18 @@ function setOptionHead() {
     //黒帯パネルの透過
     if(selHead&&selFoot){
         t += selFoot+'>div>div:nth-child(3),'+selHead+'{background:rgba(0,0,0,' + (settings.panelOpacity/255) + ')}';
+
         t += selFoot+'>div>div:nth-child(3)>*,'+selHead+'>*{opacity:' + ((settings.panelOpacity/255<0.7)?0.7:(settings.panelOpacity/255)) + '}';
         t += selFoot+'>div>div:nth-child(3)>div:nth-child(1):hover{background:rgba(32,32,32,' + (settings.panelOpacity/255) + ')}';
         //フッターチャンネルアイコンの背景を透過
         var selChLogoDiv = getElementSingleSelector($(EXfoot).find('img').parent().get(0));
         t += selChLogoDiv+'{background-color:transparent !important;}';
+        //フッターの視聴数にかぶる部分を透明にした背景
+        let barcolor = `rgba(0,0,0,${settings.panelOpacity/255})`;
+        let cvb = EXcountview.getBoundingClientRect();
+        let fbb = EXfootcome.parentElement.getBoundingClientRect();
+        let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvb.left}px, transparent ${cvb.left}px, transparent ${cvb.left+cvb.width}px, ${barcolor} ${cvb.left+cvb.width}px, ${barcolor} ${fbb.width}px);`
+        t += selFoot+'>div>div.countviewtrans{background:'+fbbackImage+'}';
     }
  
     //t += selHead+'{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
@@ -7223,7 +7242,7 @@ function comecopy() {
             let t = '<div id="copyotw" class="' + $(EXcomesendinp.parentElement).attr("class") + ' usermade" style="padding:5px 28px 30px 18px;">';
             t += '<a style="position:absolute;top:10px;left:1px;cursor:pointer;"><svg id="closecopyotw" class="usermade" width="16" height="16" style="fill:rgba(255,255,255,0.5);"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="/images/icons/close.svg#svg-body"></use></svg></a>';
             t += '<input type="hidden" id="copyotu" value="">';
-            t += '<textarea id="copyot" class="' + $(EXcomesendinp).attr("class") + '" rows="1" maxlength="100" wrap="soft" style="height:24px;width:264px;padding-left:4px;"></textarea>';
+            t += '<textarea id="copyot" class="' + $(EXcomesendinp).attr("class") + '" rows="1" maxlength="100" wrap="soft" style="height:24px;width:248px;padding-left:4px;border: black solid 1px;"></textarea>';
             t += '<div style="height:24px;pointer-events:none;">　</div>';
             t += '<a id="textNG" style="position:absolute;top:6px;right:1px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.5);padding:0px 1px;letter-spacing:1px;cursor:pointer;">NG</a>';            
             t += '<div style="position:absolute;top:32px;right:1px;">';

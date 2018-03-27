@@ -36,7 +36,7 @@ function updateInfo(message) {
 //updateInfo(notifyContent);
 $(function(){
     chrome.storage.local.get("updateNotifyVer", function (value) {
-        if (process.env.NODE_ENV != 'development' || value.updateNotifyVer == undefined || value.updateNotifyVer < currentUpdateNotifyVersion) {
+        if (process.env.NODE_ENV != 'development' && (value.updateNotifyVer == undefined || value.updateNotifyVer < currentUpdateNotifyVersion)) {
             updateInfo(notifyContent);
             chrome.storage.local.set({updateNotifyVer: currentUpdateNotifyVersion});
         }
