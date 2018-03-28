@@ -18,7 +18,7 @@ function injection_urlChanged(){
     //inj_setRefClass();
     //放送画面
     if(inj_currentLocation.indexOf('https://abema.tv/now-on-air/')>=0){
-        setTimeout(inj_delaysetComment,1000);
+        //setTimeout(inj_delaysetComment,1000);
     }else if(inj_currentLocation.indexOf('https://abema.tv/timetable')>=0){
         //番組表
         setTimeout(function setTTRefClass(){
@@ -73,11 +73,11 @@ function inj_delaysetComment(){
         inj_EXcomelist = jComelist.get(0);
         inj_commentObserver.disconnect();
         inj_commentObserver.observe(inj_EXcomelist, {childList: true});
-        //放送画面→番組表推移時にAbemaがバグるのに対処
-        setTimeout(function(){
+        //放送画面→番組表推移時にAbemaがバグるのに対処→直ったようなのでコメントアウト
+        /*setTimeout(function(){
             //なぜか存在しないrefs.animatableに対してremoveEventListenerしようとするのでダミーの要素いれておく
             inj_findReact(inj_EXcomelist.parentElement).refs.animatable = document.createElement('div');
-        },1000);
+        },1000);*/
     }else{
         console.log('waitng inj_delaysetComment()');
         setTimeout(inj_delaysetComment, 1000);

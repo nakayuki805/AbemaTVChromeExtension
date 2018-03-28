@@ -313,7 +313,7 @@ var previousLocation = currentLocation;//URL変化前のURL
 var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
 var isEdge = window.navigator.userAgent.toLowerCase().indexOf("edge") != -1;
 var headerHeight = 80;
-var footerHeight = 69;
+var footerHeight = 72;
 var commentNum = 0;
 var comeLatestPosi = [];
 var comeTTLmin = 3;
@@ -1396,16 +1396,6 @@ function getChannelNameOnTimetable(channel) { //番組表ページのチャン�
 function onresize(oldTranslate) {
     if (checkUrlPattern(true) != 3) return;
     //console.log("onresize()");
-    //視聴数の位置調整
-    setTimeout(function(){
-        if(EXcountview){
-            $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) - 2 })
-            .offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50})
-            .height($(EXfootcome).parent()[0].getBoundingClientRect().height);
-            $(EXfootcome).parent().addClass('countviewtrans');
-            setOptionHead();
-        }
-    },2000);
 
     var mode43=isDAR43;
     var resizeType = (settings.isResizeScreen ? 2 : 0)+(mode43?1:0);//0:左枠内で中央,1:左枠内で最大(4:3用),2:ウィンドウ内で最大,3:ウィンドウ内で最大(4:3用),
@@ -1458,10 +1448,21 @@ function onresize(oldTranslate) {
     tar.css("transform",r);
     tar.css('transition-delay', '0.4s');
     var isVideoResized = r != oldTranslate; ///translate[XY]\([^0][-0-9e\.]*px\)/.test(r);
-    console.log("screen resized");//,isVideoResized,r);
     movieWidth=parseInt(tar.width());
     if(isVideoResized){//映像のリサイズが落ち着くまで(translateが落ち着くまで)リトライする
+        console.log("screen resizing");//,isVideoResized,r);
         setTimeout(onresize, 1000, r);
+    }else{
+        console.log('screen resize complete');
+        //視聴数の位置調整
+        setTimeout(function(){
+            if(EXcountview){
+                let cvb = EXcountview.getBoundingClientRect();
+                $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-cvb.width/2-50});
+                $(EXfootcome).parent().addClass('countviewtrans');
+                setOptionHead();
+            }
+        },2000);
     }
 }
 /*
@@ -3931,7 +3932,7 @@ function setEXs() {
     if (! EXmenu          &&!( EXmenu          = getMenuElement()                ) /*&& ($('.Fb_Fi').length == 0 || !( EXmenu          = $('.Fb_Fi')[0] ))*/) b = false;
     if (! EXfoot          &&!( EXfoot          = getFooterElement()              ) /*&& ($('.v3_v_').length == 0 || !( EXfoot          = $('.v3_v_')[0] ))*/) b = false;// console.log("foot"); }//TVContainer__footer-container___
     if (! EXfootcome      &&!( EXfootcome      = getFootcomeElement()            ) /*&& ($('.mb_mo').length == 0 || !( EXfootcome      = $('.mb_mo')[0] ))*/) b = false;// console.log("footcome"); }//右下の入れ物
-    if (! EXcountview     &&!( EXcountview     = getViewCounterElement()         ) /*&& ($('.Eu_e' ).length == 0 || !( EXcountview     = $('.Eu_e' )[0] ))*/) b = false;// console.log("footcountview"); }//閲覧数
+    if (! EXcountview     &&!( EXcountview     = getElm.getViewCounterElement()[0]         ) /*&& ($('.Eu_e' ).length == 0 || !( EXcountview     = $('.Eu_e' )[0] ))*/) b = false;// console.log("footcountview"); }//閲覧数
     if (! EXfootcountcome &&!( EXfootcountcome = getFootcomeBtnElement()         ) /*&& ($('.JH_e' ).length == 0 || !( EXfootcountcome = $('.JH_e' )[0] ))*/) b = false;// console.log("footcountcome"); }//コメント数
     if (! EXside          &&!( EXside          = getSideElement()                ) /*&& ($('.v3_v5').length == 0 || !( EXside          = $('.v3_v5')[0] ))*/) b = false;// console.log("side"); }//TVContainer__side___
 //    if (! EXchli          &&!( EXchli          = getChannelListElement()         ) /*&& ($('.mT_e' ).length == 0 || !( EXchli          = $('.mT_e' )[0] ))*/) b = false;// console.log("chli"); }
@@ -4073,29 +4074,7 @@ function getFootcomeElement(returnSingleSelector) {
     if($(ret).is(EXfoot)){console.log("?footcome(ret=EXfoot)");return null;}
     return returnSingleSelector?getElementSingleSelector(ret):ret;
 }
-function getViewCounterElement(returnSingleSelector) {
-    //console.log("?viewcounter");
-    //ズバリ視聴数と書かれた小さい要素をviewcounterとする
-    //見た目が変わるので探索に注意する
-    var ret = null;
-    var pa=document.getElementsByTagName("p");
-    for(var i=0;i<pa.length;i++){
-        if (pa[i].textContent.indexOf("視聴数") < 0) continue;
-        ret=pa[i];
-        break;
-    }
-    if(!ret){console.log("?viewcounter");return null;}
-    var rep=ret.parentElement;
-    var b=rep.getBoundingClientRect();
-    while(rep.tagName.toUpperCase()!="BODY"&&b.width<window.innerWidth/2&&b.height<window.innerHeight/4&&$(rep).children('div').length<2){
-        //console.log(rep,b);
-        ret=rep;
-        rep=ret.parentElement;
-        b=rep.getBoundingClientRect();
-    }
-    if(rep.tagName.toUpperCase()=="BODY"){console.log("?viewcounter");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
-}
+
 function getFootcomeBtnElement(returnSingleSelector){
     if(!EXfootcome) return null;
     var ret=$(EXfootcome).find("button")[0];
@@ -6119,13 +6098,16 @@ function setOptionHead() {
         selCountview=alt?".v3_wX":"";
     }
     if(selCountview){
-        t += selCountview+'{position:absolute;z-index:11;}';
-        t += selCountview+'{background:rgba(0,0,0,' + (settings.panelOpacity/255) + ');}';
+        t += selCountview+'{position:fixed;z-index:11;bottom:0px;';
+        t += 'background:rgba(0,0,0,' + (settings.panelOpacity/255) + ');';
+        //下から出てくるアニメーション
+        t += 'transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);';
+        //パディング
+        t += 'padding:4px 0px;';//4=(footerHeight-EXcountview.getBoundingClientRect().height)/2)
+        t += '}';
         t += selCountview+'>div{background:transparent;}';
 
         t += selCountview+'>div>*{opacity:' + (settings.panelOpacity/255) + ';}';
-        //下から出てくるアニメーション
-        t += selCountview+'{transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);}';
     }
     //視聴数格納
     if (isStoreViewCounter&&selFoot) {
