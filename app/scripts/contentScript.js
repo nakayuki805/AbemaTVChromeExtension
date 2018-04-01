@@ -944,7 +944,7 @@ function timetabledtfix() {
                     break;
                 }
             }
-            $(EXTTbody).parent().parent().parent().parent().scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbody).width()+axisWidth));
+            $(EXTTbody).parent().parent().parent().parent().scrollLeft(Math.min(chLinkWidth * visibleChLinkIndex, chLinkWidth*allowChannelNum.length-$(EXTTbodyS).width()+axisWidth));
         }
         if (!isExpandFewChannels) {
             timetableWidth = axisWidth + chLinkWidth * allowChannelNum.length;
@@ -1458,9 +1458,9 @@ function onresize(oldTranslate) {
         setTimeout(function(){
             if(EXcountview){
                 let cvb = EXcountview.getBoundingClientRect();
-                $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-cvb.width/2-50});
+                $(EXcountview).css('position', 'fixed').offset({left: EXfootcome.getBoundingClientRect().left-cvb.width/2-50});
                 $(EXfootcome).parent().addClass('countviewtrans');
-                setOptionHead();
+                setFooterBGStyle();
             }
         },2000);
     }
@@ -2352,10 +2352,10 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         var fixCountViewLeft = function () {
             if (EXcountview) {
                 let oldLeft = EXcountview.getBoundingClientRect().left;
-                $(EXcountview).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
+                $(EXcountview).css('position', 'fixed').offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
                 $(EXfootcome).parent().addClass('countviewtrans');
                 if(oldLeft != EXcountview.getBoundingClientRect().left){
-                    setOptionHead();
+                    setFooterBGStyle();
                 }
             }
         };
@@ -6142,12 +6142,6 @@ function setOptionHead() {
         //フッターチャンネルアイコンの背景を透過
         var selChLogoDiv = getElementSingleSelector($(EXfoot).find('img').parent().get(0));
         t += selChLogoDiv+'{background-color:transparent !important;}';
-        //フッターの視聴数にかぶる部分を透明にした背景
-        let barcolor = `rgba(0,0,0,${settings.panelOpacity/255})`;
-        let cvb = EXcountview.getBoundingClientRect();
-        let fbb = EXfootcome.parentElement.getBoundingClientRect();
-        let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvb.left}px, transparent ${cvb.left}px, transparent ${cvb.left+cvb.width}px, ${barcolor} ${cvb.left+cvb.width}px, ${barcolor} ${fbb.width}px);`
-        t += selFoot+'>div>div.countviewtrans{background:'+fbbackImage+'}';
     }
  
     //t += selHead+'{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
@@ -6158,9 +6152,33 @@ function setOptionHead() {
         t += selInfo+'>#copyinfo{width:100%;padding:15px;}';
     }
 
-    $('head>link[title="usermade"]').remove();
-    $("<link title='usermade' rel='stylesheet' href='data:text/css," + encodeURIComponent(t) + "'>").appendTo("head");
+    let styleLink = $('head>link#extstyle');
+    let dataUri = 'data:text/css,' + encodeURIComponent(t);
+    if(styleLink.isEmpty()){
+        styleLink =$("<link title='usermade' id='extstyle' rel='stylesheet' href='" + dataUri + "'>").appendTo("head");
+    }else{
+        styleLink.attr('href', dataUri);
+    }
+    setFooterBGStyle();
     console.log("setOptionHead ok");
+}
+function setFooterBGStyle(){
+    let t='';
+    let selFoot=getElementSingleSelector(EXfoot);
+    if($(selFoot).isEmpty()) return;
+    //フッターの視聴数にかぶる部分を透明にした背景
+    let barcolor = `rgba(0,0,0,${settings.panelOpacity/255})`;
+    let cvb = EXcountview.getBoundingClientRect();
+    let fbb = EXfootcome.parentElement.getBoundingClientRect();
+    let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvb.left}px, transparent ${cvb.left}px, transparent ${cvb.left+cvb.width}px, ${barcolor} ${cvb.left+cvb.width}px, ${barcolor} ${fbb.width}px);`
+    t += selFoot+'>div>div.countviewtrans{background:'+fbbackImage+'}';
+    let dataUri = 'data:text/css,' + encodeURIComponent(t);
+    let footerBGstyle = $('#footerBGstyle');
+    if(footerBGstyle.isEmpty()){
+        footerBGstyle = $("<link title='usermade' id='footerBGstyle' rel='stylesheet' href='" + dataUri + "'>").appendTo("head");
+    }else{
+        footerBGstyle.attr('href', dataUri);
+    }
 }
 function setOptionElement() {
     if (checkUrlPattern(true) != 3) return;
