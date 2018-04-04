@@ -1458,6 +1458,9 @@ function onresize(oldTranslate) {
         setTimeout(function(){
             if(EXcountview){
                 let cvb = EXcountview.getBoundingClientRect();
+               // let cvWidth = Math.ceil(cvb.width/2)*2;//2で割り切れるよう切り上げ
+                //console.log(cvWidth,$(EXcountview).width())
+                //$(EXcountview).width(cvWidth);
                 $(EXcountview).css('position', 'fixed').offset({left: EXfootcome.getBoundingClientRect().left-cvb.width/2-50});
                 $(EXfootcome).parent().addClass('countviewtrans');
                 setFooterBGStyle();
@@ -2352,6 +2355,9 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         var fixCountViewLeft = function () {
             if (EXcountview) {
                 let oldLeft = EXcountview.getBoundingClientRect().left;
+                //let cvWidth = Math.ceil(EXcountview.getBoundingClientRect().width/2)*2;//2で割り切れるよう切り上げ
+                //console.log(cvWidth,$(EXcountview).width())
+                //$(EXcountview).width(cvWidth);
                 $(EXcountview).css('position', 'fixed').offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
                 $(EXfootcome).parent().addClass('countviewtrans');
                 if(oldLeft != EXcountview.getBoundingClientRect().left){
@@ -4229,7 +4235,7 @@ function getComeListElement(returnSingleSelector){
     }
     if(!ret){console.log("?comelist(time notfound)");return null;}
     ret=null;
-    //console.log(jo)
+    console.log(jo)
     for(let i=jo.length-1,j;i>=0;i--){
         j=jo.eq(i);
         if(j.find(EXcomesend).length>0) continue;
@@ -6170,7 +6176,10 @@ function setFooterBGStyle(){
     let barcolor = `rgba(0,0,0,${settings.panelOpacity/255})`;
     let cvb = EXcountview.getBoundingClientRect();
     let fbb = EXfootcome.parentElement.getBoundingClientRect();
-    let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvb.left}px, transparent ${cvb.left}px, transparent ${cvb.left+cvb.width}px, ${barcolor} ${cvb.left+cvb.width}px, ${barcolor} ${fbb.width}px);`
+    let cvLeft = Math.round(cvb.left);
+    let cvWidth = Math.round(cvb.width);
+    let fbWidth = Math.round(fbb.width);
+    let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvLeft-1}px, transparent ${cvLeft}px, transparent ${cvLeft+cvWidth-1}px, ${barcolor} ${cvLeft+cvWidth}px, ${barcolor} ${fbWidth}px);`
     t += selFoot+'>div>div.countviewtrans{background:'+fbbackImage+'}';
     let dataUri = 'data:text/css,' + encodeURIComponent(t);
     let footerBGstyle = $('#footerBGstyle');
