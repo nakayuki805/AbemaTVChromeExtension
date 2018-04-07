@@ -1,16 +1,17 @@
-import 'chromereload/devonly';
+//import 'chromereload/devonly';//これがあるとfirefoxで動かなくなるしこの拡張には拡張リロード時に通知ポップアップをクリックしてAbemaのページをリロードする機能があるからcontent scriptには不要かと
 import * as $ from "jquery";
 import "./lib/jquery-lib";
 import * as settingslib from './settings';
 import * as getElm from './lib/getAbemaElement';
+import * as getInfo from './lib/getAbemaInfo';
 import './updatenotify.js';
 
 // edge対応
-if ((typeof chrome === "undefined" || !chrome.extension) && typeof browser !== "undefined") {
-    this.chrome = chrome || browser;
-}
+if (process.env.VENDOR === 'edge') {
+    let chrome = chrome || browser;
+}console.log(process.env.VENDOR);
 
-var settings = {};
+var settings = settingslib.defaultSettings;
 //debug
 /*
 jQuery.noConflict();
@@ -45,6 +46,12 @@ $.fn.children = $.extend(function children(){
 window.logEval = function(varName) {
     console.log(eval(varName));
 };
+window.logGetInfo = function(name) {
+    console.log(getInfo[name]());
+}
+window.logGetElm = function(name){
+    console.log(getElm[name]());
+}
 /*設定
 拡張機能のオプション画面から設定できます。
 以下の変数のコメントにある機能を利用する場合はtrue、利用しない場合はfalseを代入してください。
@@ -185,7 +192,8 @@ function setStorage(items, callback) {
     }
 }
 //設定のロード
-getStorage(null, function (value) {
+(async function () {
+    let value = await settingslib.getStorage();
     $.extend(settings, value);
     settings.isResizeScreen = value.resizeScreen || false;
     settings.isDblFullscreen = value.dblFullscreen || false;
@@ -305,7 +313,7 @@ getStorage(null, function (value) {
     isShareNGuser = value.isShareNGuser || false;
     minResolution = (value.minResolution!==undefined)?value.minResolution:0;
     maxResolution = (value.maxResolution!==undefined)?value.maxResolution:2160;
-});
+})();
 
 var currentLocation = window.location.href;
 var previousLocation = currentLocation;//URL変化前のURL
@@ -1461,8 +1469,9 @@ function onresize(oldTranslate) {
                // let cvWidth = Math.ceil(cvb.width/2)*2;//2で割り切れるよう切り上げ
                 //console.log(cvWidth,$(EXcountview).width())
                 //$(EXcountview).width(cvWidth);
-                $(EXcountview).css('position', 'fixed').offset({left: EXfootcome.getBoundingClientRect().left-cvb.width/2-50});
-                $(EXfootcome).parent().addClass('countviewtrans');
+                let footer = $(EXfootcome).parent().addClass('countviewtrans');
+                $(EXcountview).css({'position': 'fixed', 'margin-bottom': footer.css('margin-bottom'), 'height': footer.height()+'px'}).offset({left: EXfootcome.getBoundingClientRect().left-cvb.width/2-50});
+                
                 setFooterBGStyle();
             }
         },2000);
@@ -1617,9 +1626,6 @@ function toggleFullscreen() {
     });
     setTimeout(onresize, 1000);
 }
-function getChannelByURL() {
-    return (location.href.match(/https:\/\/abema\.tv\/now-on-air\/([-\w]+)/) || [null, null])[1];
-}
 function postShareNGwords(words, channel) {
     var postWords = [];
     for(var i=0; i < words.length; i++) {
@@ -1672,7 +1678,7 @@ function postShareNGusers(users, channel) {
     });
 }
 function applySharedNG() {
-    var channel = getChannelByURL();
+    var channel = getInfo.getChannelByURL();
     isNGShareInterval = true;
     getJson(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
         if (settings.isShareNGword) {
@@ -1737,7 +1743,7 @@ function arrayFullNgMaker() {
         arFullNg.push(spfullng[ngi]);
     }
     if (settings.isShareNGword) {
-        postShareNGwords(arFullNg, getChannelByURL());
+        postShareNGwords(arFullNg, getInfo.getChannelByURL());
     }
 }
 function arrayUserNgMaker() {
@@ -1751,7 +1757,7 @@ function arrayUserNgMaker() {
         arUserNg.push(splitedUserNg[ngi]);
     }
     if (isShareNGuser) {
-        postShareNGusers(arUserNg, getChannelByURL());
+        postShareNGusers(arUserNg, getInfo.getChannelByURL());
     }
 }
 
@@ -2358,8 +2364,8 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
                 //let cvWidth = Math.ceil(EXcountview.getBoundingClientRect().width/2)*2;//2で割り切れるよう切り上げ
                 //console.log(cvWidth,$(EXcountview).width())
                 //$(EXcountview).width(cvWidth);
-                $(EXcountview).css('position', 'fixed').offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
-                $(EXfootcome).parent().addClass('countviewtrans');
+                let footer = $(EXfootcome).parent().addClass('countviewtrans');
+                $(EXcountview).css({'position': 'fixed', 'margin-bottom': footer.css('margin-bottom'), 'height': footer.height()+'px'}).offset({left: EXfootcome.getBoundingClientRect().left-EXcountview.getBoundingClientRect().width/2-50});
                 if(oldLeft != EXcountview.getBoundingClientRect().left){
                     setFooterBGStyle();
                 }
@@ -2384,7 +2390,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
 
         //放送中一覧のスクロール
         //すぐだと失敗する？からinfo読んでからやる
-        let cn = getChannelByURL();
+        let cn = getInfo.getChannelByURL();
         if (cn&&EXchli) $(EXchli).scrollTop($(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
     }
     if(!isChli&&(EXchli=getChannelListElement())){
@@ -2394,7 +2400,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         isChli=true;
         //放送中一覧のスクロール
         //↑のinfoと同じもの
-        let cn = getChannelByURL();
+        let cn = getInfo.getChannelByURL();
         if (cn&&isInfo) $(EXchli).scrollTop($(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
 
     }
@@ -3936,7 +3942,7 @@ function setEXs() {
     if (                                                                                  $('#main' ).length == 0 || !( EXmain          = $('#main' )[0] ))    b = false;// console.log("#main"); }
     if (! EXhead          &&!( EXhead          = getElm.getHeaderElement()[0]              ) /*&& ($('.P_R'  ).length == 0 || !( EXhead          = $('.P_R'  )[0] ))*/) b = false;// console.log("head"); }//AppContainer__header-container___
     if (! EXmenu          &&!( EXmenu          = getMenuElement()                ) /*&& ($('.Fb_Fi').length == 0 || !( EXmenu          = $('.Fb_Fi')[0] ))*/) b = false;
-    if (! EXfoot          &&!( EXfoot          = getFooterElement()              ) /*&& ($('.v3_v_').length == 0 || !( EXfoot          = $('.v3_v_')[0] ))*/) b = false;// console.log("foot"); }//TVContainer__footer-container___
+    if (! EXfoot          &&!( EXfoot          = getElm.getFooterElement()[0]              ) /*&& ($('.v3_v_').length == 0 || !( EXfoot          = $('.v3_v_')[0] ))*/) b = false;// console.log("foot"); }//TVContainer__footer-container___
     if (! EXfootcome      &&!( EXfootcome      = getFootcomeElement()            ) /*&& ($('.mb_mo').length == 0 || !( EXfootcome      = $('.mb_mo')[0] ))*/) b = false;// console.log("footcome"); }//右下の入れ物
     if (! EXcountview     &&!( EXcountview     = getElm.getViewCounterElement()[0]         ) /*&& ($('.Eu_e' ).length == 0 || !( EXcountview     = $('.Eu_e' )[0] ))*/) b = false;// console.log("footcountview"); }//閲覧数
     if (! EXfootcountcome &&!( EXfootcountcome = getFootcomeBtnElement()         ) /*&& ($('.JH_e' ).length == 0 || !( EXfootcountcome = $('.JH_e' )[0] ))*/) b = false;// console.log("footcountcome"); }//コメント数
@@ -3989,7 +3995,7 @@ function setEXs() {
     //if ((EXwatchingstr = $(EXchli).children('[class*="styles__current___"]').contents().find('img[class*="styles__logo___"]').prop("alt") || getEXWatchingStr()) == null) { b = false; }
     //else if ((EXwatchingnum = $(EXobli).contents().find('img[alt=' + EXwatchingstr + ']').parents().index()) == null) { b = false; }
     //else {
-    var cn = getChannelByURL();
+    var cn = getInfo.getChannelByURL();
     if (cn){
         $(EXchli).scrollTop($(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
         //$(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__current___"]').index() * 85 - $(EXside).position().top);
@@ -4040,33 +4046,10 @@ function getElementSingleSelector(ret,sw,remove){
     console.log(ret);
     return null;
 }
-function getFooterElement(returnSingleSelector) {
-    //console.log("?foot");
-    //左下のチャンネルロゴを子孫にもち下方にあるものをfooterとする
-    var cn = getChannelByURL();
-    if (!cn){console.log("?footer");return null;}
-    var jo = $('img[src*="/channels/logo/' + cn + '"]');
-    var ret = null;
-    for (let i = 0,e,b;(e=jo.get(i))&&(b=e.getBoundingClientRect()); i++) {
-        if (b.top < window.innerHeight * 3 / 4 || b.left+b.width > window.innerWidth / 4) continue;
-        ret=e;
-        break;
-    }
-    if(!ret){console.log("?footer");return null;}
-    var rep=ret.parentElement;
-    var b=rep.getBoundingClientRect();
-    while(rep.tagName.toUpperCase()!="BODY"&&b.top>window.innerHeight*3/4){
-        ret=rep;
-        rep=ret.parentElement;
-        b=rep.getBoundingClientRect();
-    }
-    if(rep.tagName.toUpperCase()=="BODY"){console.log("?footer");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
-}
 function getFootcomeElement(returnSingleSelector) {
     //console.log("?footcome");
     //コメントアイコンを孫にもち左下のチャンネルロゴと共通の親をもつものをfootcomeとする
-    var cn = getChannelByURL();
+    var cn = getInfo.getChannelByURL();
     if (!cn){console.log("?footcome(!cn)");return null;}
     var reb = $(EXfoot).find('img[src*="/channels/logo/' + cn + '"]').get(0);
     if(!reb){console.log("?footcome(!reb)");return null;}
@@ -6179,7 +6162,7 @@ function setFooterBGStyle(){
     let cvLeft = Math.round(cvb.left);
     let cvWidth = Math.round(cvb.width);
     let fbWidth = Math.round(fbb.width);
-    let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvLeft-1}px, transparent ${cvLeft}px, transparent ${cvLeft+cvWidth-1}px, ${barcolor} ${cvLeft+cvWidth}px, ${barcolor} ${fbWidth}px);`
+    let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvLeft}px, transparent ${cvLeft}px, transparent ${cvLeft+cvWidth}px, ${barcolor} ${cvLeft+cvWidth}px, ${barcolor} ${fbWidth}px);`
     t += selFoot+'>div>div.countviewtrans{background:'+fbbackImage+'}';
     let dataUri = 'data:text/css,' + encodeURIComponent(t);
     let footerBGstyle = $('#footerBGstyle');
@@ -8300,15 +8283,16 @@ function chkurl() {
 //onloadからも呼ばれる
 function checkUrlPattern(url) {
     //urlがtrueなら各部の実行はせず出力のみ(無限再試行でもURL切替で終了できるようにするURL判定用)
+    //↑判定出力はgetInfo.determineUrl(url)に移行
     //urlがfalseなら各部の実行はせずpreviousLocationによる出力のみ
     var output = false;
     if (url === true) { url = currentLocation; output = true; } 
     else if (url === false) { url = previousLocation; output = true; }
     else {
-        console.log("cup", url)
-            ;
+        console.log("cup", url);
     }
-    if (/https:\/\/abema.tv\/channels\/[-a-z0-9]+\/slots\/[a-zA-Z\d]+/.test(url)) {
+    switch(getInfo.determineUrl(url)){
+    case getInfo.URL_SLOTPAGE:
         //番組個別ページ
         if (output) {
             return 0;
@@ -8321,31 +8305,20 @@ function checkUrlPattern(url) {
             onairCleaner();
             delaysetNotOA();
         }
-    } else if (/^https:\/\/abema.tv\/timetable(?:$|\/dates\/.*)/.test(url)) {
+        break;
+    case getInfo.URL_DATETABLE:
         //日付別番組表
         if (output) {
             return 1;
         } else {
             //番組表(チャンネル個別ではない)のとき
-            var chBanners = $('[class*="styles__channel-link___"]'); //todo
-            chBanners.each(function () {
-                var chBanner = $(this);
-                var chBannerPos = chBanner.offset();
-                var chTableUrl = chBanner.attr("href");
-                var channel = chTableUrl.match(/\/timetable\/channels\/([-a-z0-9]+)/)[1];
-                var channelUrl = "https://abema.tv/now-on-air/" + channel;
-                //console.log(channelUrl)
-                var onairpageLink = $('<div style="border:solid 1px black;background-color:white;position:absolute;display:none;" class="onairpageLink"><a href="' + channelUrl + '">放送画面</a></div>').appendTo(chBanner);
-                //chBannerPos.top += chBanner.height();
-                //chBannerPos.left += (chBanner.width()+onairpageLink.width())/2;
-                //onairpageLink.offset(chBannerPos);
-
-            });
+            //番組表に再生ボタンを追加する機能があるため、ここにあった放送画面へのリンクは廃止
             onairCleaner();
             delaysetNotOA();
             waitforloadtimetable(url);
         }
-    } else if (/^https:\/\/abema.tv\/timetable\/channels\/.*/.test(url)) {
+        break;
+    case getInfo.URL_CHANNELTABLE:
         //チャンネル別番組表
         if (output) {
             return 2;
@@ -8354,14 +8327,16 @@ function checkUrlPattern(url) {
             delaysetNotOA();
             waitforloadtimetable(url);
         }
-    } else if (/^https:\/\/abema.tv\/now-on-air\/.*/.test(url)) {
+        break;
+    case getInfo.URL_ONAIR:
         //放送ページ
         if (output) {
             return 3;
         } else {
             onairfunc();
         }
-    } else if (/https:\/\/abema.tv\/search\?q=.+/.test(url)) {
+        break;
+    case getInfo.URL_SEARCH:
         //番組検索結果(放送予定の番組)
         if (output) {
             return 4;
@@ -8370,7 +8345,8 @@ function checkUrlPattern(url) {
             delaysetNotOA();
             putSerachNotifyButtons();
         }
-    } else if (/https:\/\/abema.tv\/my\/lists\/reservation/.test(url)) {
+        break;
+    case getInfo.URL_RESERVATION:
         //公式の視聴予約一覧
         if (output) {
             return 5;
@@ -8392,7 +8368,8 @@ function checkUrlPattern(url) {
                 }
             },500);
         }
-    } else {
+        break;
+    default:
         // それ以外のページ
         if (output) {
             return -1;
@@ -8400,7 +8377,7 @@ function checkUrlPattern(url) {
             onairCleaner();
             delaysetNotOA();
         }
-
+        break;
     }
 }
 
