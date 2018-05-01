@@ -27,6 +27,7 @@ import * as $ from 'jquery';
             if (option.left12r && b.left<window.innerWidth/2) return false;
             if (option.left34r && b.left<window.innerWidth*3/4) return false;
             if (option.right14r && b.left+b.width<window.innerWidth/4) return false;
+            if (option.right14l && b.left+b.width>window.innerWidth/4) return false;
             if (option.right12r && b.left+b.width<window.innerWidth/2) return false;
             if (option.right12l && b.left+b.width>window.innerWidth/2) return false;
             if (option.right34l && b.left+b.width>window.innerWidth*3/4) return false;

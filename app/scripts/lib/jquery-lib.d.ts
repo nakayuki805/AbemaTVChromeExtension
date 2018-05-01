@@ -13,6 +13,7 @@ interface rectFilterOption{
     left12r?: boolean;
     left34r?: boolean;
     right14r?: boolean;
+    right14l?: boolean;
     right12r?: boolean;
     right12l?: boolean;
     right34l?: boolean;

@@ -708,6 +708,7 @@ export var ComeColorSettingList: Setting[] = [
     ];
 interface RadioSetting {
     "name": string,
+    "type": string,
     "list": (string|number)[][][],
     "default": string|number,
     "range"?: any//エラー押さえ込み
@@ -715,6 +716,7 @@ interface RadioSetting {
 export var RadioSettingList = [
     {
         "name": "timePosition",
+        "type": "radio",
         "list":[
             [["windowtop","ウィンドウの右上（常時表示）"]],
             [["windowbottom","ウィンドウの右下（常時表示）"]],
@@ -727,6 +729,7 @@ export var RadioSettingList = [
     },
     {
         "name": "protitlePosition",
+        "type": "radio",
         "list":[
             [
                 ["windowtopleft","ウィンドウの左上（常時表示）"],
@@ -751,6 +754,7 @@ export var RadioSettingList = [
         "default": "windowtopleft"
     },{
         "name": "proSamePosition",
+        "type": "radio",
         "list":[[
                 ["over","重ねる"],
                 ["vertical","縦"],
@@ -760,10 +764,12 @@ export var RadioSettingList = [
         "default": "over"
     },{
         "name": "panelopenset",
+        "type": "radio",
         "list":[[[255879,"デフォルト"],[531440,"常に表示"],[531441,"カスタム"]]],
         "default": 255879
     },{
         "name": "highlightNewCome",
+        "type": "radio",
         "list":[[
                 [0,"なし"],
                 [1,"先頭マーク"],
@@ -773,6 +779,7 @@ export var RadioSettingList = [
         "default": 0
     },{
         "name": "highlightComeColor",
+        "type": "radio",
         "list":[[
                 [0,"黄"],
                 [1,"橙"],
@@ -992,6 +999,9 @@ function _flatSettings(){
 }
 export function valueFiler(name: string, value: boolean|string|number){
     let retVal = value;
+    if(flatSettings[name].type === 'number' || flatSettings[name].type === 'range'){
+        retVal = Number(retVal);
+    }
     if(flatSettings[name].range !== undefined){
         const range = flatSettings[name].range;
         if(range[0]!==undefined) retVal = Math.max(range[0], Number(retVal));

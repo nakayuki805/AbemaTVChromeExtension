@@ -21,7 +21,7 @@ export function getFooterElement() {
     let channelName = getInfo.getChannelByURL();
     if (!channelName){console.log("?footer(!channelName)");return $([]);}
     let logo = $('img[src*="/channels/logo/' + channelName + '"]');
-    let ret = logo.rectFilter({top34d: true, right14r: true}).first();
+    let ret = logo.rectFilter({top34d: true, right14l: true}).first();
     if(ret.isEmpty()){console.log("?footer(empty ret)");return $([]);}
     return ret.parents().rectFilter({top34d: true, notBodyParent: true}).last();
 }
