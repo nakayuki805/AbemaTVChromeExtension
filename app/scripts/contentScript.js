@@ -3998,18 +3998,17 @@ function getInfoElement(returnSingleSelector) {
     //console.log("?info");
     //ズバリ番組概要と書かれた要素を孫にもち右方にあるものをinfoとする
     //copyinfo後だとinfoのdisplay:noneでclientrectが取れない
-    var ret = null;
-    var h3a=document.getElementsByTagName('h3');
-    for(var i=0,t;i<h3a.length;i++){
-        if (h3a[i].textContent.indexOf("番組概要") < 0) continue;
-        ret=h3a[i];
-        break;
-    }
+    let ret = null;
+    let h3a=document.getElementsByTagName('h3');
+    ret = Array.from(h3a).filter(e=>{return e.textContent.indexOf("詳細情報")>=0})[0];
     if(!ret){
-        //CM中など↑で取得できないことがあるのでEXchliの隣を使う
+        //CM中など↑で取得できないことがあるのでEXchliの次もしくはsideButtonの次の次を使う
         if(EXchli){
             ret = $(EXchli).next().get(0);
             console.log("?info -> EXchli next");
+        }else if(EXside){
+            ret = $(EXside).next().next().get(0);
+            console.log("?info -> EXside next next");
         }
         if(!ret){console.log("?info");return null;}
     }

@@ -13,7 +13,7 @@ function getPackFileType () {
   }
 }
 
-gulp.task('pack', ['build'], () => {
+gulp.task('pack', gulp.series('build', () => {
   let name = packageDetails.name
   let version = packageDetails.version
   let filetype = getPackFileType()
@@ -26,4 +26,4 @@ gulp.task('pack', ['build'], () => {
       let filenameStyled = colors.magenta(`./packages/${filename}`)
       log(`Packed ${distStyled} to ${filenameStyled}`)
     })
-})
+}))

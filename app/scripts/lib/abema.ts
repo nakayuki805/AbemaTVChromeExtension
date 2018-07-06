@@ -35,7 +35,7 @@ const _findFunctions:{[index: string]: () => JQuery} = {
 }
 export function findVideoParent(){
     let video = $('object,video');
-    let videoParent = $([]);
+    let videoParent:JQuery<HTMLElement> = $([]);
     for (let i = 0; i < video.length; i++) {
         if (video.eq(i).css('display') !== 'none') {
             videoParent = video.eq(i).parent();
@@ -92,7 +92,7 @@ export function findFooterComment(){
     let commentIcon = $('[*|href*="/comment.svg"]:not([href])').containedBy(footer());
     if (commentIcon.length === 0) {log.trace('findElement', '?footcome(!commentIcon)');return $([]);}
     let parents = commentIcon.parents();
-    let footerComment = $([]);
+    let footerComment:JQuery = $([]);
     for (let i=0; i<parents.length; i++) {
         let i_1 = Math.max(0, i-1);
         if(parents.eq(i).has(chLogo).length>0 && !parents.eq(i_1).is(footer())){

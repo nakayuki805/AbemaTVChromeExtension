@@ -1,7 +1,7 @@
 interface JQuery {
     rect(): ClientRect;
-    isContainedBy(containerElement: string|HTMLElement|JQuery): boolean;
-    containedBy(containerElement: string|HTMLElement|JQuery): JQuery;
+    isContainedBy(containerElement: HTMLElement|JQuery): boolean;
+    containedBy(containerElement: HTMLElement|JQuery): JQuery;
     rectFilter(rectFilterOption: rectFilterOption): JQuery;
     isEmpty(): boolean;
     //jqueryの型定義が.has(jqueryオブジェクト)を受け付けないのでここで定義しておく
