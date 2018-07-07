@@ -1,7 +1,7 @@
 {
   "name": "abematv-chrome-extension",
   "private": true,
-  "version": "0.14.2",
+  "version": "0.14.3",
   "description": "AbemaTVを快適にする非公式の拡張機能",
   "scripts": {
     "start": "npm run dev:chrome",
@@ -15,7 +15,10 @@
     "dev:firefox": "gulp --watch --vendor=firefox",
     "dev:opera": "gulp --watch --vendor=opera",
     "dev:edge": "gulp --watch --vendor=edge",
-    "lint": "standard"
+    "lint": "standard",
+    "version:patch": "gulp patch",
+    "version:feature": "gulp feature",
+    "version:release": "gulp release"
   },
   "standard": {
     "globals": [
