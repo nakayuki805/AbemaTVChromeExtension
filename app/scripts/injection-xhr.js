@@ -1,3 +1,4 @@
+//画質選択が有効なときのみこのスクリプトを読み込む
 //画質選択
 var inj_maxRes = window.localStorage.getItem('ext_maxResolution');
 var inj_minRes = window.localStorage.getItem('ext_minResolution');
@@ -124,7 +125,7 @@ console.log('xhr open,send override');
 
 window.addEventListener('resolutionSet', function(){
     var maxres = window.localStorage.getItem('ext_maxResolution');
-    var minres = window.localStorage.getItem('ext_minResolution')
+    var minres = window.localStorage.getItem('ext_minResolution');
     inj_maxRes = parseInt((maxres!==undefined)?maxres:2160);//4K解像度をデフォルトの最大値としておく
     inj_minRes = parseInt((minres!==undefined)?minres:0);    
 });

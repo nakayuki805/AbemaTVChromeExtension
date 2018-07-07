@@ -3313,6 +3313,7 @@ function setSaveClicked() {
     //解像度設定反映
     localStorage.setItem('ext_minResolution', settings.minResolution);
     localStorage.setItem('ext_maxResolution', settings.maxResolution);
+    injectXHR();
     window.dispatchEvent(resolutionSetEvent);
     $("#saveBtn").prop("disabled", true)
         .css("background-color", "lightyellow")
@@ -5989,16 +5990,16 @@ function setOptionHead() {
         selCountview=alt?".v3_wX":"";
     }
     if(selCountview){
-        t += selCountview+'{position:fixed;z-index:11;bottom:0px;';
+        t += selCountview+',.ext_abm-countview{position:fixed;z-index:11;bottom:0px;';
         t += 'background:rgba(0,0,0,' + (settings.panelOpacity/255) + ');';
         //下から出てくるアニメーション
         t += 'transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);';
         //パディング
         t += 'padding:4px 0px;';//4=(footerHeight-EXcountview.getBoundingClientRect().height)/2)
         t += '}';
-        t += selCountview+'>div{background:transparent;}';
+        t += selCountview+'>div,.ext_abm-countview>div{background:transparent;}';
 
-        t += selCountview+'>div>*{opacity:' + ((settings.panelOpacity/255<0.7)?0.7:(settings.panelOpacity/255)) + ';}';
+        t += selCountview+'>div>*,.ext_abm-countview>div>*{opacity:' + ((settings.panelOpacity/255<0.7)?0.7:(settings.panelOpacity/255)) + ';}';
     }
     //視聴数格納
     if (settings.isStoreViewCounter&&selFoot) {
@@ -7463,15 +7464,22 @@ function closecotwclick() {
     $(EXcomesend).css("padding-left", "");
 }
 
-getStorage(['disableExtVersion'], function(val){
+function injectXHR(){
+    if($('#ext-xhr-injection').isEmpty()&&(settings.maxResolution!=2160||settings.minResolution!=0)){
+        var xhrinjectionpath = chrome.extension.getURL("/scripts/injection-xhr.js");
+        $("<script src='" + xhrinjectionpath + "' id='ext-xhr-injection'></script>").appendTo("head");
+    }
+}
+getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(val){
     if(val.disableExtVersion !== currentVersion){
         if (isEdge) {
             mainfunc();
         } else {
             $(window).on('load', mainfunc);
         }
-        var xhrinjectionpath = chrome.extension.getURL("/scripts/injection-xhr.js");
-        $("<script src='" + xhrinjectionpath + "'></script>").appendTo("head");
+        settings.maxResolution = val.maxResolution;
+        settings.minResolution = val.minResolution;
+        injectXHR();
     }else{
         var csspath = chrome.extension.getURL("/styles/content.css");
         $("<link rel='stylesheet' href='" + csspath + "'>").appendTo("head");
