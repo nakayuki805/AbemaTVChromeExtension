@@ -223,7 +223,7 @@ var previousLocation = currentLocation;//URL変化前のURL
 //var urlchangedtick=Date.now();
 var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
 var isEdge = window.navigator.userAgent.toLowerCase().indexOf("edge") != -1;
-var headerHeight = 80;
+var headerHeight = 68;
 var footerHeight = 72;
 var commentNum = 0;
 var comeLatestPosi = [];
@@ -2369,6 +2369,8 @@ function delaysetNotOA(){
         setTimeout(delaysetNotOA, 1000);
         return;
     }
+
+    hoverContents.css({'max-height': 'calc(100vh - '+headerHeight+'px)','overflow-y': 'auto'});
     //拡張機能の設定と通知番組一覧をその他メニューに追加
     var hoverLinkClass = hoverContents.children('a')[0].className;
     var hoverSpanClass = hoverContents.children('a').children('span')[0].className;
@@ -4104,7 +4106,7 @@ function getComeListElement(returnSingleSelector){
         }
         if(!ret){
             //無投稿メッセージがなければプログレスsvg
-            var jpd = $(EXcome).find('div[role=progressbar]');
+            var jpd = $(EXcome).find('div[role=progressbar]').parents().eq(1);
             if(jpd.length>0){
                 comelistClasses.progress=jpd.prop('class');
                 ret=jpd.parent('div')[0];
@@ -4885,6 +4887,7 @@ function otomouseup(p) {
     if (teki == null) return;
     teka.initMouseEvent("mouseup", true, true, window, 0, 0, 0, teki.parent().parent().offset().left + 15, p);
     setTimeout(volbar, 100);
+    setTimeout(()=>{const vol = getVolbarObject().height();isSoundFlag=vol>0?true:false;},100);
     return teki[0].dispatchEvent(teka);
 }
 function otoColor() {
@@ -7991,14 +7994,14 @@ function onCommentChange(mutations){
             }else if (comelistClasses.stabled&&firstChildClass.indexOf(comelistClasses.stabled) >= 0){
                 isCommentAdded = true;
                 newCommentNum++;
-            }else if (!comelistClasses.progress && eo.getAttribute('role')=='progressbar') {
+            }else if (!comelistClasses.progress && eo.firstElementChild && eo.firstElementChild.firstElementChild && eo.firstElementChild.firstElementChild.getAttribute('role')=='progressbar') {
                 comelistClasses.progress = nodeClass;
                 console.log('!progC&&eoRole==progressbar progC=',nodeClass);
             }else if((comelistClasses.empty && nodeClass.indexOf(comelistClasses.empty) >= 0) || (comelistClasses.progress && nodeClass.indexOf(comelistClasses.progress) >= 0) || ((eo.tagName.toUpperCase() == "P" || eo.tagName.toUpperCase() == "SPAN") && eo.textContent.indexOf('この番組にはまだ投稿がありません')>=0) || eo.firstElementChild.getAttribute('role')=='progressbar'){
                 //CH切り替え等でコメ欄が空になった時 何もしない
                 console.log('mutation added: no comment');
             }else{
-                console.warn('unexpected onCommentChange()', mutations[i], eo.parentElement, eo, nodeClass, eo.innerHTML);
+                console.warn('unexpected onCommentChange()', mutations[i], eo.parentElement, eo, nodeClass, eo.innerHTML, comelistClasses);
             }
             //console.log(nodeClass,comelistClasses.animated,isAnimationAdded)                    
         }else{
@@ -8392,6 +8395,9 @@ function putNotifyButton(url) {
     var channel = urlarray[1];
     var channelName = titleElement.next().text();
     var programID = urlarray[3];
+    if(programID.indexOf('?')>=0){
+        programID = programID.slice(0,programID.indexOf('?'));
+    }
     var programTitle = titleElement.text();
     var programTimeStr = titleElement.nextAll().eq(2).text();
     console.log(programID, programTitle, channel, channelName, programTimeStr, urlarray);

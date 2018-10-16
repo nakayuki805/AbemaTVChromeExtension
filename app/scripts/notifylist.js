@@ -26,11 +26,14 @@ $(function(){
             //console.log(notifies)
             for (var i=0; i<notifies.length; i++) {
                 var progNotifyName = notifies[i].progNotifyName;
-                var programUrl = "https://abema.tv/channels/"+notifies[i].channel+"/slots/"+notifies[i].programID;
+                progNotifyName = progNotifyName.replace(/\?/g,'__question__').replace(/=/g,'__equal__').replace(/&/g,'__and__');//URLパラメータを番組IDに含んでしまう問題(修正済み)への対応
+                let programID = notifies[i].programID;
+                if(programID.indexOf('?')>=0)programID = programID.slice(0,programID.indexOf('?'));
+                var programUrl = "https://abema.tv/channels/"+notifies[i].channel+"/slots/"+programID;
                 var trhtml = "<tr id=\"tr_"+progNotifyName+"\">";
                 trhtml += "<td>"+notifies[i].programTitle+"</td>";
                 trhtml += "<td>"+notifies[i].channelName+"</td>";
-                trhtml += "<td><a href=\""+programUrl+"\" target=\"_blank\">"+notifies[i].programID+"</a></td>";
+                trhtml += "<td><a href=\""+programUrl+"\" target=\"_blank\">"+programID+"</a></td>";
                 trhtml += "<td>"+dateToStr(notifies[i].programTime)+"</td>";
                 trhtml += "<td><input type='button' value='削除' id='delbtn_"+progNotifyName+"'></td>";
                 trhtml += "</tr>";
@@ -39,7 +42,7 @@ $(function(){
                     //console.log(e.target.id)
                     progNotifyName = e.target.id.slice(7);
                     //console.log(progNotifyName)
-                    chrome.runtime.sendMessage({type: "removeProgramNotifyAlarm", progNotifyName: progNotifyName}, function(response) {
+                    chrome.runtime.sendMessage({type: "removeProgramNotifyAlarm", progNotifyName: progNotifyName.replace(/__question__/g,'?').replace(/__equal__/g,'=').replace(/__and__/g,'&')}, function(response) {
                         if(response.result==="removed"){
                             $("#tr_"+progNotifyName).remove();
                         }else{
