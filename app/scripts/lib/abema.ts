@@ -1,4 +1,10 @@
+/*
+    *************
+    このファイルは使用しない
+    今はgetAbema*.tsで処理する
+    *************
 
+*/
 import * as $ from "jquery";
 import "./jquery-lib";
 import * as cwlog from "cw-log";
@@ -155,8 +161,9 @@ export function determineUrl(url?: string){
     url = url || location.href;
     if (/https:\/\/abema.tv\/channels\/[-a-z0-9]+\/slots\/[a-zA-Z\d]+/.test(url)) return URL_SLOTPAGE;
     else if (/^https:\/\/abema.tv\/timetable(?:$|\/dates\/.*)/.test(url)) return URL_DATETABLE;
+    else if (/^https:\/\/abema.tv\/timetable\/channels\/.*/.test(url)) return URL_CHANNELTABLE;
     else if (/^https:\/\/abema.tv\/now-on-air\/.*/.test(url)) return URL_ONAIR;
-    else if (/https:\/\/abema.tv\/search\/future\?q=.+/.test(url)) return URL_SEARCH;
-    else if (/https:\/\/abema.tv\/my\/lists\/reservation/.test(url)) return URL_RESERVATION;
+    else if (/^https:\/\/abema.tv\/search\/future\?q=.+/.test(url)) return URL_SEARCH;
+    else if (/^https:\/\/abema.tv\/my\/lists\/reservation/.test(url)) return URL_RESERVATION;
     else return URL_OTHER;
 }

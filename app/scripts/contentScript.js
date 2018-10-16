@@ -1095,6 +1095,7 @@ function timetablechloop() {
 }
 function PlaybuttonEditor() {
     if (!settings.isChTimetablePlaybutton) return;
+    if(/^https:\/\/abema\.tv\/timetable\/dates\/.+$/.test(currentLocation)) return;//当日を除く日付別番組表では実行しない
     //放送中の緑枠のclassを取得
     var fisrtChDivs = EXTTbody.firstElementChild.childNodes;
     var presentClass = '';
@@ -1116,7 +1117,10 @@ function PlaybuttonEditor() {
         if (clsArr[0][1]==1) presentClass = clsArr[0][0];
         else if (clsArr[1][1]==1) presentClass = clsArr[1][0];
     }
-    if (presentClass.length==0) {console.warn('?presentClass failed');return;}
+    if (presentClass.length==0) {
+        console.warn('?presentClass failed');
+        return;
+    }
     var presentSelector = '.'+presentClass.split(' ').join('.');
     //放送中の緑枠の移動に合わせて再生ボタンを削除、設置する
     var p = $(presentSelector); //放送中の緑色枠
@@ -7477,8 +7481,11 @@ getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(val
         } else {
             $(window).on('load', mainfunc);
         }
-        settings.maxResolution = val.maxResolution;
-        settings.minResolution = val.minResolution;
+        if(val.maxResolution!=undefined && val.minResolution!=undefined){
+            settings.maxResolution = val.maxResolution;
+            settings.minResolution = val.minResolution;
+        }
+
         injectXHR();
     }else{
         var csspath = chrome.extension.getURL("/styles/content.css");
@@ -8403,6 +8410,8 @@ function putSerachNotifyButtons() {
     listItems.each(function (i, elem) {
         var linkArea = $(elem);
         var spans = linkArea.children().eq(0).children().eq(1).children('span');
+        //console.log(spans)
+        if(spans.length<3)return;
         if($(elem).next('.listAddNotifyWrapper').length>0){return;}
         var butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
         var progUrl = linkArea.attr('href');
@@ -8458,10 +8467,19 @@ function putReminderNotifyButtons() {
     }
 }
 function putSideDetailNotifyButton(){
-    //console.log('putSideDetailNotifyButton()');
+    console.log('putSideDetailNotifyButton()');
     var sideDetailWrapper = $(EXTTsideR);
-    console.log('put side notify button', sideDetailWrapper);    
-    if (sideDetailWrapper.length == 0 || sideDetailWrapper.offset().left > window.innerWidth - 50) return;
+    //console.log('put side notify button', sideDetailWrapper);
+    if (sideDetailWrapper.length == 0) {
+        setTimeout(putSideDetailNotifyButton, 500);
+        console.log('retry putSideDetailNotifyButton (sideDetailWrapper==0)');
+    }
+    //console.log(sideDetailWrapper.offset(),window.innerWidth - 50);
+    if (sideDetailWrapper.offset().left > window.innerWidth - 50) {// sideDetailWrapperが右画面外ならリトライ
+        setTimeout(putSideDetailNotifyButton, 1000);
+        console.log('retry putSideDetailNotifyButton (left>window.innerWidth-50)');
+        return;
+    }
     var fp=sideDetailWrapper.find('p');//番組詳細,タイトル,日時,見逃し云々?
     var progTitle;
     var progTime = programTimeStrToTime(fp.eq(2).text());
@@ -8478,6 +8496,7 @@ function putSideDetailNotifyButton(){
     else progLinkArr=$('.zo_zu').attr("href").split('/'); //todo
 //    var channel = progLinkArr[2];
     var urlchan = progLinkArr.indexOf("channels");
+    //console.log(fa,progLinkArr)
     if (urlchan < 0) return;
     var channel = progLinkArr[urlchan + 1];
     var channelName = getChannelNameOnTimetable(channel);
@@ -8487,7 +8506,7 @@ function putSideDetailNotifyButton(){
     if(fp.length>=3&&fa.length>0&&fp.eq(2).next("div").is(fa.first().prev("div")))//fp2のすぐ下かつfa0のすぐ上のやつ
         notifyButParent=fp.eq(2).next("div").children("div").first();
     else notifyButParent=sideDetailWrapper.find('.zo_zw>div'); //todo
-    //console.log(progTitle,progTime,channel,channelName,progID,notifyButParent)
+    console.log(progTitle,progTime,channel,channelName,progID,notifyButParent);
     putNotifyButtonElement(channel, channelName, progID, progTitle, progTime, notifyButParent);
 }
 

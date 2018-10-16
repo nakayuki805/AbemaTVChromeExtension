@@ -15,6 +15,7 @@ export function determineUrl(url?: string){
     url = url || location.href;
     if (/https:\/\/abema.tv\/channels\/[-a-z0-9]+\/slots\/[a-zA-Z\d]+/.test(url)) return URL_SLOTPAGE;
     else if (/^https:\/\/abema.tv\/timetable(?:$|\/dates\/.*)/.test(url)) return URL_DATETABLE;
+    else if (/^https:\/\/abema.tv\/timetable\/channels\/.*/.test(url)) return URL_CHANNELTABLE;
     else if (/^https:\/\/abema.tv\/now-on-air\/.*/.test(url)) return URL_ONAIR;
     else if (/^https:\/\/abema.tv\/search\?q=.+/.test(url)) return URL_SEARCH;
     else if (/^https:\/\/abema.tv\/my\/lists\/reservation/.test(url)) return URL_RESERVATION;
