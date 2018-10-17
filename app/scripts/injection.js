@@ -63,6 +63,7 @@ function inj_setRefClass(parent){
 }
 
 function inj_delaysetComment(){
+    console.log('inj_delayset')
     var comelistInstance = null;
     var jComelist = $('.ext_abm-comelist');
     if(jComelist.length>0){

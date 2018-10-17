@@ -2313,6 +2313,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
     }
     if(!isComeli&&(EXcomelist=getComeListElement())){
         addExtClass(EXcomelist, 'comelist');
+        window.dispatchEvent(comelistReadyEvent);
         console.log("setOptionHead delayset(EXchli)");
         resetOptionHead=true;
         isComeli=true;
@@ -4178,10 +4179,11 @@ function getObliElement(returnSingleSelector){
         }
     }
     if(!ret){console.log("?obli");return null;}
-    while(ret.tagName.toUpperCase!="BODY"&&ret.childElementCount<16){
+    //abemaトップのチャンネル一覧で誤爆しないよう祖先にaがないことも条件とする
+    while(ret.tagName.toUpperCase!="BODY"&&ret.tagName.toUpperCase!="A"&&ret.childElementCount<16){
         ret=ret.parentElement;
     }
-    if(ret.tagName.toUpperCase=="BODY"){console.log("?obli");return null;}
+    if(ret.tagName.toUpperCase=="BODY"||ret.tagName.toUpperCase=="A"){console.log("?obli");return null;}
     return returnSingleSelector?getElementSingleSelector(ret):ret;
 }
 /*function getEXWatchingStr(){
@@ -5665,7 +5667,7 @@ function setOptionHead() {
         t += selComesend+'{background-color:' + bc + ';}';
     }
 
-    selComesendinpp=getElementSingleSelector(EXcomesendinp.parentElement)||'.'+EXcomesendinp.parentElement.classList[0];
+    selComesendinpp=(EXcomesendinp&&getElementSingleSelector(EXcomesendinp.parentElement))||'.'+EXcomesendinp.parentElement.classList[0];
     if($(selComesendinpp).not('#copyotw').length!=1){
         console.log("?EXcomesendinp.parentElement "+selComesendinpp);
         selComesendinpp=alt?".HH_HL":"";
@@ -5839,9 +5841,7 @@ function setOptionHead() {
         console.log("?ad-reserve");
         to=alt?'.v3_wC':"";
     }*/
-    to = getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 124px;"],';
-    to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 104px;"],';
-    to += getElementSingleSelector(EXobli) + '>div>div[style*="bottom: 48px;"]';
+    to = getElementSingleSelector(EXobli) + '>div>div[style^="bottom: "]';
     if(to){
         t += to+'{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
         if (settings.isHidePopBL) {
