@@ -272,6 +272,7 @@ var EXcomesendinp;//↑のtextarea
 var EXcomecont;
 //var EXcomelist0;
 var EXobli;
+
 //var EXwatchingnum;//EXobliの現在視聴中のチャンネルの子供のindex
 //var EXwatchingstr;//現在視聴中のチャンネル名(右チャネル一覧のチャンネルロゴのaltから取得)
 var EXvolume;
@@ -4169,21 +4170,15 @@ function getVolElement(returnSingleSelector){
 }
 function getObliElement(returnSingleSelector){
     //console.log("?obli");
-    //videoもしくは子が多いobjectを含んで子沢山をobliとする
-    var ret=$('video').get(0);
-    if(!ret){
-        ret=$('object').get(0);
-        if(ret && ret.childElementCount<7){
-            //console.log("ocec",ret.childElementCount)
-            ret=null;
-        }
-    }
+    //大きいvideoもしくは子が多いobjectを含んで子沢山をobliとする
+    var ret=getElm.getVideo().get(0);
     if(!ret){console.log("?obli");return null;}
     //abemaトップのチャンネル一覧で誤爆しないよう祖先にaがないことも条件とする
-    while(ret.tagName.toUpperCase!="BODY"&&ret.tagName.toUpperCase!="A"&&ret.childElementCount<16){
+    while(ret.tagName.toUpperCase()!="BODY"&&ret.tagName.toUpperCase()!="A"&&ret.childElementCount<16){
         ret=ret.parentElement;
+        //console.log(4185,ret);
     }
-    if(ret.tagName.toUpperCase=="BODY"||ret.tagName.toUpperCase=="A"){console.log("?obli");return null;}
+    if(ret.tagName.toUpperCase()=="BODY"||ret.tagName.toUpperCase()=="A"){console.log("?obli");return null;}
     return returnSingleSelector?getElementSingleSelector(ret):ret;
 }
 /*function getEXWatchingStr(){

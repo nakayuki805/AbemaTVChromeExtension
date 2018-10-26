@@ -5,7 +5,15 @@ import * as getInfo from './getAbemaInfo';
 
 export function getVideo() {
     //console.trace('getVideo()')
-    return $('object,video').rectFilter({displayNot: 'none', notBodyParent: true});
+    let ret=$('video').rectFilter({width12b:true, height12b:true, displayNot: 'none', notBodyParent: true}).eq(0);
+    if(!ret){
+        ret=$('object').rectFilter({displayNot: 'none', notBodyParent: true}).eq(0);
+        if(!ret.isEmpty() && ret.children().length<7){
+            //console.log("ocec",ret.childElementCount)
+            ret=$([]);
+        }
+    }
+    return ret;
 }
 export function getHeaderElement() {
     return $('[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])').parents().rectFilter({bottom14u: true, notBodyParent: true}).last();
