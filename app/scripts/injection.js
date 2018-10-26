@@ -1,5 +1,8 @@
 //onairpage.jsからscriptタグとしてこのスクリプトを挿入する
 //拡張機能のコンテキストではできないReactへのアクセスなどをページのコンテキストで行う
+import * as getElm from './lib/getAbemaElement';
+import * as getInfo from './lib/getAbemaInfo';
+import * as dl from './lib/dom-lib';
 
 var inj_currentLocation = '';
 var inj_EXcomelist;
@@ -158,3 +161,14 @@ setTimeout(function inj_jqwait(){
 //イベント
 window.addEventListener('urlChange', injection_urlChanged);
 window.addEventListener('commentListReady', inj_delaysetComment);
+
+//デバッグ用にコンソールから関数を使えるようにする
+function setExtFunction(moduleName, moduleObj){
+    window[moduleName] = moduleObj;
+    // for(let key in moduleObj){
+    //     if(typeof moduleObj[key] === 'function'){
+    //         window[moduleName]
+    //     }
+    // }
+}
+[['getElem', getElm],['getInfo', getInfo],['dl', dl]].forEach(m=>{setExtFunction(m[0],m[1]);});

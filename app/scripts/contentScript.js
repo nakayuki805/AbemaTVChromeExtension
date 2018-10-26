@@ -4,6 +4,7 @@ import "./lib/jquery-lib";
 import * as settingslib from './settings';
 import * as getElm from './lib/getAbemaElement';
 import * as getInfo from './lib/getAbemaInfo';
+import * as dl from './lib/dom-lib';
 import './updatenotify.js';
 
 // edge対応
@@ -1324,7 +1325,7 @@ function onresize(oldTranslate) {
         posiHType = +$('#moviePositionContainer input[type="radio"][name="moviePositionHType"]:checked').val();
     }
 
-    var tar=getElm.getVideo();
+    var tar=$(getElm.getVideo());
     if (tar.isEmpty()) return;
     tar=tar.first();//.parent();
     var ori=tar.parent();
@@ -1759,7 +1760,7 @@ function putComeArray(inp) {
         //        mclen-=comeoverflowlen;
     }
 //    var jo = $("object,video").parent();
-    var jo = getElm.getVideo();
+    var jo = $(getElm.getVideo());
     if (jo.isEmpty()) {
         console.log('video empty in putComeArray', jo);
     }
@@ -1939,7 +1940,7 @@ function screenBlackSet(type) {
         var p = 0;
         //        var t=1;
 //        var jo = $('object,video').parent();
-        var jo = getElm.getVideo();
+        var jo = $(getElm.getVideo());
         //        if(EXwatchingnum!==undefined){
 //        if (jo.length > 0) {
         if (!jo.isEmpty()) {
@@ -1974,7 +1975,7 @@ function screenBlackSet(type) {
     }
 }
 function movieZoomOut(sw) {
-    var j = getElm.getVideo();
+    var j = $(getElm.getVideo());
     if (j.isEmpty()) return;
     var t=j[0].style.transform.replace(/\s*scale\(\d*(\.\d+)?\)/,"");
     if (sw == 1 && settings.CMsmall < 100) {
@@ -2337,7 +2338,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         isEXC=true;
         //}
     }
-    if(!isVideo&&!getElm.getVideo().isEmpty()){
+    if(!isVideo&&getElm.getVideo()){
         console.log("setOptionHead delayset(video)");
         resetOptionHead=true;
         isVideo=true;
@@ -2416,7 +2417,7 @@ function optionStatsUpdate(outflg) {
     }
     tar = $('#windowsizes');
 //    var jp = $('object,video').parent();
-    var jp = getElm.getVideo();
+    var jp = $(getElm.getVideo());
     //    if(EXwatchingnum!==undefined&&tar.length>0){
     if (!jp.isEmpty() && tar.length > 0) {
         //        var jo=$(EXobli.children[EXwatchingnum]);
@@ -3852,11 +3853,11 @@ function setEXs() {
     if (checkUrlPattern(true) != 3) return;
     var b = true;
     if (                                                                                  $('#main' ).length == 0 || !( EXmain          = $('#main' )[0] ))    b = false;// console.log("#main"); }
-    if (! EXhead          &&!( EXhead          = getElm.getHeaderElement()[0]              ) /*&& ($('.P_R'  ).length == 0 || !( EXhead          = $('.P_R'  )[0] ))*/) b = false;// console.log("head"); }//AppContainer__header-container___
+    if (! EXhead          &&!( EXhead          = getElm.getHeaderElement()                 ) /*&& ($('.P_R'  ).length == 0 || !( EXhead          = $('.P_R'  )[0] ))*/) b = false;// console.log("head"); }//AppContainer__header-container___
     if (! EXmenu          &&!( EXmenu          = getMenuElement()                ) /*&& ($('.Fb_Fi').length == 0 || !( EXmenu          = $('.Fb_Fi')[0] ))*/) b = false;
-    if (! EXfoot          &&!( EXfoot          = getElm.getFooterElement()[0]              ) /*&& ($('.v3_v_').length == 0 || !( EXfoot          = $('.v3_v_')[0] ))*/) b = false;// console.log("foot"); }//TVContainer__footer-container___
+    if (! EXfoot          &&!( EXfoot          = getElm.getFooterElement()                 ) /*&& ($('.v3_v_').length == 0 || !( EXfoot          = $('.v3_v_')[0] ))*/) b = false;// console.log("foot"); }//TVContainer__footer-container___
     if (! EXfootcome      &&!( EXfootcome      = getFootcomeElement()            ) /*&& ($('.mb_mo').length == 0 || !( EXfootcome      = $('.mb_mo')[0] ))*/) b = false;// console.log("footcome"); }//右下の入れ物
-    if (! EXcountview     &&!( EXcountview     = getElm.getViewCounterElement()[0]         ) /*&& ($('.Eu_e' ).length == 0 || !( EXcountview     = $('.Eu_e' )[0] ))*/) b = false;// console.log("footcountview"); }//閲覧数
+    if (! EXcountview     &&!( EXcountview     = getElm.getViewCounterElement()            ) /*&& ($('.Eu_e' ).length == 0 || !( EXcountview     = $('.Eu_e' )[0] ))*/) b = false;// console.log("footcountview"); }//閲覧数
     if (! EXfootcountcome &&!( EXfootcountcome = getFootcomeBtnElement()         ) /*&& ($('.JH_e' ).length == 0 || !( EXfootcountcome = $('.JH_e' )[0] ))*/) b = false;// console.log("footcountcome"); }//コメント数
     if (! EXside          &&!( EXside          = getSideElement()                ) /*&& ($('.v3_v5').length == 0 || !( EXside          = $('.v3_v5')[0] ))*/) b = false;// console.log("side"); }//TVContainer__side___
 //    if (! EXchli          &&!( EXchli          = getChannelListElement()         ) /*&& ($('.mT_e' ).length == 0 || !( EXchli          = $('.mT_e' )[0] ))*/) b = false;// console.log("chli"); }
@@ -3879,8 +3880,8 @@ function setEXs() {
         addExtClass(EXcountview, 'countview');
         addExtClass(EXfootcountcome, "footcountcome");
         addExtClass(EXside, 'sideButton');
-        addExtClass(EXchli, "channelList");
-        addExtClass(EXinfo, 'info');
+        //addExtClass(EXchli, "channelList");
+        //addExtClass(EXinfo, 'info');
         addExtClass(EXcome, 'come');
         addExtClass(EXcomesend, 'comesend');
         addExtClass(EXcomesendinp, 'comesendinput');
@@ -3895,7 +3896,7 @@ function setEXs() {
         setOptionElement(); //各オプションを要素に直接適用
         setOptionEvent();   //各オプションによるイベントを作成
     } else {
-        console.log("setEXs retry "+(EXhead?".":"H")+(EXmenu?".":"M")+(EXfoot?".":"F")+(EXfootcome?"..":"Fc")+(EXcountview?".":"V")+(EXfootcountcome?"..":"Fb")+(EXside?".":"S")+(EXchli?"..":"L")+(EXcomesendinp?"..":"Ct")+(EXcomesend?"..":"Cf")+(EXcome?".":"C")+(EXvolume?"..":"Vo")+(EXfullscr?"..":"Fs")+(EXobli?".":"O")+(EXcomelist?"..":"Cl"));
+        console.log("setEXs retry "+(EXhead?".":"H")+(EXmenu?".":"M")+(EXfoot?".":"F")+(EXfootcome?"..":"Fc")+(EXcountview?".":"V")+(EXfootcountcome?"..":"Fb")+(EXside?".":"S")+(EXcomesendinp?"..":"Ct")+(EXcomesend?"..":"Cf")+(EXcome?".":"C")+(EXvolume?"..":"Vo")+(EXfullscr?"..":"Fs")+(EXobli?".":"O")+(EXcomelist?"..":"Cl"));
         setTimeout(setEXs, 1000);
     }
 }
@@ -4171,7 +4172,7 @@ function getVolElement(returnSingleSelector){
 function getObliElement(returnSingleSelector){
     //console.log("?obli");
     //大きいvideoもしくは子が多いobjectを含んで子沢山をobliとする
-    var ret=getElm.getVideo().get(0);
+    var ret=getElm.getVideo();
     if(!ret){console.log("?obli");return null;}
     //abemaトップのチャンネル一覧で誤爆しないよう祖先にaがないことも条件とする
     while(ret.tagName.toUpperCase()!="BODY"&&ret.tagName.toUpperCase()!="A"&&ret.childElementCount<16){
@@ -6202,7 +6203,7 @@ function usereventWakuclick() {
     if (proinfoOpened) {
         setTimeout(openInfo, 50, false);
     }
-    var jo = getElm.getVideo();
+    var jo = $(getElm.getVideo());
     if (!jo.isEmpty() && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width()));//, parseInt(jo[0].style.height));
@@ -6352,7 +6353,7 @@ function usereventSideChliButClick() {
         }
         pophideElement(phi);
     }
-    var jo = getElm.getVideo();
+    var jo = $(getElm.getVideo());
     if (!jo.isEmpty() && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width()));//, parseInt(jo[0].style.height));
@@ -6376,7 +6377,7 @@ function usereventFootInfoButClick() {
         }
         pophideElement(phi);
     }
-    var jo = getElm.getVideo();
+    var jo = $(getElm.getVideo());
     if (!jo.isEmpty() && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width()));//, parseInt(jo[0].style.height));
@@ -6434,7 +6435,7 @@ function usereventFCclick() {
             },500);//コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
         }
     }
-    var jo = getElm.getVideo();
+    var jo = $(getElm.getVideo());
     if (!jo.isEmpty() && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width()));//, parseInt(jo[0].style.height));
@@ -7582,7 +7583,7 @@ function onairBasefunc() {
         //        //映像のtopが変更したらonresize()実行
         //        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
         //        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
-        var jo = getElm.getVideo();
+        var jo = $(getElm.getVideo());
         //.resize-screenに設定されるwidth,heightをトリガーにする
         if (!jo.isEmpty() && (movieWidth != parseInt(jo.first().width()))){// || movieHeight != parseInt(jo[0].style.height))) {
             onresize();
@@ -7856,7 +7857,7 @@ function onairBasefunc() {
 
         if (settings.comeMovingAreaTrim) {
 //            var jo = $("object,video").parent();
-            let jo = getElm.getVideo();
+            let jo = $(getElm.getVideo());
 //            if (jo.length > 0) {
             if (!jo.isEmpty()) {
                 var er = jo[0].getBoundingClientRect();
