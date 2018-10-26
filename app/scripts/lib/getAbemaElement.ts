@@ -16,6 +16,20 @@ export function getVideo() {
     }
     return ret;
 }
+export function getVideoAreaElement() {//映像領域を内包する要素(旧obliの子に相当)
+    const videoElement = getVideo();
+    if(!videoElement)return null;
+    return dl.parentsFilterLast(videoElement, {notBodyParent: true, filters: [e=>{
+        const children = e.children;
+        let btnFlag = false, imgFlag = false;
+        for(let i=0; i<children.length; i++){
+            const tag = children[i].tagName.toUpperCase();
+            if(tag === 'BUTTON') btnFlag = true;
+            if(tag === 'IMG') imgFlag = true;
+        }
+        return btnFlag && imgFlag;
+    }]});
+}
 export function getHeaderElement() {
     //return $('[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])').parents().rectFilter({bottom14u: true, notBodyParent: true}).last();
     return dl.parentsFilterLastByArray(document.querySelectorAll('[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])'),{bottom14u: true, notBodyParent: true});

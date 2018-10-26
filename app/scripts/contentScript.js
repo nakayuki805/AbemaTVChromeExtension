@@ -272,8 +272,8 @@ var EXcomesendinp;//↑のtextarea
 //var EXcomesendbut;
 var EXcomecont;
 //var EXcomelist0;
-var EXobli;
-
+//var EXobli;
+let EXvideoarea;
 //var EXwatchingnum;//EXobliの現在視聴中のチャンネルの子供のindex
 //var EXwatchingstr;//現在視聴中のチャンネル名(右チャネル一覧のチャンネルロゴのaltから取得)
 var EXvolume;
@@ -407,7 +407,8 @@ function onairCleaner() {
     EXcome = null;
     EXvolume = null;
     EXfullscr = null;
-    EXobli = null;
+    //EXobli = null;
+    EXvideoarea = null;
     EXcomelist = null;
     EXfootcount = null;
     //DOM監視停止
@@ -3867,7 +3868,8 @@ function setEXs() {
     if (! EXcome          &&!( EXcome          = getComeFormElement(2)           ) /*&& ($('.v3_wi').length == 0 || !( EXcome          = $('.v3_wi')[0] ))*/) b = false;// console.log("come"); }//TVContainer__right-comment-area___
     if (! EXvolume        &&!( EXvolume        = getVolElement()                 ) /*&& ($('.mb_mk').length == 0 || !( EXvolume        = $('.mb_mk')[0] ))*/) b = false;// console.log("vol"); }
     if (! EXfullscr       &&!( EXfullscr       = getFullScreenElement()          ) /*&& ($('.mb_mi').length == 0 || !( EXvolume        = $('.mb_mi')[0] ))*/) b = false;// console.log("vol"); }
-    if (! EXobli          &&!( EXobli          = getObliElement()                ) /*&& ($('.v3_ws').length == 0 || !( EXobli          = $('.v3_ws')[0] ))*/) b = false;// console.log("obli"); }//TVContainer__tv-container___
+//    if (! EXobli          &&!( EXobli          = getObliElement()                ) /*&& ($('.v3_ws').length == 0 || !( EXobli          = $('.v3_ws')[0] ))*/) b = false;// console.log("obli"); }//TVContainer__tv-container___
+    if (! EXvideoarea     &&!( EXvideoarea     = getElm.getVideoAreaElement()    )) b = false;
 //    if (! EXcomelist      &&!( EXcomelist      = getComeListElement()            ) /*&& ($('.uo_e' ).length == 0 || !( EXcomelist      = $('.uo_e' )[0] ))*/) b = false;
     EXfootcount = EXfootcome;//仕様変更により右下にはコメント数のみとなった
 
@@ -3887,7 +3889,8 @@ function setEXs() {
         addExtClass(EXcomesendinp, 'comesendinput');
         addExtClass(EXvolume, 'volume');
         addExtClass(EXfullscr, 'fullscr');
-        addExtClass(EXobli, 'objectlist');
+        //addExtClass(EXobli, 'objectlist');
+        addExtClass(EXvideoarea, 'videoarea');
         addExtClass(EXcomelist, 'comelist');
 
         console.log("%csetEXs ok", 'color:green;');
@@ -3896,7 +3899,7 @@ function setEXs() {
         setOptionElement(); //各オプションを要素に直接適用
         setOptionEvent();   //各オプションによるイベントを作成
     } else {
-        console.log("setEXs retry "+(EXhead?".":"H")+(EXmenu?".":"M")+(EXfoot?".":"F")+(EXfootcome?"..":"Fc")+(EXcountview?".":"V")+(EXfootcountcome?"..":"Fb")+(EXside?".":"S")+(EXcomesendinp?"..":"Ct")+(EXcomesend?"..":"Cf")+(EXcome?".":"C")+(EXvolume?"..":"Vo")+(EXfullscr?"..":"Fs")+(EXobli?".":"O")+(EXcomelist?"..":"Cl"));
+        console.log("setEXs retry "+(EXhead?".":"H")+(EXmenu?".":"M")+(EXfoot?".":"F")+(EXfootcome?"..":"Fc")+(EXcountview?".":"V")+(EXfootcountcome?"..":"Fb")+(EXside?".":"S")+(EXcomesendinp?"..":"Ct")+(EXcomesend?"..":"Cf")+(EXcome?".":"C")+(EXvolume?"..":"Vo")+(EXfullscr?"..":"Fs")+(EXvideoarea?"..":"Va")+(EXcomelist?"..":"Cl"));
         setTimeout(setEXs, 1000);
     }
 }
@@ -4372,8 +4375,10 @@ function getComeModuleElements(returnSingleSelector){
 }
 function getVideoRouteClasses(){
     //EXobli>各chコンテナ>背景画像,videoの親..からvideoの親のclassを選ぶ
-    var jo= $(EXobli).find('video,object').first().parentsUntil(EXobli).eq(-2);
-    return [jo.first().prop("class"), jo.siblings('img[src*="/channels/logo/"]').first().prop("class")];
+    let videoContainer = dl.parentsFilterLast(getElm.getVideo(),{filters:[e=>e.parentElement===EXvideoarea]});
+    //var jo= $(EXobli).find('video,object').first().parentsUntil(EXobli).eq(-2);
+    //return [jo.first().prop("class"), jo.siblings('img[src*="/channels/logo/"]').first().prop("class")];
+    return [videoContainer.getAttribute('class'), videoContainer.parentElement.querySelector(':scope>img[src*="/channels/logo/"]').getAttribute('class')];
 }
 function getTTProgramTitleClass(){
     // 0:ビデオのN、1～その他、10くらいから番組タイトル
@@ -5616,7 +5621,7 @@ function setOptionHead() {
     var jo,jp;
     var eo;
     var to="";
-    var selCome,selComesend,selComesendinpp,selComesendinp,selComelist,selComelistp,selHead,selFoot,selSide,selChli,selInfo,selObli,selFootcome,selCountview;
+    var selCome,selComesend,selComesendinpp,selComesendinp,selComelist,selComelistp,selHead,selFoot,selSide,selChli,selInfo,selVideoarea,selFootcome,selCountview;
     var alt=false;
 
     //投稿ボタン削除（入力欄1行化はこの下のコメ見た目のほうとoptionElementでやる）
@@ -5837,7 +5842,7 @@ function setOptionHead() {
         console.log("?ad-reserve");
         to=alt?'.v3_wC':"";
     }*/
-    to = getElementSingleSelector(EXobli) + '>div>div[style^="bottom: "]';
+    to = getElementSingleSelector(EXvideoarea) + '>div[style^="bottom: "]';
     if(to){
         t += to+'{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
         if (settings.isHidePopBL) {
@@ -5861,12 +5866,11 @@ function setOptionHead() {
         t += '}';
     }
 
-    selObli=getElementSingleSelector(EXobli);
-    if($(selObli).length!=1){
-        console.log("?EXobli "+selObli);
-        selObli=alt?".v3_ws":"";
+    selVideoarea = getElementSingleSelector(EXvideoarea);
+    if(document.querySelector(selVideoarea)){
+        console.log("?EXvideoarea "+selVideoarea);
     }
-    if (settings.isHidePopTL&&selObli) {
+    if (settings.isHidePopTL&&selVideoarea) {
         //直接指定しようとするといつか出た時の短時間にgetしないといけないので映像以外を消す
         to=getVideoRouteClasses();
         if(!to[0]||!to[1]){
@@ -5875,12 +5879,12 @@ function setOptionHead() {
         }else to=['.'+to[0],'.'+to[1]];
         //.Aq_Ay .Aq_AA
         if(to[0]&&to[1]){
-            t += selObli+'>div>div:not('+to[0]+'){display:none;}';
-            t += selObli+'>div>img:not('+to[1]+'){display:none;}';
+            t += selVideoarea+'>div:not('+to[0]+'){display:none;}';
+            t += selVideoarea+'>img:not('+to[1]+'){display:none;}';
         }
         //t += '[class*="styles__eyecatch-blind___"]{display:none;}';
     }
-    if (selObli) t += selObli + '>div{transition-delay:0.5s;}'; // onresizeで設定していたtransitionをheadに付けてみる fastrefreshでガクっとなるのを防ぐ
+    if (selVideoarea) t += selVideoarea + '{transition-delay:0.5s;}'; // onresizeで設定していたtransitionをheadに付けてみる fastrefreshでガクっとなるのを防ぐ
     if (selCome) t += selCome + '{transition-delay:0.5s;}';
 
     //z-index調整、コメ流す範囲
@@ -6431,7 +6435,7 @@ function usereventFCclick() {
         }
         if(settings.isResizeScreen){
             setTimeout(function(){
-                $(EXobli).children().has(getElm.getVideo()).width(window.innerWidth).height(window.innerHeight);            
+                $(EXvideoarea).width(window.innerWidth).height(window.innerHeight);            
             },500);//コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
         }
     }
@@ -6699,7 +6703,8 @@ function tryCM(retrycount) {
 function fastEyecatching(retrycount) {
     //console.log("fastEyecatch#"+retrycount);
     if ($('.manualblock').length > 0 || retrycount <= 0) { eyecatcheck = false; return; }//手動対応を優先
-    if ($(EXobli).find("object,video").first().parentsUntil(EXobli).last().children().length > 3 && retrycount > 0){
+    //if ($(EXobli).find("object,video").first().parentsUntil(EXobli).last().children().length > 3 && retrycount > 0){
+    if (EXvideoarea.childElementCount > 3 && retrycount > 0){
     //if ($(EXobli.children[EXwatchingnum]).children().is('[class*="styles__eyecatch"]') && retrycount > 0) {
         setTimeout(fastEyecatching, 100, retrycount - 1);
     } else {
@@ -7688,7 +7693,8 @@ function onairBasefunc() {
         }
         if (settings.useEyecatch) {
         //if ((EXwatchingnum !== undefined) && settings.useEyecatch) {
-            if ($(EXobli).find("object,video").first().parentsUntil(EXobli).last().children().length > 3) {
+            //if ($(EXobli).find("object,video").first().parentsUntil(EXobli).last().children().length > 3) {
+            if (EXvideoarea.childElementCount > 3){
             //if ($(EXobli.children[EXwatchingnum]).children('[class*="styles__eyecatch"]').length > 0) {
                 //eyecatchが有る
                 if (eyecatched == true) {
@@ -8159,7 +8165,7 @@ $(window).on("resize", function (){
         if(settings.isResizeScreen/* && isComeOpen()*/){
             setTimeout(function(){
                 //コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
-                $(EXobli).children().has(getElm.getVideo()).width(window.innerWidth).height(window.innerHeight);
+                $(EXvideoarea).width(window.innerWidth).height(window.innerHeight);
                 setTimeout(onresize, 1000);//1秒後にリサイズをかける
                 //setTimeout(onresize, 1500);//たまに映像がずれるので再度リサイズかけると落ち着く
             },200);
