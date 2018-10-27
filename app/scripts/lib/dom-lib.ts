@@ -108,3 +108,44 @@ export function parentsFilterLastByArray(elements: ArrayLike<HTMLElement>, optio
     });
     return last(filteredArray, true);
 }
+//セレクターを返す
+export function getElementSingleSelector(element: HTMLElement, sw: number, remove: string){
+    //idがあれば要素名#idを返す
+    //classが全体で唯一なら要素名.classを返す
+    //sw 1:classが全体でその兄弟だけなら要素名.class:eq(index)を返す 2:classが兄弟で唯一なら要素名.classを返す
+    //全体や兄弟に含めないid,classをremoveで受ける swを忘れないように注意する
+
+    if(!element) return null;
+    const tagName=element.tagName;
+    var rw=/\w/;
+    var rt=/^\s+|\s+$/g;
+    const id=element.id.trim();
+    if(id!=='') return tagName+'#'+id;
+    var rs=/\s/;
+    const className = element.className.trim();
+    var jo;
+    var jolen;
+    if(className==='') return null;
+    var jr: JQuery<HTMLElement> = $([]);
+    if(remove&&remove.length>0){
+        jr=$(remove[0]);
+        for(var i=1;i<remove.length;i++) jr=jr.add(remove[i]);
+    }
+    const classArray = className.split(rs);
+    let selector=className;
+    for(let i=0;i<classArray.length;i++){
+        if(classArray[i]==='' && classArray[i].indexOf('ext_abm-')>=0) continue; //拡張機能が付与したclassは除外
+        selector=tagName+'.'+classArray[i].trim();
+        jo=$(selector).not(jr);
+        jolen=jo.length;
+        if(jolen==0) continue;
+        if(jolen==1) return selector;
+        else if(sw==1){
+            jo=$(element).siblings(selector).not(jr);
+            if(jolen==1+jo.length) return selector+":eq("+$(element).prevAll(selector).not(jr).length+")";
+        }else if(sw==2&&$(element).siblings(selector).not(jr).length==0) return selector;
+    }
+    console.log("?getElementSingleSelector:");
+    console.log(element);
+    return null;
+}

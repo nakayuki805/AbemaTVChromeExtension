@@ -467,7 +467,7 @@ function timetableCss() {
         selPTitle=alt?'.ok_bq':'';
     }else selPTitle='.'+selPTitle;
 
-    selBody=getElementSingleSelector(EXTTbody);
+    selBody=dl.getElementSingleSelector(EXTTbody);
     if($(selBody).length!=1){
         console.log("?EXTTbody "+selBody);
         selBody=alt?'.pi_pk':"";
@@ -490,7 +490,7 @@ function timetableCss() {
     var c = checkUrlPattern(true);
     if (c == 1) {
         if (allowChannelNum.length > 0) {
-            selHead=getElementSingleSelector(EXTThead);
+            selHead=dl.getElementSingleSelector(EXTThead);
             if($(selHead).length!=1){
                 console.log("?EXTThead "+selHead);
                 selHead=alt?'.qR_qT ':"";
@@ -557,7 +557,7 @@ function timetableCss() {
         }
     }
 
-    selBodyS = getElementSingleSelector(EXTTbodyS);
+    selBodyS = dl.getElementSingleSelector(EXTTbodyS);
     if ($(selBodyS).length != 1) {
         console.log("?EXTTbodyS " + selBodyS);
         selBody = alt ? '.i__jT' : "";
@@ -2224,7 +2224,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
                 var bp=e.parentElement.getBoundingClientRect();//↓縦長ウィンドウでも反応するようtop判定はやめる
                 if($(e).css("position")=="absolute"&&/*b.top<5&&*/b.left<5&&b.width==bp.width&&b.height==bp.height&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&$(e).css("opacity")==0&&$(e).siblings().length<10)return e;
             });
-            if(jo.length>0)overlapSelector=getElementSingleSelector(jo[0]);
+            if(jo.length>0)overlapSelector=dl.getElementSingleSelector(jo[0]);
             //else{
             //    console.log('?overlapSelector');
             //    overlapSelector = "#main div.nN_nR";
@@ -2301,7 +2301,10 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         //放送中一覧のスクロール
         //すぐだと失敗する？からinfo読んでからやる
         let cn = getInfo.getChannelByURL();
-        if (cn&&EXchli) $(EXchli).scrollTop($(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
+        if (cn&&EXchli) {
+            const chlogo = $(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0)
+            if(!chlogo.isEmpty()) $(EXchli).scrollTop(chlogo.parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
+        }
     }
     if(!isChli&&(EXchli=getChannelListElement())){
         addExtClass(EXchli, 'channelList');
@@ -3923,7 +3926,7 @@ function setEXs() {
         setTimeout(setEX2, 1000);
     }
 }*/
-function getElementSingleSelector(ret,sw,remove){
+/*function getElementSingleSelector(ret,sw,remove){
     //idがあれば要素名#idを返す
     //classが全体で唯一なら要素名.classを返す
     //sw 1:classが全体でその兄弟だけなら要素名.class:eq(index)を返す 2:classが兄弟で唯一なら要素名.classを返す
@@ -3961,7 +3964,7 @@ function getElementSingleSelector(ret,sw,remove){
     console.log("?getElementSingleSelector:");
     console.log(ret);
     return null;
-}
+}*/
 function getFootcomeElement(returnSingleSelector) {
     //console.log("?footcome");
     //コメントアイコンを孫にもち左下のチャンネルロゴと共通の親をもつものをfootcomeとする
@@ -3977,14 +3980,14 @@ function getFootcomeElement(returnSingleSelector) {
         rep=ret.parentElement;
     }
     if($(ret).is(EXfoot)){console.log("?footcome(ret=EXfoot)");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 
 function getFootcomeBtnElement(returnSingleSelector){
     if(!EXfootcome) return null;
     var ret=$(EXfootcome).find("button")[0];
     if(!ret) return null;
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getSideElement(returnSingleSelector) {
     //console.log("?side");
@@ -4005,7 +4008,7 @@ function getSideElement(returnSingleSelector) {
         b=rep.getBoundingClientRect();
     }
     if(rep.tagName.toUpperCase()=="BODY"){console.log("?side");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getInfoElement(returnSingleSelector) {
     //console.log("?info");
@@ -4033,7 +4036,7 @@ function getInfoElement(returnSingleSelector) {
         b=rep.getBoundingClientRect();
     }
     if(rep.tagName.toUpperCase()=="BODY"){console.log("?info");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getChannelListElement(returnSingleSelector) {
     //console.log("?chli");
@@ -4056,7 +4059,7 @@ function getChannelListElement(returnSingleSelector) {
         b=rep.getBoundingClientRect();
     }
     if(rep.tagName.toUpperCase()=="BODY"){console.log("?chli");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getComeFormElement(sw,returnSingleSelector) {
     //sw 0:come 1:form 2:textarea
@@ -4090,7 +4093,7 @@ function getComeFormElement(sw,returnSingleSelector) {
         ret=e;
     }
     if(!ret){console.log("?comeform"+sw+"(ret=null)");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getComeListElement(returnSingleSelector){
     console.log("?comelist");
@@ -4120,7 +4123,7 @@ function getComeListElement(returnSingleSelector){
             }
         }
         if(!ret){console.log("?comelist(emptylist or progress notfound)");return null;}
-        return returnSingleSelector?getElementSingleSelector(ret):ret;
+        return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
     }
 
     for(let i=0,t,ji;i<jo.length;i++){
@@ -4155,7 +4158,7 @@ function getComeListElement(returnSingleSelector){
         }
     }
     if(!ret){console.log("?comelist(children notfound)");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getVolElement(returnSingleSelector){
     //console.log("?vol");
@@ -4170,7 +4173,7 @@ function getVolElement(returnSingleSelector){
         b=rep.getBoundingClientRect();
     }
     if(rep.tagName.toUpperCase()=="BODY"){console.log("?getvol");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getObliElement(returnSingleSelector){
     //console.log("?obli");
@@ -4183,7 +4186,7 @@ function getObliElement(returnSingleSelector){
         //console.log(4185,ret);
     }
     if(ret.tagName.toUpperCase()=="BODY"||ret.tagName.toUpperCase()=="A"){console.log("?obli");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 /*function getEXWatchingStr(){
     console.log("?exws");
@@ -4208,7 +4211,7 @@ function getFullScreenElement(returnSingleSelector){
     //console.log("?fullscreen");
     var ret = $('[*|href*="/full_screen.svg"][*|href$="#svg-body"]:not([href])').first().parentsUntil("button").parent().get(0);
     if(!ret){console.log("?fullscreen");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getMenuElement(returnSingleSelector){
     //head内にあること前提でリンクが多いのを選ぶ
@@ -4234,7 +4237,7 @@ function getMenuElement(returnSingleSelector){
         }
     }
     if(!ret){console.log("?menu");return null;}
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getMenuObject() {
     console.log("?menu");
@@ -4304,7 +4307,7 @@ function getReceiveNotifyElement(returnSingleSelector){
         b=rep.getBoundingClientRect();
     }
     if(rep.tagName.toUpperCase=="BODY") return null;
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getReceiveTwtElement(returnSingleSelector){
     //左下にあるtwtアイコンの親で左下のを選ぶ
@@ -4324,7 +4327,7 @@ function getReceiveTwtElement(returnSingleSelector){
         b=rep.getBoundingClientRect();
     }
     if(rep.tagName.toUpperCase=="BODY") return null;
-    return returnSingleSelector?getElementSingleSelector(ret):ret;
+    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getComeModuleElements(returnSingleSelector){
     //投稿ボタンの祖先でtextareaと共通の祖先の子 と投稿ボタン とtwtコンテナを返す
@@ -4359,6 +4362,7 @@ function getComeModuleElements(returnSingleSelector){
         }
         if(!jd) continue;
         for(var k=r;k+1<jp.length;k++){
+            //console.log(4363,jp.eq(k+1).innerWidth(),jp.eq(k).innerWidth())
             if(jp.eq(k+1).innerWidth()==0||jp.eq(k).innerWidth()==0) break;
             if(jp.eq(k+1).innerWidth()<jp.eq(k).innerWidth()+10) continue;
             ret[2]=jp[k];
@@ -4367,9 +4371,9 @@ function getComeModuleElements(returnSingleSelector){
         break;
     }
     if(returnSingleSelector){
-        ret[0]=getElementSingleSelector(ret[0]);
-        ret[1]=getElementSingleSelector(ret[1]);
-        ret[2]=getElementSingleSelector(ret[2]);
+        ret[0]=dl.getElementSingleSelector(ret[0]);
+        ret[1]=dl.getElementSingleSelector(ret[1]);
+        ret[2]=dl.getElementSingleSelector(ret[2]);
     }
     return ret;
 }
@@ -4448,33 +4452,33 @@ function getTTLRArrowContainerElement(returnSingleSelector) {
     //var jo = $('[*|href$="/images/icons/chevron_right.svg#svg-body"]:not([href])');
     var jo = $('div').map(function (i, e) { if (e.clientWidth > window.innerWidth / 2 && e.offsetTop > window.innerHeight / 3 && e.offsetTop < window.innerHeight * 2 / 3) return e; });
     if (jo.length == 0) return null;
-    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+    else if (jo.length == 1) return returnSingleSelector ? dl.getElementSingleSelector(jo[0]) : jo[0];
 
     //特定条件でtimebarも取れるので除外する
     var ret = getTTtimebarElement();
     if (ret) {
         jo = jo.not(ret);
         if (jo.length == 0) return null;
-        else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+        else if (jo.length == 1) return returnSingleSelector ? dl.getElementSingleSelector(jo[0]) : jo[0];
     }
     for (let i = 0; i < jo.length; i++) {
         if ($(EXTTtime).find(jo.eq(i)).length > 0) jo = jo.not(jo.eq(i));
     }
     if (jo.length == 0) return null;
-    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+    else if (jo.length == 1) return returnSingleSelector ? dl.getElementSingleSelector(jo[0]) : jo[0];
 
     for (let i = 0, z; i < jo.length; i++) {
         z = jo.eq(i).css("z-index");
         if (z == "auto" || isNaN(parseInt(z)) || parseInt(z) <= 0) jo = jo.not(jo.eq(i));
     }
     if (jo.length == 0) return null;
-    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+    else if (jo.length == 1) return returnSingleSelector ? dl.getElementSingleSelector(jo[0]) : jo[0];
 
     for (let i = 0, z; i < jo.length; i++) {
         if (jo.eq(i).offset().left > 50) jo = jo.not(jo.eq(i));
     }
     if (jo.length == 0) return null;
-    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+    else if (jo.length == 1) return returnSingleSelector ? dl.getElementSingleSelector(jo[0]) : jo[0];
 
     return null;
 }
@@ -4482,13 +4486,13 @@ function getTTtimebarElement(returnSingleSelector) {
     //横に長くて縦が短くtopが直接指定されてるのを選ぶ
     let jo = $('div').map(function (i, e) { if (e.clientWidth > window.innerWidth / 2 && e.clientHeight < 30 && e.style.top != "") return e; });
     if (jo.length == 0) return null;
-    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+    else if (jo.length == 1) return returnSingleSelector ? dl.getElementSingleSelector(jo[0]) : jo[0];
 
     //もし2以上引っかかったら時刻を探す
     var re = /(^|[^\d])\d{1,2}:\d{2}($|[^\d])/;
     jo = jo.map(function (i, e) { if (re.test(e.textContent)) return e; });
     if (jo.length == 0) return null;
-    else if (jo.length == 1) return returnSingleSelector ? getElementSingleSelector(jo[0]) : jo[0];
+    else if (jo.length == 1) return returnSingleSelector ? dl.getElementSingleSelector(jo[0]) : jo[0];
 
     //この時点でまだ取りきれないなら背景を使う
     var rt = /rgba? *\( *(\d+) *, *(\d+) *, *(\d+)(?: *,\d+ *,?)? *\)/;
@@ -4512,7 +4516,7 @@ function getTTtimebarElement(returnSingleSelector) {
         p = ret.parentElement;
     }
     if (p.tagName.toUpperCase() == "BODY") return null;
-    return returnSingleSelector ? getElementSingleSelector(ret) : ret;
+    return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
 }
 function getTTProgramTimeClasses() {
     //番組開始の00とか30のクラス とその中のアイコンコンテナ(FREEとかを収納する用)があれば取る
@@ -5631,7 +5635,7 @@ function setOptionHead() {
     //}
     //twtパネルのように再生成されるかもしれないのでmoduleeditorからこのoptionheadを再実行して適用させる
     if (settings.isCustomPostWin&&EXcomemodule) {
-        to=getElementSingleSelector(EXcomemodule);
+        to=dl.getElementSingleSelector(EXcomemodule);
         if($(to).length!=1){
             console.log("?EXcomemodule "+to);
             to=alt?'.hw_hy.HH_HR':'';
@@ -5649,7 +5653,7 @@ function setOptionHead() {
     var uc = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (0.2) + ")";//コメント入力欄背景色
     var vc = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (0.3) + ")";//コメント一覧区切り線色
 
-    selCome=getElementSingleSelector(EXcome);
+    selCome=dl.getElementSingleSelector(EXcome);
     if($(selCome).length!=1){
         console.log("?EXcome "+selCome);
         selCome=alt?".v3_wi":"";
@@ -5659,7 +5663,7 @@ function setOptionHead() {
         t += selCome+'>*{background-color:transparent;}';
     }
 
-    selComesend=getElementSingleSelector(EXcomesend);
+    selComesend=dl.getElementSingleSelector(EXcomesend);
     if($(selComesend).length!=1){
         console.log("?EXcomesend "+selComesend);
         selComesend=alt?".HH_e":"";
@@ -5668,7 +5672,7 @@ function setOptionHead() {
         t += selComesend+'{background-color:' + bc + ';}';
     }
 
-    selComesendinpp=(EXcomesendinp&&getElementSingleSelector(EXcomesendinp.parentElement))||'.'+EXcomesendinp.parentElement.classList[0];
+    selComesendinpp=(EXcomesendinp&&dl.getElementSingleSelector(EXcomesendinp.parentElement))||'.'+EXcomesendinp.parentElement.classList[0];
     if($(selComesendinpp).not('#copyotw').length!=1){
         console.log("?EXcomesendinp.parentElement "+selComesendinpp);
         selComesendinpp=alt?".HH_HL":"";
@@ -5677,7 +5681,7 @@ function setOptionHead() {
         t += selComesendinpp+'{background-color:' + uc + ';}';
     }
 
-    selComesendinp=getElementSingleSelector(EXcomesendinp,2);
+    selComesendinp=dl.getElementSingleSelector(EXcomesendinp,2);
     if($(selComesendinp).not('#copyot').length!=1){
         console.log("?EXcomesendinp "+selComesendinp);
         selComesendinp=alt?".HH_HN":"";
@@ -5692,12 +5696,12 @@ function setOptionHead() {
     }
 
     //EXcomelistのコピー#copycomecがあるので注意する
-    selComelist=getElementSingleSelector(EXcomelist,0,["#copycomec"]);
+    selComelist=dl.getElementSingleSelector(EXcomelist,0,["#copycomec"]);
     if($(selComelist).not("#copycomec").length!=1){
         console.log("?EXcomelist "+selComelist);
         selComelist=alt?".uo_e":"";
     }
-    selComelistp=EXcomelist?getElementSingleSelector(EXcomelist.parentElement,0,["#copycome"]):null;
+    selComelistp=EXcomelist?dl.getElementSingleSelector(EXcomelist.parentElement,0,["#copycome"]):null;
     if($(selComelistp).not("#copycome").length!=1){
         console.log("?EXcomelist.parent "+selComelistp);
         selComelistp=alt?".Ai_Am.t7_e":"";
@@ -5788,7 +5792,7 @@ function setOptionHead() {
     //もしくは常時隠して表示する場合に記述する、つまり表示切替の一切を自力でやる
     //（コメ欄常時表示で黒帯パネルの表示切替が発生した時のレイアウト崩れを防ぐため）
 
-    selHead=getElementSingleSelector(EXhead);
+    selHead=dl.getElementSingleSelector(EXhead);
     if($(selHead).length!=1){
         console.log("?EXhead "+selHead);
         selHead=alt?".P_R":"";
@@ -5797,7 +5801,7 @@ function setOptionHead() {
         t += selHead+'{visibility:visible;opacity:1;transform:translate(0);}';
     }
 
-    selFoot=getElementSingleSelector(EXfoot);
+    selFoot=dl.getElementSingleSelector(EXfoot);
     if($(selFoot).length!=1){
         console.log("?EXfoot "+selFoot);
         selFoot=alt?".v3_v_":"";
@@ -5806,7 +5810,7 @@ function setOptionHead() {
         t += selFoot+'{visibility:visible;opacity:1;transform:translate(0);}';
     }
 
-    selSide=getElementSingleSelector(EXside);
+    selSide=dl.getElementSingleSelector(EXside);
     if($(selSide).length!=1){
         console.log("?EXside "+selSide);
         selSide=alt?".v3_v5":"";
@@ -5815,7 +5819,7 @@ function setOptionHead() {
         t += selSide+'{transform:translateY(-50%);z-index:20;opacity:0.5}';
     }
 
-    selChli=getElementSingleSelector(EXchli);
+    selChli=dl.getElementSingleSelector(EXchli);
     if($(selChli).length!=1){
         console.log("?EXchli "+selChli);
         selChli=alt?".v3_wk":"";
@@ -5824,7 +5828,7 @@ function setOptionHead() {
         t += selChli+'{z-index:15;}';//head11より上の残り時間12,13,14より上
     }
 
-    selInfo=getElementSingleSelector(EXinfo);
+    selInfo=dl.getElementSingleSelector(EXinfo);
     if($(selInfo).length!=1){
         console.log("?EXinfo "+selInfo);
         selInfo=alt?".v3_wg":"";
@@ -5833,16 +5837,16 @@ function setOptionHead() {
         t += selInfo+'{z-index:15;}';
     }
 
-    if(selCome) t += selCome+' *{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
+    if(selCome) t += selCome+'>*{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
     if(selComelist) t += selComelist+'{margin:0px}';
 
     //左上・左下の非表示
     /*jo=getReceiveNotifyElement();
-    if(!jo || !((to=getElementSingleSelector(jo))&&$(to).length==1)){
+    if(!jo || !((to=dl.getElementSingleSelector(jo))&&$(to).length==1)){
         console.log("?ad-reserve");
         to=alt?'.v3_wC':"";
     }*/
-    to = getElementSingleSelector(EXvideoarea) + '>div[style^="bottom: "]';
+    to = dl.getElementSingleSelector(EXvideoarea) + '>div[style^="bottom: "]';
     if(to){
         t += to+'{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
         if (settings.isHidePopBL) {
@@ -5854,7 +5858,7 @@ function setOptionHead() {
     //twitter通知パネル すぐには生成されないので遅延適用するためdelaysetのループへ
     //生成されたらこのoptionheadを再実行して適用させる
     jo=getReceiveTwtElement();
-    if(!jo || !((to=getElementSingleSelector(jo))&&$(to).length==1)){
+    if(!jo || !((to=dl.getElementSingleSelector(jo))&&$(to).length==1)){
         console.log("?twtPanel");
         to=alt?'.v3_wA':"";
     }
@@ -5866,7 +5870,7 @@ function setOptionHead() {
         t += '}';
     }
 
-    selVideoarea = getElementSingleSelector(EXvideoarea);
+    selVideoarea = dl.getElementSingleSelector(EXvideoarea);
     if(document.querySelector(selVideoarea)){
         console.log("?EXvideoarea "+selVideoarea);
     }
@@ -5922,7 +5926,7 @@ function setOptionHead() {
 
     //全画面・音量ボタン非表示 display:noneだとホイール音量操作でスタック
     if (settings.isHideButtons) {
-        to=getElementSingleSelector(EXfullscr);
+        to=dl.getElementSingleSelector(EXfullscr);
         if($(to).length!=1){
             console.log("?fullscreen "+to);
             to=alt&&selFoot?selFoot+" .mb_mi":"";
@@ -5931,7 +5935,7 @@ function setOptionHead() {
             t += to+'{opacity:0;visibility:hidden;}';
         }
 
-        to=getElementSingleSelector(EXvolume);
+        to=dl.getElementSingleSelector(EXvolume);
         if($(to).length!=1){
             console.log("?volume "+to);
             to=alt&selFoot?selFoot+" .mb_mk":"";
@@ -5957,7 +5961,7 @@ function setOptionHead() {
     t += '#tProtitle{padding:4px 8px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
     t += '#proTimeEpNum>div{border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;}';
 
-    selFootcome = getElementSingleSelector(EXfootcome);
+    selFootcome = dl.getElementSingleSelector(EXfootcome);
     if ($(selFootcome).length != 1) {
         console.log("?EXfootcome " + selFootcome);
         selFootcome = alt ? ".iF_iT" : "";
@@ -5991,7 +5995,7 @@ function setOptionHead() {
     }
     t += '}';
     //視聴数
-    selCountview=getElementSingleSelector(EXcountview);
+    selCountview=dl.getElementSingleSelector(EXcountview);
     if($(selCountview).length!=1){
         console.log("?EXcountview "+selCountview);
         selCountview=alt?".v3_wX":"";
@@ -6016,7 +6020,7 @@ function setOptionHead() {
         t += '#viewcounticon{vertical-align:middle;fill:#1a1a1a;}';
         t += '#viewcountcont{margin-left:4px;font-size:12px;font-weight:700;vertical-align:middle;color:#1a1a1a;}';
         t += '#comecountcont{margin-left:10px;font-size:18px;font-weight:700;vertical-align:middle;line-height:1.6;color:#1a1a1a;}';
-        to=getElementSingleSelector(EXfootcome);
+        to=dl.getElementSingleSelector(EXfootcome);
         if($(to).length!=1){
             console.log("?EXfootcome "+to);
             to=alt?selFoot+" .mb_mo":"";
@@ -6039,7 +6043,7 @@ function setOptionHead() {
         t += selFoot+'>div>div:nth-child(3)>*,'+selHead+'>*{opacity:' + ((settings.panelOpacity/255<0.7)?0.7:(settings.panelOpacity/255)) + '}';
         t += selFoot+'>div>div:nth-child(3)>div:nth-child(1):hover{background:rgba(32,32,32,' + (settings.panelOpacity/255) + ')}';
         //フッターチャンネルアイコンの背景を透過
-        var selChLogoDiv = getElementSingleSelector($(EXfoot).find('img').parent().get(0));
+        var selChLogoDiv = dl.getElementSingleSelector($(EXfoot).find('img').parent().get(0));
         t += selChLogoDiv+'{background-color:transparent !important;}';
     }
  
@@ -6063,7 +6067,7 @@ function setOptionHead() {
 }
 function setFooterBGStyle(){
     let t='';
-    let selFoot=getElementSingleSelector(EXfoot);
+    let selFoot=dl.getElementSingleSelector(EXfoot);
     if($(selFoot).isEmpty()) return;
     //フッターの視聴数にかぶる部分を透明にした背景
     let barcolor = `rgba(0,0,0,${settings.panelOpacity/255})`;
@@ -6488,7 +6492,7 @@ function comeModuleEditor() {
         return;
     }
     EXcomemodule=ret[0];
-    var to=getElementSingleSelector(ret[1]);
+    var to=dl.getElementSingleSelector(ret[1]);
     if(!to){
         console.log("?sendbtn");
         to = "";//'.ts_jZ';
