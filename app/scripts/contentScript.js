@@ -2288,6 +2288,9 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         //初期読込時にマウス反応の要素が閉じないのを直したい
         forElementClose=1;
 
+        // ピクチャーインピクチャーボタン設置
+        createPIPbutton();
+
         isInit=true;
     }
 
@@ -2404,6 +2407,32 @@ function volumecheck() {
         }
     } else {
         setTimeout(volumecheck, 1000);
+    }
+}
+function createPIPbutton() {
+    if (!document.pictureInPictureEnabled) return;
+    if (!EXside) {
+        console.log("createPIPbutton retry");
+        setTimeout(createPIPbutton, 1000);
+        return;
+    }
+    //設定ウィンドウ・開くボタン設置
+    if (!document.getElementById('PIPbutton')) {
+        var PIPbutton = document.createElement("div");
+        PIPbutton.id = "PIPbutton";
+        PIPbutton.classList.add('ext-sideButton');
+        PIPbutton.setAttribute('title', 'ピクチャーインピクチャーモードの切り替え(拡張機能)');
+        PIPbutton.innerHTML = "<img src='" + chrome.extension.getURL("/images/pip.svg") + "' alt='PIP' class='ext-sideButton-icon'>";
+        EXside.appendChild(PIPbutton);
+        $("#PIPbutton").on("click", function () {
+            if (!document.pictureInPictureElement) {
+                getElm.getVideo().requestPictureInPicture()
+                .then(w=>{toast('ピクチャーインピクチャーに切り替えました。');})
+                .catch(e=>{console.warn('request PIP error', e);toast('ピクチャーインピクチャーへの切り替えに失敗しました。');});
+            } else {
+                document.exitPictureInPicture().catch(e=>{console.warn('exit PIP error', e); toast('ピクチャーインピクチャーの終了に失敗しました。');});
+            }
+        });
     }
 }
 function optionStatsUpdate(outflg) {
@@ -2581,8 +2610,9 @@ function createSettingWindow() {
     if ($(EXside).children('#optionbutton').length == 0) {
         var optionbutton = document.createElement("div");
         optionbutton.id = "optionbutton";
-        optionbutton.setAttribute("style", "width:40px;height:40px;position:relative;background-color:#ddd;opacity:0.5;cursor:pointer;");
-        optionbutton.innerHTML = "<img src='" + chrome.extension.getURL("/images/gear.svg") + "' alt='拡張設定' style='margin: auto;position: absolute;left: 0;top: 0;right: 0;bottom: 0;height:20px;width:20px;'>";
+        optionbutton.classList.add('ext-sideButton');
+        optionbutton.setAttribute('title', '拡張機能の一時設定');
+        optionbutton.innerHTML = "<img src='" + chrome.extension.getURL("/images/gear.svg") + "' alt='拡張設定' class='ext-sideButton-icon'>";
         slidecont.appendChild(optionbutton);
         $("#optionbutton").on("click", function () {
             if ($("#settcont").css("display") == "none") {
@@ -5518,7 +5548,8 @@ function setOptionHead() {
     var cc = "rgba(" + settings.commentBackColor + "," + settings.commentBackColor + "," + settings.commentBackColor + "," + (0.2) + ")";
     var rc = "rgba(" + Math.floor(255 - (255 - settings.commentTextColor) * 0.8) + "," + Math.floor(settings.commentTextColor * 0.8) + "," + Math.floor(settings.commentTextColor * 0.8) + "," + (settings.commentTextTrans / 255) + ")";//赤系のコメント文字色(NG登録で使用)
     var tc = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (settings.commentTextTrans / 255) + ")";//コメント文字色
-    var uc = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (0.2) + ")";//コメント入力欄背景色
+    var uc = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (0.1) + ")";//コメント入力欄背景色
+    const activeInputBack = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (0.2) + ")";//コメント入力欄背景色(入力可能時)
     var vc = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (0.3) + ")";//コメント一覧区切り線色
 
     selCome=dl.getElementSingleSelector(EXcome);
@@ -5546,7 +5577,9 @@ function setOptionHead() {
         selComesendinpp=alt?".HH_HL":"";
     }
     if(selComesendinpp){
-        t += selComesendinpp+'{background-color:' + uc + ';}';
+        t += selComesendinpp+'{background-color:' + uc + ' !important;}';
+        //投稿可能時にabemaが付与すると思われるクラスがついたときは背景色を少し変える
+        t += '.com-o-CommentForm__can-post .com-o-CommentForm__opened-textarea-wrapper{background-color:' + activeInputBack + ' !important;}';
     }
 
     selComesendinp=dl.getElementSingleSelector(EXcomesendinp,2);
@@ -5558,8 +5591,8 @@ function setOptionHead() {
         //t += selComesendinp+'{background-color:' + uc + ';color:' + tc + ';}';
         //t += selComesendinp+'+*{background-color:' + uc + ';color:' + tc + ';}';
         //↓コメント入力欄が二重枠にならないようにtextareaとその兄弟の背景は透明にしておく
-        t += selComesendinp+'{background-color: transparent;color:' + tc + ';}';
-        t += selComesendinp+'+*{background-color: transparent;color:' + tc + ';}';
+        t += selComesendinp+'{background-color: transparent;color:' + tc + ' !important;}';
+        t += selComesendinp+'+*{background-color: transparent;color:' + tc + ' !important;}';
 
     }
 
@@ -5718,7 +5751,8 @@ function setOptionHead() {
     if(to){
         t += to+'{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
         if (settings.isHidePopBL) {
-            t += 'transform:translateX(-170px);';
+            //t += 'transform:translateX(-170px);';
+            t += 'display: none;';
         }
         t+='}';
     }
@@ -5813,15 +5847,6 @@ function setOptionHead() {
         }
     }
 
-/*
-    //自動更新停止アイコン用
-    t += '.reloadicon{fill:rgba(255,255,255,0.5);position:absolute;right:0;top:9px;}';
-    t += '#reloadon{transform:rotate3d(3,-2,0,180deg);}';
-    t += '#reloadoff{pointer-events:none;}';
-    t += '[class^="styles__right-comment-area___"] [class*="styles__comment-form___"]{padding-right:0;}';
-    t += '[class^="styles__right-comment-area___"] [class^="styles__opened-textarea-wrapper___"]{padding-right:23px;}';
-    t += '[class^="styles__right-comment-area___"] textarea{width:calc(100% - 8px * 2 - 15px);}';
-*/
     //残り時間用
     t += '#forProEndBk{padding:0px 0px;margin:4px 0px;background-color:rgba(255,255,255,0.2);z-index:12!important;}';
     t += '#forProEndTxt{padding:4px 5px 4px 11px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
@@ -5963,24 +5988,6 @@ function setOptionElement() {
         isEdge || $(EXcomesendinp).prop("wrap", "");
     }
     setProSamePosiChanged();
-
-    //コメントアイコン付近にリロードアイコン作成
-    /*
-    if ($('#reloadon').length == 0) {
-        var ri = '<a title="スクロール時コメ自動更新は現在 OFF です">';
-        ri += '<svg id="reloadon" class="usermade reloadicon" width="16" height="16">';
-        ri += '<use xlink:href="/images/icons/return.svg#svg-body"></use></svg>';
-        ri += '<svg id="reloadoff" class="usermade reloadicon" width="16" height="16" style="">';
-        ri += '<use xlink:href="/images/icons/close.svg#svg-body"></use></svg>';
-        ri += '</a>';
-        $(ri).appendTo(EXcomesendinp.parentElement);
-        $('#reloadon').on("click", function () {
-            isAutoReload = !isAutoReload;
-            $('#reloadoff').css("display", isAutoReload ? "none" : "block");
-            $('#reloadoff').parent('a').prop("title", "スクロール時コメ自動更新は現在 " + (isAutoReload ? "ON" : "OFF") + " です");
-        });
-    }
-    */
 
     //    $(EXfootcome).css("pointer-events","auto");
     if(EXcomelist)copycome();
@@ -7448,15 +7455,6 @@ function onairBasefunc() {
             setOptionHead();
         }
 
-        if (EXcome && isAutoReload) {
-            //            var btn = $(EXcome).contents().find('[class^="styles__continue-btn___"]'); //新着コメのボタン
-            var btn = $(EXcomesend).siblings('[class^="styles__continue-btn___"]'); //todo
-            if (btn.length > 0) {
-                //var newCommentNum = parseInt(btn.text().match("^[0-9]+"));
-                btn.trigger("click");// 1秒毎にコメントの読み込みボタンを自動クリック
-                comeColor($('#reloadon'));
-            }
-        }
         //        //映像のtopが変更したらonresize()実行
         //        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
         //        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
