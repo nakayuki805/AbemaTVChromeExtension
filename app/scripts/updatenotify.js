@@ -11,13 +11,9 @@ var currentUpdateNotifyVersion = 15;//0.13.1の時
 var optionUrl = chrome.extension.getURL("/pages/option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",//表示させたいときはcurrentUpdateNotifyVersionの更新を忘れずに
-    "コメントマウスオーバーで同一ユーザーのコメントをハイライト※",
-    "ユーザーIDによるNG※",
-    "共有NGユーザー※",
-    "拡張機能を一時停止させる(設定画面の下のボタン)",
-    "番組表を掴んで移動",
+    "ピクチャーインピクチャーモードへの切り替え(Chrome 70以降から)",
     "などの機能が追加されています。",
-    "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
+//    "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
     "<span style='font-size:small'>コメント欄がちらつく場合はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を500以上にしてください。",
     "番組表で右側の番組表詳細に初回だけ通知登録ボタンが表示されない場合、番組表を開いて少し待ってから番組をクリックしてください。",
     "</span><span style='font-size:x-small;'>不具合等あれば設定画面の不具合報告フォームから詳細を報告お願いします。</span>"

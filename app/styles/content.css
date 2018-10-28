@@ -249,3 +249,22 @@ body{
 .toggle-switch input[type="checkbox"]:focus {
     outline: none;
 }
+.ext-sideButton {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    background-color: #8c8c8c;
+    opacity: 0.8;
+    cursor: pointer;
+    margin-top: 1px;
+}
+.ext-sideButton-icon {
+    margin: auto;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    height:20px;
+    width:20px;
+}
