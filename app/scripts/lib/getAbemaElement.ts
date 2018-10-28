@@ -31,21 +31,49 @@ export function getVideoAreaElement() {//映像領域を内包する要素(旧ob
     }]});
 }
 export function getHeaderElement() {
-    //return $('[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])').parents().rectFilter({bottom14u: true, notBodyParent: true}).last();
     return dl.parentsFilterLastByArray(document.querySelectorAll('[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])'),{bottom14u: true, notBodyParent: true});
 }
 export function getViewCounterElement() {
-    let p = $('p').filter(function(){return this.innerHTML.indexOf('視聴数')>=0;});
-    if (p.isEmpty()) {console.log('?viewCounter(!p)');return null;}
-    return p.parents().rectFilter({width14s: true, height14s: true, notBodyParent: true, filters: [function(e){return $(e).children('div').length<2;}]}).last()[0];
+    const p = dl.filter(document.getElementsByTagName('p'), {includeText: '視聴数'});
+    if (p.length === 0) {console.log('?viewCounter(!p)');return null;}
+    return dl.parentsFilterLastByArray(p, {width14s: true, height14s: true, notBodyParent: true, filters: [function(e){return $(e).children('div').length<2;}]});
 }
 export function getFooterElement() {
     //console.log("?foot");
     //左下のチャンネルロゴを子孫にもち下方にあるものをfooterとする
-    let channelName = getInfo.getChannelByURL();
+    const channelName = getInfo.getChannelByURL();
     if (!channelName){console.log("?footer(!channelName)");return null;}
-    let logo = $('img[src*="/channels/logo/' + channelName + '"]');
-    let ret = logo.rectFilter({top34d: true, right14l: true}).first();
-    if(ret.isEmpty()){console.log("?footer(empty ret)");return null;}
-    return ret.parents().rectFilter({top34d: true, notBodyParent: true}).last()[0];
+    const footerLogo = dl.filter(document.querySelectorAll('img[src*="/channels/logo/' + channelName + '"]'), {top34d: true, right14l: true})[0];
+    if(!footerLogo){console.log("?footer(!footerLogo)");return null;}
+    return dl.parentsFilterLast(footerLogo, {top34d: true, notBodyParent: true});
+}
+export function getChannelListElement() {
+    //console.log("?chli");
+    //右下にある番組表リンクを孫にもち右にあるのをchliとする //元々は直下がaリストだったけどその上のfooter,info等と同じ階層のを選ぶようにする
+    var ret = null;
+    var links = document.links;
+    for (let i = links.length - 1,b; i >= 0; i--) {
+        b=links[i].getBoundingClientRect();
+        if (links[i].href.indexOf("/timetable") < 0 || b.top < window.innerHeight * 3 / 4||b.left<window.innerWidth/2) continue;
+        ret = links[i];
+        break;
+    }
+    //if(!ret)ret=$('.ext_ref-programList')[0];
+    if(!ret){/*console.log("?chli");*/return null;}
+    return dl.parentsFilterLast(ret, {left12r: true, notBodyParent: true});
+}
+export function getVolElement(){
+    //console.log("?vol");
+    //音声アイコンを含んで右下のをvolとする
+    const svg: HTMLElement|null = document.querySelector('[*|href*="/volume_"][*|href$="#svg-body"]:not([href])');
+    if(!svg){console.log("?getvol");return null;}
+    return dl.parentsFilterLast(svg, {left23r: true, top23d: true, notBodyParent: true})
+}
+
+export function getFullScreenElement(){
+    //console.log("?fullscreen");
+    var ret = $('[*|href*="/full_screen.svg"][*|href$="#svg-body"]:not([href])').first().parentsUntil("button").parent().get(0);
+    let svg: HTMLElement|null = document.querySelector('[*|href*="/full_screen.svg"][*|href$="#svg-body"]:not([href])');
+    if(!svg){console.log("?fullscreen");return null;}
+    return dl.filter(dl.parents(svg), {tagName: 'button'})[0];
 }

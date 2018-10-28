@@ -4,6 +4,7 @@ interface rectFilterOption{
     left14l?: boolean;
     left12l?: boolean;
     left12r?: boolean;
+    left23r?: boolean;
     left34r?: boolean;
     right14r?: boolean;
     right14l?: boolean;
@@ -13,6 +14,7 @@ interface rectFilterOption{
     top14u?: boolean;
     top12u?: boolean;
     top12d?: boolean;
+    top23d?: boolean;
     top34d?: boolean;
     bottom14u?: boolean;
     bottom12u?: boolean;
@@ -33,6 +35,13 @@ interface rectFilterOption{
     notBodyParent?: boolean;
     display?: string;
     displayNot?: string;
+    tagName?: string;
+    tagNames?: string[];
+    notTagName?: string;
+    notTagNames?: string[];
+    matchSelector?: string;
+    notMatchSelector?: string;
+    includeText?: string;
     filters?: Array<(element: HTMLElement) => boolean>;
 }
 
@@ -58,6 +67,7 @@ export function filter(elements: ArrayLike<HTMLElement>, option: rectFilterOptio
         if (option.left14l && b.left>window.innerWidth/4) return false;
         if (option.left12l && b.left>window.innerWidth/2) return false;
         if (option.left12r && b.left<window.innerWidth/2) return false;
+        if (option.left23r && b.left<window.innerWidth*2/3) return false;
         if (option.left34r && b.left<window.innerWidth*3/4) return false;
         if (option.right14r && b.left+b.width<window.innerWidth/4) return false;
         if (option.right14l && b.left+b.width>window.innerWidth/4) return false;
@@ -67,6 +77,7 @@ export function filter(elements: ArrayLike<HTMLElement>, option: rectFilterOptio
         if (option.top14u && b.top>window.innerHeight/4) return false;
         if (option.top12u && b.top>window.innerHeight/2) return false;
         if (option.top12d && b.top<window.innerHeight/2) return false;
+        if (option.top23d && b.top<window.innerHeight*2/3) return false;
         if (option.top34d && b.top<window.innerHeight*3/4) return false;
         if (option.bottom14u && b.top+b.height>window.innerHeight/4) return false;
         if (option.bottom12u && b.top+b.height>window.innerHeight/2) return false;
@@ -87,6 +98,29 @@ export function filter(elements: ArrayLike<HTMLElement>, option: rectFilterOptio
         if (option.notBodyParent && (!element.parentElement || /BODY|HTML/i.test(element.parentElement.tagName))) return false;
         if (option.display && element.style.display !== option.display) return false;
         if (option.displayNot && element.style.display === option.displayNot) return false;
+        if (option.tagName || option.tagNames){
+            const tagNames = option.tagNames?[...option.tagNames]:[];
+            if (option.tagName) tagNames.push(option.tagName);
+            for (const tagName of tagNames) {
+                if (element.tagName.toUpperCase()!==tagName.toUpperCase()) return false;
+            }
+        }
+        if (option.notTagName || option.notTagNames){
+            const notTagNames = option.notTagNames?[...option.notTagNames]:[];
+            if (option.notTagName) notTagNames.push(option.notTagName);
+            for (const notTagName of notTagNames) {
+                if (element.tagName.toUpperCase()===notTagName.toUpperCase()) return false;
+            }
+        }
+        if (option.matchSelector) {
+            if (!element.matches(option.matchSelector)) return false;
+        }
+        if (option.notMatchSelector) {
+            if (element.matches(option.notMatchSelector)) return false;
+        }
+        if (option.includeText) {
+            if (!element.textContent || !element.textContent.includes(option.includeText)) return false;
+        }
         if (option.filters && option.filters.length>0) {
             let flag = true;
             option.filters.forEach(filter => {
@@ -97,10 +131,10 @@ export function filter(elements: ArrayLike<HTMLElement>, option: rectFilterOptio
         return true;
     });
 }
-export function parentsFilterLast(element: HTMLElement, option: rectFilterOption){
+export function parentsFilterLast(element: HTMLElement, option: rectFilterOption): HTMLElement|null{
     return last(filter(parents(element), option), true);
 }
-export function parentsFilterLastByArray(elements: ArrayLike<HTMLElement>, option: rectFilterOption){
+export function parentsFilterLastByArray(elements: ArrayLike<HTMLElement>, option: rectFilterOption): HTMLElement|null{
     let filteredArray: HTMLElement[] = [];
     Array.from(elements).forEach(element=>{
         const lastElement = parentsFilterLast(element, option);

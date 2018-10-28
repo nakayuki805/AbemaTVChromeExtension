@@ -2306,7 +2306,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
             if(!chlogo.isEmpty()) $(EXchli).scrollTop(chlogo.parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
         }
     }
-    if(!isChli&&(EXchli=getChannelListElement())){
+    if(!isChli&&(EXchli=getElm.getChannelListElement())){
         addExtClass(EXchli, 'channelList');
         console.log("setOptionHead delayset(EXchli)");
         resetOptionHead=true;
@@ -3869,8 +3869,8 @@ function setEXs() {
     if (! EXcomesendinp   &&!( EXcomesendinp   = getComeFormElement(0)           ) /*&& ($('.HH_HN').length == 0 || !( EXcomesendinp   = $('.HH_HN')[0] ))*/) b = false;// console.log("comesendinp"); }
     if (! EXcomesend      &&!( EXcomesend      = getComeFormElement(1)           ) /*&& ($('.HH_e' ).length == 0 || !( EXcomesend      = $('.HH_e' )[0] ))*/) b = false;// console.log("comesend"); }
     if (! EXcome          &&!( EXcome          = getComeFormElement(2)           ) /*&& ($('.v3_wi').length == 0 || !( EXcome          = $('.v3_wi')[0] ))*/) b = false;// console.log("come"); }//TVContainer__right-comment-area___
-    if (! EXvolume        &&!( EXvolume        = getVolElement()                 ) /*&& ($('.mb_mk').length == 0 || !( EXvolume        = $('.mb_mk')[0] ))*/) b = false;// console.log("vol"); }
-    if (! EXfullscr       &&!( EXfullscr       = getFullScreenElement()          ) /*&& ($('.mb_mi').length == 0 || !( EXvolume        = $('.mb_mi')[0] ))*/) b = false;// console.log("vol"); }
+    if (! EXvolume        &&!( EXvolume        = getElm.getVolElement()                 ) /*&& ($('.mb_mk').length == 0 || !( EXvolume        = $('.mb_mk')[0] ))*/) b = false;// console.log("vol"); }
+    if (! EXfullscr       &&!( EXfullscr       = getElm.getFullScreenElement()          ) /*&& ($('.mb_mi').length == 0 || !( EXvolume        = $('.mb_mi')[0] ))*/) b = false;// console.log("vol"); }
 //    if (! EXobli          &&!( EXobli          = getObliElement()                ) /*&& ($('.v3_ws').length == 0 || !( EXobli          = $('.v3_ws')[0] ))*/) b = false;// console.log("obli"); }//TVContainer__tv-container___
     if (! EXvideoarea     &&!( EXvideoarea     = getElm.getVideoAreaElement()    )) b = false;
 //    if (! EXcomelist      &&!( EXcomelist      = getComeListElement()            ) /*&& ($('.uo_e' ).length == 0 || !( EXcomelist      = $('.uo_e' )[0] ))*/) b = false;
@@ -3906,65 +3906,7 @@ function setEXs() {
         setTimeout(setEXs, 1000);
     }
 }
-/*function setEX2() {
-    if (checkUrlPattern(true) != 3) { return; }
-    var b = true;
-    //if ($(EXchli).children('[class*="styles__current___"]').length == 0) { b = false; }
-    //eyecatchの捕捉はexwatchingnumでなくvideoから使うようにする
-    //if ((EXwatchingstr = $(EXchli).children('[class*="styles__current___"]').contents().find('img[class*="styles__logo___"]').prop("alt") || getEXWatchingStr()) == null) { b = false; }
-    //else if ((EXwatchingnum = $(EXobli).contents().find('img[alt=' + EXwatchingstr + ']').parents().index()) == null) { b = false; }
-    //else {
-    var cn = getInfo.getChannelByURL();
-    if (cn){
-        $(EXchli).scrollTop($(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
-        //$(EXchli).parent().scrollTop($(EXchli).children('[class*="styles__current___"]').index() * 85 - $(EXside).position().top);
-    }
-    if (b == true) {
-        console.log("setEX2 ok");
-    } else {
-        console.log("setEX2 retry");
-        setTimeout(setEX2, 1000);
-    }
-}*/
-/*function getElementSingleSelector(ret,sw,remove){
-    //idがあれば要素名#idを返す
-    //classが全体で唯一なら要素名.classを返す
-    //sw 1:classが全体でその兄弟だけなら要素名.class:eq(index)を返す 2:classが兄弟で唯一なら要素名.classを返す
-    //全体や兄弟に含めないid,classをremoveで受ける swを忘れないように注意する
 
-    if(!ret) return null;
-    var ren=ret.tagName;
-    var rw=/\w/;
-    var rt=/^\s+|\s+$/g;
-    var tms=ret.id;
-    if(rw.test(tms)) return ren+'#'+tms.replace(rt,"");
-    var rs=/\s/;
-    tms=ret.className;
-    var jo;
-    var jolen;
-    if(!rw.test(tms)) return null;
-    var jr=null;
-    if(remove&&remove.length>0){
-        jr=$(remove[0]);
-        for(var i=1;i<remove.length;i++) jr=jr.add(remove[i]);
-    }
-    var tma=tms.replace(rt,"").split(rs);
-    for(let i=0;i<tma.length;i++){
-        if(!rw.test(tma[i]) && tma[i].indexOf('ext_abm-')<0) continue; //拡張機能が付与したclassは除外
-        tms=ren+'.'+tma[i].replace(rt,"");
-        jo=$(tms).not(jr);
-        jolen=jo.length;
-        if(jolen==0) continue;
-        if(jolen==1) return tms;
-        else if(sw==1){
-            jo=$(ret).siblings(tms).not(jr);
-            if(jolen==1+jo.length) return tms+":eq("+$(ret).prevAll(tms).not(jr).length+")";
-        }else if(sw==2&&$(ret).siblings(tms).not(jr).length==0) return tms;
-    }
-    console.log("?getElementSingleSelector:");
-    console.log(ret);
-    return null;
-}*/
 function getFootcomeElement(returnSingleSelector) {
     //console.log("?footcome");
     //コメントアイコンを孫にもち左下のチャンネルロゴと共通の親をもつものをfootcomeとする
@@ -4038,29 +3980,7 @@ function getInfoElement(returnSingleSelector) {
     if(rep.tagName.toUpperCase()=="BODY"){console.log("?info");return null;}
     return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
-function getChannelListElement(returnSingleSelector) {
-    //console.log("?chli");
-    //右下にある番組表リンクを孫にもち右にあるのをchliとする //元々は直下がaリストだったけどその上のfooter,info等と同じ階層のを選ぶようにする
-    var ret = null;
-    var links = document.links;
-    for (let i = links.length - 1,b; i >= 0; i--) {
-        b=links[i].getBoundingClientRect();
-        if (links[i].href.indexOf("/timetable") < 0 || b.top < window.innerHeight * 3 / 4||b.left<window.innerWidth/2) continue;
-        ret = links[i];
-        break;
-    }
-    //if(!ret)ret=$('.ext_ref-programList')[0];
-    if(!ret){/*console.log("?chli");*/return null;}
-    var rep=ret.parentElement;
-    var b=rep.getBoundingClientRect();
-    while(rep.tagName.toUpperCase()!="BODY"&&b.left>window.innerWidth/2){
-        ret=rep;
-        rep=ret.parentElement;
-        b=rep.getBoundingClientRect();
-    }
-    if(rep.tagName.toUpperCase()=="BODY"){console.log("?chli");return null;}
-    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
-}
+
 function getComeFormElement(sw,returnSingleSelector) {
     //sw 0:come 1:form 2:textarea
     //0 placeholderにコメントを含むtextarea
@@ -4160,59 +4080,7 @@ function getComeListElement(returnSingleSelector){
     if(!ret){console.log("?comelist(children notfound)");return null;}
     return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
-function getVolElement(returnSingleSelector){
-    //console.log("?vol");
-    //音声アイコンを含んで右下のをvolとする
-    var ret = $('[*|href*="/volume_on.svg"][*|href$="#svg-body"]:not([href])').add('[*|href*="/volume_off.svg"][*|href$="#svg-body"]:not([href])').get(0);
-    if(!ret){console.log("?getvol");return null;}
-    var rep=ret.parentElement;
-    var b=rep.getBoundingClientRect();
-    while(rep.tagName.toUpperCase()!="BODY"&&b.left>window.innerWidth*2/3&&b.top>window.innerHeight*2/3){
-        ret=rep;
-        rep=ret.parentElement;
-        b=rep.getBoundingClientRect();
-    }
-    if(rep.tagName.toUpperCase()=="BODY"){console.log("?getvol");return null;}
-    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
-}
-function getObliElement(returnSingleSelector){
-    //console.log("?obli");
-    //大きいvideoもしくは子が多いobjectを含んで子沢山をobliとする
-    var ret=getElm.getVideo();
-    if(!ret){console.log("?obli");return null;}
-    //abemaトップのチャンネル一覧で誤爆しないよう祖先にaがないことも条件とする
-    while(ret.tagName.toUpperCase()!="BODY"&&ret.tagName.toUpperCase()!="A"&&ret.childElementCount<16){
-        ret=ret.parentElement;
-        //console.log(4185,ret);
-    }
-    if(ret.tagName.toUpperCase()=="BODY"||ret.tagName.toUpperCase()=="A"){console.log("?obli");return null;}
-    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
-}
-/*function getEXWatchingStr(){
-    console.log("?exws");
-    var ret=null;
-    var chlic=$(EXchli);
-    while(chlic.children().length<16){
-        chlic=chlic.children().first();
-    }
-    chlic=chlic.children();
-    for(var i=0,t;i<chlic.length;i++){
-        if(chlic.eq(i).children("div").length>1){
-            t=chlic.eq(i).find('img[src*="/channels/logo/"]');
-            if(t.length>0){
-                ret=t.eq(0).prop("alt");
-                break;
-            }
-        }
-    }
-    return ret;
-}*/
-function getFullScreenElement(returnSingleSelector){
-    //console.log("?fullscreen");
-    var ret = $('[*|href*="/full_screen.svg"][*|href$="#svg-body"]:not([href])').first().parentsUntil("button").parent().get(0);
-    if(!ret){console.log("?fullscreen");return null;}
-    return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
-}
+
 function getMenuElement(returnSingleSelector){
     //head内にあること前提でリンクが多いのを選ぶ
     var ret=null;
@@ -5989,7 +5857,7 @@ function setOptionHead() {
         t += '.movingComment{font-size:' + settings.comeFontsize + 'px;}';
 
     //投票機能
-    t += '[class^="styles__vote-container___"]{z-index:8;'; //todo
+    t += selInfo+'+div[style^="width:"]{z-index:8;'; //infoの隣でwidthがinnerWidthに直指定されてる
     if (settings.isHideVoting) {
         t += 'display:none;';
     }
@@ -6708,7 +6576,7 @@ function fastEyecatching(retrycount) {
     //console.log("fastEyecatch#"+retrycount);
     if ($('.manualblock').length > 0 || retrycount <= 0) { eyecatcheck = false; return; }//手動対応を優先
     //if ($(EXobli).find("object,video").first().parentsUntil(EXobli).last().children().length > 3 && retrycount > 0){
-    if (EXvideoarea.childElementCount > 3 && retrycount > 0){
+    if (EXvideoarea.childElementCount > 4 && retrycount > 0){
     //if ($(EXobli.children[EXwatchingnum]).children().is('[class*="styles__eyecatch"]') && retrycount > 0) {
         setTimeout(fastEyecatching, 100, retrycount - 1);
     } else {
@@ -7698,7 +7566,7 @@ function onairBasefunc() {
         if (settings.useEyecatch) {
         //if ((EXwatchingnum !== undefined) && settings.useEyecatch) {
             //if ($(EXobli).find("object,video").first().parentsUntil(EXobli).last().children().length > 3) {
-            if (EXvideoarea.childElementCount > 3){
+            if (EXvideoarea.childElementCount > 4){
             //if ($(EXobli.children[EXwatchingnum]).children('[class*="styles__eyecatch"]').length > 0) {
                 //eyecatchが有る
                 if (eyecatched == true) {
