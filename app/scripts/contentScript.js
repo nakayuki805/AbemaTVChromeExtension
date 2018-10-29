@@ -347,6 +347,7 @@ var resolutionSetEvent = new Event('resolutionSet');
 var delaysetConsoleStr = "";
 var delaysetConsoleRepeated = false;
 var lastMovedCommentTime = 0;//最後に流れたコメントの時間(コメントが二重に流れるのを防ぐ)
+let isResizeInterval = false;
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -2263,6 +2264,8 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         arrayUserNgMaker();
         //映像のリサイズ
         onresize();
+        if(!isResizeInterval)setInterval(onresize, 30000);
+        isResizeInterval = true;
         volumecheck(); //1秒ごとに実行していた最大音量チェックを初回読込時の1回だけに変更
         if ($('#moveContainer').length == 0) {
             $('<div id="moveContainer" class="usermade">').appendTo('body');
@@ -2284,6 +2287,7 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         setTimeout(fixCountViewLeft, 3000);//コメント数が表示されるまで待つ
         setTimeout(fixCountViewLeft, 10000);//再度修正
         setInterval(fixCountViewLeft, 30000);//30秒ごとに再調整
+
 
         //初期読込時にマウス反応の要素が閉じないのを直したい
         forElementClose=1;
@@ -2410,6 +2414,34 @@ function volumecheck() {
     }
 }
 function createPIPbutton() {
+    const PIPvideoObserver = new MutationObserver(mutations=>{
+        //console.log(mutations)
+        if(!document.pictureInPictureElement || document.pictureInPictureElement.src===''){
+            //console.log('!!!video changed');
+            PIPvideoObserver.disconnect();
+            //abemaが使用するvideo要素が変更されたら自動でPIP再表示しようと目論んでいたが
+            //PIPの表示にはユーザー操作が必要なため挫折
+            //現時点ではCMやCH切り替え等のタイミングでいちいちPIPボタンを押してもらう必要がある
+            const PIPrequestAgain = ()=>{
+                const video = getElm.getVideo();
+                if(video){
+                    getElm.getVideo().requestPictureInPicture()
+                    .then(w=>{
+                        PIPvideoObserver.observe(document.pictureInPictureElement, {childList: true});
+                    })
+                    .catch(e=>{
+                        console.warn('request PIP error (video changed)', e);
+                        setTimeout(PIPrequestAgain,500);
+                    });
+    
+                }else{
+                    console.log('PIP video retry');
+                    setTimeout(PIPrequestAgain,500);
+                }
+            }
+            //setTimeout(PIPrequestAgain,500);
+        }
+    })
     if (!document.pictureInPictureEnabled) return;
     if (!EXside) {
         console.log("createPIPbutton retry");
@@ -2425,12 +2457,24 @@ function createPIPbutton() {
         PIPbutton.innerHTML = "<img src='" + chrome.extension.getURL("/images/pip.svg") + "' alt='PIP' class='ext-sideButton-icon'>";
         EXside.appendChild(PIPbutton);
         $("#PIPbutton").on("click", function () {
-            if (!document.pictureInPictureElement) {
+            if (!document.pictureInPictureElement||document.pictureInPictureElement.src==="") {
                 getElm.getVideo().requestPictureInPicture()
-                .then(w=>{toast('ピクチャーインピクチャーに切り替えました。');})
+                .then(w=>{
+                    PIPvideoObserver.observe(document.pictureInPictureElement, {attributes: true});
+                    toast('ピクチャーインピクチャーに切り替えました。<br>CMと本編の切り替わりやチャンネル変更でピクチャーインピクチャーの再生が止まります。<br>その際は毎回、再度切り替えボタンを押してください。<br>(AbemaTV及びChromeの仕様により自動で再生継続できません。)');
+                    console.log(w);
+                    w.addEventListener('resize', e=>{
+                        //console.log(e);
+                        // if(!document.pictureInPictureElement || document.pictureInPictureElement.src===''){
+                        //     getElm.getVideo().requestPictureInPicture();
+                        // }
+                    });
+                })
                 .catch(e=>{console.warn('request PIP error', e);toast('ピクチャーインピクチャーへの切り替えに失敗しました。');});
             } else {
-                document.exitPictureInPicture().catch(e=>{console.warn('exit PIP error', e); toast('ピクチャーインピクチャーの終了に失敗しました。');});
+                document.exitPictureInPicture().then(()=>{
+                    PIPvideoObserver.disconnect();
+                }).catch(e=>{console.warn('exit PIP error', e); toast('ピクチャーインピクチャーの終了に失敗しました。');});
             }
         });
     }

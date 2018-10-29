@@ -11,7 +11,7 @@ var currentUpdateNotifyVersion = 15;//0.13.1の時
 var optionUrl = chrome.extension.getURL("/pages/option.html");
 var notifyContent = [
     "最近追加された機能(※デフォルト無効):",//表示させたいときはcurrentUpdateNotifyVersionの更新を忘れずに
-    "ピクチャーインピクチャーモードへの切り替え(Chrome 70以降から)",
+    "ピクチャーインピクチャーモードへの切り替え(Chrome 70以降、CM等で再生停止するためその都度手動で再度切り替えが必要です。)",
     "などの機能が追加されています。",
 //    "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
     "<span style='font-size:small'>コメント欄がちらつく場合はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を500以上にしてください。",
