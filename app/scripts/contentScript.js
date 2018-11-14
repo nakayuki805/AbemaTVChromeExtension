@@ -60,7 +60,7 @@ window.logGetElm = function(name){
 var isHoge = true; //利用したい機能
 var isFuga = false; //利用したくない機能
 */
-console.log('before', Object.assign({},settings))
+//console.log('before', Object.assign({},settings))
 
 var cmblockia = 1; //コメント欄が無効になってからCM処理までのウェイト(+1以上)
 var cmblockib = -1; //有効になってから解除までのウェイト(-1以下)
@@ -101,7 +101,7 @@ function setStorage(items, callback) {
 (async function () {
     let value = await settingslib.getSettings();
     Object.assign(settings, value);
-    console.log('after',settings);
+    //console.log('after',settings);
     cmblockia = Math.max(1, ((value.beforeCMWait !== undefined) ? (1 + value.beforeCMWait) : cmblockia));
     cmblockib = -Math.max(1, ((value.afterCMWait !== undefined) ? (1 + value.afterCMWait) : (-cmblockib)));
     //        panelopenses=value.panelopenset||"111000000000";
@@ -5688,7 +5688,7 @@ function setOptionHead() {
         t += selInfo+'{z-index:15;}';
     }
 
-    if(selCome) t += selCome+'>*{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
+    if(selCome) t += selCome+'>div:first-child{z-index:11;}';//foot10より上(foot内の全画面・音ボタンをマスク)
     if(selComelist) t += selComelist+'{margin:0px}';
 
     //左上・左下の非表示
