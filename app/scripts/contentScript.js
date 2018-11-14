@@ -60,107 +60,14 @@ window.logGetElm = function(name){
 var isHoge = true; //利用したい機能
 var isFuga = false; //利用したくない機能
 */
-settings.isResizeScreen = false; //ウィンドウが横長でも映像の端が切れることないようウィンドウに収まるようリサイズ 不具合報告があったのでデフォルトでfalse
-settings.isDblFullscreen = false; //ダブルクリックで全画面表示に切り替え(全画面表示のときは機能しません。通常→全画面のみ)
-settings.isHideOldComment = false; //古いコメントを非表示
-settings.isCMBlack = false; //コメント数無効(CommentMukou)の時ずっと画面真っ黒
-settings.isCMBkTrans = false; //コメント数無効の時ずっと画面真っ黒を少し透かす
-settings.isCMsoundoff = false; //コメント数無効の時ずっと音量ミュート
-settings.CMsmall = 100; //コメント数無効の時ずっと映像縮小
-settings.isMovingComment = false; //あの動画サイトのように画面上をコメントが流れる(コメント欄を表示しているときのみ機能)
-settings.movingCommentSecond = 8;//コメントが画面を流れる秒数
-settings.movingCommentLimit = 50;//同時コメント最大数
-settings.isComeNg = false;//流れるコメントのうち特定の文字列を削除or置き換えする
-settings.isComeDel = false;//流れるコメントのうちユーザー指定の文字列を含むものを流さない(この処理は↑の除去前に実行される)
-settings.isUserDel = false;//指定のユーザーIDのコメントを流さない
-settings.fullNg = "";//流れるコメントのうち特定の文字列を含む場合は流さない
-settings.userNg = "";//流れるコメントのうち特定のユーザーIDは流さない
-settings.isInpWinBottom = false; //コメントリストを非表示、かつコメント入力欄を下の方へ。
-settings.isCustomPostWin = false; //コメント投稿ボタン等を非表示、かつコメント入力欄を1行化。
-settings.isCancelWheel = false; //マウスホイールによるページ遷移を抑止する
-settings.isVolumeWheel = false; //マウスホイールで音量を操作する
-settings.changeMaxVolume = 100; //最大音量(100)をこの値へ自動変更
-settings.isTimeVisible = false; //残り時間を表示
-settings.isSureReadComment = false; //コメント欄を開きっ放しにする
-settings.isCommentFormWithSide = false;//↑有効時にコメ入力欄を右ボタンに連動させて非表示
-settings.sureReadRefreshx = 500; //コメ欄開きっ放しの時にコメ数がこれ以上ならコメ欄を自動開閉する
-// settings.isAlwaysShowPanel = false; //黒帯パネルを常に表示する
-// settings.isMovieResize = false; //映像を枠に合わせて縮小
-settings.commentBackColor = 255; //コメント一覧の背景色
-settings.commentBackTrans = 191; //コメント一覧の背景透過
-settings.commentTextColor = 0; //コメント一覧の文字色
-settings.commentTextTrans = 255; //コメント一覧の文字透過
-settings.isCommentPadZero = false; //コメント一覧のコメ間の間隔を詰める
-settings.isCommentTBorder = false; //コメント一覧のコメ間の区切り線表示
-settings.timePosition = "windowtop"; //残り時間の表示位置
-settings.notifySeconds = 60;//何秒前に番組通知するか
+console.log('before', Object.assign({},settings))
+
 var cmblockia = 1; //コメント欄が無効になってからCM処理までのウェイト(+1以上)
 var cmblockib = -1; //有効になってから解除までのウェイト(-1以下)
-settings.isManualKeyCtrlR = false; //右ctrlキーによる手動調整
-settings.isManualKeyCtrlL = false; //左ctrlキーによる手動調整
-settings.isManualMouseBR = false; //マウスによる右下での手動調整
-settings.isCMBkR = false; //画面クリックによる真っ黒解除
-settings.isCMsoundR = false; //画面クリックによるミュート解除
-settings.isCMsmlR = false; //画面クリックによる縮小解除
-settings.isTabSoundplay = false; //タブ設定によるミュート切替
-// var isOpenPanelwCome = true; //コメント欄を開いてる時にもマウスオーバーで各要素を表示する
-settings.isProtitleVisible = false; //番組名を画面右の情報枠から取得して表示する
-settings.protitlePosition = "windowtopleft"; //番組名の表示位置
-settings.proSamePosition = "over"; //番組名と残り時間の位置が重なった場合の対処方法
-settings.isCommentWide = false; //コメント一覧内のコメント部分の横幅を広げる
-settings.isProTextLarge = false; //番組名と残り時間の文字を大きくする
-settings.kakikomiwait = 0; //自分のコメントを流すまでのウェイト(マイナスは流さない)
-settings.isHidePopBL = false; //左下に出る告知
-settings.isHidePopTL = false; //左上に出るロゴ
 var panelopenset = [[1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]];//head,foot,sideの開閉設定[全閉,info開,chli開,come開] 0:非表示 1:5秒で隠す 2:常に表示
-// var panelopenses = 255879; //設定との読み書き時にのみ使用
-settings.useEyecatch = false; //左上に出るロゴのタイミングを利用する
-settings.comeMovingAreaTrim = false; //false:ウィンドウ全体 true:映像でない右側では流さない
-settings.isHideButtons = false; //全画面と音量ボタンの非表示
-settings.isResizeSpacing = false; //上下位置調整時に上ヘッダ分の余白を開けて上に詰めるかどうか
-settings.isDeleteStrangeCaps = false; //流れるコメントの規定NGに文字コード基準のフィルターを適用する
-settings.highlightNewCome = 0; //新着コメントの強調
 // settings.isChTimetableExpand = false; //チャンネル別番組表でタイトルが隠れないように縦に広げる
-settings.isHidePopFresh = false; //左下に出るFresh宣伝
-settings.isChTimetableBreak = false; //チャンネル別番組表でタイトルの改行位置を変更する
-settings.isChTimetableWeekend = true; //土日を着色する
-settings.isChTimetablePlaybutton = true; //番組表からnow-on-airに直接移動するためのリンク設置
-settings.timetableScroll = ""; //番組表で指定チャンネルへスクロール
-settings.isHideTwitterPanel = false; //「twitterで番組情報を受け取ろう」な左下パネル非表示
-settings.isHideTodayHighlight = false; //ヘッダメニューの今日のみどころのポップアップ
-settings.isComelistNG = false; //コメント一覧の代わりにNG適用済一覧を表示する
-settings.isComelistClickNG = false; //コメント一覧のコメントクリックでNG一時追加用の入力欄を表示
-settings.highlightComeColor = 0; //新着コメント強調色 0:黄色
-settings.highlightComePower = 30; //新着コメント強調の強度(不透明度)
-settings.isComeClickNGautoClose = false; //NG追加したらNG入力欄を自動的に閉じる
-settings.isShareNGword = false;//共有NGワード
-settings.isDelOldTime = false; //NG適用コメ一覧から古いコメの書込時刻を削除する
-settings.isMovieSpacingZeroTop = false; //映像位置を上に詰める
-settings.isMovieSpacingZeroLeft = false; //映像位置を左に詰める
-settings.comeFontsize = 32; //流れるコメントのfont-size xx-large
-settings.isHideVoting = false; //アンケート機能の非表示
-settings.isStoreViewCounter = false; //視聴数をコメント開閉ボタンのコメ数表記と並べる
-settings.isComeTriming = false; //コメント欄常時表示時はコメ欄の分だけ上下黒帯を縮めてコメ欄を縦に伸ばす
 //settings.allowChannelNames = ["abema-news", "abema-special", "special-plus", "special-plus-2", "special-plus-3", "special-plus-4", "special-plus-5", "special-plus-6", "drama", "asia-drama", "reality-show", "mtv-hits", "space-shower", "documentary", "variety", "pet", "club-channel", "commercial", "anime24", "midnight-anime", "oldtime-anime", "family-anime", "new-anime", "yokonori-sports", "hiphop", "soccer", "fighting-sports", "fighting-sports2", "golf", "fishing", "shogi", "mahjong"];
 settings.allowChannelNames = [];
-settings.isExpandLastItem = false; //番組表の一番下の細いマスを縦に少し伸ばす
-settings.isExpandFewChannels = false; //番組表の余白がある場合に横に伸ばす
-settings.isHideArrowButton = false; //番組表の左右移動ボタンを非表示
-settings.isPutSideDetailHighlight = true; //番組表の右枠に番組詳細を追加する
-settings.panelOpacity = 127; //黒帯パネル透過度
-settings.comeFontsizeV = false; //流れるコメントの文字サイズをウィンドウ縦長さに合わせる
-settings.proTitleFontC = false; //タイトル・残り時間の文字色をコメント欄に合わせる
-settings.isDelTime = false; //NG適用コメ一覧からコメの書込時刻を削除する
-settings.mastodonInstance = ""; //mastodon投稿用インスタンス
-settings.mastodonToken = ""; //mastodon api token
-settings.mastodonFormat = "{comment}\\n#AbemaTV\\n{onairpage}"; //mastodon投稿用トゥートフォーマット
-settings.audibleReloadWait = 20; // タブの音声再生が停止してからタブを更新するまでの秒数
-settings.isDAR43 = false;//映像リサイズ4:3処理モード
-settings.isReplaceIcons = false; // 番組表のタイトル接頭接尾アイコンを開始時刻下に収納
-settings.isUserHighlight = false; //コメントにマウスオーバーで同一ユーザーのコメントをハイライト
-settings.isShareNGuser = false; //共有NGユーザー
-settings.minResolution = 0;
-settings.maxResolution = 2160;
 
 var disableExtVersion = ''; //拡張機能の動作を停止するバージョン
 
@@ -193,7 +100,8 @@ function setStorage(items, callback) {
 //設定のロード
 (async function () {
     let value = await settingslib.getSettings();
-    $.extend(settings, value);
+    Object.assign(settings, value);
+    console.log('after',settings);
     cmblockia = Math.max(1, ((value.beforeCMWait !== undefined) ? (1 + value.beforeCMWait) : cmblockia));
     cmblockib = -Math.max(1, ((value.afterCMWait !== undefined) ? (1 + value.afterCMWait) : (-cmblockib)));
     //        panelopenses=value.panelopenset||"111000000000";
@@ -2032,7 +1940,6 @@ function openOption() {
     $("#isCommentFormWithSide").prop("checked", settings.isCommentFormWithSide);
     $("#sureReadRefreshx").val(settings.sureReadRefreshx);
     // $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
-    //    $("#isMovieResize").prop("checked", settings.isMovieResize);
     //    $("#isMovieMaximize").prop("checked", isMovieMaximize);
     $("#commentBackColor").val(settings.commentBackColor);
     $("#commentBackTrans").val(settings.commentBackTrans);
@@ -3302,7 +3209,6 @@ function setSaveClicked() {
     settings.isSureReadComment = $("#isSureReadComment").prop("checked");
     settings.isCommentFormWithSide = $("#isCommentFormWithSide").prop("checked");
     settings.sureReadRefreshx = Math.max(101, $("#sureReadRefreshx").val());
-    //    settings.isMovieResize = $("#isMovieResize").prop("checked");
     //    isMovieMaximize = $("#isMovieMaximize").prop("checked");
     // settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
     settings.commentBackColor = parseInt($("#commentBackColor").val());
