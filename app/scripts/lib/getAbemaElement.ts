@@ -50,13 +50,15 @@ export function getFooterElement() {
 export function getChannelListElement() {
     //console.log("?chli");
     //右下にある番組表リンクを孫にもち右にあるのをchliとする //元々は直下がaリストだったけどその上のfooter,info等と同じ階層のを選ぶようにする
-    var ret = null;
+    var ret = document.getElementsByClassName('com-tv-VChannelList__container')[0] as HTMLElement;
     var links = document.links;
-    for (let i = links.length - 1,b; i >= 0; i--) {
-        b=links[i].getBoundingClientRect();
-        if (links[i].href.indexOf("/timetable") < 0 || b.top < window.innerHeight * 3 / 4||b.left<window.innerWidth/2) continue;
-        ret = links[i];
-        break;
+    if(!ret){
+        for (let i = links.length - 1,b; i >= 0; i--) {
+            b=links[i].getBoundingClientRect();
+            if (links[i].href.indexOf("/timetable") < 0 || b.top < window.innerHeight * 3 / 4||b.left<window.innerWidth/2) continue;
+            ret = links[i];
+            break;
+        }
     }
     //if(!ret)ret=$('.ext_ref-programList')[0];
     if(!ret){/*console.log("?chli");*/return null;}

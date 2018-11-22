@@ -2228,7 +2228,8 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
         //放送中一覧のスクロール
         //↑のinfoと同じもの
         let cn = getInfo.getChannelByURL();
-        if (cn&&isInfo) $(EXchli).scrollTop($(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0].offsetTop-window.innerHeight/2);
+        let currentChannelElem = $(EXchli).find('img[src*="/channels/logo/' + cn + '"]').eq(0).parentsUntil(EXchli).eq(-2)[0];
+        if (cn&&isInfo&&currentChannelElem) $(EXchli).scrollTop(currentChannelElem.offsetTop-window.innerHeight/2);
 
     }
     if(!isComeli&&(EXcomelist=getComeListElement())){
@@ -3940,13 +3941,13 @@ function getInfoElement(returnSingleSelector) {
     let h3a=document.getElementsByTagName('h3');
     ret = Array.from(h3a).filter(e=>{return e.textContent.indexOf("詳細情報")>=0})[0];
     if(!ret){
-        //CM中など↑で取得できないことがあるのでEXchliの次もしくはsideButtonの次の次を使う
+        //CM中など↑で取得できないことがあるのでEXchliの次もしくはsideButtonの次の次の次を使う
         if(EXchli){
             ret = $(EXchli).next().get(0);
             console.log("?info -> EXchli next");
         }else if(EXside){
-            ret = $(EXside).next().next().get(0);
-            console.log("?info -> EXside next next");
+            ret = $(EXside).next().next().next().get(0);
+            console.log("?info -> EXside next next next");
         }
         if(!ret){console.log("?info");return null;}
     }
