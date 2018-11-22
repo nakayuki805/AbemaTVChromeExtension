@@ -283,7 +283,7 @@ export const settings: SettingList[] = [
             },
             {
                 "name": "isUserHighlight",
-                "description": "コメントにマウスオーバーで同一ユーザーのコメントの背景を黄色くする(同一人物のコメントを見分けるのに便利です。)",
+                "description": "コメントにマウスオーバーで同一ユーザーのコメントの背景を黄色くする(同一人物のコメントを見分けるのに便利です。コメ欄にNG設定を適応させてない場合、新着コメントには効きません。)",
                 "type": "boolean",
                 "isInstantChangable": true,
                 "default": false
@@ -410,7 +410,7 @@ export const settings: SettingList[] = [
             {
                 "name": "isComelistNG",
 //                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
-                "description": "NG設定を右コメント一覧にも適用する(これを有効にしないと流れるコメントにしかNGが効きません。ただし、一覧のコメント表示数は直近100件まで<s>、投稿時刻は新着のみ表示</s>となります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆",
+                "description": "NG設定を右コメント一覧にも適用する(これを有効にしないと流れるコメントにしかNGが効きません。ただし、一覧のコメント表示数は直近100件まで<s>、投稿時刻は新着のみ表示</s>となります。コメントの反映が少し遅くなります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆",
                 "type": "boolean",
                 "isInstantChangable": true,
                 "default": false

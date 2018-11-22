@@ -5559,11 +5559,11 @@ function setOptionHead() {
         selComelistp=alt?".Ai_Am.t7_e":"";
     }
     if(selComelist){
-        t += selComelist+'>div{background-color:' + bc + ';color:' + tc + ';}';
-        t += selComelist+':not(#copycomec)>div[class]:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので) EXcomelistの一番最初の子でclassが指定されてるやつ
-        t += selComelist+'>div>div>p>span{color:' + tc + ' !important;}';//コメント文字色
-        t += selComelist+'>div>div{background-color: transparent;}';
-        t += selComelist+'>div>div:hover{background-color: transparent;}';
+        t += selComelist+'>div,'+selComelist+'>div[class]:first-child>div>div{background-color:' + bc + ';color:' + tc + ';}';
+        //t += selComelist+':not(#copycomec)>div[class]:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので) EXcomelistの一番最初の子でclassが指定されてるやつ
+        t += selComelist+'>div>div>p>span,'+selComelist+'>div[class]:first-child>div>div>div>p>span{color:' + tc + ' !important;}';//コメント文字色
+        t += selComelist+'>div>div,'+selComelist+'>div[class]:first-child>div>div>div{background-color: transparent;}';
+        t += selComelist+'>div>div:hover,'+selComelist+'>div[class]:first-child>div>div>div:hover{background-color: transparent;}';
     }
 
     //    //映像最大化
@@ -5616,6 +5616,8 @@ function setOptionHead() {
             }*/
             //AbemaTV Screen Comment Scrollerスクリプトのコメントグラデーションを逆向きに
             t += '[data-selector="commentPane"] > div {-webkit-mask-image: linear-gradient(transparent 0%, black 50%);mask-image: linear-gradient(transparent 0%, black 50%);}';
+            //新着コメントアニメーションを打ち消し
+            t += selComelist+'>div[class]:first-child>div{transform:none!important;}';
         }
         //t += selComelist+'>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
         //    if(settings.isCustomPostWin){ //1行化
@@ -5623,18 +5625,18 @@ function setOptionHead() {
         //        t+='[class^="TVContainer__right-comment-area___"] textarea+div{height:18px!important;}';
         //    }
         if (settings.isCommentPadZero) { //コメ間隔詰め
-            t += selComelist+'>div>div{padding-top:0px;padding-bottom:0px;}';
-            t += selComelist+'>div>div>*{margin-top:0px;margin-bottom:0px!important;}';//bottomはあったり無かったりする(これより強い)ので付けておく
+            t += selComelist+'>div>div,'+selComelist+'>div[class]:first-child>div>div>div{padding-top:0px;padding-bottom:0px;}';
+            t += selComelist+'>div>div>*,'+selComelist+'>div[class]:first-child>div>div>div>*{margin-top:0px;margin-bottom:0px!important;}';//bottomはあったり無かったりする(これより強い)ので付けておく
         }
         if (settings.isCommentTBorder) { //コメ区切り線
-            t += selComelist+'>div{border-top:1px solid ' + vc + ';}';
+            t += selComelist+'>div,'+selComelist+'>div[class]:first-child>div>div{border-top:1px solid ' + vc + ';}';
             if (settings.isInpWinBottom) { //先頭コメ(一番下)の下にも線を引く
-                t += selComelist+'>div:first{border-bottom:1px solid ' + vc + ';}';
+                t += selComelist+'>div:first,'+selComelist+'>div[class]:first-child>div>div:first{border-bottom:1px solid ' + vc + ';}';
             }
         }
         if (settings.isCommentWide) { //コメント部分をほんの少し広く
-            t += selComelist+'>div>div{padding-right:4px;padding-left:8px;}';
-            t += selComelist+'>div>div>p:first{width:' + (settings.isHideOldComment ? 258 : 242) + 'px;}';
+            t += selComelist+'>div>div,'+selComelist+'>div[class]:first-child>div>div>div{padding-right:4px;padding-left:8px;}';
+            t += selComelist+'>div>div>p:first,'+selComelist+'>div[class]:first-child>div>div>div>p:first{width:' + (settings.isHideOldComment ? 258 : 242) + 'px;}';
             //フォントによるがそれぞれ259,243でギリギリなので1だけ余裕をみる
             t += selComelist+'{margin:0;}';
         }
@@ -6659,6 +6661,10 @@ function comeUserHighlight(jo){
             j.siblings(':not([data-ext-userid='+uid+'])').children().css('background-color', '');
         }
         j.children().css('background-color', 'rgba(255,255,0,0.6)');
+    }
+    const firstClass = jo.first().attr('class');
+    if(firstClass&&comelistClasses.animated&&firstClass.includes(comelistClasses.animated)){
+        jo = jo.slice(1);//先頭要素が新着アニメーションなら飛ばす
     }
     $(jo).mouseover(function(e){
         if (comeUserHlInterval !== null) {
