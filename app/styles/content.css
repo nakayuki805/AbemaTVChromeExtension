@@ -268,3 +268,6 @@ body{
     height:20px;
     width:20px;
 }
+.ext-ngcomment{
+    display:none;
+}

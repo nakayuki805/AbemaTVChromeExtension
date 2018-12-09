@@ -6,6 +6,7 @@ import * as dl from './lib/dom-lib';
 
 var inj_currentLocation = '';
 var inj_EXcomelist;
+var inj_EXcome;
 var inj_commentObserver = new MutationObserver(function(mutations) {
     inj_onCommentChange(mutations);
 }); //コメント欄DOM監視
@@ -69,18 +70,20 @@ function inj_delaysetComment(){
     console.log('inj_delayset')
     var comelistInstance = null;
     var jComelist = $('.ext_abm-comelist');
-    if(jComelist.length>0){
-        comelistInstance = inj_findReact(jComelist.parent().get(0));
+    var jCome = $('.ext_abm-come');
+    if(jCome.length>0){
+        comelistInstance = inj_findReact(jCome.get(0));
     }
     if(comelistInstance !== null){
         //console.log('comelistInstance:', comelistInstance);
         inj_EXcomelist = jComelist.get(0);
+        inj_EXcome = jCome.get(0);
         inj_commentObserver.disconnect();
         inj_commentObserver.observe(inj_EXcomelist, {childList: true});
         //放送画面→番組表推移時にAbemaがバグるのに対処→直ったようなのでコメントアウト
         setTimeout(function(){
             //なぜか存在しないrefs.animatableに対してremoveEventListenerしようとするのでダミーの要素いれておく
-            inj_findReact(inj_EXcomelist.parentElement).refs.animatable = document.createElement('div');
+            //inj_findReact(inj_EXcomelist.parentElement).refs.animatable = document.createElement('div');
         },1000);
     }else{
         console.log('waitng inj_delaysetComment()');
@@ -88,9 +91,9 @@ function inj_delaysetComment(){
     }
 }
 function inj_onCommentChange(mutations){
-    var comelistInstance = inj_findReact(inj_EXcomelist.parentElement);
+    var comelistInstance = inj_findReact(inj_EXcome);
     //console.log('inj_occ comelistInstance:', comelistInstance);
-    var newCommentCount = comelistInstance.state.newCommentCount;//animationのコメ数
+    var newCommentCount = comelistInstance.props.newCommentCount;//animationのコメ数
     var hasCommentAnimation = comelistInstance.props.hasCommentAnimation;
     var comments = comelistInstance.props.comments;
     //console.log('inj_occ newComeC,hasComeAni,comeli[0]', newCommentCount, hasCommentAnimation, inj_EXcomelist.firstChild);

@@ -125,6 +125,9 @@ function setStorage(items, callback) {
     settings.highlightComeColor = (value.highlightComeColor !== undefined) ? Number(value.highlightComeColor) : settings.highlightComeColor;
     settings.highlightComePower = (value.highlightComePower !== undefined) ? Number(value.highlightComePower) : settings.highlightComePower;
     settings.allowChannelNames = (value.allowChannelNames !== undefined) ? value.allowChannelNames.split(",") : settings.allowChannelNames;
+    //無視する設定
+    settings.isInpWinBottom = false;
+    settings.isComelistNG = false;
 })();
 
 var currentLocation = window.location.href;
@@ -3150,6 +3153,7 @@ function setPSaveNG() {
     if (settings.isComelistNG) {
         copycome();
     }
+    applyCommentListNG();
     setStorage({
         "fullNg": settings.fullNg
     }, function () {
@@ -4859,6 +4863,7 @@ function waitforComeReady(){
         if (settings.isComelistNG) {
             copycome();
         }
+        applyCommentListNG();
     }else{
         console.log('waitforComeReady',comeListLen);
         setTimeout(waitforComeReady, 1000);
@@ -5586,13 +5591,14 @@ function setOptionHead() {
 
     if(selComelist&&selComelistp){
         //コメ欄スクロールバー非表示
-        if (settings.isInpWinBottom) {//コメ逆順の時は対象が逆になる
-            t += selComelistp+'{overflow:hidden;}';
-            t += selComelist+'{';
-        } else {
+        /*if (settings.isInpWinBottom) {//コメ逆順の時は対象が逆になる
             t += selComelist+'{overflow:hidden;}';
             t += selComelistp+'{';
-        }
+        } else {
+            t += selComelistp+'{overflow:hidden;}';
+            t += selComelist+'{';
+        }*/
+        t += selComelistp+'{';
         if (settings.isHideOldComment) {
             t += 'overflow:hidden;';
         } else {
@@ -5604,8 +5610,8 @@ function setOptionHead() {
         t += '#NGConfig{z-index:20;}';
         if (settings.isInpWinBottom) { //コメ入力欄を下
             if(selCome) t += selCome+'>*{display:flex;flex-direction:column-reverse;}';
-            t += selComelistp+'{display:flex;flex-direction:column;justify-content:flex-end;border-top:1px solid ' + vc + ';border-bottom:1px solid ' + vc + ';}';
-            t += selComelist+'{display:flex;flex-direction:column-reverse;}';
+            t += selComelistp+'{display:flex;flex-direction:column;border-top:1px solid ' + vc + ';border-bottom:1px solid ' + vc + ';}';
+            t += selComelist+'{display:flex;flex-direction:column-reverse;min-height:min-content}';
             t += selComelist+'>div{overflow:visible;min-height:min-content;}';//min-heightがないとdislay:flexで重なってしまう
             //↑の構成そのままだと各コメントのデフォ間隔padding:15px 15px 0;のtop,bottomがうまく効かなくなってしまう
             //2つめのflex(下スクロール、コメント少数時の下詰め)を解除すれば有効になるけど、下スクロールを解除したくない
@@ -5943,7 +5949,7 @@ function setOptionElement() {
     setProSamePosiChanged();
 
     //    $(EXfootcome).css("pointer-events","auto");
-    if(EXcomelist)copycome();
+    if(EXcomelist){copycome();applyCommentListNG();}
 
     if (!settings.isStoreViewCounter) $(EXfootcountcome).children('#viewcounticon,#viewcountcont,br,#comecountcont').remove();
 
@@ -6501,7 +6507,7 @@ function setOptionEvent() {//放送画面用イベント設定
     //    $(EXcomesend).contents().find('[class*="styles__post-button___"]').on("click",usereventSendButClick);
     $(EXcomesendinp).on("keydown keyup", usereventSendInpKeyinput);
     //コメ一覧をクリック時
-    $(EXcome).on("click", '#copycomec', comecopy);
+    $(EXcome).on("click", '.ext_abm-comelist', comecopy);
     //コメ入力欄がフォーカスされた時
     $(EXcomesendinp).on('focus', comeModuleEditor);
 
@@ -6550,6 +6556,7 @@ function fastEyecatching(retrycount) {
     }
 }
 function comehl(jo, hlsw) {
+    //console.log(jo,hlsw)
     var hlbc = settings.commentBackColor;
     var hlbt = settings.commentBackTrans;
     var hlc = settings.highlightComeColor;
@@ -6728,7 +6735,32 @@ function getComeInfo(wdiv){
     }
     return {message: msg, datetime: datetime, timeStr: timeStr, userid: uid};
 }
+function applyCommentListNG(d){
+    if(!EXcomelist)return;
+    let commentDivs = EXcomelist.children;
+    if(comelistClasses.progress&&commentDivs[0].className.includes(comelistClasses.progress)){console.log('skip applyCommentListNG: progress');return;}
+    if(d===undefined||d<0){d = commentDivs.length;console.log('applyCommentListNG: all');}
+    for(let i=commentDivs.length-d; i<commentDivs.length;i++){
+        if(!commentDivs[i])console,warn('applyCommentListNG: invalid index', i,commentDivs);
+        if(commentDivs[i].getAttribute('data-ext-filtered')=='true')continue;
+        commentDivs[i].setAttribute('data-ext-filtered','true');
+        let cinfo = getComeInfo(commentDivs[i]);
+        let filteredComment = comefilter(cinfo.message, cinfo.userid);
+        //commentDivs[i].classList.add('comew');
+        if(!(commentDivs[i].firstElementChild&&commentDivs[i].firstElementChild.getElementsByTagName('p')[0]&&commentDivs[i].firstElementChild.getElementsByTagName('p')[0].getElementsByTagName('span')[0])){
+            console.warn("applyCommentListNG: could not find message span", commentDivs[i]);
+            return ;
+        }
+        if(filteredComment!=""){
+            commentDivs[i].firstElementChild.getElementsByTagName('p')[0].classList.add('comem');
+            commentDivs[i].firstElementChild.getElementsByTagName('p')[0].getElementsByTagName('span')[0].innerText = filteredComment;
+        }else{
+            commentDivs[i].classList.add('ext-ngcomment');
+        }
+    }
+}
 function copycome(d, hlsw) {
+    console.log('copycome',d,hlsw);
 //console.log("copycome d="+d,isComelistMouseDown);
     if (isComelistMouseDown) return;//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
     if (!EXcomelist) return;
@@ -7126,6 +7158,7 @@ function appendTextNG(ev, inpstr) {
 
         arrayFullNgMaker();
         copycome();
+        applyCommentListNG();
     }
     if (inpstr === undefined) {
         if (settings.isComeClickNGautoClose) {
@@ -7191,6 +7224,7 @@ function appendUserNG(ev, inpstr){
         console.log('apUsNg append');
         arrayUserNgMaker();
         copycome();
+        applyCommentListNG();
     }
     if (inpstr === undefined) {
         if (settings.isComeClickNGautoClose) {
@@ -7805,16 +7839,16 @@ function onCommentChange(mutations){
                 comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
                 console.log('!aniC&&eo.style.height<10 aniC=',comelistClasses.animated,' height=',eo.style.height);                
-            }else if(!comelistClasses.animated && EXcomelist.getAttribute('data-ext-hascommentanimation')=='true'){
+            }else if(!comelistClasses.animated && EXcomelist.getAttribute('data-ext-hascommentanimation')=='true'&&nodeClass){
                 comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
-                console.log('!aniC&&hasComeAni==true aniC=',comelistClasses.animated);
+                console.log('!aniC&&hasComeAni==true aniC=',comelistClasses.animated);    
             }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0 && comelistClasses.progress && nodeClass.indexOf(comelistClasses.progress) >= 0) {
                 //animation部がプログレスバー なにもしない
                 console.log('animation: progress');
             }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0) {
                 isAnimationAdded = true;
-            }else if (comelistClasses.animated && !comelistClasses.stabled && eofc.childElementCount>1 && eofc.children[0].tagName.toUpperCase() == "P" && (eofc.children[1].children[1].textContent.indexOf("今") >= 0 || eofc.children[1].children[1].textContent.indexOf("秒前") >= 0 || eofc.children[1].children[1].textContent.indexOf("分前") >= 0)) {
+            }else if (!comelistClasses.stabled && eofc.childElementCount>1 && eofc.children[0].tagName.toUpperCase() == "P" && (eofc.children[1].children[1].textContent.indexOf("今") >= 0 || eofc.children[1].children[1].textContent.indexOf("秒前") >= 0 || eofc.children[1].children[1].textContent.indexOf("分前") >= 0)) {
                 comelistClasses.stabled = firstChildClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 comelistClasses.message = eofc.children[0].className;
                 comelistClasses.posttime = eofc.children[1].children[1].className;
@@ -7837,7 +7871,7 @@ function onCommentChange(mutations){
             //console.log('other mutation', mutations[i].type, mutations[i])
         }
     }
-    //console.log(isAnimationAdded,isCommentAdded);
+    //console.log(isAnimationAdded,isCommentAdded,newCommentNum);
     if(isCommentAdded){
         //コメント取得(animation除外) ただし最初のanimationでも実行
         //console.time('obf_getComment_beforeif')
@@ -7853,7 +7887,7 @@ function onCommentChange(mutations){
         var comments = [];// 負荷軽減のためjQuery使わずに
         var commentDivs = EXcomelist.children;
         //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
-        for(var cdi = isAnimationIncluded?1:0; cdi < commentDivs.length; cdi++){
+        for(var cdi = 0; cdi < commentDivs.length - (isAnimationIncluded?1:0); cdi++){
             var cinfo = getComeInfo(commentDivs[cdi]);
             comments.push([cinfo.message, cinfo.userid, cinfo.datetime]);
         }
@@ -7868,7 +7902,7 @@ function onCommentChange(mutations){
             //                if(!comeRefreshing||!settings.isSureReadComment){
             var commentDivParentV = (settings.isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : commentDivParent;
             var scrolled = false;
-            if (settings.isInpWinBottom) scrolled = (commentDivParentV.children().first().offset().top > window.innerHeight);
+            if (!settings.isInpWinBottom) scrolled = (commentDivParentV.children().first().offset().top > window.innerHeight);
             else scrolled = (commentDivParentV.children().first().offset().top < 0);
             if (d > 0 && !scrolled) { //コメ増加あり && スクロールが規定値以上でない
                 //console.log("cmts",comments,commentDivParent,d,comeListLen,commentNum)
@@ -7897,11 +7931,12 @@ function onCommentChange(mutations){
                 if (settings.isComelistNG) {
                     copycome(d, hlsw); //copycome内からcomehlを実行
                 } else {
+                    applyCommentListNG(d);
                     if (hlsw > 0) {
-                        comehl($(EXcomelist).children().slice(0, d), hlsw);
+                        comehl($(EXcomelist).children().slice(-d), hlsw);
                     }
                     if (settings.isUserHighlight) {
-                        comeUserHighlight($(EXcomelist).children().slice(0, d));
+                        comeUserHighlight($(EXcomelist).children().slice(-d));
                     }
                 }
             } else if (comeListLen < commentNum && !isAnimationIncluded) {
@@ -7919,13 +7954,16 @@ function onCommentChange(mutations){
             if (settings.isMovingComment && isFirstComeAnimated && !isAnimationAdded) {
                     let idx, dt, movingStarti=0;
                     for(let i = 0; i < d; i++){
-                        idx = d - i - 1;
+                        //idx = d - i - 1;
+                        idx = comments.length - d + i;//commentsの後ろに新着がある
+                        //console.log(comments[idx],i)
                         dt = comments[idx]?parseInt(comments[idx][2]):0;
                         if(dt<=lastMovedCommentTime){
                             continue;
                         }else if(movingStarti==0){
-                            movingStarti = i;
+                            //movingStarti = i;//movingStartiの存在目的が不明
                         }
+                        //console.log(comments[idx],idx,i,d,movingStarti)
                         putComment(comments[idx][0], comments[idx][1], i-movingStarti, d-movingStarti);                
                         if(i == d-1 && dt > 0){
                             lastMovedCommentTime = dt;

@@ -6,7 +6,9 @@ import * as dl from './dom-lib';
 
 export function getVideo() {
     //console.trace('getVideo()')
-    let ret: HTMLElement|null = dl.filter(document.getElementsByTagName('video'),{width12b:true, height12b:true, displayNot: 'none', notBodyParent: true})[0];
+    let ret: HTMLElement|null = dl.filter(document.getElementsByTagName('video'),{displayNot: 'none', notBodyParent: true, filters:[(e,b)=>{
+        return (b.height>window.innerHeight*0.5&&b.width>window.innerWidth*0.5)||(!!e.style.transform&&e.style.transform.includes('scale'));
+    }]})[0];
     if(!ret){
         ret=dl.filter(document.getElementsByTagName('object'),{displayNot: 'none', notBodyParent: true})[0];
         if(ret && ret.childElementCount<7){

@@ -141,7 +141,7 @@ export const settings: SettingList[] = [
             },
             {
                 "name": "isHideVoting",
-                "description": "アンケートを非表示",
+                "description": "アンケート(投票機能)を非表示",
                 "type": "boolean",
                 "isInstantChangable": true,
                 "default": false
@@ -205,9 +205,9 @@ export const settings: SettingList[] = [
             },
             {
                 "name": "isInpWinBottom",
-                "description": "コメント入力欄を下へ(コメント一覧は逆順・下スクロール)",
+                "description": "<s>コメント入力欄を下へ(コメント一覧は逆順・下スクロール)</s>公式で最新コメントが下に来るようになったのでこの設定は無視されます。(廃止予定)",
                 "type": "boolean",
-                "isInstantChangable": true,
+                "isInstantChangable": false,//無視するためにfalse
                 "default": false
             },
             {
@@ -410,7 +410,7 @@ export const settings: SettingList[] = [
             {
                 "name": "isComelistNG",
 //                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
-                "description": "NG設定を右コメント一覧にも適用する(これを有効にしないと流れるコメントにしかNGが効きません。ただし、一覧のコメント表示数は直近100件まで<s>、投稿時刻は新着のみ表示</s>となります。コメントの反映が少し遅くなります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆",
+                "description": "この設定は無視され、常に右のコメ欄にもNGが適用されます。<s>NG設定を右コメント一覧にも適用する(これを有効にしないと流れるコメントにしかNGが効きません。ただし、一覧のコメント表示数は直近100件までとなります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆</s>",
                 "type": "boolean",
                 "isInstantChangable": true,
                 "default": false
@@ -432,7 +432,7 @@ export const settings: SettingList[] = [
             {
                 "name": "isComelistClickNG",
 //                "description": "コメント一覧クリックでNG追加欄を表示(このNG追加欄による保存は一時的です。永久保存は設定画面へ。)",
-                "description": "↑でコメント一覧クリックでNG追加欄を表示(「<b>NG設定を右コメント一覧にも適用する</b>」も有効にしてください。)(NGボタン1回クリックで一時保存(黄色)、短時間で2回クリックすると永久保存(赤色)になります。)",
+                "description": "コメント一覧クリックでNG追加欄を表示<s>(「NG設定を右コメント一覧にも適用する」も有効にしてください。)</s>(NGボタン1回クリックで一時保存(黄色)、短時間で2回クリックすると永久保存(赤色)になります。)",
                 "type": "boolean",
                 "isInstantChangable": true,
                 "default": false

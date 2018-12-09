@@ -42,7 +42,7 @@ interface rectFilterOption{
     matchSelector?: string;
     notMatchSelector?: string;
     includeText?: string;
-    filters?: Array<(element: HTMLElement) => boolean>;
+    filters?: Array<(element: HTMLElement, b:ClientRect) => boolean>;
 }
 
 export function last(array: any[], isNull?: boolean){
@@ -124,7 +124,7 @@ export function filter(elements: ArrayLike<HTMLElement>, option: rectFilterOptio
         if (option.filters && option.filters.length>0) {
             let flag = true;
             option.filters.forEach(filter => {
-                if (flag) {flag = filter(element)}
+                if (flag) {flag = filter(element,b)}
             });
             if (!flag) return false;
         }
