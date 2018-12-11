@@ -247,7 +247,7 @@ var timetableRunning = false; //番組表表示時の10分インターバル
 var audibleReloadCount = -1;
 var isSoundFlag = true; //音が出ているか soundSet(isSound)のisSoundを保持したり音量クリック時にミュートチェック
 var timetableGrabbing = {value:false,cx:0,cy:0,test:false,sx:0,sy:0,scrolled:false,}; //番組表を掴む
-var comelistClasses = { stabled: "", animated: "", empty: "", progress: "", message: "", posttime: ""};
+var comelistClasses = { comment: "", stabled: "", animated: "", empty: "", progress: "", message: "", posttime: "", newhilight: ""};
 var timetableClasses = { arrow: "", timebar: "", };//ページ遷移直後に取得できないので初回取得時に保持する getSingleSelectorの結果を入れるので使用時は.を付けない
 var currentVersion = chrome.runtime.getManifest().version;
 var resizeEventTimer = 0; //ウィンドウリサイズイベント用のタイマー
@@ -4001,7 +4001,7 @@ function getComeFormElement(sw,returnSingleSelector) {
     return returnSingleSelector?dl.getElementSingleSelector(ret):ret;
 }
 function getComeListElement(returnSingleSelector){
-    console.log("?comelist");
+    //console.log("?comelist");
     //EXcomeの中で秒前とかを探して5人以上の親をcomelistとする
     //下からだとanimatedが引っかかるので上から探す
     //無ければ <p>この番組には<br>まだ投稿がありません</p> の親divとしてみたけどやめて大丈夫そうならやめたいが、
@@ -5501,6 +5501,8 @@ function setOptionHead() {
 
     //コメント見た目
     var bc = "rgba(" + settings.commentBackColor + "," + settings.commentBackColor + "," + settings.commentBackColor + "," + (settings.commentBackTrans / 255) + ")";//コメント背景色
+    const cbhn = (settings.commentBackColor>127)?(settings.commentBackColor-22):(settings.commentBackColor+22);
+    const comeBackHl = "rgba(" + cbhn + "," + cbhn + "," + cbhn + "," + (settings.commentBackTrans / 255) + ")";//新着コメント背景色
     var cc = "rgba(" + settings.commentBackColor + "," + settings.commentBackColor + "," + settings.commentBackColor + "," + (0.2) + ")";
     var rc = "rgba(" + Math.floor(255 - (255 - settings.commentTextColor) * 0.8) + "," + Math.floor(settings.commentTextColor * 0.8) + "," + Math.floor(settings.commentTextColor * 0.8) + "," + (settings.commentTextTrans / 255) + ")";//赤系のコメント文字色(NG登録で使用)
     var tc = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (settings.commentTextTrans / 255) + ")";//コメント文字色
@@ -5508,6 +5510,7 @@ function setOptionHead() {
     const activeInputBack = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (0.2) + ")";//コメント入力欄背景色(入力可能時)
     var vc = "rgba(" + settings.commentTextColor + "," + settings.commentTextColor + "," + settings.commentTextColor + "," + (0.3) + ")";//コメント一覧区切り線色
 
+    t += '@keyframes comebg{0%{background:'+comeBackHl+'}to{background:'+bc+'}}';
     selCome=dl.getElementSingleSelector(EXcome);
     if($(selCome).length!=1){
         console.log("?EXcome "+selCome);
@@ -5564,7 +5567,7 @@ function setOptionHead() {
         selComelistp=alt?".Ai_Am.t7_e":"";
     }
     if(selComelist){
-        t += selComelist+'>div,'+selComelist+'>div[class]:first-child>div>div{background-color:' + bc + ';color:' + tc + ';}';
+        t += selComelist+'>div,'+selComelist+'>div[class]:first-child>div>div{background-color:' + bc + ';color:' + tc + ';animation: '+(settings.highlightNewCome>=2?'none':'comebg 1s ease-in')+' !important;}';
         //t += selComelist+':not(#copycomec)>div[class]:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので) EXcomelistの一番最初の子でclassが指定されてるやつ
         t += selComelist+'>div>div>p>span,'+selComelist+'>div[class]:first-child>div>div>div>p>span{color:' + tc + ' !important;}';//コメント文字色
         t += selComelist+'>div>div,'+selComelist+'>div[class]:first-child>div>div>div{background-color: transparent;}';
@@ -5750,6 +5753,10 @@ function setOptionHead() {
         //t += '[class*="styles__eyecatch-blind___"]{display:none;}';
     }
     if (selVideoarea) t += selVideoarea + '{transition-delay:0.5s;}'; // onresizeで設定していたtransitionをheadに付けてみる fastrefreshでガクっとなるのを防ぐ
+    //アベマショッピング等で情報表示時の下のバー
+    if(selVideoarea){
+        t += selVideoarea+'~div[style^="width:"]{z-index:8;}';
+    }
     if (selCome) t += selCome + '{transition-delay:0.5s;}';
 
     //z-index調整、コメ流す範囲
@@ -7839,10 +7846,11 @@ function onCommentChange(mutations){
                 comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
                 console.log('!aniC&&eo.style.height<10 aniC=',comelistClasses.animated,' height=',eo.style.height);                
-            }else if(!comelistClasses.animated && EXcomelist.getAttribute('data-ext-hascommentanimation')=='true'&&nodeClass){
+            }else if(!comelistClasses.animated && EXcomelist.getAttribute('data-ext-hascommentanimation')=='true'&&nodeClass
+            &&[...EXcomelist.children].indexOf(eo)===0&&eo.nextElementSibling&&nodeClass!==eo.nextElementSibling.className){
                 comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
-                console.log('!aniC&&hasComeAni==true aniC=',comelistClasses.animated);    
+                console.log('!aniC&&come[0]class!=come[1]class&&hasComeAni==true aniC=',comelistClasses.animated);
             }else if (comelistClasses.animated && nodeClass.indexOf(comelistClasses.animated) >= 0 && comelistClasses.progress && nodeClass.indexOf(comelistClasses.progress) >= 0) {
                 //animation部がプログレスバー なにもしない
                 console.log('animation: progress');
@@ -7852,9 +7860,11 @@ function onCommentChange(mutations){
                 comelistClasses.stabled = firstChildClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 comelistClasses.message = eofc.children[0].className;
                 comelistClasses.posttime = eofc.children[1].children[1].className;
+                comelistClasses.comment = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isCommentAdded = true;
                 newCommentNum++;
             }else if (comelistClasses.stabled&&firstChildClass.indexOf(comelistClasses.stabled) >= 0){
+
                 isCommentAdded = true;
                 newCommentNum++;
             }else if (!comelistClasses.progress && eo.firstElementChild && eo.firstElementChild.firstElementChild && eo.firstElementChild.firstElementChild.getAttribute('role')=='progressbar') {
