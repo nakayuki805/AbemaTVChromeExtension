@@ -12,7 +12,7 @@ if (process.env.VENDOR === 'edge') {
     let chrome = chrome || browser;
 }console.log(process.env.VENDOR);
 
-var settings = settingslib.defaultSettings;
+var settings = Object.assign({},settingslib.defaultSettings);
 //debug
 /*
 jQuery.noConflict();
@@ -127,7 +127,7 @@ function setStorage(items, callback) {
     settings.allowChannelNames = (value.allowChannelNames !== undefined) ? value.allowChannelNames.split(",") : settings.allowChannelNames;
     //無視する設定
     settings.isInpWinBottom = false;
-    settings.isComelistNG = false;
+    //settings.isComelistNG = false;
 })();
 
 var currentLocation = window.location.href;
@@ -2010,7 +2010,7 @@ function openOption() {
     $('#timetableScroll').val(settings.timetableScroll);
     $('#isHideTwitterPanel').prop("checked", settings.isHideTwitterPanel);
     $('#isHideTodayHighlitht').prop("checked", settings.isHideTodayHighlight);
-    $('#isComelistNG').prop("checked", settings.isComelistNG);
+    //$('#isComelistNG').prop("checked", settings.isComelistNG);
     $('#isComelistClickNG').prop("checked", settings.isComelistClickNG);
     $('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]').val([settings.highlightComeColor]);
     $('#highlightComePower').val(settings.highlightComePower);
@@ -2095,7 +2095,7 @@ function closeOption() {
         ;
     $(".rightshift").css("display", "none");
     $(".leftshift").css("display", "");
-    var jo = $(EXcomelist).add('#copycomec').children('div');
+    var jo = $(EXcomelist)/*.add('#copycomec')*/.children('div');
     jo.css("background-color", "") //基本色、新着強調
         .css("color", "") //基本色
         .css("border-left", "") //新着強調
@@ -2249,7 +2249,8 @@ function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
     }
     if(!isEXC&&$(EXcomelist).length>0){
 //        addExtClass(EXcomelist, 'comelist');
-        setTimeout(copycome, 1000);
+        //setTimeout(copycome, 1000);
+        setTimeout(applyCommentListNG, 1000);
         //EXcomelist = $(commentListParentSelector)[0];
         //if($(EXcomelist).length>0){
         EXcomments = $(EXcomelist).find('p').map(function(i,e){if($(e).index()==0)return e;});
@@ -2591,7 +2592,7 @@ function createSettingWindow() {
         settcont += '<div id="settcontbody" style="overflow:scroll;">';
         settcont += settingslib.generateOptionHTML(false) + '<br><hr>';
         settcont += '<input type="button" id="clearLocalStorage" value="localStorageクリア"><br>';
-        settcont += '<span style="word-wrap: break-word; color: #444; font-size: smaller;">UserID:' + localStorage.getItem('abm_userId') + ' token:' + localStorage.getItem('abm_token') + '</span>';;
+        settcont += '<span style="word-wrap: break-word; color: #444; font-size: smaller;">UserID:' + localStorage.getItem('abm_userId') + ' token:' + localStorage.getItem('abm_token') + '</span>';
         settcont += '</div>';
         settcont += '<div id="settcontfooter">';
         settcont += '<input type="button" id="saveBtn" value="一時保存"> ';
@@ -3156,9 +3157,9 @@ function setSaveDisable() {
 function setPSaveNG() {
     settings.fullNg = $("#fullNg").val();
     arrayFullNgMaker();
-    if (settings.isComelistNG) {
-        copycome();
-    }
+    // if (settings.isComelistNG) {
+    //     copycome();
+    // }
     applyCommentListNG();
     setStorage({
         "fullNg": settings.fullNg
@@ -3267,7 +3268,7 @@ function setSaveClicked() {
     //    settings.isChTimetablePlaybutton=$('#isChTimetablePlaybutton').prop("checked");
     settings.isHideTwitterPanel = $('#isHideTwitterPanel').prop("checked");
     settings.isHideTodayHighlight = $('#isHideTodayHighlight').prop("checked");
-    settings.isComelistNG = $('#isComelistNG').prop("checked");
+    //settings.isComelistNG = $('#isComelistNG').prop("checked");
     settings.isComelistClickNG = $('#isComelistClickNG').prop("checked");
     settings.highlightComeColor = parseInt($('#ihighlightComeColor input[type="radio"][name="highlightComeColor"]:checked').val());
     settings.highlightComePower = parseInt($('#highlightComePower').val());
@@ -3519,7 +3520,7 @@ function setComeColorChanged() {
 function toggleCommentList() {
     console.log("comevisiset toggleCommentList");
     //    var jo=$(EXcomelist).parent();
-    var jo = $(EXcomelist).parent().add('#copycome');
+    var jo = $(EXcomelist).parent();//.add('#copycome');
     //display:noneだと崩れるので変更
     //重なっていて下にあるfooterの音量ボタン等を使用できるようにpointer-eventsを利用
     var jv = jo.css("visibility");
@@ -4866,9 +4867,9 @@ function waitforComeReady(){
     if (comelistClasses.animated&&EXcomelist.firstElementChild.className.indexOf(comelistClasses.animated) >= 0) { comeListLen--; }//冒頭のanimationは数から除外
     else if(EXcomelist.firstElementChild.firstElementChild.firstElementChild.tagName.toUpperCase().indexOf('DIV')>=0) { comeListLen--;}
     if (comeListLen>0){
-        if (settings.isComelistNG) {
-            copycome();
-        }
+        // if (settings.isComelistNG) {
+        //     copycome();
+        // }
         applyCommentListNG();
     }else{
         console.log('waitforComeReady',comeListLen);
@@ -5969,7 +5970,7 @@ function setOptionElement() {
     setProSamePosiChanged();
 
     //    $(EXfootcome).css("pointer-events","auto");
-    if(EXcomelist){copycome();applyCommentListNG();}
+    if(EXcomelist){/*copycome();*/applyCommentListNG();}
 
     if (!settings.isStoreViewCounter) $(EXfootcountcome).children('#viewcounticon,#viewcountcont,br,#comecountcont').remove();
 
@@ -6716,7 +6717,7 @@ function comeUserHighlight(jo){
     });
 }
 //copycomeで作ったコメ欄のcomepにコメントをセットする
-function setCopycome(comep, msg, uid, datetime, timeStr, msgWidth){
+/*function setCopycome(comep, msg, uid, datetime, timeStr, msgWidth){
     var div = $(comep).children().eq(0);
     div.children('p').children('span').text(msg);
     div.children('p').css('width', msgWidth);
@@ -6731,7 +6732,7 @@ function setCopycome(comep, msg, uid, datetime, timeStr, msgWidth){
     }else{
         btdiv.css('width', '');
     }
-}
+}*/
 function getComeInfo(wdiv){
     var uid = $(wdiv).attr('data-ext-userid');
     var div = $(wdiv).children().eq(0);
@@ -6761,7 +6762,7 @@ function applyCommentListNG(d){
     if(comelistClasses.progress&&commentDivs[0].className.includes(comelistClasses.progress)){console.log('skip applyCommentListNG: progress');return;}
     if(d===undefined||d<0){d = commentDivs.length;console.log('applyCommentListNG: all');}
     for(let i=commentDivs.length-d; i<commentDivs.length;i++){
-        if(!commentDivs[i])console,warn('applyCommentListNG: invalid index', i,commentDivs);
+        if(!commentDivs[i])console.warn('applyCommentListNG: invalid index', i,commentDivs);
         if(d<commentDivs.length&&commentDivs[i].getAttribute('data-ext-filtered')=='true')continue;
         commentDivs[i].setAttribute('data-ext-filtered','true');
         let cinfo = getComeInfo(commentDivs[i]);
@@ -6780,7 +6781,7 @@ function applyCommentListNG(d){
         }
     }
 }
-function copycome(d, hlsw) {
+/*function copycome(d, hlsw) {
     console.log('copycome',d,hlsw);
 //console.log("copycome d="+d,isComelistMouseDown);
     if (isComelistMouseDown) return;//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
@@ -6970,8 +6971,8 @@ function copycome(d, hlsw) {
     }
  
     //console.timeEnd('copycome');
-}
-function comewidthfix(i, h) {
+}*/
+/*function comewidthfix(i, h) {
 // コメ欄のwidth:unsetによって文字列分の幅になっているコメントが右コントロールと被っていたら縮める
 // スクロールするごとに改行位置を変えるのは忙しすぎるのでスクロール状態は無視する
 // コメ欄がスクロール状態でも未スクロールと同様に動作させるためtopの使用は避けてheightを加算している
@@ -7006,7 +7007,7 @@ function comewidthfix(i, h) {
     }
     j = 1 + $('#copycomec').children().eq(i).height();
     setTimeout(comewidthfix, 0, i + 1, settings.isInpWinBottom ? h - j : h + j);
-}
+}*/
 // コメ欄クリック時に呼び出され、NGワード追加画面表示
 function comecopy() {
     console.log("comecopy");
@@ -7178,7 +7179,7 @@ function appendTextNG(ev, inpstr) {
         }
 
         arrayFullNgMaker();
-        copycome();
+        //copycome();
         applyCommentListNG();
     }
     if (inpstr === undefined) {
@@ -7244,7 +7245,7 @@ function appendUserNG(ev, inpstr){
         }
         console.log('apUsNg append');
         arrayUserNgMaker();
-        copycome();
+        //copycome();
         applyCommentListNG();
     }
     if (inpstr === undefined) {
@@ -7510,22 +7511,22 @@ function onairBasefunc() {
 
         //console.timeEnd('obf_come');
         //console.time('obf_1_2');
-        if (settings.isComelistNG) {
-            //copycomeできていない場合はここで全copyする
-            var b = true;
-            if ($('#copycome').length > 0) {
-                //番組切替直後などでcopycomeはある場合は中身があるか数件チェックする
-                for (var i = 0, c = $('#copycomec').children(), j; i < 5; i++) {
-                    if (c.eq(i).children().children().first().text().length > 0) {
-                        b = false;
-                        break;
-                    }
-                }
-            }
-            if (b) {
-                copycome();
-            }
-        }
+        // if (settings.isComelistNG) {
+        //     //copycomeできていない場合はここで全copyする
+        //     var b = true;
+        //     if ($('#copycome').length > 0) {
+        //         //番組切替直後などでcopycomeはある場合は中身があるか数件チェックする
+        //         for (var i = 0, c = $('#copycomec').children(), j; i < 5; i++) {
+        //             if (c.eq(i).children().children().first().text().length > 0) {
+        //                 b = false;
+        //                 break;
+        //             }
+        //         }
+        //     }
+        //     if (b) {
+        //         copycome();
+        //     }
+        // }
         //console.timeEnd('obf_1_2');
         //流れるコメントのうちmovingCommentSecond*2経過したものを削除
         if (settings.isMovingComment) {
@@ -7731,7 +7732,8 @@ function onairBasefunc() {
                         $('#tProtitle').text(proTitle);
                     }
                     copycomecount = 2;
-                    setTimeout(copycome, 300);
+                    //setTimeout(copycome, 300);
+                    setTimeout(applyCommentListNG,300);
                     //番組情報(コピー)を更新
                     $(EXinfo).children('#copyinfo').remove();
                     $(EXinfo).children().not('#copyinfo').first().clone().removeClass().addClass('usermade').prop("id", "copyinfo").appendTo($(EXinfo));
@@ -7851,7 +7853,7 @@ function onCommentChange(mutations){
                 comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
                 console.log('!aniC&&emp&&added.l==1&&EXcomeli.chi.l==1 aniC=',comelistClasses.animated);
-            }else if (!comelistClasses.animated && eofc.firstElementChild.tagName.toUpperCase() == "DIV") { //直下のコメ本文がpじゃなければanimatedとする
+            }else if (!comelistClasses.animated && eofc.firstElementChild.tagName.toUpperCase() == "DIV"&&(comelistClasses.progress&&nodeClass.indexOf(comelistClasses.progress) < 0)) { //直下のコメ本文がpじゃなければanimatedとする
                 comelistClasses.animated = nodeClass.split(/\s/)[0].replace(/^\s+|\s+$/g, "");
                 isAnimationAdded = true;
                 console.log('!aniC&&eo.1stChi==div aniC=',comelistClasses.animated);
@@ -7924,7 +7926,7 @@ function onCommentChange(mutations){
             //console.log('cl,cn,d', comeListLen,commentNum,d)
             //            if(comeListLen>commentNum){ //コメ増加あり
             //                if(!comeRefreshing||!settings.isSureReadComment){
-            var commentDivParentV = (settings.isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : commentDivParent;
+            var commentDivParentV = /*(settings.isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : */commentDivParent;
             var scrolled = false;
             if (!settings.isInpWinBottom) scrolled = (commentDivParentV.children().first().offset().top > window.innerHeight);
             else scrolled = (commentDivParentV.children().first().offset().top < 0);
@@ -7952,9 +7954,9 @@ function onCommentChange(mutations){
                 }
                 //新着コメント強調 一時試用できるように、一時保存画面が開いている場合を考慮
                 var hlsw = $('#settcont').css("display") == "none" ? settings.highlightNewCome : parseInt($('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked').val());
-                if (settings.isComelistNG) {
-                    copycome(d, hlsw); //copycome内からcomehlを実行
-                } else {
+                //if (settings.isComelistNG) {
+                    //copycome(d, hlsw); //copycome内からcomehlを実行
+                //} else {
                     applyCommentListNG(d);
                     if (hlsw > 0) {
                         comehl($(EXcomelist).children().slice(-d), hlsw);
@@ -7962,7 +7964,7 @@ function onCommentChange(mutations){
                     if (settings.isUserHighlight) {
                         comeUserHighlight($(EXcomelist).children().slice(-d));
                     }
-                }
+                //}
             } else if (comeListLen < commentNum && !isAnimationIncluded) {
                 commentNum = 0;
                 comeHealth = 100;
@@ -8083,7 +8085,7 @@ function chkurl() {
         proEnd = new Date();
         proTitle = "";
         $('#tProtitle').text("未取得");
-        $('#copycome').remove();
+        //$('#copycome').remove();
         $('#copyotw').remove();
         if(EXcomesendinp) $(EXcomesendinp.parentElement).css("display", "");
         window.dispatchEvent(urlChangeEvent);
