@@ -648,9 +648,9 @@ $(function(){
                     }else if(key == 'notifyMailAddress' || key == 'notifyLNtoken' || key == 'notifyPostUrl'){
                         sendVal[key] = value[key].replace(/[a-z]/g, 'a').replace(/[A-Z]/g, 'A').replace(/\d/g, '0');
                     }else if(key == 'fullNg') {
-                        sendVal[key] = value[key].replace(/.+/g, 'dummy-word');
+                        sendVal[key] = 'ngword-count-'+value[key].split('\n').length;
                     }else if(key == 'userNg') {
-                        sendVal[key] = value[key].replace(/.+/g, 'dummy-userid');
+                        sendVal[key] = 'nguserid-count-'+value[key].split('\n').length;
                     }
                 }
             }

@@ -275,6 +275,20 @@ export const settings: SettingList[] = [
                 "default": false
             },
             {
+                "name": "isDelOldTime",
+                "description": "<s>古いコメントの投稿時刻の表示を非表示にする。</s>現在機能しません。",
+                "type": "boolean",
+                "isInstantChangable": true,
+                "default": false
+            },
+            {
+                "name": "isDelTime",
+                "description": "各コメントの投稿時刻を全て非表示にする。",
+                "type": "boolean",
+                "isInstantChangable": true,
+                "default": false
+            },
+            {
                 "name": "highlightComePower",
                 "description": "新着コメント強調の強度",
                 "type": "number",
@@ -411,20 +425,6 @@ export const settings: SettingList[] = [
                 "name": "isComelistNG",
 //                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
                 "description": "この設定は無視され、常に右のコメ欄にもNGが適用されます。<s>NG設定を右コメント一覧にも適用する(これを有効にしないと流れるコメントにしかNGが効きません。ただし、一覧のコメント表示数は直近100件までとなります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆</s>",
-                "type": "boolean",
-                "isInstantChangable": true,
-                "default": false
-            },
-            {
-                "name": "isDelOldTime",
-                "description": "↑で各コメントの投稿時刻の表示を新着のみとし、古いコメントの投稿時刻は非表示にする。",
-                "type": "boolean",
-                "isInstantChangable": true,
-                "default": false
-            },
-            {
-                "name": "isDelTime",
-                "description": "↑で各コメントの投稿時刻を全て非表示にする。",
                 "type": "boolean",
                 "isInstantChangable": true,
                 "default": false

@@ -1916,7 +1916,7 @@ function movieZoomOut(sw) {
 //}
 function openOption() {
     var settcontjq = $("#settcont");
-    settcontjq.css("display", "block");
+    settcontjq.css("display", "flex");
     optionHeightFix();
     //設定ウィンドウにロード
     $("#isResizeScreen").prop("checked", settings.isResizeScreen);
@@ -2116,7 +2116,7 @@ function optionHeightFix() {
     var settcontpadv = parseInt(settcontjq.css("padding-top")) + parseInt(settcontjq.css("padding-bottom"));
     if (settcontheight > window.innerHeight - 105 - settcontpadv) {
         //console.log("optionHeightFix: "+settcontjq.height()+" -> "+($(window).height()-105-settcontpadv));
-        settcontjq.height(window.innerHeight - 105 - settcontpadv).css("overflow-y", "scroll");
+        settcontjq.height(window.innerHeight - 105 - settcontpadv);
     }
 }
 function toast(message) {
@@ -2579,19 +2579,25 @@ function createSettingWindow() {
     }
     if ($('#settcont').length == 0) {
         let settcont = '<div id="settcont" class="usermade" style="';
-        settcont += 'width:670px;position:absolute;right:40px;top:' + headerHeight + 'px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;';//head11より上の残り時間12,13,14より上の番組情報等15より上
+        settcont += 'width:670px;position:absolute;right:40px;top:' + headerHeight + 'px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;flex-flow:column;';//head11より上の残り時間12,13,14より上の番組情報等15より上
         //ピッタリの658pxから少し余裕を見る
         settcont += '">';
         //設定ウィンドウの中身
-        settcont += '<span style="font-weight:bold;">拡張機能一時設定画面</span><br>';
+        settcont += '<div id="settcontheader">';
+        settcont += '<span style="font-weight:bold;">拡張機能一時設定画面</span> (一時設定できない項目は表示されません)<br>';
         settcont += '<input type="button" class="closeBtn" value="閉じる" style="position:absolute;top:10px;right:10px;">';
         settcont += '<a href="' + chrome.extension.getURL('/pages/option.html') + '" target="_blank">永久設定オプション画面はこちら</a><br>';
-        settcont += settingslib.generateOptionHTML(false) + '<br>';
+        settcont += '</div>';
+        settcont += '<div id="settcontbody" style="overflow:scroll;">';
+        settcont += settingslib.generateOptionHTML(false) + '<br><hr>';
+        settcont += '<input type="button" id="clearLocalStorage" value="localStorageクリア"><br>';
+        settcont += '<span style="word-wrap: break-word; color: #444; font-size: smaller;">UserID:' + localStorage.getItem('abm_userId') + ' token:' + localStorage.getItem('abm_token') + '</span>';;
+        settcont += '</div>';
+        settcont += '<div id="settcontfooter">';
         settcont += '<input type="button" id="saveBtn" value="一時保存"> ';
         settcont += '<input type="button" class="closeBtn" value="閉じる"><br>';
-        settcont += '※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。<hr>';
-        settcont += '<input type="button" id="clearLocalStorage" value="localStorageクリア"><br>';
-        settcont += '<span style="word-wrap: break-word; color: #444; font-size: smaller;">UserID:' + localStorage.getItem('abm_userId') + ' token:' + localStorage.getItem('abm_token') + '</span>';
+        settcont += '※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。';
+        settcont += '</div>';
         settcont += '</div>';
         $(settcont).prependTo('body');
         $('#CommentColorSettings').change(setComeColorChanged);
@@ -3332,7 +3338,7 @@ function setProSamePosiChanged(pophide, bigtext) {
     var titleprop = "";
     var timeprop = "";
     var sameprop = "";
-    if ($("#settcont").css("display") == "block") {
+    if ($("#settcont").css("display") == "flex") {
         if ($("#isProtitleVisible").prop("checked")) {
             titleprop = $('#iprotitlePosition input[type="radio"][name="protitlePosition"]:checked').val();
         }
@@ -5649,6 +5655,13 @@ function setOptionHead() {
             //フォントによるがそれぞれ259,243でギリギリなので1だけ余裕をみる
             t += selComelist+'{margin:0;}';
         }
+
+        if (settings.isDelTime) { //コメントの時刻非表示
+            t += selComelist+' time{display:none}';
+        }
+        if (settings.isDelOldTime || settings.isDelTime) {
+            t += selComelist+'>div>div>div:nth-child(2){width:unset;}';
+        }
     }
 
     //各パネルの常時表示 隠す場合は積極的にelement.cssに隠す旨を記述する(fade-out等に任せたり単にcss除去で済まさない)
@@ -6749,7 +6762,7 @@ function applyCommentListNG(d){
     if(d===undefined||d<0){d = commentDivs.length;console.log('applyCommentListNG: all');}
     for(let i=commentDivs.length-d; i<commentDivs.length;i++){
         if(!commentDivs[i])console,warn('applyCommentListNG: invalid index', i,commentDivs);
-        if(commentDivs[i].getAttribute('data-ext-filtered')=='true')continue;
+        if(d<commentDivs.length&&commentDivs[i].getAttribute('data-ext-filtered')=='true')continue;
         commentDivs[i].setAttribute('data-ext-filtered','true');
         let cinfo = getComeInfo(commentDivs[i]);
         let filteredComment = comefilter(cinfo.message, cinfo.userid);
@@ -6761,8 +6774,9 @@ function applyCommentListNG(d){
         if(filteredComment!=""){
             commentDivs[i].firstElementChild.getElementsByTagName('p')[0].classList.add('comem');
             commentDivs[i].firstElementChild.getElementsByTagName('p')[0].getElementsByTagName('span')[0].innerText = filteredComment;
+            commentDivs[i].setAttribute('data-ext-ngcomment','false');
         }else{
-            commentDivs[i].classList.add('ext-ngcomment');
+            commentDivs[i].setAttribute('data-ext-ngcomment','true');
         }
     }
 }

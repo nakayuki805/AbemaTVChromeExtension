@@ -152,53 +152,47 @@ export function removeCMsettings(obj: StorageItems){
 function generateOptionInput(settingsArr: settings.Setting[], isPermanent: boolean) {
     var inputHTML = "";
     var i = 0;
-    var disabled;
     var description;
     var isNotChangable;
     var defaultVal;
-    var NCTEXT="　※この設定はここで変更不可";
     for (i = 0; i < settingsArr.length; i += 1) {
         description = (!isPermanent && settingsArr[i].instantDescription) ? settingsArr[i].instantDescription : settingsArr[i].description;
         isNotChangable = !isPermanent && !settingsArr[i].isInstantChangable;
-        disabled = isNotChangable ? " disabled" : "";
+        //変更不可な項目は表示せず飛ばす
+        if(isNotChangable)continue;
         if (settingsArr[i].type === "boolean") {
-            inputHTML += '<div class="toggle-switch" id="' + settingsArr[i].name + '-switch"><input type="checkbox" id="' + settingsArr[i].name + '" ' + disabled + '><label for="' + settingsArr[i].name + '"></label></div><label for="' + settingsArr[i].name + '">:' + description + '</label>';
-            inputHTML += isNotChangable ? NCTEXT : "";
+            inputHTML += '<div class="toggle-switch" id="' + settingsArr[i].name + '-switch"><input type="checkbox" id="' + settingsArr[i].name + '"><label for="' + settingsArr[i].name + '"></label></div><label for="' + settingsArr[i].name + '">:' + description + '</label>';
             inputHTML += "<br/>"
         } else {
             if (settingsArr[i].type === "number") {
                 inputHTML += '<label for="' + settingsArr[i].name + '">'
                 inputHTML += description;
-                inputHTML += isNotChangable ? NCTEXT : "" + ":";
-                inputHTML += '</label>';
-                inputHTML += '<input type="number" id="' + settingsArr[i].name + '" ' + disabled + '>';
+                inputHTML += ':</label>';
+                inputHTML += '<input type="number" id="' + settingsArr[i].name + '">';
                 inputHTML += "<br/>"
             } else if (settingsArr[i].type === "textarea") {
                 inputHTML += '<label for="' + settingsArr[i].name + '">'                
-                inputHTML += '<textarea id="' + settingsArr[i].name + '" rows=3 cols=40 wrap=off ' + disabled + '></textarea>';
+                inputHTML += '<textarea id="' + settingsArr[i].name + '" rows=3 cols=40 wrap=off></textarea>';
                 inputHTML += ':' + description;
                 inputHTML += '</label>';                
-                inputHTML += isNotChangable ? NCTEXT : "";                
                 inputHTML += "<br/>"
             } else if (settingsArr[i].type === "range") {
                 inputHTML += '<div><span class="desc"><label for="' + settingsArr[i].name + '">'+description;
-                inputHTML += isNotChangable ? NCTEXT : "" + "</label></span>:";
+                inputHTML += "</label></span>:";
                 inputHTML += '<span class="prop">-</span>';
-                inputHTML += '<input type="range" id="' + settingsArr[i].name + '" max=255 ' + disabled + '></div>';
+                inputHTML += '<input type="range" id="' + settingsArr[i].name + '" max=255></div>';
             } else if (settingsArr[i].type === "text"){
                 defaultVal = settingsArr[i].default || "";
                 inputHTML += '<label for="' + settingsArr[i].name + '">'                
                 inputHTML += description;
-                inputHTML += isNotChangable ? NCTEXT : "" + ":";
-                inputHTML += '</label>';
-                inputHTML += '<input type="input" id="' + settingsArr[i].name + '" ' + disabled + ' placeholder=' + defaultVal + '>';
+                inputHTML += ':</label>';
+                inputHTML += '<input type="input" id="' + settingsArr[i].name + '" placeholder=' + defaultVal + '>';
                 inputHTML += "<br/>"
             } else if (settingsArr[i].type === "select"){
                 inputHTML += '<label for="' + settingsArr[i].name + '">'
                 inputHTML += description;
-                inputHTML += isNotChangable ? NCTEXT : "" + ":";
-                inputHTML += '</label>';
-                inputHTML += '<select id="' + settingsArr[i].name + '" ' + disabled + ' >';
+                inputHTML += ':</label>';
+                inputHTML += '<select id="' + settingsArr[i].name + '">';
                 if(settingsArr[i].selections !== undefined){
                     (settingsArr[i].selections as (string|number)[]).forEach(function(item){
                     inputHTML += '<option value="' + item + '">' + item + '</option>';
@@ -232,9 +226,12 @@ function generateRadioInput(settingsArr: typeof RadioSettingList){
 export function generateOptionHTML(isPermanent: boolean) {
     var htmlstr = "";
     for (var i=0; i < settingsList.length; i++) {
+        let inputHtml = generateOptionInput(settingsList[i].settings, isPermanent);
+        //一時設定で項目が空なら飛ばす
+        if(!inputHtml&&!isPermanent&&!settingsList[i].instantHeader&&!settingsList[i].instantFooter)continue;
         htmlstr += "<fieldset style='border: 1px solid silver;margin: 0 2px;padding: .35em .625em .75em;'><legend>" + settingsList[i].description + "</legend>";
         if(isPermanent){htmlstr += settingsList[i].header || '';}else{htmlstr += settingsList[i].instantHeader || settingsList[i].header || '';}
-        htmlstr += generateOptionInput(settingsList[i].settings, isPermanent);
+        htmlstr += inputHtml;
         if(isPermanent){htmlstr += settingsList[i].footer || '';}else{htmlstr += settingsList[i].instantFooter || settingsList[i].footer || '';}
         htmlstr += "</fieldset>";
     }
