@@ -5,6 +5,9 @@ import * as settingslib from './settings';
 import * as getElm from './lib/getAbemaElement';
 import * as getInfo from './lib/getAbemaInfo';
 import * as dl from './lib/dom-lib';
+import * as gl from './lib/generic-lib';
+import * as gdl from './lib/generic-dom-lib';
+import * as notifyButton from './lib/notifyButton';
 import './updatenotify.js';
 
 // edge対応
@@ -74,29 +77,7 @@ var disableExtVersion = ''; //拡張機能の動作を停止するバージョ�
 console.log("script loaded");
 //window.addEventListener(function () {console.log})
 //chrome.storageの関数
-function getStorage(keys, callback) {
-    if (chrome.storage) {
-        if (keys) {
-            chrome.storage.local.get(keys, callback);
-        } else {
-            chrome.storage.local.get(callback);
-        }
-    } else {
-        chrome.runtime.sendMessage({ type: "getStorage", keys: keys }, function (response) {
-            callback(response.items);
-        });
-    }
-}
-function setStorage(items, callback) {
-    if (chrome.storage) {
-        chrome.storage.local.set(items, callback);
-    } else {
-        chrome.runtime.sendMessage({ type: "setStorage", items: items }, function (response) {
-            //console.log(response.result)
-            callback();
-        });
-    }
-}
+
 //設定のロード
 (async function () {
     let value = await settingslib.getSettings();
@@ -133,8 +114,6 @@ function setStorage(items, callback) {
 var currentLocation = window.location.href;
 var previousLocation = currentLocation;//URL変化前のURL
 //var urlchangedtick=Date.now();
-var isFirefox = window.navigator.userAgent.toLowerCase().indexOf("firefox") != -1;
-var isEdge = window.navigator.userAgent.toLowerCase().indexOf("edge") != -1;
 var headerHeight = 68;
 var footerHeight = 72;
 var commentNum = 0;
@@ -231,7 +210,6 @@ var movieWidth = 0; //.TVContainer__resize-screenの大きさ(onresize発火用)
 //var movieHeight = 0;
 var waitingforResize = false; //waitforresizeの複数起動防止用
 var copycomecount = 2; //番組移動直後にcopycomeをfullcopyする回数
-var notifyButtonData = {}; //通知登録ボタンの番組情報格納
 var allowChannelNum = []; //Namesを元にした表示列番号
 //var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
 var oldWindowState = "normal"; // フルスクリーン切り替え前のウィンドウのstate
@@ -261,39 +239,7 @@ var lastMovedCommentTime = 0;//最後に流れたコメントの時間(コメン
 let isResizeInterval = false;
 let isComeInpFocus = false;
 
-function hasArray(array, item) {//配列arrayにitemが含まれているか
-    var hasFlg = false;
-    for (var hai = 0; hai < array.length; hai++) {
-        if (array[hai] === item) {
-            hasFlg = true;
-        }
-    }
-    return hasFlg;
-}
-function postJson(url, data, headers, callback, errorCallback) {
-    if(isFirefox){
-        chrome.runtime.sendMessage({ type: "postJson", url: url, data: data, headers: headers}, function (response) {
-            if (response.status == 'success') {
-                callback(response.result);                
-            }else {
-                errorCallback();
-            }
-        });
-    }else{
-        $.ajax({url: url, type: 'POST', data: JSON.stringify(data), headers: headers, contentType: 'application/json', dataType: 'json', success: callback, error: errorCallback});
-    }
-}
-function getJson(url, data, callback) {
-    if(isFirefox){
-        chrome.runtime.sendMessage({ type: "getJson", url: url, data: data}, function (response) {
-            if (response.status == 'success') {
-                callback(response.result);                
-            }
-        });
-    }else{
-        $.get(url, data, callback);
-    }
-}
+
 
 function onairCleaner() {
     console.log("onairCleaner");
@@ -484,24 +430,24 @@ function toggleChannel(targetUrl) {
     var t = /\/([^/]+)$/.exec(targetUrl)[1];
     if(t == 'timetable'){
         //ALLを選択した時
-        toast("番組表に表示するチャンネルをリセットしました。");
+        gdl.toast("番組表に表示するチャンネルをリセットしました。");
         settings.allowChannelNames = [];
         allowChannelNum = [];
     }else{
         var i = settings.allowChannelNames.indexOf(t);
-        var chname = getChannelNameOnTimetable(t);
+        var chname = getInfo.getChannelNameOnTimetable(t, EXTTsideL);
         if (i < 0) {
             //追加
-            toast(chname+"を番組表に表示するチャンネルに追加しました。");
+            gdl.toast(chname+"を番組表に表示するチャンネルに追加しました。");
             settings.allowChannelNames.push(t);
         } else {
             //削除
-            toast(chname+"を番組表に表示するチャンネルから削除しました。");
+            gdl.toast(chname+"を番組表に表示するチャンネルから削除しました。");
             settings.allowChannelNames.splice(i,1);
         }
     }
     console.log(settings.allowChannelNames);
-    setStorage({"allowChannelNames": settings.allowChannelNames.join(",")});
+    gl.setStorage({"allowChannelNames": settings.allowChannelNames.join(",")});
     waitforloadtimetable(currentLocation);
 }
 function waitforloadtimetable(url) {
@@ -636,8 +582,8 @@ function waitforloadtimetable(url) {
                     if (jSideR1.css('z-index')<jSideR2.css('z-index')){
                         EXTTsideR = jSideR2[0];
                         addExtClass(EXTTsideR, 'tt-side-r');
-                    }
-                    putSideDetailNotifyButton();
+                    }console.log(EXTTsideR)
+                    notifyButton.putSideDetailNotifyButton(settings.notifySeconds, EXTTsideL, EXTTsideR);
                     if (settings.isPutSideDetailHighlight) {
                         putSideDetailHighlight();
                     }
@@ -799,7 +745,7 @@ function timetabledtfix() {
         li = $(li);
         var checkbox = li.children('input');
         if(checkbox.length == 0){
-            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="display:inline-block;margin:'+(isFirefox?7:8)+'px;height:12px;vertical-align:middle;" title="拡張機能のチャンネル表示切替">').appendTo(li);
+            checkbox = $('<input type="checkbox" class="usermade chlicheckbox" style="display:inline-block;margin:'+(gl.isFirefox?7:8)+'px;height:12px;vertical-align:middle;" title="拡張機能のチャンネル表示切替">').appendTo(li);
             checkbox.click(function (e){
                 toggleChannel(e.currentTarget.previousElementSibling.getAttribute('href'));
             });
@@ -808,7 +754,7 @@ function timetabledtfix() {
             checkbox.prop('checked', allowChannelNum.length == 0);
             checkbox.prop('disabled', allowChannelNum.length == 0);
         }else{
-            checkbox.prop('checked', hasArray(allowChannelNum, i - 1));
+            checkbox.prop('checked', gl.hasArray(allowChannelNum, i - 1));
         }
         li.children('a').css('display', 'inline-block').css('width', 'calc(100% - '+(16+checkbox.width())+'px)');
     });
@@ -1194,35 +1140,10 @@ function timetableCommonFix(retrycount) {
             }
         });
     });
-    setRegistProgsBackground();
+    notifyButton.setRegistProgsBackground();
 
 }
-//拡張機能通知登録済みの番組に背景をつける
-function setRegistProgsBackground(){
-    getStorage(null, function(values){
-        var programIDs = [];
-        for (var key in values) {
-            if (key.indexOf("progNotify")==0) {//通知登録データ
-                programIDs.push(values[key].programID);
-                //登録済みなのでclass追加
-                $('#'+values[key].programID).closest('article').addClass('registeredProgs');
-            }
-        }
-        //登録されてないのに背景がついてる番組のclass解除
-        $('.registeredProgs').each(function(){
-            var article = $(this);
-            var progID = article.find('input[type=checkbox]').attr('id');
-            if(!hasArray(programIDs, progID)){
-                article.removeClass('registeredProgs');
-            }
-        });
-    });
-}
-function getChannelNameOnTimetable(channel) { //番組表ページのチャンネルリストを利用してチャンネル名を得る
-    var hrefStr = "/timetable/channels/" + channel;
-    if (EXTTsideL != null) return $(EXTTsideL).find('a[href$="' + hrefStr + '"]').text();
-    else return $('.i__jP ul').find('a[href$="' + hrefStr + '"]').text();
-}
+
 
 function onresize(oldTranslate) {
     if (checkUrlPattern(true) != 3) return;
@@ -1452,7 +1373,7 @@ function toggleFullscreen() {
 function postShareNGwords(words, channel) {
     var postWords = [];
     for(var i=0; i < words.length; i++) {
-        if (!hasArray(postedNGwords, words[i].toString())) {
+        if (!gl.hasArray(postedNGwords, words[i].toString())) {
             postWords.push(words[i].toString());
         }
     }
@@ -1464,7 +1385,7 @@ function postShareNGwords(words, channel) {
         "words": postWords
     };
     postedNGwords = postedNGwords.concat(postWords);//重複送信防止のため送信前にpostedに追加する
-    postJson(NGshareURLbase + 'add_json.php', postData, {}, function(result) {
+    gl.postJson(NGshareURLbase + 'add_json.php', postData, {}, function(result) {
         if (result.status == "success") {
             console.log("postShareNGwords success", postWords, channel);
             //postedNGwords = postedNGwords.concat(postWords);
@@ -1478,7 +1399,7 @@ function postShareNGwords(words, channel) {
 function postShareNGusers(users, channel) {
     var postUsers = [];
     for(var i=0; i < users.length; i++) {
-        if (!hasArray(postedNGusers, users[i].toString())) {
+        if (!gl.hasArray(postedNGusers, users[i].toString())) {
             postUsers.push(users[i].toString());
         }
     }
@@ -1490,7 +1411,7 @@ function postShareNGusers(users, channel) {
         "users": postUsers
     };
     postedNGusers = postedNGusers.concat(postUsers);//重複送信防止のため送信前にpostedに追加する
-    postJson(NGshareURLbase + 'add_json.php', postData, {}, function(result) {
+    gl.postJson(NGshareURLbase + 'add_json.php', postData, {}, function(result) {
         if (result.status == "success") {
             console.log("postShareNGusers success", postUsers, channel);
         } else {
@@ -1503,14 +1424,14 @@ function postShareNGusers(users, channel) {
 function applySharedNG() {
     var channel = getInfo.getChannelByURL();
     isNGShareInterval = true;
-    getJson(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
+    gl.getJson(NGshareURLbase + "sharedng/" + channel + ".json", { "client": APIclientName }, function (data) {
         if (settings.isShareNGword) {
             var sharedNGwords = data.ngword;
             var appendNGwords = [];
             console.log("got shared NG words ");
             console.table(sharedNGwords);
             for (var asni = 0; asni < sharedNGwords.length; asni++) {
-                if (!hasArray(postedNGwords, sharedNGwords[asni].word)) {
+                if (!gl.hasArray(postedNGwords, sharedNGwords[asni].word)) {
                     postedNGwords.push(sharedNGwords[asni].word);
                 }
                 appendNGwords.push(sharedNGwords[asni].word);
@@ -1523,7 +1444,7 @@ function applySharedNG() {
             console.log("got shared NG users ");
             console.table(sharedNGusers);
             for (let asni = 0; asni < sharedNGusers.length; asni++) {
-                if (!hasArray(postedNGusers, sharedNGusers[asni].userid)) {
+                if (!gl.hasArray(postedNGusers, sharedNGusers[asni].userid)) {
                     postedNGusers.push(sharedNGusers[asni].userid);
                 }
                 appendNGusers.push(sharedNGusers[asni].userid);
@@ -1641,7 +1562,7 @@ function comefilter(m, uid) {
         }
     }
     if (settings.isUserDel && m.length > 0 && uid) {
-        if (hasArray(arUserNg, uid)) {
+        if (gl.hasArray(arUserNg, uid)) {
             console.log("userNG matched UserID:" + uid + " text:" + m);
             m = "";
         }
@@ -1724,7 +1645,7 @@ function putComeArray(inp) {
         var movingDelta = (-mcwidth - 2)-(inp[i][2] + winwidth);
 
         setTimeout(function (jo, w, delta) {
-            if (isEdge) { jo = $(jo); }
+            if (gl.isEdge) { jo = $(jo); }
             jo.css("transition", "transform " + w + "s linear")
                 .css("transform", "translateX(" + delta + "px)")
                 .attr('data-createdSec', onairSecCount)
@@ -2120,12 +2041,7 @@ function optionHeightFix() {
         settcontjq.height(window.innerHeight - 105 - settcontpadv);
     }
 }
-function toast(message) {
-    var toastElem = $("<div class='ext-toast'><p>" + message + "</p></div>").appendTo("body");
-    setTimeout(function () {
-        toastElem.fadeOut(3000);
-    }, 4000);
-}
+
 function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
     if (checkUrlPattern(true) != 3) return;
     if(!isOLS){
@@ -2374,7 +2290,7 @@ function createPIPbutton() {
                 getElm.getVideo().requestPictureInPicture()
                 .then(w=>{
                     PIPvideoObserver.observe(document.pictureInPictureElement, {attributes: true});
-                    toast('ピクチャーインピクチャーに切り替えました。<br>CMと本編の切り替わりやチャンネル変更でピクチャーインピクチャーの再生が止まります。<br>その際は毎回、再度切り替えボタンを押してください。<br>(AbemaTV及びChromeの仕様により自動で再生継続できません。)');
+                    gdl.toast('ピクチャーインピクチャーに切り替えました。<br>CMと本編の切り替わりやチャンネル変更でピクチャーインピクチャーの再生が止まります。<br>その際は毎回、再度切り替えボタンを押してください。<br>(AbemaTV及びChromeの仕様により自動で再生継続できません。)');
                     console.log(w);
                     w.addEventListener('resize', e=>{
                         //console.log(e);
@@ -2383,11 +2299,11 @@ function createPIPbutton() {
                         // }
                     });
                 })
-                .catch(e=>{console.warn('request PIP error', e);toast('ピクチャーインピクチャーへの切り替えに失敗しました。');});
+                .catch(e=>{console.warn('request PIP error', e);gdl.toast('ピクチャーインピクチャーへの切り替えに失敗しました。');});
             } else {
                 document.exitPictureInPicture().then(()=>{
                     PIPvideoObserver.disconnect();
-                }).catch(e=>{console.warn('exit PIP error', e); toast('ピクチャーインピクチャーの終了に失敗しました。');});
+                }).catch(e=>{console.warn('exit PIP error', e); gdl.toast('ピクチャーインピクチャーの終了に失敗しました。');});
             }
         });
     }
@@ -3162,7 +3078,7 @@ function setPSaveNG() {
     //     copycome();
     // }
     applyCommentListNG();
-    setStorage({
+    gl.setStorage({
         "fullNg": settings.fullNg
     }, function () {
         $('#PsaveNG').prop("disabled", true)
@@ -3178,7 +3094,7 @@ function setPSaveCome() {
     settings.commentTextColor = parseInt($("#commentTextColor").val());
     settings.commentTextTrans = parseInt($("#commentTextTrans").val());
     setOptionHead();
-    setStorage({
+    gl.setStorage({
         "settings.commentBackColor": settings.commentBackColor,
         "settings.commentBackTrans": settings.commentBackTrans,
         "settings.commentTextColor": settings.commentTextColor,
@@ -5969,7 +5885,7 @@ function setOptionElement() {
     if (settings.isCustomPostWin) {
         $(EXcomesendinp).prop("wrap", "soft");
     } else {
-        isEdge || $(EXcomesendinp).prop("wrap", "");
+        gl.isEdge || $(EXcomesendinp).prop("wrap", "");
     }
     setProSamePosiChanged();
 
@@ -6264,10 +6180,10 @@ function usercommentposted(inptxt) {
         // toot
         var tootText = settings.mastodonFormat;
         tootText = tootText.replace('{comment}', inptxt).replace('{onairpage}', location.href).replace(/\\n/g,"\n");
-        postJson('https://' + settings.mastodonInstance + '/api/v1/statuses', {status: tootText}, {'Authorization': 'Bearer ' + settings.mastodonToken}, function(result) {
+        gl.postJson('https://' + settings.mastodonInstance + '/api/v1/statuses', {status: tootText}, {'Authorization': 'Bearer ' + settings.mastodonToken}, function(result) {
             console.log('toot:', tootText);
         }, function() {
-            toast('Mastodon投稿エラー');
+            gdl.toast('Mastodon投稿エラー');
         });
     }
 }
@@ -7269,7 +7185,7 @@ function addPermanentNG(word, userid) {
     //storageから持ってきて追加、setStorageする
     //console.log('addPermanentNG',word,userid)
     var PfullNg, PuserNg;
-    getStorage(null, function (value) {
+    gl.getStorage(null, function (value) {
         var b = true;        
         PfullNg = value.fullNg || settings.fullNg;
         PuserNg = value.userNg || settings.userNg;
@@ -7292,7 +7208,7 @@ function addPermanentNG(word, userid) {
                 } else {
                     PfullNg += "\n" + word;
                 }
-                setStorage({
+                gl.setStorage({
                     "fullNg": PfullNg
                 });
             }
@@ -7315,7 +7231,7 @@ function addPermanentNG(word, userid) {
                 } else {
                     PuserNg += "\n" + userid;
                 }
-                setStorage({
+                gl.setStorage({
                     "userNg": PuserNg
                 });
             }
@@ -7374,9 +7290,9 @@ function injectXHR(){
         $("<script src='" + xhrinjectionpath + "' id='ext-xhr-injection'></script>").appendTo("head");
     }
 }
-getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(val){
+gl.getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(val){
     if(val.disableExtVersion !== currentVersion){
-        if (isEdge) {
+        if (gl.isEdge) {
             mainfunc();
         } else {
             $(window).on('load', mainfunc);
@@ -7390,7 +7306,7 @@ getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(val
     }else{
         var csspath = chrome.extension.getURL("/styles/content.css");
         $("<link rel='stylesheet' href='" + csspath + "'>").appendTo("head");
-        toast('現在のバージョンの拡張機能は動作が停止されています。');
+        gdl.toast('現在のバージョンの拡張機能は動作が停止されています。');
     }
 });
 
@@ -8114,7 +8030,7 @@ function checkUrlPattern(url) {
         if (output) {
             return 0;
         } else {
-            putNotifyButton(url);
+            notifyButton.putNotifyButton(settings.notifySeconds, url);
             //放送画面へのリンク追加
             // var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z\d]+/)[1];
             // var channelUrl = "https://abema.tv/now-on-air/" + channel;
@@ -8160,7 +8076,7 @@ function checkUrlPattern(url) {
         } else {
             onairCleaner();
             delaysetNotOA();
-            putSerachNotifyButtons();
+            notifyButton.putSerachNotifyButtons(settings.notifySeconds);
         }
         break;
     case getInfo.URL_RESERVATION:
@@ -8170,7 +8086,7 @@ function checkUrlPattern(url) {
         } else {
             onairCleaner();
             delaysetNotOA();
-            putReminderNotifyButtons();
+            notifyButton.putReminderNotifyButtons(settings.notifySeconds);
             //スクロールで続きを読み込んだときのためチェック
             var itemCount = 0;
             var checkListInterval = setInterval(function(){
@@ -8180,7 +8096,7 @@ function checkUrlPattern(url) {
                 }
                 var count = $('a[role=listitem]').length;
                 if(itemCount<count){
-                    putReminderNotifyButtons();
+                    notifyButton.putReminderNotifyButtons(settings.notifySeconds);
                     itemCount = count;
                 }
             },500);
@@ -8198,220 +8114,7 @@ function checkUrlPattern(url) {
     }
 }
 
-//通知機能
-function putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, notifyButParent) {
-    var notifyTime = programTime - settings.notifySeconds * 1000;
-    var now = new Date();
-    if (notifyTime > now) {
-        var progNotifyName = "progNotify_" + channel + "_" + programID;
-        notifyButParent.children('.addNotify').remove();
-        var notifyButton = $('<div class="addNotify" data-prognotifyname="' + progNotifyName + '" data-registered="false"></div>').prependTo(notifyButParent);        
-        getStorage(progNotifyName, function (notifyData) {
-            //console.log(notifyData, progNotifyName)
-            notifyButtonData[progNotifyName] = {
-                channel: channel,
-                channelName: channelName,
-                programID: programID,
-                programTitle: programTitle,
-                programTime: programTime - 0,//dateを数字に
-                notifyTime: notifyTime
-            };
-            if (!notifyData[progNotifyName]) {
-                //未登録
-                notifyButton.text("拡張機能の通知登録").css('background-color', '#fff').attr('data-registered', 'false').click(function (e) {
-                    var clickedButton = $(e.target);
-                    var request = notifyButtonData[clickedButton.attr("data-prognotifyname")];
-                    request.type = "addProgramNotifyAlarm";
-                    chrome.runtime.sendMessage(request, function (response) {
-                        if (response.result === "added") {
-                            toast("通知登録しました<br>番組開始" + settings.notifySeconds + "秒前にポップアップで通知します。設定されていた場合は自動で放送画面を開きます。通知設定やChromeが立ち上がってないなどにより通知されない場合があります。Chromeが起動していればAbemaTVを開いてなくても通知されます。");
-                            var clickedButtonParent = clickedButton.parent();
-                            clickedButton.remove();
-                            putNotifyButtonElement(request.channel, request.channelName, request.programID, request.programTitle, request.programTime, clickedButtonParent);
-                            if(checkUrlPattern(true) == 1 || checkUrlPattern(true) == 2){setRegistProgsBackground();}
-                        } else if (response.result === "notificationDined") {
-                            toast("拡張機能からの通知が拒否されているので通知できません");
-                        } else if (response.result === "pastTimeError") {
-                            toast("既に開始された番組です");
-                        }
-                    });
-                });
-            } else {
-                //登録済み
-                notifyButton.text("拡張機能の通知登録解除").css('background-color', '#feb').attr('data-registered', 'true').click(function (e) {
-                    var clickedButton = $(e.target);
-                    var progData = notifyButtonData[clickedButton.attr("data-prognotifyname")];
-                    chrome.runtime.sendMessage({ type: "removeProgramNotifyAlarm", progNotifyName: clickedButton.attr("data-prognotifyname") }, function (response) {
-                        if (response.result === "removed") {
-                            toast("通知解除しました");
-                            var clickedButtonParent = clickedButton.parent();
-                            clickedButton.remove();
-                            putNotifyButtonElement(progData.channel, progData.channelName, progData.programID, progData.programTitle, progData.programTime, clickedButtonParent);
-                            if(checkUrlPattern(true) == 1 || checkUrlPattern(true) == 2){setRegistProgsBackground();}
-                        }
-                    });
-                });
-            }
-        });
-    } else {
-        notifyButParent.children('.addNotify').remove();
-    }
-}
-function programTimeStrToTime(programTimeStr) {
-    var programTimeArray = programTimeStr.match(/(\d+)月(\d+)日[（\(][^ ~]+[）\)]\s*(\d+):(\d+)/);
-    if(programTimeArray===null){console.warn('programTimeStrToTime("'+programTimeStr+'") not match'); return new Date(0);}
-    var now = new Date();
-    var programYear = now.getFullYear();
-    var programMonthNum = parseInt(programTimeArray[1]) - 1;
-    var programDate = parseInt(programTimeArray[2]);
-    var programHour = parseInt(programTimeArray[3]);
-    var programMinute = parseInt(programTimeArray[4]);
-    if (now.getMonth() === 11 && programMonthNum === 0) {programYear++;} //現在12月なら1月は来年とする
-    var programTime = new Date(programYear, programMonthNum, programDate, programHour, programMinute, 0, 0);
-    return programTime;
-}
-function putNotifyButton(url) {
-    if (checkUrlPattern(true) != 0) return;
-    const detailContainer = dl.last(dl.filter(document.getElementsByTagName('div'),{top14u:true,width12b:true,height12b:true, notBodyParent:true,notMatchSelector:'#main>*',filters:[e=>e.childElementCount==2]}));
-    const buttonContainer = detailContainer&&dl.parentsFilterLastByArray(detailContainer.getElementsByTagName('button'),{height14s:true,filters:[e=>e.childElementCount>2]});
-    const header = detailContainer.getElementsByTagName('header');
 
-    var titleElement = $(header).find('h1').eq(0);
-    if (titleElement.text() == "") { setTimeout(function () { putNotifyButton(url); }, 1000); console.log("putNotifyButton wait"); return; }
-    var urlarray = url.substring(17).split("/");
-    var channel = urlarray[1];
-    var channelName = titleElement.next().text();
-    var programID = urlarray[3];
-    if(programID.indexOf('?')>=0){
-        programID = programID.slice(0,programID.indexOf('?'));
-    }
-    var programTitle = titleElement.text();
-    var programTimeStr = titleElement.nextAll().eq(1).text();
-    console.log(programID, programTitle, channel, channelName, programTimeStr, urlarray);
-    var programTime = programTimeStrToTime(programTimeStr);
-    //console.log(programTime)
-    var butParent = $('<div class="addNotifyWrapper slotpage"></span>').appendTo(buttonContainer);
-    putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
-    const observer = new MutationObserver(r=>{
-        console.log(r);
-        observer.disconnect();
-        var butParent = $('<div class="addNotifyWrapper slotpage"></span>').appendTo(buttonContainer);
-        putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
-
-    });
-    observer.observe(buttonContainer,{childList:true});
-}
-function putSerachNotifyButtons() {
-    if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) return;
-    const h1=Array.from(document.getElementsByTagName('h1')).filter(e=>e.innerText.includes('放送予定'))[0];    
-    var listWrapper = $(h1&&h1.nextElementSibling.querySelector('div[role=list]'));
-    var listItems = listWrapper.find('a[role=listitem]');
-    var noContentText = '該当する放送予定の番組はありませんでした';
-    var noContentMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(noContentText)>=0){return e;}});
-    if (listItems.length == 0 && noContentMessage.length == 0) { setTimeout(function () { putSerachNotifyButtons(); }, 1000); console.log("putSerachNotifyButtons wait"); return; }
-    listItems.each(function (i, elem) {
-        var linkArea = $(elem);
-        var spans = linkArea.children().eq(0).children().eq(1).children('span');
-        if(spans.length<3)return;
-        if($(elem).next('.listAddNotifyWrapper').length>0){return;}
-        var butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
-        linkArea.children().css('border-bottom','none');
-        var progUrl = linkArea.attr('href');
-        var urlarray = progUrl.substring(1).split("/");
-        //console.log(urlarray);
-        var channel = urlarray[1];
-        var channelNameElem = spans.eq(1);
-        var channelName = channelNameElem.text();
-        var programID = urlarray[3];
-        var programTitle = spans.eq(0).text();
-        var programTime = programTimeStrToTime(spans.eq(2).text());
-        //console.log(linkArea, channel, channelName, programID, programTitle, programTime, butParent);
-        putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
-    });
-    //もっとみるボタンに対応
-    var moreBtn = listWrapper.next('button');
-    moreBtn.click(function(){
-        setTimeout(putSerachNotifyButtons, 500);
-    });
-}
-function putReminderNotifyButtons() {
-    if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) return;
-    var listWrapper = $('div[role=list]');
-    var listItems = $('a[role=listitem]');
-    var featureText = '見たい番組を見逃さないためには';//公式通知登録一覧で何も登録してないときの機能紹介文
-    var featureMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(featureText)>=0){return e;}});
-    if (listItems.length == 0 && featureMessage.length == 0) { setTimeout(function () { putReminderNotifyButtons(); }, 1000); console.log("putReminderNotifyButtons wait"); return; }
-    listItems.each(function (i, elem) {
-        var linkArea = $(elem);
-        var spans = linkArea.children().eq(1).find('span');
-        var butParent;
-        if(linkArea.next().is('.listAddNotifyWrapper')){
-            butParent = linkArea.next();
-        }else{
-            butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
-            linkArea.css('border-bottom','none');
-        }
-        var progUrl = linkArea.attr('href');
-        var urlarray = progUrl.substring(1).split("/");
-        //console.log(urlarray);
-        var channel = urlarray[1];
-        var titleElem = spans.eq(0);
-        var channelName = spans.eq(1).text();
-        var programID = urlarray[3];
-        var programTitle = spans.eq(0).text();
-        var programTime = programTimeStrToTime(spans.eq(2).text());
-        putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
-    });
-    //一括登録ボタン
-    if(listItems.length>1&&$('.addAllNotifyButton').length<1){
-        $('<div class="addAllNotifyButton" >以上の番組を全て拡張機能の通知登録する</div>').insertAfter(listWrapper).click(function(){
-            $('.addNotify[data-registered="false"]').trigger('click');
-        });
-    }
-}
-function putSideDetailNotifyButton(){
-    console.log('putSideDetailNotifyButton()');
-    var sideDetailWrapper = $(EXTTsideR);
-    //console.log('put side notify button', sideDetailWrapper);
-    if (sideDetailWrapper.length == 0) {
-        setTimeout(putSideDetailNotifyButton, 500);
-        console.log('retry putSideDetailNotifyButton (sideDetailWrapper==0)');
-    }
-    //console.log(sideDetailWrapper.offset(),window.innerWidth - 50);
-    if (sideDetailWrapper.offset().left > window.innerWidth - 50) {// sideDetailWrapperが右画面外ならリトライ
-        setTimeout(putSideDetailNotifyButton, 1000);
-        console.log('retry putSideDetailNotifyButton (left>window.innerWidth-50)');
-        return;
-    }
-    var fp=sideDetailWrapper.find('p');//番組詳細,タイトル,日時,見逃し云々?
-    var progTitle;
-    var progTime = programTimeStrToTime(fp.eq(2).text());
-    if(fp.length>=3){
-        progTitle = fp.eq(1).text();
-        progTime = programTimeStrToTime(fp.eq(2).text());
-    }else{
-        progTitle=$('zo_bq').text();
-        progTime = programTimeStrToTime($('.zo_hs').text()); //todo
-    }
-    var fa = sideDetailWrapper.find('a').map(function (i, e) { if (e.textContent.indexOf("詳細") == 0) return e; });//a 放送中なら放送画面リンク,詳細をもっとみる
-    var progLinkArr;
-    if(fa.length>0) progLinkArr = fa.first().attr("href").split('/');
-    else progLinkArr=$('.zo_zu').attr("href").split('/'); //todo
-//    var channel = progLinkArr[2];
-    var urlchan = progLinkArr.indexOf("channels");
-    //console.log(fa,progLinkArr)
-    if (urlchan < 0) return;
-    var channel = progLinkArr[urlchan + 1];
-    var channelName = getChannelNameOnTimetable(channel);
-//    var progID = progLinkArr[4];
-    var progID = progLinkArr[urlchan + 3];
-    var notifyButParent;
-    if(fp.length>=3&&fa.length>0&&fp.eq(2).next("div").is(fa.first().prev("div")))//fp2のすぐ下かつfa0のすぐ上のやつ
-        notifyButParent=fp.eq(2).next("div").children("div").first();
-    else notifyButParent=sideDetailWrapper.find('.zo_zw>div'); //todo
-    console.log(progTitle,progTime,channel,channelName,progID,notifyButParent);
-    putNotifyButtonElement(channel, channelName, progID, progTitle, progTime, notifyButParent);
-}
 
 chrome.runtime.onMessage.addListener(function (r) {
     //console.log(r);

@@ -26,3 +26,8 @@ export function determineUrl(url?: string){
 export function getChannelByURL(url?: string) {
     return ((url||location.href).match(/https:\/\/abema\.tv\/now-on-air\/([-\w]+)/) || [null, null])[1];
 }
+export function getChannelNameOnTimetable(channel: string, EXTTsideL: HTMLElement|null) { //番組表ページのチャンネルリストを利用してチャンネル名を得る
+    var hrefStr = "/timetable/channels/" + channel;
+    if (EXTTsideL != null) return $(EXTTsideL).find('a[href$="' + hrefStr + '"]').text();
+    else return $('.c-tv-TimeTableContainer__channels').find('a[href$="' + hrefStr + '"]').text();
+}
