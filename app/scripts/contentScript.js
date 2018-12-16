@@ -259,6 +259,7 @@ var delaysetConsoleStr = "";
 var delaysetConsoleRepeated = false;
 var lastMovedCommentTime = 0;//最後に流れたコメントの時間(コメントが二重に流れるのを防ぐ)
 let isResizeInterval = false;
+let isComeInpFocus = false;
 
 function hasArray(array, item) {//配列arrayにitemが含まれているか
     var hasFlg = false;
@@ -3595,13 +3596,15 @@ function pophideElement(inp) {
     }
     if (inp.side == 1) {
         EXside.style.transform = "translateY(-50%)";
-        if (settings.isSureReadComment && settings.isCommentFormWithSide) {
+        if (settings.isSureReadComment && settings.isCommentFormWithSide && $(EXcomesend).is(':hidden')) {
             $(EXcomesend).show();
+            if(isComeInpFocus)EXcomesendinp.focus();
         }
     } else if (inp.side == -1) {
         EXside.style.transform = "translate(100%, -50%)";
         if (settings.isSureReadComment && settings.isCommentFormWithSide) {
             $(EXcomesend).hide();
+            isComeInpFocus = (EXcomesendinp==document.activeElement)?true:false;
         }
     } else if (inp.side == 0) {
         EXside.style.transform = "";
@@ -5508,7 +5511,7 @@ function setOptionHead() {
 
     //コメント見た目
     var bc = "rgba(" + settings.commentBackColor + "," + settings.commentBackColor + "," + settings.commentBackColor + "," + (settings.commentBackTrans / 255) + ")";//コメント背景色
-    const cbhn = (settings.commentBackColor>127)?(settings.commentBackColor-22):(settings.commentBackColor+22);
+    const cbhn = (settings.commentBackColor>127)?(settings.commentBackColor-32):(settings.commentBackColor+32);
     const comeBackHl = "rgba(" + cbhn + "," + cbhn + "," + cbhn + "," + (settings.commentBackTrans / 255) + ")";//新着コメント背景色
     var cc = "rgba(" + settings.commentBackColor + "," + settings.commentBackColor + "," + settings.commentBackColor + "," + (0.2) + ")";
     var rc = "rgba(" + Math.floor(255 - (255 - settings.commentTextColor) * 0.8) + "," + Math.floor(settings.commentTextColor * 0.8) + "," + Math.floor(settings.commentTextColor * 0.8) + "," + (settings.commentTextTrans / 255) + ")";//赤系のコメント文字色(NG登録で使用)
@@ -5574,10 +5577,11 @@ function setOptionHead() {
         selComelistp=alt?".Ai_Am.t7_e":"";
     }
     if(selComelist){
-        t += selComelist+'>div,'+selComelist+'>div[class]:first-child>div>div{background-color:' + bc + ';color:' + tc + ';animation: '+(settings.highlightNewCome>=2?'none':'comebg 1s ease-in')+' !important;}';
+        t += selComelist+'>div,'+selComelist+'>div[class]:first-child>div>div{background-color:' + bc + ';color:' + tc + ';animation: '+(settings.highlightNewCome>=2?'none':'comebg 2s ease-in')+' !important;}';
+        t += selComelist+'>div[data-ext-isowner="true"],'+selComelist+'>div[class]:first-child>div>div[data-ext-isowner="true"]{background-color:' + comeBackHl + ' !important;}';
         //t += selComelist+':not(#copycomec)>div[class]:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので) EXcomelistの一番最初の子でclassが指定されてるやつ
         t += selComelist+'>div>div>p>span,'+selComelist+'>div[class]:first-child>div>div>div>p>span{color:' + tc + ' !important;}';//コメント文字色
-        t += selComelist+'>div>div,'+selComelist+'>div[class]:first-child>div>div>div{background-color: transparent;}';
+        t += selComelist+'>div>div,'+selComelist+'>div[class]:first-child>div>div>div{background-color: transparent !important}';
         t += selComelist+'>div>div:hover,'+selComelist+'>div[class]:first-child>div>div>div:hover{background-color: transparent;}';
     }
 
@@ -8268,21 +8272,11 @@ function programTimeStrToTime(programTimeStr) {
 }
 function putNotifyButton(url) {
     if (checkUrlPattern(true) != 0) return;
-    var divs = $("div");
-    var contentsWrapper;
-    var rightContents;
-    var leftContnts;
-    var j=divs.map(function(i, e){//大きくて子要素が２つでmain直下じゃないもの
-        var rect = e.getBoundingClientRect();
-        if(rect.top<window.innerHeight/4&&rect.left<window.innerWidth/4&&rect.width>1000/2&&rect.height>window.innerHeight/2&&$(e).children().length==2&&!$(e).parent().is('main'))return e;
-    });
-    if(j.length>0){contentsWrapper=j;}
-    else{
-        contentsWrapper=$('.tZ_o'); //todo
-    }
-    rightContents = contentsWrapper.children().eq(1);
-    leftContnts = contentsWrapper.children().eq(0);
-    var titleElement = rightContents.find('h2').eq(0);
+    const detailContainer = dl.last(dl.filter(document.getElementsByTagName('div'),{top14u:true,width12b:true,height12b:true, notBodyParent:true,notMatchSelector:'#main>*',filters:[e=>e.childElementCount==2]}));
+    const buttonContainer = detailContainer&&dl.parentsFilterLastByArray(detailContainer.getElementsByTagName('button'),{height14s:true,filters:[e=>e.childElementCount>2]});
+    const header = detailContainer.getElementsByTagName('header');
+
+    var titleElement = $(header).find('h1').eq(0);
     if (titleElement.text() == "") { setTimeout(function () { putNotifyButton(url); }, 1000); console.log("putNotifyButton wait"); return; }
     var urlarray = url.substring(17).split("/");
     var channel = urlarray[1];
@@ -8292,27 +8286,36 @@ function putNotifyButton(url) {
         programID = programID.slice(0,programID.indexOf('?'));
     }
     var programTitle = titleElement.text();
-    var programTimeStr = titleElement.nextAll().eq(2).text();
+    var programTimeStr = titleElement.nextAll().eq(1).text();
     console.log(programID, programTitle, channel, channelName, programTimeStr, urlarray);
     var programTime = programTimeStrToTime(programTimeStr);
     //console.log(programTime)
-    var butParent = $('<span class="addNotifyWrapper"></span>').insertAfter(leftContnts.children('div').children('div').eq(0));
+    var butParent = $('<div class="addNotifyWrapper slotpage"></span>').appendTo(buttonContainer);
     putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
+    const observer = new MutationObserver(r=>{
+        console.log(r);
+        observer.disconnect();
+        var butParent = $('<div class="addNotifyWrapper slotpage"></span>').appendTo(buttonContainer);
+        putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent);
+
+    });
+    observer.observe(buttonContainer,{childList:true});
 }
 function putSerachNotifyButtons() {
     if (checkUrlPattern(true) != 4 && checkUrlPattern(true) != 5) return;
-    var listWrapper = $('div[role=list]');
-    var listItems = $('a[role=listitem]');
+    const h1=Array.from(document.getElementsByTagName('h1')).filter(e=>e.innerText.includes('放送予定'))[0];    
+    var listWrapper = $(h1&&h1.nextElementSibling.querySelector('div[role=list]'));
+    var listItems = listWrapper.find('a[role=listitem]');
     var noContentText = '該当する放送予定の番組はありませんでした';
     var noContentMessage = $('p').map(function(i,e){if(e.innerHTML.indexOf(noContentText)>=0){return e;}});
     if (listItems.length == 0 && noContentMessage.length == 0) { setTimeout(function () { putSerachNotifyButtons(); }, 1000); console.log("putSerachNotifyButtons wait"); return; }
     listItems.each(function (i, elem) {
         var linkArea = $(elem);
         var spans = linkArea.children().eq(0).children().eq(1).children('span');
-        //console.log(spans)
         if(spans.length<3)return;
         if($(elem).next('.listAddNotifyWrapper').length>0){return;}
         var butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
+        linkArea.children().css('border-bottom','none');
         var progUrl = linkArea.attr('href');
         var urlarray = progUrl.substring(1).split("/");
         //console.log(urlarray);
@@ -8346,6 +8349,7 @@ function putReminderNotifyButtons() {
             butParent = linkArea.next();
         }else{
             butParent = $('<span class="listAddNotifyWrapper"></span>').insertAfter(elem);
+            linkArea.css('border-bottom','none');
         }
         var progUrl = linkArea.attr('href');
         var urlarray = progUrl.substring(1).split("/");

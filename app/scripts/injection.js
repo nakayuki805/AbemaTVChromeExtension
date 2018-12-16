@@ -107,7 +107,8 @@ function inj_onCommentChange(mutations){
             .attr('data-ext-message', comments[i].message)
             .attr('data-ext-createdatms', comments[i].createdAtMs)
             .attr('data-ext-id', comments[i].id)
-            .attr('data-ext-userid', comments[i].userId);
+            .attr('data-ext-userid', comments[i].userId)
+            .attr('data-ext-isowner', comments[i].isOwner);
             //.attr('data-ext-origmsg', jComments.eq(0).children('div').children('div').eq(i).text());
     }
     //コメントリスト本体部
@@ -121,7 +122,8 @@ function inj_onCommentChange(mutations){
                 .attr('data-ext-message', comment.message)
                 .attr('data-ext-createdatms', comment.createdAtMs)
                 .attr('data-ext-id', comment.id)
-                .attr('data-ext-userid', comment.userId);
+                .attr('data-ext-userid', comment.userId)
+                .attr('data-ext-isowner', comment.isOwner);
                 //.attr('data-ext-origmsg', jComments.eq(i).find('p').text());
         }
     }
