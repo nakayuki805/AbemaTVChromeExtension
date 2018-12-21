@@ -8036,8 +8036,11 @@ function chkurl() {
         $('#copyotw').remove();
         if(EXcomesendinp) $(EXcomesendinp.parentElement).css("display", "");
         //全画面・音量ボタンの位置を戻す
-        EXfullscr.style.right = '';
-        EXvolume.style.right = '';
+        if(EXfullscr&&EXvolume){
+            EXfullscr.style.right = '';
+            EXvolume.style.right = '';
+        }
+
         window.dispatchEvent(urlChangeEvent);
 
         checkUrlPattern(currentLocation);
