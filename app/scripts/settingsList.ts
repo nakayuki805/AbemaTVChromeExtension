@@ -297,7 +297,7 @@ export const settings: SettingList[] = [
             },
             {
                 "name": "isUserHighlight",
-                "description": "コメントにマウスオーバーで同一ユーザーのコメントの背景を黄色くする(同一人物のコメントを見分けるのに便利です。コメ欄にNG設定を適応させてない場合、新着コメントには効きません。)",
+                "description": "コメントにマウスオーバーで同一ユーザーのコメントの背景を黄色くする(同一人物のコメントを見分けるのに便利です。)",
                 "type": "boolean",
                 "isInstantChangable": true,
                 "default": false

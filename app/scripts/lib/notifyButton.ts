@@ -37,6 +37,7 @@ export function setRegistProgsBackground(){
     });
 }
 function putNotifyButtonElement(channel: string, channelName: string, programID: string, programTitle: string, programTime: Date, notifyButParent: JQuery, notifySeconds: number) {
+    //console.log(notifySeconds)
     var notifyTime = programTime.getTime() - notifySeconds * 1000;
     var now = new Date();
     if (notifyTime > now.getTime()) {
@@ -130,7 +131,7 @@ export function putNotifyButton(notifySeconds: number, url: string) {
     var butParent = $('<div class="addNotifyWrapper slotpage"></span>').appendTo(buttonContainer);
     putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent, notifySeconds);
     const observer = new MutationObserver(r=>{
-        console.log(r);
+        //console.log(r);
         observer.disconnect();
         var butParent = $('<div class="addNotifyWrapper slotpage"></span>').appendTo(buttonContainer);
         putNotifyButtonElement(channel, channelName, programID, programTitle, programTime, butParent, notifySeconds);
@@ -248,6 +249,6 @@ export function putSideDetailNotifyButton(notifySeconds: number, EXTTsideL: HTML
     if(fp.length>=3&&fa.length>0&&fp.eq(2).next("div").is(fa.first().prev("div")))//fp2のすぐ下かつfa0のすぐ上のやつ
         notifyButParent=fp.eq(2).next("div").children("div").first();
     else notifyButParent=sideDetailWrapper.find('.zo_zw>div'); //todo
-    console.log(progTitle,progTime,channel,channelName,progID,notifyButParent);
+    //console.log(progTitle,progTime,channel,channelName,progID,notifyButParent);
     putNotifyButtonElement(channel, channelName, progID, progTitle, progTime, notifyButParent, notifySeconds);
 }

@@ -114,8 +114,12 @@ console.log("script loaded");
 var currentLocation = window.location.href;
 var previousLocation = currentLocation;//URL変化前のURL
 //var urlchangedtick=Date.now();
-var headerHeight = 68;
-var footerHeight = 72;
+const headerHeight = 68;
+const footerHeight = 72;
+const commentListWidth = 310;
+const volumeRight = 20;
+const fullscrRight = 72;
+
 var commentNum = 0;
 var comeLatestPosi = [];
 var comeTTLmin = 3;
@@ -5476,8 +5480,9 @@ function setOptionHead() {
         //t += selComesendinp+'{background-color:' + uc + ';color:' + tc + ';}';
         //t += selComesendinp+'+*{background-color:' + uc + ';color:' + tc + ';}';
         //↓コメント入力欄が二重枠にならないようにtextareaとその兄弟の背景は透明にしておく
-        t += selComesendinp+'{background-color: transparent;color:' + tc + ' !important;}';
-        t += selComesendinp+'+*{background-color: transparent;color:' + tc + ' !important;}';
+        t += selComesendinp+'{background-color: transparent;color:' + tc + ';}';
+        t += selComesendinp+'+*{background-color: transparent;color:' + tc + ';}';
+        t += selComesendinp+'+* span{color:' + tc + ';}';
 
     }
 
@@ -5726,27 +5731,34 @@ function setOptionHead() {
     //7 #moveContainer 流れるコメント(クリックイベントは常時無効)
     //6 #ComeMukouMask 画面装飾、映像クリック受付(クリックはここで受ける)
 
+    let fullscrSlector = dl.getElementSingleSelector(EXfullscr);
+    if($(fullscrSlector).length!=1){
+        console.log("?fullscreen "+fullscrSlector);
+        fullscrSlector=alt&&selFoot?selFoot+" .mb_mi":"";
+    }
+    let volumeSelector = dl.getElementSingleSelector(EXvolume);
+    if($(volumeSelector).length!=1){
+        console.log("?volume "+volumeSelector);
+        volumeSelector=alt&selFoot?selFoot+" .mb_mk":"";
+    }
     //全画面・音量ボタン非表示 display:noneだとホイール音量操作でスタック
     if (settings.isHideButtons) {
-        to=dl.getElementSingleSelector(EXfullscr);
-        if($(to).length!=1){
-            console.log("?fullscreen "+to);
-            to=alt&&selFoot?selFoot+" .mb_mi":"";
+        if(fullscrSlector){
+            t += fullscrSlector+'{opacity:0;visibility:hidden;}';
         }
-        if(to){
-            t += to+'{opacity:0;visibility:hidden;}';
-        }
-
-        to=dl.getElementSingleSelector(EXvolume);
-        if($(to).length!=1){
-            console.log("?volume "+to);
-            to=alt&selFoot?selFoot+" .mb_mk":"";
-        }
-        if(to){
-            t += to+'{opacity:0;visibility:hidden;}';
+        if(volumeSelector){
+            t += volumeSelector+'{opacity:0;visibility:hidden;}';
         }
     }
-
+    //常にコメ欄表示時、全画面・音量ボタンをずらす
+    if(settings.isSureReadComment){
+        if(fullscrSlector){
+            t += fullscrSlector+`{right:${commentListWidth+fullscrRight}px;}`;
+        }
+        if(volumeSelector){
+            t += volumeSelector+`{right:${commentListWidth+volumeRight}px;}`;
+        }
+    }
     //残り時間用
     t += '#forProEndBk{padding:0px 0px;margin:4px 0px;background-color:rgba(255,255,255,0.2);z-index:12!important;}';
     t += '#forProEndTxt{padding:4px 5px 4px 11px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
@@ -5976,6 +5988,12 @@ function usereventWakuclick() {
                 comeFastOpen = true;
                 waitforCloseSlide(5);
             }
+        }
+    }else{
+        //コメ欄を常に表示*しない*時で画面クリックによりコメ欄を閉じた時
+        if(isComeOpen()){//現状コメ欄があいてる→これから閉まる
+            EXfullscr.style.right = '';
+            EXvolume.style.right = '';
         }
     }
     //旧windowclick
@@ -6217,6 +6235,9 @@ function usereventFCclick() {
                 $(EXvideoarea).width(window.innerWidth).height(window.innerHeight);            
             },500);//コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
         }
+        //コメ欄が開かれるので全画面・音量ボタンずらす
+        EXfullscr.style.right = (commentListWidth+fullscrRight)+'px';
+        EXvolume.style.right = (commentListWidth+volumeRight)+'px';
     }
     var jo = $(getElm.getVideo());
     if (!jo.isEmpty() && !waitingforResize) {
@@ -6603,12 +6624,14 @@ function comeUserHighlight(jo){
         var uid = j.attr('data-ext-userid') || '';
         //var opacity = settings.commentTextTrans/255;
         //console.log('mov',e,j,uid);
+        const defaultcss = j.children().attr('style');
         if(uid.length>0){
             //console.log(j.siblings('[data-ext-userid='+uid+']'))
-            j.siblings('[data-ext-userid='+uid+']').children().css('background-color', 'rgba(255,255,0,0.6)');
+            let hlelem = j.siblings('[data-ext-userid='+uid+']').children();
+            hlelem.css({'cssText': defaultcss+'background-color:rgba(255,255,0,0.6) !important;'});
             j.siblings(':not([data-ext-userid='+uid+'])').children().css('background-color', '');
         }
-        j.children().css('background-color', 'rgba(255,255,0,0.6)');
+        j.children().css({'cssText': defaultcss+'background-color:rgba(255,255,0,0.6) !important;'});
     }
     const firstClass = jo.first().attr('class');
     if(firstClass&&comelistClasses.animated&&firstClass.includes(comelistClasses.animated)){
@@ -7010,11 +7033,13 @@ function paintcopyot(mode) {
             break;
         default:
     }
-    var r = /rgba\( *(\d+), *(\d+), *(\d+), *(\d?(?:\.\d+)?) *\)/;
+    var r = /rgba?\( *(\d+), *(\d+), *(\d+)(?:, *(\d?(?:\.\d+)?))? *\)/;
     var c = $(EXcomesendinp).css("color");
     if (r.test(c)) {
         var t = r.exec(c);
-        $('#copyot').css("color", "rgba(" + Math.floor(a[0] - (a[0] - (+t[1])) * p) + "," + Math.floor(a[1] - (a[1] - (+t[2])) * p) + "," + Math.floor(a[2] - (a[2] - (+t[3])) * p) + "," + t[4] + ")");
+        const color = "rgba(" + Math.floor(a[0] - (a[0] - (+t[1])) * p) + "," + Math.floor(a[1] - (a[1] - (+t[2])) * p) + "," + Math.floor(a[2] - (a[2] - (+t[3])) * p) + "," + (t[4]||'1') + ")";
+        const copyot = document.getElementById('copyot');
+        copyot.style.color = color;
     }
 }
 function paintcopyotw(mode) {
@@ -7041,11 +7066,13 @@ function paintcopyotw(mode) {
             break;
         default:
     }
-    var r = /rgba\( *(\d+), *(\d+), *(\d+), *(\d?(?:\.\d+)?) *\)/;
+    var r = /rgba?\( *(\d+), *(\d+), *(\d+)(?:, *(\d?(?:\.\d+)?))? *\)/;
     var b = $(EXcomesendinp.parentElement).css("background-color");
     if (r.test(b)) {
         var t = r.exec(b);
-        $('#copyotw').css("background-color", "rgba(" + Math.floor(a[0] - (a[0] - (+t[1])) * p) + "," + Math.floor(a[1] - (a[1] - (+t[2])) * p) + "," + Math.floor(a[2] - (a[2] - (+t[3])) * p) + "," + t[4] + ")");
+        const bgstyle = "rgba(" + Math.floor(a[0] - (a[0] - (+t[1])) * p) + "," + Math.floor(a[1] - (a[1] - (+t[2])) * p) + "," + Math.floor(a[2] - (a[2] - (+t[3])) * p) + "," + (t[4]||'1') + ")";
+        const copyotw = document.getElementById('copyotw');
+        copyotw.style.cssText += `background-color:${bgstyle} !important;`;
     }
 }
 function appendTextNG(ev, inpstr) {
@@ -7898,7 +7925,7 @@ function onCommentChange(mutations){
             }
             //新着コメがanimationされないときがあるのでanimationが含まれないときはコメ流しもここでやる(下でも同様にコメ流しの処理をしていて多分重複するけどlastMovedCommentTimeで弾けるはず)
             if (settings.isMovingComment && isFirstComeAnimated && !isAnimationAdded) {
-                    let idx, dt, movingStarti=0;
+                    let idx, dt, movingStarti=null;
                     for(let i = 0; i < d; i++){
                         //idx = d - i - 1;
                         idx = comments.length - d + i;//commentsの後ろに新着がある
@@ -7906,8 +7933,8 @@ function onCommentChange(mutations){
                         dt = comments[idx]?parseInt(comments[idx][2]):0;
                         if(dt<=lastMovedCommentTime){
                             continue;
-                        }else if(movingStarti==0){
-                            //movingStarti = i;//movingStartiの存在目的が不明
+                        }else if(movingStarti==null){
+                            movingStarti = i;//movingStartiはlastMovedCommentTimeで弾いたコメントを除いた新着として流すコメントの起点
                         }
                         //console.log(comments[idx],idx,i,d,movingStarti)
                         putComment(comments[idx][0], comments[idx][1], i-movingStarti, d-movingStarti);                
@@ -8008,6 +8035,9 @@ function chkurl() {
         //$('#copycome').remove();
         $('#copyotw').remove();
         if(EXcomesendinp) $(EXcomesendinp.parentElement).css("display", "");
+        //全画面・音量ボタンの位置を戻す
+        EXfullscr.style.right = '';
+        EXvolume.style.right = '';
         window.dispatchEvent(urlChangeEvent);
 
         checkUrlPattern(currentLocation);
