@@ -187,7 +187,7 @@ export function parentsFilterLastByArray(
 export function getElementSingleSelector(
     element: HTMLElement,
     sw: number,
-    remove: string
+    remove?: string[]
 ) {
     // idがあれば要素名#idを返す
     // classが全体で唯一なら要素名.classを返す
@@ -245,3 +245,159 @@ export function getElementSingleSelector(
     console.log(element);
     return null;
 }
+// ↓現在未使用 とりあえずTS移植せずにここにコメントアウトで置いておく
+/*function getElementSelector(
+    inpElm,
+    includeID,
+    includeClass,
+    includeIndex,
+    remove
+) {
+    //includeID true:#idを含める false:含めない
+    //includeClass 2:全ての.classを含める 1:全体で唯一の.classだけ含める 0:含めない
+    //includeIndex 2:全要素*:eq(index)を含める 1:要素名:eq(index)を含める 0:含めない
+    //全体に含めないid,classをremoveで受ける
+    if (!inpElm) return null;
+    var ta = $(inpElm);
+    var pa = ta.parentsUntil('html');
+    var ts = '';
+    var ps = '';
+    var tt = [];
+    var ns = [];
+    var re = /\w/;
+    var rd = /\s+/;
+    var rc = /^\s+|\s+$/g;
+    var jr = null;
+    if (remove && remove.length > 0) {
+        jr = $(remove[0]);
+        for (var i = 1; i < remove.length; i++) jr = jr.add(remove[i]);
+    }
+
+    ns[0] = [];
+    ns[0][0] = ta.prop('nodeName');
+    if (includeID) {
+        ns[0][1] = ta.prop('id');
+    } else {
+        ns[0][1] = '';
+    }
+    ns[0][3] = [];
+    ts = ta.prop('class');
+    if (re.test(ts)) {
+        tt = ts.split(rd);
+        for (var j = 0, k = 0; j < tt.length; j++) {
+            ts = tt[j].replace(rc, '');
+            if (re.test(ts) && ts.indexOf('ext_abm-') < 0) {
+                //拡張機能で付与したclassは除外しておく(含めるとcomeまわりでうまくいかない)
+                if (includeClass == 1) {
+                    if ($('.' + ts).remove(jr).length == 1) {
+                        ns[0][3][k++] = ts;
+                    }
+                } else if (includeClass == 2) {
+                    ns[0][3][k++] = ts;
+                }
+            }
+        }
+    }
+    if (includeIndex == 2 && includeClass == 0 && !includeID) {
+        ns[0][2] = ta.index();
+    } else if (includeIndex > 0) {
+        if (includeIndex == 1) {
+            ts = ta.prop('nodeName');
+        } else if (includeIndex == 2) {
+            ts = '';
+        }
+        if (ns[0][1].length > 0) {
+            ts = ts + '#' + ns[0][1];
+        }
+        for (let j = 0; j < ns[0][3].length; j++) {
+            ts = ts + '.' + ns[0][3][j];
+        }
+        ns[0][2] = ta.prevAll(ts).length;
+    } else {
+        ns[0][2] = 0;
+    }
+    for (let i = 0; i < pa.length; i++) {
+        ns[i + 1] = [];
+        ns[i + 1][0] = pa.eq(i).prop('nodeName');
+        if (includeID) {
+            ns[i + 1][1] = pa.eq(i).prop('id');
+        } else {
+            ns[i + 1][1] = '';
+        }
+        ns[i + 1][3] = [];
+        ts = pa.eq(i).prop('class');
+        if (re.test(ts)) {
+            tt = ts.split(rd);
+            for (let j = 0, k = 0; j < tt.length; j++) {
+                ts = tt[j].replace(rc, '');
+                if (re.test(ts) && ts.indexOf('ext_abm-') < 0) {
+                    if (includeClass == 1) {
+                        if ($('.' + ts).length == 1) {
+                            ns[i + 1][3][k++] = ts;
+                        }
+                    } else if (includeClass == 2) {
+                        ns[i + 1][3][k++] = ts;
+                    }
+                }
+            }
+        }
+        if (includeIndex == 2 && includeClass == 0 && !includeID) {
+            ns[i + 1][2] = pa.eq(i).index();
+        } else if (includeIndex > 0) {
+            if (includeIndex == 1) {
+                ts = pa.eq(i).prop('nodeName');
+            } else if (includeIndex == 2) {
+                ts = '*';
+            }
+            if (ns[i + 1][1].length > 0) {
+                ts = ts + '#' + ns[i + 1][1];
+            }
+            for (let j = 0; j < ns[i + 1][3].length; j++) {
+                ts = ts + '.' + ns[i + 1][3][j];
+            }
+            ns[i + 1][2] = pa.eq(i).prevAll(ts).length;
+        } else {
+            ns[i + 1][2] = 0;
+        }
+    }
+
+    ps = '';
+    if (includeIndex == 2) {
+        ts = '*';
+    } else {
+        ts = ns[0][0];
+    }
+    if (includeID && ns[0][1].length > 0) {
+        ts = ts + '#' + ns[0][1];
+    }
+    if (includeClass > 0) {
+        for (let j = 0; j < ns[0][3].length; j++) {
+            ts = ts + '.' + ns[0][3][j];
+        }
+    }
+    if (includeIndex > 0) {
+        ts = ts + ':eq(' + ns[0][2] + ')';
+    }
+    ps = ts;
+    for (let i = 1; i < ns.length - 1; i++) {
+        if (includeIndex == 2) {
+            ts = '*';
+        } else {
+            ts = ns[i][0];
+        }
+        if (includeID && ns[i][1].length > 0) {
+            ts = ts + '#' + ns[i][1];
+        }
+        if (includeClass > 0) {
+            for (let j = 0; j < ns[i][3].length; j++) {
+                ts = ts + '.' + ns[i][3][j];
+            }
+        }
+        if (includeIndex > 0) {
+            ts = ts + ':eq(' + ns[i][2] + ')';
+        }
+        ps = ts + '>' + ps;
+    }
+    ps = 'BODY>' + ps;
+    return ps;
+}*/

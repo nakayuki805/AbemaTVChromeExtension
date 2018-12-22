@@ -643,11 +643,6 @@ export const settings: SettingList[] = [
         description: '番組表関連設定',
         settings: [
             {
-                //    "name": "isChTimetableExpand",
-                //    "description": "<s>チャンネル別番組表ページにて、番組タイトルの末尾が隠れないように枠を縦に広げる (時刻の縦の長さが一定でなくバラバラになります)</s>古いオプションで正常に動かないので無効",
-                //    "type": "boolean",
-                //    "isInstantChangable": false
-                // },{
                 name: 'isChTimetableBreak',
                 //                "description": "チャンネル別番組表ページにて、番組タイトルの改行位置を変更する (2桁の話数が改行よって数字1字ずつに分かれたりするのを防止)",
                 description:

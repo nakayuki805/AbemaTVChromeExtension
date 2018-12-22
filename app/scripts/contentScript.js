@@ -8,6 +8,7 @@ import * as dl from './lib/dom-lib';
 import * as gl from './lib/generic-lib';
 import * as gdl from './lib/generic-dom-lib';
 import * as notifyButton from './lib/notifyButton';
+import * as gcl from './lib/generic-comment-lib';
 import './updatenotify.js';
 
 // edge対応
@@ -69,7 +70,6 @@ var isFuga = false; //利用したくない機能
 var cmblockia = 1; //コメント欄が無効になってからCM処理までのウェイト(+1以上)
 var cmblockib = -1; //有効になってから解除までのウェイト(-1以下)
 var panelopenset = [[1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]]; //head,foot,sideの開閉設定[全閉,info開,chli開,come開] 0:非表示 1:5秒で隠す 2:常に表示
-// settings.isChTimetableExpand = false; //チャンネル別番組表でタイトルが隠れないように縦に広げる
 //settings.allowChannelNames = ["abema-news", "abema-special", "special-plus", "special-plus-2", "special-plus-3", "special-plus-4", "special-plus-5", "special-plus-6", "drama", "asia-drama", "reality-show", "mtv-hits", "space-shower", "documentary", "variety", "pet", "club-channel", "commercial", "anime24", "midnight-anime", "oldtime-anime", "family-anime", "new-anime", "yokonori-sports", "hiphop", "soccer", "fighting-sports", "fighting-sports2", "golf", "fishing", "shogi", "mahjong"];
 settings.allowChannelNames = [];
 
@@ -135,7 +135,6 @@ console.log('script loaded');
 
 var currentLocation = window.location.href;
 var previousLocation = currentLocation; //URL変化前のURL
-//var urlchangedtick=Date.now();
 const headerHeight = 68;
 const footerHeight = 72;
 const commentListWidth = 310;
@@ -153,22 +152,15 @@ for (var i = 0; i < comeLatestLen; i++) {
     comeLatestPosi[i][0] = 0;
     comeLatestPosi[i][1] = comeTTLmin;
 }
-//var playtick=0;
-//var comeLatestCount = 0; //画面右下で取得するコメント数
 var isComeLatestClickable = true; //右下コメント数をクリックできるか
 var arFullNg = [];
 var arUserNg = [];
-//var retrytick=[1000,3000,6000,12000,18000];
 //var retrycount=0;
 var proStart = new Date(); //番組開始時刻として現在時刻を仮設定
-//var proEnd = new Date(Date.now()+60*60*1000); //番組終了として現在時刻から1時間後を仮設定
-var proEnd = new Date(); //↑で23時～24時の間に実行すると終了時刻が1日ずれるので現時刻にした
+var proEnd = new Date(); //番組終了時刻として現時刻を仮定(日付が変わる直前で未来を仮定すると1日ずれる)
 var forElementClose = 0; //コメント表示中でも各要素を表示させた時に自動で隠す場合のカウントダウン
 var EXcomelist;
-var EXcomments;
 
-//var commentsSelector = '[class^="TVContainer__right-comment-area___"] [class^="styles__message___"]';
-var commentListParentSelector = '#main div.ww_wA.rH_e.rH_rJ > div';
 var overlapSelector; // = '#main div.'+$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0))return e;}).eq(0).prop("class");
 
 var EXmain;
@@ -185,13 +177,9 @@ var EXinfo;
 var EXcome;
 var EXcomesend; //コメント入力フォーム
 var EXcomesendinp; //↑のtextarea
-//var EXcomesendbut;
-var EXcomecont;
-//var EXcomelist0;
 //var EXobli;
 let EXvideoarea;
 //var EXwatchingnum;//EXobliの現在視聴中のチャンネルの子供のindex
-//var EXwatchingstr;//現在視聴中のチャンネル名(右チャネル一覧のチャンネルロゴのaltから取得)
 var EXvolume;
 var EXfullscr;
 var EXcomemodule; //Twitterボタンや投稿ボタンを含む要素 入力欄をフォーカスしたときにセットし放送画面以外ではnull
@@ -201,7 +189,6 @@ var EXTTbodyS; //bodyのスクロール担当(sideL,Rの兄弟)
 var EXTTsideR; //timetableの右の番組詳細
 var EXTTsideL; //timetableの左の番組一覧
 var EXTTtime; //timetableの時間列(縦長の緑のやつ)
-var comeclickcd = 2; //コメント欄を早く開きすぎないためのウェイト
 var cmblockcd = 0; //カウント用
 var comeRefreshing = false; //コメ欄自動開閉中はソートを実行したいのでコメント更新しない用
 var comeFastOpen = false;
@@ -213,7 +200,6 @@ var setBlacked = [false, false, false]; //soundsetなどのスイッチ
 var keyinput = []; //コマンド入れ
 var keyCodes = '38,38,40,40,37,39,37,39,66,65';
 var comeArray = []; //流すコメントで、新着の複数コメントのうちNG処理等を経て実際に出力するコメントのリスト
-//var popElemented=false; //mouseoverでunpopElementが実行されまくるのを防止
 var proTitle = ''; //番組タイトル
 var proinfoOpened = false; //番組タイトルクリックで番組情報枠を開いた後にクリックで閉じれるようにする
 var optionStatsUpdated = false; //optionStatsUpdateの重複起動防止
@@ -223,7 +209,6 @@ var eyecatcheck = false; //eyecatch利用時の高速チェックの多重起動
 var popCodes = '39' + ',39'.repeat(50); //黒帯パネルを全て非表示にした時の脱出コマンド(右矢印を51回連打)
 var popinput = [];
 var popacti = false; //脱出コマンドを受け付けるかどうか
-var isAutoReload = false; //コメ欄スクロール時に読込済コメントを自動反映するかどうか
 var onairRunning = false; //映像ページの定期実行のやつの複数起動防止用 setintervalの格納
 var comeNGmode = 0; //NG追加先の分岐用
 var NGshareURLbase = 'https://abema.nakayuki.net/ngshare/v1/'; //共有NGワードAPI
@@ -235,7 +220,6 @@ var isComelistMouseDown = false;
 var movieWidth = 0; //.TVContainer__resize-screenの大きさ(onresize発火用)
 //var movieHeight = 0;
 var waitingforResize = false; //waitforresizeの複数起動防止用
-var copycomecount = 2; //番組移動直後にcopycomeをfullcopyする回数
 var allowChannelNum = []; //Namesを元にした表示列番号
 //var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
 var oldWindowState = 'normal'; // フルスクリーン切り替え前のウィンドウのstate
@@ -322,7 +306,6 @@ function allowChannelNumMaker() {
     //console.log("allowChannelNumMaker");
     if (settings.allowChannelNames.length == 0) return 2;
     var u = 'https://abema.tv/timetable/channels/';
-    //    var jo = $('[class^="styles__channel-content-header___"]').children('[class^="styles__channel-icon-header___"]');
     var eaHead = $(EXTThead).children('a');
     if (eaHead.length == 0) return -2;
     var n = [];
@@ -437,10 +420,6 @@ function timetableCss() {
             timetableClasses.timebar = selTime;
             t += selTime + '{pointer-events:none;}';
         }
-        //t += '[class^="styles__date-bar___"]{pointer-events:none;}';
-        //    }else if(c==2){
-        //        t+='[class^="styles__date-list-header___"]>*{width:calc((100vw - 265px) / 8);min-width:176px;}';
-        //        t+='[class^="styles__timetable-wrapper___"]>*{width:calc((100vw - 265px) / 8);min-width:176px;}';
     }
 
     if (settings.isHideArrowButton) {
@@ -554,16 +533,7 @@ function waitforloadtimetable(url) {
     if (timetableRunning === false) {
         timetableRunning = setInterval(waitforloadtimetable, 600000, url);
     }
-    //if (!settings.isChTimetableExpand && !settings.isChTimetableBreak && !settings.isChTimetableWeekend && !settings.isChTimetablePlaybutton && !settings.timetableScroll) { return; }
-    var b = false;
-    //    if($('[class^="styles__channel-icon-header___"]').next('[class*="styles__time-table___"]').length>0){
-    //    if ($('[class*="styles__channel-content-header-wrapper___"]').next('[class*="styles__time-table___"]').length > 0) {
-    //        var c = $('[class*="styles__col___"]'); //日付の列
-    //        var t = $('[class^="styles__title___"]'); //タイトル
-    //        if (c.length > 0 && t.length > 0) {
-    //            b = true;
-    //        }
-    //    }
+
     var dd = $('div');
     var alt = false;
     $('head>link[title="usermade"]').remove(); //要素がdisplay:noneだと探索で大きさが取れないのでまず元に戻す
@@ -711,11 +681,9 @@ function waitforloadtimetable(url) {
         addExtClass(EXTTtime, 'tt-time');
         addExtClass(EXTTbodyS, 'tt-body-s');
         allowChannelNumMaker();
-        //        if (currentLocation.indexOf("https://abema.tv/timetable/channels/") == 0) {
-        if (c == 2) {
+        if (c === getInfo.URL_CHANNELTABLE) {
             setTimeout(timetablechfix, 100);
-            //        } else if (currentLocation.match(/^https:\/\/abema\.tv\/timetable(?:\/dates\/.+)?$/)) {
-        } else if (c == 1) {
+        } else if (c === getInfo.URL_DATETABLE) {
             setTimeout(timetabledtfix, 100);
         }
         setTimeout(timetableCommonFix, 100);
@@ -875,12 +843,7 @@ function timetabledtfix() {
     var t = '';
     if (settings.isChTimetablePlaybutton) {
         ce = true;
-        //        t += '.playbutton:hover{background-color:yellow;}';
     }
-    //    if (t.length > 0) {
-    //        $('head>link[title="usermade"]').remove();
-    //        $('<link title="usermade" rel="stylesheet" href="data:text/css,' + encodeURI(t) + '">').appendTo("head");
-    //    }
     if (ce) {
         timetabledtloop();
     }
@@ -914,7 +877,6 @@ function timetabledtfix() {
     var axisWidth = $(EXTTtime).width();
     let timetableWidth;
     if (allowChannelNum.length > 0) {
-        //chLinkWidth = $(EXTTbody).children().eq(allowChannelNum[0]).width();//channelLink.siblings().eq(allowChannelNum[0]).width();//allowChannelに含まれないチャンネルのchannelLinkから幅を取得するとずれる
         if (isTimetableScroll) {
             visibleChLinkIndex = 0;
             for (var i = 0; i < allowChannelNum.length; i++) {
@@ -1012,32 +974,17 @@ function timetablechfix() {
     //console.log("timetablechfix");
     //チャンネル別番組表
     var ce = false; //定期実行するかどうか
-    //    if (settings.isChTimetableExpand) {
-    //        ce = true; //現在時刻の横棒の位置を直す
-    //        setTimeout(TimetableExpander, 500, 0); //playbutton設置(timetablechloop)によって隠れる分も考慮してそれより後に実行するようにset
-    //    }
-    //削除できるようにtitleを付けているせいかusermade以降の追加cssが適用されないので全て纏めてからusermadeに適用する
-    //setoptionheadも同様
-    //    var t = '';
-    //    if (settings.isChTimetableBreak) {
-    //        t += '[class^="styles__title___"]{word-break:break-word;}';
-    //    }
+
     if (settings.isChTimetablePlaybutton) {
         //再生ボタンの設置場所(放送中の緑色枠)は移動するので定期実行にて削除,設置する
         ce = true;
-        //        t += '.playbutton:hover{background-color:yellow;}';
     }
-    //    if (t.length > 0) {
-    //        $('head>link[title="usermade"]').remove();
-    //        $('<link title="usermade" rel="stylesheet" href="data:text/css,' + encodeURIComponent(t) + '">').appendTo("head");
-    //    }
+
     if (ce) {
         timetablechloop();
     }
 }
 function getSatSun() {
-    //    if (settings.isChTimetableWeekend) {
-    //        var h = $('[class*="styles__date-list-header___"]').children();//styles__date-list-header-inner___
     var h = $(EXTThead).children('a[href*="/timetable/dates/"]');
     var sat = -1;
     var sun = -1;
@@ -1066,131 +1013,12 @@ function getSatSun() {
             }
         }
     }
-    //        if (sat >= 0) {
-    //            t += '[class^="styles__timetable-wrapper"]>div[class^="styles__col___"]:nth-child(' + (sat + 1) + ') [class*="style__status-future___"]{background-color:rgba(227,238,255,0.7);}';
-    //            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sat + 1) + ') [class*="style__status-future___"]:hover{background-color:rgba(222,233,250,0.7);}';
-    //        }
-    //        if (sun >= 0) {
-    //            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sun + 1) + ') [class*="style__status-future___"]{background-color:rgba(255,227,238,0.7);}';
-    //            t += '[class^="styles__timetable-wrapper"]>div[class*="styles__col___"]:nth-child(' + (sun + 1) + ') [class*="style__status-future___"]:hover{background-color:rgba(250,222,233,0.7);}';
-    //        }
-    //    }
     return [sat, sun];
 }
-/*function TimetableExpander(prevColNum) {
-    if (!settings.isChTimetableExpand) { return; }
-    var dayCols = $('[class*="styles__col___"]'); //日付の列
-    if(dayCols.length == 0 || dayCols.length > prevColNum){//列が出そろうまで待つ
-        //console.log("retry TimetableExpander colnum="+dayCols.length+" prev="+prevColNum);
-        setTimeout(TimetableExpander, 1500, dayCols.length);
-        return;
-    }
-    //console.log("TimetableExpander() colnum="+dayCols.length+" prev="+prevColNum);
-    var progTitles = $('span[class^="styles__title___"]'); //各番組タイトル
-    var i = 0, col, titlesInCol;
-    for (i = 0; i < dayCols.length; i++) { //列の日付についてのループ
-        col = dayCols.eq(i);
-        titlesInCol = col.find(progTitles);
-        var j, eachTitle, titleHeight, titleWrapper, lessTextClassName, progDiv, progDivHeight, progDivTop, progDivBottomPos, progArticle, progArticleHeight, heightDelta;
-        for (j = titlesInCol.length - 1; j >= 0; j--) { //列の中の番組タイトルについてのループ
-            eachTitle = titlesInCol.eq(j);
-            titleHeight = eachTitle.height();
-            titleWrapper = eachTitle.parents('p').css('height', titleHeight + 'px');
-            lessTextClassName = (titleWrapper.attr('class').match(/style__less-text___[a-zA-Z0-9]+/)||[""])[0];
-            titleWrapper.removeClass(lessTextClassName);//省略されたタイトル等につくclassを除去
-            progDiv = col.children().has(eachTitle);
-            progDivTop = progDiv.offset().top;
-            progDivHeight = progDiv.height();
-            progDivBottomPos = progDivTop + progDivHeight;//各番組divの底のtop位置
-            progArticle = eachTitle.parents('article');//各番組div内のarticle要素
-            //番組articleの前後に空白がある場合、porgDivの位置を設定し直す
-            if (progArticle.prev().is('[class^="styles__suspension-item___"]')) { //suspension-itemは番組表の空白埋めdivで連接する番組のarticleと兄弟(例えばその日最初の番組の前に前日からの日越し番組があるとその部分がその日の番組表では空白になる)
-                progDivTop = progArticle.offset().top;
-            }
-            if (progArticle.next().is('[class^="styles__suspension-item___"]')) {
-                progDivBottomPos = progArticle.next('[class^="styles__suspension-item___"]').offset().top - 1;
-            }
-            progDivHeight = progDivBottomPos - progDivTop;
-            var progArticleHeight = parseInt(progArticle.css("height"));
-            var heightDelta = titleHeight + 24 - progArticleHeight;//枠を広げた高さの差 24という数字はタイトルのpaddingの上下計(上8px,下8+8px)
-            if (heightDelta <= 0) { continue; }
-            var axisItems = $('[class^="styles__time-axis-item___"]');//時刻軸のメモリ
-            var v, axisItem, axisItemHeight, axisItemBottom;
-            for (v = 0; v < axisItems.length; v++) {//時刻軸のメモリ0-23時ループ
-                axisItem = axisItems.eq(v);
-                axisItemHeight = parseInt(axisItem.css("height"));
-                axisItemBottom = axisItem.offset().top + axisItemHeight + 1;
-                if (axisItemBottom >= progDivBottomPos) {
-                    axisItem.css("padding-top", (parseInt(axisItem.css("padding-top")) + Math.floor(heightDelta / 2)) + "px")
-                        .css("height", (axisItemHeight + heightDelta) + "px")
-                        ;
-                    break;
-                }
-            }
-            var u = 0, col_u_items, heightDelta_u, progDivHeight_u
-            for (u = 0; u < dayCols.length; u++) {//日付列についてのループ(番組タイトルについてのループの中)
-                col_u_items = dayCols.eq(u).children();
-                heightDelta_u = heightDelta;
-                progDivHeight_u = progDivHeight;
-                var v, coluItem, coluItemChildren
-                for (v = col_u_items.length - 1; v >= 0; v--) {//番組毎divについてのループ
-                    coluItem = col_u_items.eq(v);
-                    coluItemChildren = coluItem.children();
-                    var w, hm, coluItemChiTop, coluItemBottomPos, coluItemArticle;
-                    for (w = coluItemChildren.length - 1; w >= 0; w--) {//番組毎divの子供についてループ
-                        if (coluItemChildren.length > 1) {
-                            coluItemChiTop = coluItemChildren.eq(w).offset().top;
-                            if (w == coluItemChildren.length - 1) {
-                                coluItemBottomPos = coluItem.offset().top + coluItem.height();
-                            } else {
-                                coluItemBottomPos = coluItemChiTop + parseInt(coluItemChildren.eq(w).css("height"));
-                            }
-                        } else {
-                            coluItemChiTop = coluItem.offset().top;
-                            coluItemBottomPos = coluItemChiTop + coluItem.height();
-                        }
-                        hm = Math.min(progDivBottomPos, coluItemBottomPos) - Math.max(progDivTop, coluItemChiTop);
-                        //console.log("i="+i+",j="+j+",u="+u+",v="+v+",w="+w+",text="+coluItem.find(progTitles).text()+",cucvot="+coluItemChiTop+",cucvob="+coluItemBottomPos+",hm="+hm);
-                        if (hm > 0) {
-                            if (w < coluItemChildren.length - 1) {
-                                coluItemArticle = coluItemChildren.eq(w);
-                            } else {
-                                coluItemArticle = coluItem.children('article');
-                            }
-                            var hn = Math.round(heightDelta * hm / progDivHeight);
-                            progDivHeight_u -= hm;
-                            if (progDivHeight_u <= 0) {
-                                hn = heightDelta_u
-                            } else {
-                                heightDelta_u -= hn;
-                            }
-                            coluItemArticle.css("height", (parseInt(coluItemArticle.css("height")) + hn) + "px");
-                        }
-                    }
-                }
-            }
-        }
-    }
-    var nd = new Date;
-    var nh = nd.getHours();
-    $('body').scrollTop($('[class^="styles__time-axis-item___"]').eq(nh).offset().top - 160);
-}*/
 function timetablechloop() {
     //URL変わったら終われるようにURLチェック
     if (getInfo.determineUrl() != getInfo.URL_CHANNELTABLE) return;
-    //    if (!settings.isChTimetableExpand && !settings.isChTimetablePlaybutton) { return; }
     if (!settings.isChTimetablePlaybutton) return;
-    //    if (settings.isChTimetableExpand) {
-    //        //現在時刻の赤棒の位置変更
-    //        var nd = new Date;
-    //        var nh = nd.getHours();
-    //        var nm = nd.getMinutes();
-    //        var jo = $('[class^="styles__time-axis-item___"]').eq(nh);
-    //        var jh = parseInt(jo.css("height"));
-    //        $('[class^="TimeTableContainer__date-bar___"]').css("top", (jo.offset().top - 170 + jh * (nm / 60)) + "px")
-    //            .css("pointer-events", "none") //特に再生ボタンと重なると邪魔、この赤棒はクリックできなくても別に問題無さそう
-    //            ;
-    //    }
     if (settings.isChTimetablePlaybutton) {
         PlaybuttonEditor();
     }
@@ -1310,9 +1138,6 @@ function PlaybuttonEditor() {
                 ) {
                     e.preventDefault();
                     e.stopImmediatePropagation();
-                    // 番組表ページから直接放送画面へ飛ぶボタンがないため以下の関数は使用せずlocation.hrefで移動する
-                    //clickPlaybuttonBack(e.currentTarget);//←↓この2関数はコメントアウトされている
-                    //waitformakelink(50);
                     //再生ボタンのある番組をクリックして右詳細の番組画像をクリック
                     //console.log(e.currentTarget);
                     clickElement($(e.currentTarget).parents('button'));
@@ -1326,15 +1151,7 @@ function PlaybuttonEditor() {
         }
     }
 }
-/*function clickPlaybuttonBack(eo) {
-    console.log("clickPlaybuttonBack", eo);
-    var jo = $(eo).parent('a').siblings('a');
-    if (jo.length == 0) { return; }
-    var teka = document.createEvent("MouseEvents");
-    teka.initMouseEvent("click", true, true, window);
-    //console.log("dispatch");
-    return jo[0].dispatchEvent(teka);
-}*/
+
 function clickElement(jo) {
     //clickOnairLink(jo)
     //console.log("clickElement", jo);
@@ -1343,32 +1160,9 @@ function clickElement(jo) {
     //console.log("dispatch");
     return jo[0].dispatchEvent(teka);
 }
-/*function waitformakelink(retrycount) {
-    console.log("waitformakelink#" + retrycount);
-    var jo = $('[class*="styles__contents___"]').find('[class^="styles__link___"]');
-    if (jo.length > 0 && /^https:\/\/abema.tv\/now-on-air\//.test(jo.prop("href"))) {
-        //console.log("jo.len="+jo.length+",jo.href="+jo.prop("href"));
-        clickElement(jo);
-    } else if (retrycount > 40) {
-        setTimeout(waitformakelink, 20, retrycount - 1);
-    } else if (retrycount > 30) {
-        setTimeout(waitformakelink, 80, retrycount - 1);
-    } else if (retrycount > 20) {
-        setTimeout(waitformakelink, 200, retrycount - 1);
-    } else if (retrycount > 10) {
-        setTimeout(waitformakelink, 1000, retrycount - 1);
-    } else if (retrycount > 0) {
-        setTimeout(waitformakelink, 2000, retrycount - 1);
-    }
-}*/
+
 function timetableCommonFix(retrycount) {
     var progArticle, progTitle;
-    //    var cols = $('[class*="styles__col___"]');
-    //    if(cols.length == 0 || cols.length > prevColNum){ //列が出そろうまで待つ
-    //        //console.log("retry timetableCommonFix colnum="+cols.length+" prev="+prevColNum);
-    //        setTimeout(timetableCommonFix, 1000, cols.length);
-    //        return;
-    //    }
     //読込に1秒以上かかる場合を考慮し、ヘッダと列の数を見るようにしてみる
     var cols = $(EXTTbody)
         .children('div')
@@ -1379,14 +1173,7 @@ function timetableCommonFix(retrycount) {
             )
                 return e;
         });
-    //    var c = getInfo.determineUrl();
-    //    var j = $('[class^="styles__channel-content-header___"]');
-    //    var h;
-    //    if (c == 1) {
-    //        h = '[class^="styles__channel-icon-header___"]';
-    //    } else if (c == 2) {
-    //        h = '[class^="styles__date-list-header___"]';
-    //    }
+
     if (cols.length < EXTThead.childElementCount) {
         setTimeout(timetableCommonFix, 1000);
         return;
@@ -1419,7 +1206,6 @@ function timetableCommonFix(retrycount) {
                 progArticle = $(this).find('article');
                 jt = progArticle.find('.' + selPTitle);
                 progTitle = jt.text();
-                //progTitle = progArticle.find('span[class^="styles__title___"]').text();
                 progArticle.attr('title', progTitle);
 
                 if (settings.isReplaceIcons && selICont) {
@@ -1580,142 +1366,7 @@ function onresize(oldTranslate) {
         }, 2000);
     }
 }
-/*
-function onresize() {
-    if (getInfo.determineUrl() !== getInfo.URL_ONAIR) { return; }
-    //console.log("onresize()");
-    //視聴数の位置調整
-    setTimeout(function(){
-        if(EXcountview){
-            $(EXcountview).offset({ top: window.innerHeight - (EXcountview.style.visibility==="hidden"?0:footerHeight) });
-            $(EXcountview).offset({left:($(EXfootcome).offset().left-200)});
-        }
-    },2000);
 
-    var resizeType = settings.isResizeScreen ? 1 : 0;
-    var posiVType = settings.isMovieSpacingZeroTop ? 1 : ( settings.isResizeSpacing ? 2 : 0);
-    var posiHType = settings.isMovieSpacingZeroLeft ? 1 : 0;
-    if ($('#settcont').css("display") != "none") {
-        resizeType = +$('#movieResizeContainer input[type="radio"][name="movieResizeType"]:checked').val();
-        posiVType = +$('#moviePositionContainer input[type="radio"][name="moviePositionVType"]:checked').val();
-        posiHType = +$('#moviePositionContainer input[type="radio"][name="moviePositionHType"]:checked').val();
-    }
-
-//    var obj = $("object,video").parent(),
-    var obj,
-        wd,
-        hg,
-        wdbyhg,
-        newwd,
-        newhg;
-//    if (obj.length == 0) {
-    if(!(obj = getVideo())) {
-        //console.log("obj.length==0 -> onresize() return;");
-        return;
-    }
-    if (resizeType == 0 && posiVType == 0 && posiHType == 0) {
-        //        obj.css("top","")
-        //            .css("left","")
-        obj.css("transition", "")
-            .css("width", "")
-            .css("height", "")
-            ;
-        obj.parents('[class*="styles__resize-screen___"]').parent().css("transition", "")
-            .css("transform", "")
-            .css("top", "")
-            .css("left", "")
-            ;
-        //console.log("*Type==0 -> onresize() return;");
-        return;
-    }
-    //元の枠 ウィンドウが縦長の場合は映像サイズと同じ、横長の場合は横が長い
-    var objr = obj.parents('[class*="styles__resize-screen___"]');
-    if (objr.length == 0) {
-        //console.log("objr.length==0 -> onresize() return;");
-        return;
-    }
-    var oldwd = parseInt(objr[0].style.width);
-    var oldhg = parseInt(objr[0].style.height);
-
-    //映像を最大化する先の大きさ設定
-    if (resizeType == 1) {
-        //リサイズする場合、ウィンドウ内で最大化
-        wd = window.innerWidth;
-        hg = window.innerHeight;
-    } else {
-        //リサイズしない場合、元のサイズ
-        wd = oldwd;
-        hg = oldhg;
-    }
-    if (posiVType == 2 && hg + headerHeight > window.innerHeight) {
-        hg = window.innerHeight - headerHeight;
-    }
-
-    //映像サイズ設定
-    wdbyhg = Math.ceil(hg * 16 / 9); //480*16/9=853.333->854
-    if (wd > wdbyhg) {
-        //横に余裕がある場合、wdbyhgを適用
-        newwd = wdbyhg;
-        newhg = hg;
-    } else {
-        //横に余裕が無い場合、wdbyhgをやめる
-        newwd = wd;
-        newhg = Math.floor(wd * 9 / 16); //854*9/16=480.375->480
-    }
-
-    //newtop設定
-    var newtop;
-    if (posiVType == 2) {
-        newtop = headerHeight;
-    } else if (posiVType == 1) {
-        newtop = 0;
-    } else { //中央合わせ
-        newtop = Math.floor((window.innerHeight - newhg) / 2);
-    }
-    //    if(setBlacked[2]){
-    //        newtop+=Math.floor(newhg*(100-settings.CMsmall)/200);
-    //}
-
-    //newleft設定
-    var newleft;
-    if (posiHType == 1) {
-        newleft = 0;
-    } else { //中央合わせ
-        newleft = Math.floor((wd - newwd) / 2);
-    }
-    //    if(setBlacked[2]){
-    //        newleft+=Math.floor(newwd*(100-settings.CMsmall)/200);
-    //}
-
-    //transition設定
-    if (obj[0].style.transition.length == 0) {
-        var objt = ' 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) 0s';
-        obj.css("transition", "width" + objt + ", height" + objt);
-        objr.parent().css("transition", "top" + objt + ", left" + objt);
-    }
-
-    //console.log("setTimeout onresize2()");
-    setTimeout(onresize2, 0, obj, objr, newwd, newhg, newtop, newleft, oldwd, oldhg);
-}
-function onresize2(obj, objr, newwd, newhg, newtop, newleft, oldwd, oldhg) {
-    obj.css("width", newwd + "px")
-        .css("height", newhg + "px")
-        //        .offset({"top": newtop, "left": newleft})
-        ;
-
-    objr.parent().css("transform", "translateY(0)")
-        .css("top", newtop)
-        .css("left", newleft)
-        ;
-    //    newtop=obj.offset().top;
-    //ここでobjr(.resize-screen)のwidth,heightを取得するとonresize時から変化している場合があるので引数で持ってくる
-    movieWidth = oldwd;
-    movieHeight = oldhg;
-    movieWidth2 = newwd;
-
-    console.log("screen resized");
-}
-*/
 function onScreenDblClick() {
     console.log('dblclick');
     if (comeNGmode == 2) return;
@@ -1838,146 +1489,7 @@ function applySharedNG() {
         isNGShareInterval = false;
     }
 }
-function arrayFullNgMaker() {
-    //自由入力欄からNG正規表現を生成
-    arFullNg = [];
-    var spfullng = settings.fullNg.split(/\r|\n|\r\n/);
-    for (var ngi = 0; ngi < spfullng.length; ngi++) {
-        if (spfullng[ngi].length == 0 || spfullng[ngi].match(/^\/\//)) {
-            continue;
-        }
-        spfullng[ngi] = spfullng[ngi].replace(/\/\/.*$/, ''); //文中コメントを除去
-        var refullng = /^\/(.+)\/([igm]*)$/;
-        var rexefullng;
-        var b = true;
-        if ((rexefullng = refullng.exec(spfullng[ngi])) != null) {
-            try {
-                spfullng[ngi] = new RegExp(rexefullng[1], rexefullng[2]);
-                b = false;
-            } catch (e) {
-                console.warn(e);
-                //                spfullng[ngi]=new RegExp("\\"+spfullng[ngi].split("").join("\\"));
-            }
-        }
-        if (b) {
-            spfullng[ngi] = new RegExp(
-                spfullng[ngi].replace(/([.*+?^=!:${}()|[\]/\\])/g, '\\$1')
-            );
-        }
-        //console.log(spfullng[ngi]);
 
-        arFullNg.push(spfullng[ngi]);
-    }
-    if (settings.isShareNGword) {
-        postShareNGwords(arFullNg, getInfo.getChannelByURL());
-    }
-}
-function arrayUserNgMaker() {
-    arUserNg = [];
-    var splitedUserNg = settings.userNg.split(/\r|\n|\r\n/);
-    for (var ngi = 0; ngi < splitedUserNg.length; ngi++) {
-        if (
-            splitedUserNg[ngi].length == 0 ||
-            splitedUserNg[ngi].match(/^\/\//)
-        ) {
-            continue;
-        }
-        splitedUserNg[ngi] = splitedUserNg[ngi].replace(/\/\/.*$/, ''); //文中コメントを除去
-        arUserNg.push(splitedUserNg[ngi]);
-    }
-    if (settings.isShareNGuser) {
-        postShareNGusers(arUserNg, getInfo.getChannelByURL());
-    }
-}
-
-function comeNG(prengcome) {
-    //規定のNG処理
-    var ngedcome = prengcome;
-    var strface1 =
-        "[　 ]*[Σ<＜‹૮＋\\+\\*＊･゜ﾟ:\\.｡\\'☆〜～ｗﾍ√ﾚｖꉂ꒰·‧º∑♪₍⁺✧]*[　 ]*[┌└┐⊂二乁＼ヾヽつっdｄo_ƪ\\\\╭╰m👆ฅｍ╲٩Ｏ∩┗┏∠٩☜ᕕԅ]*[　 ]*[（\\(《〈\\[\\|｜fζᔦ]+.*[8oO∀дД□◯▽△＿ڼ ౪艸^_⌣зεωm௰ｍ꒳ｰワヮ－U◇。｡࿄ш﹏㉨ꇴㅂ\\-ᴗ‿˘﹃_ﾛ◁ฅ∇益言人ㅅＡAΔΘ罒ᗜ◒◊vਊ⍛ー3xエェｪｴρｐё灬▿┓ڡ◡凵⌑︎▾0▼]+.*";
-    var strface2 = '[）\\)》〉\\]\\|｜ᔨ]';
-    var strface3 =
-        '[　 ]*[┐┘┌┸┓／シノ厂\\/ｼﾉ۶つっbｂoა_╮╯mｍو👎☝」Ｏσ二⊃ゝʃง╭☞∩ゞ┛︎۶งวᕗ]';
-    var strface4 =
-        "[　 ]*[彡°ﾟ\\+・･⚡\\*＋＊ﾞ゜:\\.｡\\' ̑̑🌾💢ฅ≡<＜>＞ｗﾍ√ﾚｖ꒱‧º·…⋆ฺ✲⁾♪⁺✧]*[　 ]*";
-    var reface1 = new RegExp(
-        strface1 + strface2 + '+' + strface3 + '*' + strface4,
-        'g'
-    );
-    var reface2 = new RegExp(
-        strface1 + strface2 + '*' + strface3 + '+' + strface4,
-        'g'
-    );
-    ngedcome = ngedcome.replace(reface1, '');
-    ngedcome = ngedcome.replace(reface2, '');
-    ngedcome = ngedcome.replace(/(@\w+[　 ]*)+/g, ''); //twitter-dest.
-    ngedcome = ngedcome.replace(/(#[^　 ]+[　 ]*)+$/g, ''); //twitter-tag
-    ngedcome = ngedcome.replace(/[ｗw]{3,}/g, 'ｗｗｗ');
-    ngedcome = ngedcome.replace(/ʬ+/g, 'ｗ');
-    ngedcome = ngedcome.replace(/h?ttps?:\/\/.*\..*/, '');
-    ngedcome = ngedcome.replace(/[〜～ー－━─]{2,}/g, 'ー');
-    ngedcome = ngedcome.replace(/[・･…‥、､。｡．\.]{2,}/g, '‥');
-    ngedcome = ngedcome.replace(/[　 \n]+/g, ' ');
-    ngedcome = ngedcome.replace(/[？?❔❓]+/g, '？');
-    ngedcome = ngedcome.replace(/[！!‼️❗❗️]+/g, '！');
-    ngedcome = ngedcome.replace(/[○●]+/g, '○');
-    ngedcome = ngedcome.replace(/[⑧❽８]{3,}/g, '888');
-    ngedcome = ngedcome.replace(/[工エｴｪ]{3,}/g, 'エエエ');
-    ngedcome = ngedcome.replace(/([ﾊハ八]|[ﾉノ/][ヽ＼]){3,}/g, 'ハハハ');
-    if (settings.isDeleteStrangeCaps) {
-        ngedcome = ngedcome.replace(/[^ - -⁯■□▲△▼▽◆◇○◎●　-ヿ一-鿿＀-￯]/g, ''); //基本ラテン・一般句読点・幾何学模様(一部)・CJK用の記号および分音記号・ひらがな・かたかな・CJK統合漢字・半角形/全角形
-    }
-    ngedcome = ngedcome.replace(/[͜͜͏̘̣͔͙͎͎̘̜̫̗͍͚͓]+/g, '');
-    ngedcome = ngedcome.replace(/[ด็้]+/g, '');
-
-    ngedcome = ngedcome.replace(/[▀-▓]+/g, '');
-    ngedcome = ngedcome.replace(/(.)\1{3,}/g, '$1$1$1');
-    ngedcome = ngedcome.replace(/(...*?)\1{3,}/, '$1$1$1');
-    ngedcome = ngedcome.replace(/(...*?)\1*(...*?)(\1|\2){2,}/g, '$1$2');
-    return ngedcome;
-}
-function comefilter(m, uid) {
-    //putComeArrayとcopycomeで同じNG処理を実行するので分離
-    var n = m;
-    if (settings.isComeNg && m.length > 0) {
-        n = comeNG(m);
-    }
-    if (settings.isComeDel && m.length > 0) {
-        for (var ngi = 0; ngi < arFullNg.length; ngi++) {
-            if (arFullNg[ngi].test(m)) {
-                console.log(
-                    'userNG matched text:' +
-                        m +
-                        ' ngword:' +
-                        arFullNg[ngi].toString()
-                );
-                m = '';
-                break;
-            } else if (arFullNg[ngi].test(n)) {
-                console.log(
-                    'userNG matched text:' +
-                        n +
-                        '(ori:' +
-                        m +
-                        ') ngword:' +
-                        arFullNg[ngi].toString()
-                );
-                m = '';
-                break;
-            }
-        }
-    }
-    if (settings.isUserDel && m.length > 0 && uid) {
-        if (gl.hasArray(arUserNg, uid)) {
-            console.log('userNG matched UserID:' + uid + ' text:' + m);
-            m = '';
-        }
-    }
-    if (settings.isComeNg && m.length > 0) {
-        m = n;
-    }
-    return m;
-}
 function putComeArray(inp) {
     //console.log("putComeArray");
     //console.table(inp);
@@ -2129,7 +1641,7 @@ function putComment(commentText, userid, index, inmax, isSelf) {
         kakikomitxt = '';
         // console.log("kakikomitxt reset: putComment")
     }
-    commentText = comefilter(commentText, userid);
+    commentText = gcl.comefilter(commentText, userid, arFullNg, arUserNg, settings.isComeDel, settings.isUserDel, settings.isComeNg, settings.isDeleteStrangeCaps);
     var commentTopMargin = 50;
     var commentBottomMargin = 150;
     if (EXhead.style.visibility == 'hidden') {
@@ -2221,8 +1733,7 @@ function soundSet(isSound) {
 }
 //画面を真っ暗、透過する関数 0:無 1:半分透過 2:すべて透過 3:真っ黒
 function screenBlackSet(type) {
-    //    var pwaku = $('[class^="style__overlap___"]'); //動画枠
-    var pwaku = $('#ComeMukouMask');
+    var pwaku = $('#ComeMukouMask'); // 動画枠
     if ($(overlapSelector).length == 0) return;
     if (
         /*pwaku.length == 0*/ $(overlapSelector).siblings('#ComeMukouMask')
@@ -2241,30 +1752,14 @@ function screenBlackSet(type) {
         setBlacked[0] = false;
         pwaku.css('background-color', '').css('border-top', '');
     } else if (type == 1) {
-        //        var w=$(window).height();
         var h = window.innerHeight;
         var p = 0;
-        //        var t=1;
-        //        var jo = $('object,video').parent();
         var jo = $(getElm.getVideo());
-        //        if(EXwatchingnum!==undefined){
-        //        if (jo.length > 0) {
         if (!jo.isEmpty()) {
-            //            var jo=$(EXobli.children[EXwatchingnum]);
-            //            w=jo.height();
-            //            p=jo.offset().top;
-            //            if(jo.css("transform")!="none"){
-            //                t=parseFloat((/(?:^| )matrix\( *\d+.?\d* *, *\d+.?\d* *, *\d+.?\d* *, *(\d+.?\d*) *, *\d+.?\d* *, *\d+.?\d* *\)/.exec(jo.css("transform"))||[,t])[1]);
-            //            }
-            //zoom後の実際に見えている大きさでheightを取得できる以下に変更
-            //            var eo=EXobli.children[EXwatchingnum];
             var eo = jo[0];
             var cr = eo.getBoundingClientRect();
             h = cr.height;
             p = cr.top;
-            //            if(eo.style.transform.indexOf("scale")>=0){
-            //                t=settings.CMsmall/100;
-            //            }
         }
         setBlacked[0] = true;
         pwaku
@@ -2365,7 +1860,6 @@ function openOption() {
         .children()
         .slice(0, 10);
     jo.css('background-color', bc).css('color', tc);
-    //.children('[class^="styles__message___"]').css("color", tc)
     if (comelistClasses.message)
         jo.children('.' + comelistClasses.message).css('color', tc);
     $('#commentBackColor')
@@ -2459,7 +1953,6 @@ function openOption() {
     $('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]').val([
         settings.highlightNewCome
     ]);
-    // $('#isChTimetableExpand').prop("checked", settings.isChTimetableExpand);
     $('#isHidePopFresh').prop('checked', settings.isHidePopFresh);
     $('#isChTimetableBreak').prop('checked', settings.isChTimetableBreak);
     $('#isChTimetableWeekend').prop('checked', settings.isChTimetableWeekend);
@@ -2519,9 +2012,7 @@ function openOption() {
                 panelopenset[i][j] * Math.pow(3, (3 - i) * 3 + (2 - j));
         }
     }
-    //    panelopenseu[i] = panelopenset[i].join('');
-    //}
-    //panelopenses = panelopenseu.join('');
+
     if (
         $(
             '#ipanelopenset [type="radio"][name="panelopenset"][value=' +
@@ -2540,7 +2031,6 @@ function openOption() {
     } else {
         cancelPopacti();
     }
-    // var sp = panelopenses.split('');
     for (let i = 0; i < 4; i++) {
         for (let j = 0; j < 3; j++) {
             $(
@@ -2549,18 +2039,6 @@ function openOption() {
         }
     }
 
-    //    if(settings.isResizeScreen||isMovieMaximize){
-    //    if(settings.isResizeScreen){
-    //        $('#movieResizeChkA').prop("checked",true);
-    //        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",false)
-    //            .val([settings.isResizeScreen?([settings.isResizeSpacing?1:0):2])
-    //        ;
-    //    }else{
-    //        $('#movieResizeChkA').prop("checked",false);
-    //        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').val([0])
-    //            .prop("disabled",true)
-    //        ;
-    //    }
     $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').val([
         settings.isResizeScreen ? 1 : 0
     ]);
@@ -2584,7 +2062,7 @@ function closeOption() {
         .css('right', '40px');
     $('.rightshift').css('display', 'none');
     $('.leftshift').css('display', '');
-    var jo = $(EXcomelist) /*.add('#copycomec')*/
+    var jo = $(EXcomelist)
         .children('div');
     jo.css('background-color', '') //基本色、新着強調
         .css('color', '') //基本色
@@ -2592,7 +2070,6 @@ function closeOption() {
         .css('padding-left', '') //新着強調
         .css('border-top', '') //区切り線
         .css('transition', ''); //新着強調
-    //.children('[class^="styles__message___"]').css("color", "") //基本色
     if (comelistClasses.message)
         jo.children('.' + comelistClasses.message).css('color', '');
     $('.movingComment').css('font-size', '');
@@ -2671,26 +2148,16 @@ function delayset(
         }
     }
 
-    //EXmenuを作ったのでoptionelementに移動
-    //    if(!isHC){
-    //        var hoverContents = getMenuObject();
-    //        if(hoverContents==null) hoverContents=$('.Fb_Fi');
-    //        if (hoverContents.children().length > 0) {
-    //            //拡張機能の設定と通知番組一覧をその他メニューに追加
-    //            var hoverLinkClass = hoverContents.children()[0].className;
-    //            var hoverSpanClass = hoverContents.children().eq(0).children()[0].className;
-    //            if (hoverContents.children('#extSettingLink').length == 0) {
-    //                hoverContents.append('<a class="' + hoverLinkClass + '" id="extSettingLink" href="' + chrome.extension.getURL("option.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張設定</span></a>');
-    //                hoverContents.append('<a class="' + hoverLinkClass + '" id="extProgNotifiesLink" href="' + chrome.extension.getURL("prognotifies.html") + '" target="_blank"><span class="' + hoverSpanClass + '">拡張通知登録一覧</span></a>');
-    //            }
-    //            isHC=true;
-    //        }
-    //    }
-
     if (!isInit && $(EXfootcome).length > 0 && $(EXcountview).length > 0) {
         createSettingWindow();
-        arrayFullNgMaker();
-        arrayUserNgMaker();
+        arFullNg = gcl.arrayFullNgMaker(settings.fullNg);
+        arUserNg = gcl.arrayUserNgMaker(settings.userNg);
+        if (settings.isShareNGword) {
+            postShareNGwords(arFullNg, getInfo.getChannelByURL());
+        }
+        if (settings.isShareNGuser) {
+            postShareNGusers(arUserNg, getInfo.getChannelByURL());
+        }
         //映像のリサイズ
         onresize();
         if (!isResizeInterval) setInterval(onresize, 30000);
@@ -2703,9 +2170,6 @@ function delayset(
         var fixCountViewLeft = function() {
             if (EXcountview) {
                 let oldLeft = EXcountview.getBoundingClientRect().left;
-                //let cvWidth = Math.ceil(EXcountview.getBoundingClientRect().width/2)*2;//2で割り切れるよう切り上げ
-                //console.log(cvWidth,$(EXcountview).width())
-                //$(EXcountview).width(cvWidth);
                 let footer = $(EXfootcome)
                     .parent()
                     .addClass('countviewtrans');
@@ -2792,15 +2256,8 @@ function delayset(
     }
     if (!isEXC && $(EXcomelist).length > 0) {
         //        addExtClass(EXcomelist, 'comelist');
-        //setTimeout(copycome, 1000);
         setTimeout(applyCommentListNG, 1000);
-        //EXcomelist = $(commentListParentSelector)[0];
-        //if($(EXcomelist).length>0){
-        EXcomments = $(EXcomelist)
-            .find('p')
-            .map(function(i, e) {
-                if ($(e).index() == 0) return e;
-            });
+
         //コメ欄のDOM変更監視
         commentObserver.observe(EXcomelist, {
             childList: true /*, subtree: true, attributes: true*/
@@ -3095,20 +2552,6 @@ function optionStatsUpdate(outflg) {
             //            ropt= settings.isResizeSpacing?headerHeight:0;
             ropt = Math.round(jp.offset().top - (jp.height() - er.height) / 2);
             ropb = owh - romh - ropt;
-            //        }else if(isMovieMaximize){ //映像リサイズ2
-            //            odes="(拡大中)";
-            //            ndes="(拡大後)";
-            //            romw=jp.width(); //window100%
-            //            romh=jp.height(); //〃
-            //            var rodar=romw/romh;
-            //            if(rodar>16/9){ //darが16/9超 横に長い 縦にfit
-            //                romw=Math.ceil(romh*16/9);
-            //            }else if(rodar<16/9){ //darが16/9未満 縦に長い 横にfit
-            //                romh=Math.floor(romw*9/16);
-            //            }
-            //            ropw=oww-romw;
-            //            ropb=Math.floor((owh-romh)/2);
-            //            ropt=owh-romh-ropb;
         }
         var nmw = omw;
         var nmh = omh;
@@ -3169,10 +2612,6 @@ function optionStatsUpdate(outflg) {
                     rnpw = 0;
                     rnpt = headerHeight;
                     rnpb = footerHeight;
-                    //                }else if(isMovieMaximize){
-                    //                    rnpw=0;
-                    //                    rnpb=64;
-                    //                    rnpt=64;
                 } else {
                     npb = footerHeight;
                     npt = headerHeight;
@@ -3697,11 +3136,6 @@ function createSettingWindow() {
             .css('margin-top', '8px')
             .css('padding', '8px')
             .css('border', '1px solid black');
-        // $('#isAlwaysShowPanel').appendTo('#panelCustom').prop("disabled", true).before("旧");
-        // $('<input type="button" id="alwaysShowPanelB" value="下表に適用">').insertAfter('#isAlwaysShowPanel').before("常に黒帯パネルを表示する");
-        // $('#isOpenPanelwCome').appendTo('#panelCustom').prop("disabled", true).before("<br>旧");
-        // $('<input type="button" id="openPanelwComeB" value="下表に適用">').insertAfter('#isOpenPanelwCome').before("コメント欄を開いていても黒帯パネル等を表示できるようにする");
-        // $('<br><span>※以上の古いオプションは以下の新オプションに統合され、適当な経過期間の後に削除予定</span>').appendTo('#panelCustom');
         $('#ipanelopenset')
             .appendTo('#panelCustom')
             .children()
@@ -3780,10 +3214,6 @@ function createSettingWindow() {
         ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll(
             '<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">'
         );
-        //        $('<input id="movieResizeChkA" type="checkbox">').prependTo('#movieResizeContainer')
-        //            .after(':映像リサイズ (ウィンドウに合わせます。映像がウィンドウの外にハミ出なくなり、コメ欄などを開いても映像の大きさは変わらず、コメ欄などは映像の上に重なります。)<br>映像の上下位置<br>')
-        //            .change(movieResizeChkChanged)
-        //        ;
         let tres = '';
         tres +=
             '<br><input type="radio" name="movieResizeType" value=0 style="margin-left:16px;" id="radio-movieResizeType-0">:<label for="radio-movieResizeType-0"><span id="movieResizeDesc">' +
@@ -3797,16 +3227,8 @@ function createSettingWindow() {
             .css('display', 'none')
             //            .before('<input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:上に詰める (空き無し)')
             .before(tres);
-        //        $('#isResizeSpacing').css("display","none")
-        //            .before('<input type="radio" name="movieResizeType" value=1 style="margin-left:16px;">:上に詰めるが、上の黒帯の分だけ空ける')
-        //        ;
-        //        $('#isMovieMaximize').css("display","none")
-        //            .before('<input type="radio" name="movieResizeType" value=2 style="margin-left:16px;">:画面中央')
-        //        ;
         let jc = $('#movieResizeContainer').contents();
         jc.eq(jc.index($('#isResizeScreen-switch')) + 1)
-            //            .add(jc.eq(jc.index($('#isResizeSpacing'))+1))
-            //            .add(jc.eq(jc.index($('#isMovieMaximize'))+1))
             .add(jc.eq(jc.index($('#isDAR43-switch')) + 1))
             .remove();
         $('#isDAR43-switch')
@@ -4018,17 +3440,7 @@ function movieResizeTypeChanged() {
     );
     onresize();
 }
-//function movieResizeChkChanged(){
-//    if($('#movieResizeChkA').prop("checked")){
-//        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",false);
-//        movieResizeTypeChanged();
-//    }else{
-//        $('#movieResizeContainer input[type="radio"][name="movieResizeType"]').prop("disabled",true);
-//        $('#isResizeScreen').prop("checked",false);
-//        $('#isResizeSpacing').prop("checked",false);
-//        $('#isMovieMaximize').prop("checked",false);
-//    }
-//}
+
 function epcountchange() {
     var c = parseInt(
         $('#epnumedit input[type="number"][name="epcount"]').val()
@@ -4141,10 +3553,10 @@ function setSaveDisable() {
 }
 function setPSaveNG() {
     settings.fullNg = $('#fullNg').val();
-    arrayFullNgMaker();
-    // if (settings.isComelistNG) {
-    //     copycome();
-    // }
+    arFullNg = gcl.arrayFullNgMaker(settings.fullNg);
+    if (settings.isShareNGword) {
+        postShareNGwords(arFullNg, getInfo.getChannelByURL());
+    }
     applyCommentListNG();
     gl.setStorage(
         {
@@ -4198,7 +3610,6 @@ function setSaveClicked() {
     settings.isMovingComment = $('#isMovingComment').prop('checked');
     settings.movingCommentSecond = parseInt($('#movingCommentSecond').val());
     settings.movingCommentLimit = parseInt($('#movingCommentLimit').val());
-    //    isMoveByCSS = $("#isMoveByCSS").prop("checked");
     settings.isComeNg = $('#isComeNg').prop('checked');
     settings.isComeDel = $('#isComeDel').prop('checked');
     settings.fullNg = $('#fullNg').val();
@@ -4217,8 +3628,6 @@ function setSaveClicked() {
         'checked'
     );
     settings.sureReadRefreshx = Math.max(101, $('#sureReadRefreshx').val());
-    //    isMovieMaximize = $("#isMovieMaximize").prop("checked");
-    // settings.isAlwaysShowPanel = $("#isAlwaysShowPanel").prop("checked");
     settings.commentBackColor = parseInt($('#commentBackColor').val());
     settings.commentBackTrans = parseInt($('#commentBackTrans').val());
     settings.commentTextColor = parseInt($('#commentTextColor').val());
@@ -4241,7 +3650,6 @@ function setSaveClicked() {
     settings.isCMsmlR =
         $('#isCMsmlR').prop('checked') && $('#CMsmall').val() != 100;
     settings.isTabSoundplay = $('#isTabSoundplay').prop('checked');
-    // isOpenPanelwCome = $("#isOpenPanelwCome").prop("checked");
     settings.isProtitleVisible = $('#isProtitleVisible').prop('checked');
     settings.protitlePosition = $(
         '#iprotitlePosition input[type="radio"][name="protitlePosition"]:checked'
@@ -4276,7 +3684,6 @@ function setSaveClicked() {
             '#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked'
         ).val()
     );
-    //    settings.isChTimetableExpand=$('#isChTimetableExpand').prop("checked");
     settings.isHidePopFresh = $('#isHidePopFresh').prop('checked');
     //    settings.isChTimetableBreak=$('#isChTimetableBreak').prop("checked");
     //    settings.isChTimetableWeekend=$('#isChTimetableWeekend').prop("checked");
@@ -4326,8 +3733,14 @@ function setSaveClicked() {
     settings.minResolution = parseInt($('#minResolution').val());
     settings.maxResolution = parseInt($('#maxResolution').val());
 
-    arrayFullNgMaker();
-    arrayUserNgMaker();
+    arFullNg = gcl.arrayFullNgMaker(settings.fullNg);
+    arUserNg = gcl.arrayUserNgMaker(settings.userNg);
+    if (settings.isShareNGword) {
+        postShareNGwords(arFullNg, getInfo.getChannelByURL());
+    }
+    if (settings.isShareNGuser) {
+        postShareNGusers(arUserNg, getInfo.getChannelByURL());
+    }
     onresize();
     setOptionHead();
     setOptionElement();
@@ -4601,7 +4014,6 @@ function setComeColorChanged() {
         .children()
         .slice(0, 10);
     js.css('background-color', bc).css('color', tc);
-    //.children('[class^="styles__message___"]').css("color", tc)
     if (comelistClasses.message)
         js.children('.' + comelistClasses.message).css('color', tc);
     if (settings.isCommentTBorder) {
@@ -4612,7 +4024,7 @@ function setComeColorChanged() {
 function toggleCommentList() {
     console.log('comevisiset toggleCommentList');
     //    var jo=$(EXcomelist).parent();
-    var jo = $(EXcomelist).parent(); //.add('#copycome');
+    var jo = $(EXcomelist).parent();
     //display:noneだと崩れるので変更
     //重なっていて下にあるfooterの音量ボタン等を使用できるようにpointer-eventsを利用
     var jv = jo.css('visibility');
@@ -4905,7 +4317,6 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
             if (isComeOpen()) {
                 volshift = true;
             }
-            //            jfmbot=$(EXfoot).children('[class^="TVContainer__footer___"]').height();
             jfmbot = footerHeight; //old:61
             if (
                 ptime == 'commentinputbottom' &&
@@ -4926,7 +4337,6 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
             jcchd += jfmbot;
         } else {
             // jftop,jcbot
-            //            jcmbot=$(EXfoot).children('[class^="TVContainer__footer___"]').height();
             jcmbot = footerHeight; //old:61
             jcchd += jcmbot;
         }
@@ -5122,8 +4532,6 @@ function setEXs() {
         !(EXside = getSideElement()) /*&& ($('.v3_v5').length == 0 || !( EXside          = $('.v3_v5')[0] ))*/
     )
         b = false; // console.log("side"); }//TVContainer__side___
-    //    if (! EXchli          &&!( EXchli          = getChannelListElement()         ) /*&& ($('.mT_e' ).length == 0 || !( EXchli          = $('.mT_e' )[0] ))*/) b = false;// console.log("chli"); }
-    //    if (! EXinfo          &&!( EXinfo          = getInfoElement()                ) /*&& ($('.v3_wg').length == 0 || !( EXinfo          = $('.v3_wg')[0] ))*/) b = false;// console.log("info"); }//TVContainer__right-slide___
     if (
         !EXcomesendinp &&
         !(EXcomesendinp = getComeFormElement(
@@ -5155,7 +4563,6 @@ function setEXs() {
         !(EXfullscr = getElm.getFullScreenElement()) /*&& ($('.mb_mi').length == 0 || !( EXvolume        = $('.mb_mi')[0] ))*/
     )
         b = false; // console.log("vol"); }
-    //    if (! EXobli          &&!( EXobli          = getObliElement()                ) /*&& ($('.v3_ws').length == 0 || !( EXobli          = $('.v3_ws')[0] ))*/) b = false;// console.log("obli"); }//TVContainer__tv-container___
     if (!EXvideoarea && !(EXvideoarea = getElm.getVideoAreaElement()))
         b = false;
     //    if (! EXcomelist      &&!( EXcomelist      = getComeListElement()            ) /*&& ($('.uo_e' ).length == 0 || !( EXcomelist      = $('.uo_e' )[0] ))*/) b = false;
@@ -5942,161 +5349,6 @@ function getTTProgramTimeClasses() {
     }
     return ret;
 }
-function getElementSelector(
-    inpElm,
-    includeID,
-    includeClass,
-    includeIndex,
-    remove
-) {
-    //includeID true:#idを含める false:含めない
-    //includeClass 2:全ての.classを含める 1:全体で唯一の.classだけ含める 0:含めない
-    //includeIndex 2:全要素*:eq(index)を含める 1:要素名:eq(index)を含める 0:含めない
-    //全体に含めないid,classをremoveで受ける
-    if (!inpElm) return null;
-    var ta = $(inpElm);
-    var pa = ta.parentsUntil('html');
-    var ts = '';
-    var ps = '';
-    var tt = [];
-    var ns = [];
-    var re = /\w/;
-    var rd = /\s+/;
-    var rc = /^\s+|\s+$/g;
-    var jr = null;
-    if (remove && remove.length > 0) {
-        jr = $(remove[0]);
-        for (var i = 1; i < remove.length; i++) jr = jr.add(remove[i]);
-    }
-
-    ns[0] = [];
-    ns[0][0] = ta.prop('nodeName');
-    if (includeID) {
-        ns[0][1] = ta.prop('id');
-    } else {
-        ns[0][1] = '';
-    }
-    ns[0][3] = [];
-    ts = ta.prop('class');
-    if (re.test(ts)) {
-        tt = ts.split(rd);
-        for (var j = 0, k = 0; j < tt.length; j++) {
-            ts = tt[j].replace(rc, '');
-            if (re.test(ts) && ts.indexOf('ext_abm-') < 0) {
-                //拡張機能で付与したclassは除外しておく(含めるとcomeまわりでうまくいかない)
-                if (includeClass == 1) {
-                    if ($('.' + ts).remove(jr).length == 1) {
-                        ns[0][3][k++] = ts;
-                    }
-                } else if (includeClass == 2) {
-                    ns[0][3][k++] = ts;
-                }
-            }
-        }
-    }
-    if (includeIndex == 2 && includeClass == 0 && !includeID) {
-        ns[0][2] = ta.index();
-    } else if (includeIndex > 0) {
-        if (includeIndex == 1) {
-            ts = ta.prop('nodeName');
-        } else if (includeIndex == 2) {
-            ts = '';
-        }
-        if (ns[0][1].length > 0) {
-            ts = ts + '#' + ns[0][1];
-        }
-        for (let j = 0; j < ns[0][3].length; j++) {
-            ts = ts + '.' + ns[0][3][j];
-        }
-        ns[0][2] = ta.prevAll(ts).length;
-    } else {
-        ns[0][2] = 0;
-    }
-    for (let i = 0; i < pa.length; i++) {
-        ns[i + 1] = [];
-        ns[i + 1][0] = pa.eq(i).prop('nodeName');
-        if (includeID) {
-            ns[i + 1][1] = pa.eq(i).prop('id');
-        } else {
-            ns[i + 1][1] = '';
-        }
-        ns[i + 1][3] = [];
-        ts = pa.eq(i).prop('class');
-        if (re.test(ts)) {
-            tt = ts.split(rd);
-            for (let j = 0, k = 0; j < tt.length; j++) {
-                ts = tt[j].replace(rc, '');
-                if (re.test(ts) && ts.indexOf('ext_abm-') < 0) {
-                    if (includeClass == 1) {
-                        if ($('.' + ts).length == 1) {
-                            ns[i + 1][3][k++] = ts;
-                        }
-                    } else if (includeClass == 2) {
-                        ns[i + 1][3][k++] = ts;
-                    }
-                }
-            }
-        }
-        if (includeIndex == 2 && includeClass == 0 && !includeID) {
-            ns[i + 1][2] = pa.eq(i).index();
-        } else if (includeIndex > 0) {
-            if (includeIndex == 1) {
-                ts = pa.eq(i).prop('nodeName');
-            } else if (includeIndex == 2) {
-                ts = '*';
-            }
-            if (ns[i + 1][1].length > 0) {
-                ts = ts + '#' + ns[i + 1][1];
-            }
-            for (let j = 0; j < ns[i + 1][3].length; j++) {
-                ts = ts + '.' + ns[i + 1][3][j];
-            }
-            ns[i + 1][2] = pa.eq(i).prevAll(ts).length;
-        } else {
-            ns[i + 1][2] = 0;
-        }
-    }
-
-    ps = '';
-    if (includeIndex == 2) {
-        ts = '*';
-    } else {
-        ts = ns[0][0];
-    }
-    if (includeID && ns[0][1].length > 0) {
-        ts = ts + '#' + ns[0][1];
-    }
-    if (includeClass > 0) {
-        for (let j = 0; j < ns[0][3].length; j++) {
-            ts = ts + '.' + ns[0][3][j];
-        }
-    }
-    if (includeIndex > 0) {
-        ts = ts + ':eq(' + ns[0][2] + ')';
-    }
-    ps = ts;
-    for (let i = 1; i < ns.length - 1; i++) {
-        if (includeIndex == 2) {
-            ts = '*';
-        } else {
-            ts = ns[i][0];
-        }
-        if (includeID && ns[i][1].length > 0) {
-            ts = ts + '#' + ns[i][1];
-        }
-        if (includeClass > 0) {
-            for (let j = 0; j < ns[i][3].length; j++) {
-                ts = ts + '.' + ns[i][3][j];
-            }
-        }
-        if (includeIndex > 0) {
-            ts = ts + ':eq(' + ns[i][2] + ')';
-        }
-        ps = ts + '>' + ps;
-    }
-    ps = 'BODY>' + ps;
-    return ps;
-}
 function hasNotTransformed(jo) {
     //transformしていない=right0等が画面外に移動していない=開いている
     //1つでも開いてればtrue,全部閉じてたらfalse
@@ -6124,7 +5376,7 @@ function isComeOpen(sw) {
     if (bs == 'true' || bs == 'false') {
         bb = bs == 'false';
     } else {
-        bb = hasNotTransformed(jo); //.is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
+        bb = hasNotTransformed(jo);
     }
     var bc = eo.style.transform == 'translateX(0px)';
     var bd = jo.offset().left < window.innerWidth; //少しでも開いてるとtrue
@@ -6149,9 +5401,6 @@ function isComeOpen(sw) {
     return false;
 }
 function isSlideOpen(sw) {
-    //    return ($(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==1)?true:false;
-    //    return ($(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length>0)?true:false;
-    //return hasNotTransformed($(EXchli).add(EXinfo).add(EXcome));//.is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
     if (!sw) sw = 0;
     return isChliOpen(sw) || isInfoOpen(sw) || isComeOpen(sw);
 }
@@ -6168,25 +5417,21 @@ function isInfoOpen(sw) {
     if (bs == 'true' || bs == 'false') {
         bb = bs == 'false';
     } else {
-        bb = hasNotTransformed(jo); //.is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
+        bb = hasNotTransformed(jo);
     }
     var bc = eo.style.transform == 'translateX(0px)';
     var bd = jo.offset().left < window.innerWidth;
     switch (sw) {
         case 0:
-            //            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]');
             return bb;
             break;
         case 1:
-            //            return (EXinfo.style.transform=="translateX(0px)");
             return bc;
             break;
         case 2:
-            //            return $(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')||(EXinfo.style.transform=="translateX(0px)");
             return bb || bc;
             break;
         case 3:
-            //            return ($(EXinfo).is('[class*="TVContainer__right-slide--shown___"]')&&EXinfo.style.transform!="translateX(100%)")||(EXinfo.style.transform=="translateX(0px)");
             return bd;
             break;
         default:
@@ -6205,7 +5450,7 @@ function isChliOpen(sw) {
     if (bs == 'true' || bs == 'false') {
         bb = bs == 'false';
     } else {
-        bb = hasNotTransformed(jo); //.is('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
+        bb = hasNotTransformed(jo);
     }
     var bc = eo.style.transform == 'translateX(0px)';
     var bd = jo.offset().left < window.innerWidth;
@@ -6238,7 +5483,7 @@ function isSideOpen(sw) {
     if (bs == 'true' || bs == 'false') {
         bb = bs == 'false';
     } else {
-        bb = hasNotTransformed(jo); //.is('[class*="styles__right-slide--shown__"]');
+        bb = hasNotTransformed(jo);
     }
     var bc = eo.style.transform == 'translateY(-50%)';
     var bd = jo.offset().left < window.innerWidth;
@@ -6261,7 +5506,6 @@ function isSideOpen(sw) {
 function otosageru() {
     if (!EXvolume) return;
     var teka = document.createEvent('MouseEvents');
-    //    var teki=$('[class^="styles__slider-container___"]').children();
     var teki = getVolbarObject();
     if (teki == null) return;
     var maxvol = teki.parent().height();
@@ -6486,9 +5730,6 @@ function waitforComeReady() {
         comeListLen--;
     }
     if (comeListLen > 0) {
-        // if (settings.isComelistNG) {
-        //     copycome();
-        // }
         applyCommentListNG();
     } else {
         console.log('waitforComeReady', comeListLen);
@@ -6518,7 +5759,6 @@ function chkcomelist(retrycount) {
         commentNum = comeListLen;
         comeHealth = Math.min(100, Math.max(0, commentNum));
         comeColor($(EXfootcountcome), comeHealth);
-        //if(comeListLen<10){console.log('chkcomelist copycome ', EXcomelist.children)}
         waitforComeReady();
     } else if (retrycount > 0) {
         setTimeout(chkcomelist, 200, retrycount - 1);
@@ -6541,7 +5781,6 @@ function waitforOpenCome(retrycount) {
 function waitforOpenableCome(retrycount) {
     //console.log("waitforOpenableCome#"+retrycount);
     if (!isSlideOpen() && isFootcomeClickable()) {
-        //    if($(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0){
         $(EXfootcome)
             .children('button')
             .trigger('click');
@@ -7458,18 +6697,15 @@ function setOptionHead() {
         t += selComesendinp + '+* span{color:' + tc + ';}';
     }
 
-    //EXcomelistのコピー#copycomecがあるので注意する
-    selComelist = dl.getElementSingleSelector(EXcomelist, 0, ['#copycomec']);
-    if ($(selComelist).not('#copycomec').length != 1) {
+    selComelist = dl.getElementSingleSelector(EXcomelist, 0);
+    if ($(selComelist).length != 1) {
         console.log('?EXcomelist ' + selComelist);
         selComelist = alt ? '.uo_e' : '';
     }
     selComelistp = EXcomelist
-        ? dl.getElementSingleSelector(EXcomelist.parentElement, 0, [
-              '#copycome'
-          ])
+        ? dl.getElementSingleSelector(EXcomelist.parentElement, 0)
         : null;
-    if ($(selComelistp).not('#copycome').length != 1) {
+    if ($(selComelistp).length != 1) {
         console.log('?EXcomelist.parent ' + selComelistp);
         selComelistp = alt ? '.Ai_Am.t7_e' : '';
     }
@@ -7492,7 +6728,6 @@ function setOptionHead() {
             '>div[class]:first-child>div>div[data-ext-isowner="true"]{background-color:' +
             comeBackHl +
             ' !important;}';
-        //t += selComelist+':not(#copycomec)>div[class]:first-child>div{display:none;}';//コメント欄のスライドするように出てくる新着コメントは非表示(拡張のスタイルが反映されないので) EXcomelistの一番最初の子でclassが指定されてるやつ
         t +=
             selComelist +
             '>div>div>p>span,' +
@@ -7511,24 +6746,6 @@ function setOptionHead() {
             selComelist +
             '>div[class]:first-child>div>div>div:hover{background-color: transparent;}';
     }
-
-    //    //映像最大化
-    ////    if(isMovieMaximize||settings.isSureReadComment){
-    //    if(settings.isSureReadComment){
-    //        t+='[class*="TVContainer__tv-container___"]{width:100%;';
-    ////        if(isMovieMaximize){
-    ////            t+='height:100%;';
-    ////        }
-    //        t+='}';
-    //        t+='[class*="TVContainer__tv-container___"]>[class*="TVContainer__resize-screen___"]{';
-    ////        if(isMovieMaximize){
-    ////            t+='width:100%!important;height:100%!important;';
-    ////        }else if(settings.isSureReadComment){
-    //        if(settings.isSureReadComment){
-    //            t+='max-width:calc(100% - 310px);';
-    //        }
-    //        t+='}';
-    //    }
 
     if (selComelist && selComelistp) {
         //コメ欄スクロールバー非表示
@@ -7568,10 +6785,7 @@ function setOptionHead() {
             //↑の構成そのままだと各コメントのデフォ間隔padding:15px 15px 0;のtop,bottomがうまく効かなくなってしまう
             //2つめのflex(下スクロール、コメント少数時の下詰め)を解除すれば有効になるけど、下スクロールを解除したくない
             //各コメントの中身(本文、投稿時刻)にpadding設定したらうまくいった→min-height指定で不要に
-            /*if (!settings.isCommentPadZero) {
-                    t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div{padding-top:0px;padding-bottom:0px;}';
-                    t += '[class^="styles__right-comment-area___"] [class^="styles__comment-list-wrapper___"]>div>div>p{padding-top:12px;padding-bottom:3px;}';
-            }*/
+
             //AbemaTV Screen Comment Scrollerスクリプトのコメントグラデーションを逆向きに
             t +=
                 '[data-selector="commentPane"] > div {-webkit-mask-image: linear-gradient(transparent 0%, black 50%);mask-image: linear-gradient(transparent 0%, black 50%);}';
@@ -7580,11 +6794,8 @@ function setOptionHead() {
                 selComelist +
                 '>div[class]:first-child>div{transform:none!important;}';
         }
-        //t += selComelist+'>div{padding:0 15px;}';//copycomeじゃない方に適用されてる公式のcssのmarginを個々のコメントのpaddingにする
-        //    if(settings.isCustomPostWin){ //1行化
-        //        t+='[class^="TVContainer__right-comment-area___"] textarea{height:18px!important;}';
-        //        t+='[class^="TVContainer__right-comment-area___"] textarea+div{height:18px!important;}';
-        //    }
+        //t += selComelist+'>div{padding:0 15px;}';//公式のcssのmarginを個々のコメントのpaddingにする
+
         if (settings.isCommentPadZero) {
             //コメ間隔詰め
             t +=
@@ -7698,11 +6909,6 @@ function setOptionHead() {
     if (selComelist) t += selComelist + '{margin:0px}';
 
     //左上・左下の非表示
-    /*jo=getReceiveNotifyElement();
-    if(!jo || !((to=dl.getElementSingleSelector(jo))&&$(to).length==1)){
-        console.log("?ad-reserve");
-        to=alt?'.v3_wC':"";
-    }*/
     to = dl.getElementSingleSelector(EXvideoarea) + '>div[style^="bottom: "]';
     if (to) {
         t += to + '{z-index:8;'; //元はoverlapと同じ3 通知を受け取る
@@ -7744,7 +6950,6 @@ function setOptionHead() {
             t += selVideoarea + '>div:not(' + to[0] + '){display:none;}';
             t += selVideoarea + '>img:not(' + to[1] + '){display:none;}';
         }
-        //t += '[class*="styles__eyecatch-blind___"]{display:none;}';
     }
     if (selVideoarea) t += selVideoarea + '{transition-delay:0.5s;}'; // onresizeで設定していたtransitionをheadに付けてみる fastrefreshでガクっとなるのを防ぐ
     //アベマショッピング等で情報表示時の下のバー
@@ -7806,7 +7011,7 @@ function setOptionHead() {
         }
     }
     //常にコメ欄表示時、全画面・音量ボタンをずらす
-    if (settings.isSureReadComment) {
+    if (settings.isSureReadComment && !settings.isComeTriming) {
         if (fullscrSlector) {
             t +=
                 fullscrSlector +
@@ -7894,7 +7099,6 @@ function setOptionHead() {
     if (settings.isStoreViewCounter && selFoot) {
         //to=selCountview;
         //t += to+'{display:none;}';
-        //t += '[class*="styles__view-counter___"]{display:none;}';
         t += '#viewcounticon{vertical-align:middle;fill:#1a1a1a;}';
         t +=
             '#viewcountcont{margin-left:4px;font-size:12px;font-weight:700;vertical-align:middle;color:#1a1a1a;}';
@@ -7952,8 +7156,6 @@ function setOptionHead() {
         );
         t += selChLogoDiv + '{background-color:transparent !important;}';
     }
-
-    //t += selHead+'{background-color: transparent;}[class*="Header__container___"]{background-color: black;}';
 
     //番組情報のコピー置換
     if (selInfo) {
@@ -8014,7 +7216,7 @@ function setOptionElement() {
 
     //    $(EXfootcome).css("pointer-events","auto");
     if (EXcomelist) {
-        /*copycome();*/ applyCommentListNG();
+        applyCommentListNG();
     }
 
     if (!settings.isStoreViewCounter)
@@ -8066,10 +7268,6 @@ function pophideSelector(sv, sw) {
     if (sv >= 0) {
         st = panelopenset[sv];
     } else {
-        //var jo = $(EXfoot).nextAll('[class*="styles__right-slide--shown___"]');//TVContainer__right-slide--shown___
-        //if (jo.length == 0) {
-        //console.log("panel none");
-        //st = panelopenset[0];
         if (isInfoOpen(3)) {
             //console.log("panel info");
             st = panelopenset[2];
@@ -8422,11 +7620,13 @@ function usereventFCclick() {
                 $(EXvideoarea)
                     .width(window.innerWidth)
                     .height(window.innerHeight);
-            }, 500); //コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
+            }, 500); // コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
         }
-        //コメ欄が開かれるので全画面・音量ボタンずらす
-        EXfullscr.style.right = commentListWidth + fullscrRight + 'px';
-        EXvolume.style.right = commentListWidth + volumeRight + 'px';
+        // コメ欄が開かれるので全画面・音量ボタンずらす(黒帯トリミングの場合は不要)
+        if(!(settings.isComeTriming && settings.isSureReadComment)){
+            EXfullscr.style.right = commentListWidth + fullscrRight + 'px';
+            EXvolume.style.right = commentListWidth + volumeRight + 'px';    
+        }
     }
     var jo = $(getElm.getVideo());
     if (!jo.isEmpty() && !waitingforResize) {
@@ -8557,7 +7757,7 @@ function setOptionEvent() {
                     'onmousewheel on ComeMukouMask or [data-selector=closer]',
                     e
                 );
-                //        if (settings.isVolumeWheel&&e.target.className.indexOf("style__overlap___") != -1){//イベントが映像上なら
+                //イベントが映像上なら
                 if (
                     settings.isVolumeWheel &&
                     (e.target.id == 'ComeMukouMask' ||
@@ -8741,8 +7941,6 @@ function setOptionEvent() {
         .prev()
         .on('click', usereventFootInfoButClick);
     //投稿ボタンを押した時
-    //$(EXcomesend).on("click", '[class*="styles__post-button___"]', usereventSendButClick);//コメント欄に入るまで投稿ボタンが存在しないためcomemoduleeditorでやる
-    //    $(EXcomesend).contents().find('[class*="styles__post-button___"]').on("click",usereventSendButClick);
     $(EXcomesendinp).on('keydown keyup', usereventSendInpKeyinput);
     //コメ一覧をクリック時
     $(EXcome).on('click', '.ext_abm-comelist', comecopy);
@@ -8794,9 +7992,7 @@ function fastEyecatching(retrycount) {
         eyecatcheck = false;
         return;
     } //手動対応を優先
-    //if ($(EXobli).find("object,video").first().parentsUntil(EXobli).last().children().length > 3 && retrycount > 0){
     if (EXvideoarea.childElementCount > 4 && retrycount > 0) {
-        //if ($(EXobli.children[EXwatchingnum]).children().is('[class*="styles__eyecatch"]') && retrycount > 0) {
         setTimeout(fastEyecatching, 100, retrycount - 1);
     } else {
         //eyecatch消失
@@ -9037,23 +8233,7 @@ function comeUserHighlight(jo) {
         comeUserHlInterval = null;
     });
 }
-//copycomeで作ったコメ欄のcomepにコメントをセットする
-/*function setCopycome(comep, msg, uid, datetime, timeStr, msgWidth){
-    var div = $(comep).children().eq(0);
-    div.children('p').children('span').text(msg);
-    div.children('p').css('width', msgWidth);
-    $(comep).attr('data-ext-userid', uid);
-    var btdiv = div.children('div');
-    var time = btdiv.children('time');
-    time.attr('datetime', datetime);
-    time.children('span').text(timeStr);
-    div.children('.comeposttime').attr('name', 'n'+datetime*1000);
-    if(timeStr==""){
-        btdiv.css('width', '0px');
-    }else{
-        btdiv.css('width', '');
-    }
-}*/
+
 function getComeInfo(wdiv) {
     var uid = $(wdiv).attr('data-ext-userid');
     var div = $(wdiv)
@@ -9103,7 +8283,7 @@ function applyCommentListNG(d) {
             continue;
         commentDivs[i].setAttribute('data-ext-filtered', 'true');
         let cinfo = getComeInfo(commentDivs[i]);
-        let filteredComment = comefilter(cinfo.message, cinfo.userid);
+        let filteredComment = gcl.comefilter(cinfo.message, cinfo.userid, arFullNg, arUserNg, settings.isComeDel, settings.isUserDel, settings.isComeNg, settings.isDeleteStrangeCaps);
         //commentDivs[i].classList.add('comew');
         if (
             !(
@@ -9133,233 +8313,6 @@ function applyCommentListNG(d) {
         }
     }
 }
-/*function copycome(d, hlsw) {
-    console.log('copycome',d,hlsw);
-//console.log("copycome d="+d,isComelistMouseDown);
-    if (isComelistMouseDown) return;//もしコメ欄でマウスが押されている途中なら=コメ欄で文字列を選択中ならcopycomeは一時停止
-    if (!EXcomelist) return;
-    if (!settings.isComelistNG) {
-        $('#copycome').remove();
-        $(EXcomelist).parent().css("display", "");
-        return;
-    }
-    //console.time('copycome')
-    var eo = EXcomelist;
-    var isAnimationIncluded = false;
-    var isCopycomeCreated = false;
-    if (comelistClasses.animated) {isAnimationIncluded = eo.firstElementChild.className.indexOf(comelistClasses.animated) >= 0;}
-    else if (eo.childElementCount>2) {
-        isAnimationIncluded = eo.firstElementChild.className!=eo.childNodes[1].className;
-    } else return;
-    //console.log('copycome isA:',isAnimationIncluded,eo.firstElementChild)
-    var EXcomelistChildren = $(EXcomelist).children('div' + (isAnimationIncluded ? ':gt(0)' : ''));
-    //console.log("EXCLChi",EXcomelistChildren)
-    var jo = $(eo);
-    if ($('#copycome').length == 0) {
-        //console.log("copycome leng=0");
-        var t = '<div id="copycome" class="' + jo.parent().attr("class") + ' usermade"><div id="copycomec" class="'+jo.attr("class")+' usermade">';
-        var eofc = EXcomelistChildren[0];
-        if(!eofc)return;
-        var eofcfc = eofc.firstElementChild;
-        //console.log(eofc,isAnimationIncluded,eo.firstElementChild,EXcomelistChildren, comelistClasses)
-        if ((comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) return;
-        //eofc=eo.children[1];//firstElementChildが空っぽの場合があるので二番目の子供を使う
-        if (eofc === undefined || eofcfc === undefined || !eofcfc.hasChildNodes()) return;
-        var eofcc = $(eofc).prop("class");
-        var eofcfcc = $(eofcfc).prop("class");
-        if (eofcfcc === undefined || (comelistClasses.progress&&eofcc.indexOf(comelistClasses.progress)>=0)) return;
-        var em = eofcfc.children[0];
-        var ecm = $(em).prop("class");
-        var ems = eofcfc.children[0].firstElementChild;
-        var ecms = $(ems).prop("class");
-        var ebtw = eofcfc.children[1];//ブロックボタンと時間の親div
-        if(!ebtw)return;
-        var ecbtw = $(ebtw).prop("class");
-        var et = ebtw.children[1];
-        var ect = $(et).prop("class");
-        var ets = ebtw.children[1].firstElementChild;
-        var ects = $(ets).prop("class");
-        for (var i = 0; i < 100; i++) {
-            t += '<div class="comew"><div class="' + eofcfcc + ' comep usermade"><p class="' + ecm + ' comem usermade"><span class="'+ecms+'"></span></p><div class="'+ecbtw+' btwrapper"> <time class="' + ect + ' comet usermade"><span class="'+ects+'"></span></time></div><p class="comeposttime usermade" style="display:none;"></p></div></div>';
-        }
-        t += '</div></div>';
-        $(t).insertAfter(jo.parent());
-        //EXcomelistをコピーしてそのすぐ後ろに追加した場合、copycomeをスクロールするとEXcomelistに既存コメントが重複して追加されていってしまう
-        //なのでその親ごとコピーして回避した
-        //空のdivがあるので今後の仕様変更がある可能性は高い
-        jo.parent().css("display", "none");
-        d = undefined; //新規作成した場合は全コピー
-        //コメ欄でマウスが押されているか
-        $('#copycome').mousedown(function (e) { if (e.button != 2) { isComelistMouseDown = true; } });//右クリックには反応しない
-        $('#copycome').mouseup(function () { setTimeout(function () { isComelistMouseDown = false; }, 3000); });//選択し終わってから右クリまで3秒の猶予
-        isCopycomeCreated = true;
-    }
-    var jc = $('#copycomec').children();
-    var ec = $('#copycomec')[0];
-    var nt = Date.now();
-    var rn = /^今$/;
-    var rs = /^(\d+) *秒前$/;
-    var rm = /^(\d+) *分前$/;
-
-    if (d < 0 || (comelistClasses.empty && eo.firstElementChild.className.indexOf(comelistClasses.empty) >= 0) || eo.firstElementChild.textContent.indexOf('まだ投稿がありません') >= 0) { //全消去
-        console.log("copycome allerase");
-        jc.find('span').text("");
-        $('.comeposttime').attr("name", "");
-        $('.comet').attr("datetime", "");
-    } else if (d > 0 && copycomecount <= 0) {
-        //console.log("copycome append:"+d);
-        //d件をNG処理して追加した後にcomehl
-        var ma = [];
-        for (let i = 0, e, dt, m, n, t, u, cinfo; i < d; i++) {
-            //console.log("ma loop")
-            e = EXcomelistChildren[i];//eo.children[i];
-            if(!e||!e.firstElementChild||e.firstElementChild.childElementCount<2||e.firstElementChild.firstElementChild.tagName.toUpperCase()!='P') continue;
-            cinfo = getComeInfo(e);
-            u = cinfo.userid;
-            m = comefilter(cinfo.message, u);
-            if (m.length > 0) {
-                t = cinfo.timeStr;
-                dt = cinfo.datetime;
-                ma.push([m, t, u, dt]);
-            }
-        }
-        //console.log("ma:",ma)
-        if (ma.length > 0) {
-            if (ma.length <= 100) {
-                //console.time('ma100_loop')
-                for (let i = ec.childElementCount - 1, e, m, t, n, d, s, u, efc, cinfo, mw; (e = ec.children[i - ma.length]) ; i--) {
-                    //console.log("loop ma<100")
-                    efc = e.firstElementChild;
-                    cinfo = getComeInfo(e);
-                    m = cinfo.message;
-                    u = cinfo.userid;
-                    mw = "";
-                    t = "";
-                    if (settings.isDelOldTime || settings.isDelTime) {
-                        mw = (isComeOpen(3) && isSideOpen(3)) ? e.children[0].style.width : "unset";
-                    } else {
-                        d = cinfo.datetime;
-                        if (d>0) {
-                            s = Math.floor((nt - d) / 1000);
-                            if (s < 60) {
-                                t = s + "秒前";
-                            } else if (s >= 60) {
-                                t = Math.floor(s / 60) + "分前";
-                            }
-                        }
-                    }
-                    //jc.eq(i).attr('data-ext-userid', u);
-                    setCopycome(jc.eq(i), m, u, cinfo.datetime, t, mw);
-                }
-                //console.timeEnd('ma100_loop')
-            }
-            var malen = Math.min(ma.length, 100);
-            //console.time('malen_loop')
-            for (let i = 0, m, t, d, u, dt, mw; i < malen; i++) {
-                //console.log("loop after malen")
-                m = ma[i][0];
-                u = ma[i][2];
-                t = ma[i][1];
-                dt = ma[i][3];
-                mw = "";
-                if (settings.isDelTime) {
-                    mw = "unset";
-                    t = "";
-                }
-                setCopycome(jc.eq(i), m, u, dt, t, mw);
-            }
-            //console.timeEnd('malen_loop')
-            //            if(eo.childElementCount<100){
-            //                jc.slice(eo.childElementCount,100).children().text("")
-            //                    .filter('.comeposttime').attr("name","")
-            //                ;
-            //            }
-            if (hlsw > 0) {
-                comehl(jc.slice(0, ma.length), hlsw);
-            }
-            if (settings.isUserHighlight) {
-                comeUserHighlight(jc.slice(0, ma.length));
-            }
-            if ((settings.isDelOldTime || settings.isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0);
-        }
-        commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
-    } else if (d === undefined || copycomecount > 0) {
-        console.log("copycome fullcopy");
-        //100件全てを上書き
-        jc.find('span').text("");
-        $('.comeposttime').attr("name", "");
-        //console.time('fullcp_loop')
-        for (let i = 0, j = 0, e, m, t, dt, u, cinfo, mw; (e = EXcomelist.children[i]) ; i++) {
-            if (e.hasChildNodes() && e.firstElementChild.childElementCount > 1 && e.firstElementChild.firstElementChild.tagName.toUpperCase()=='P') {
-                cinfo = getComeInfo(e);
-                u = cinfo.userid;
-                m = comefilter(cinfo.message, u);
-                //console.log(e,cinfo,m)
-                if (m.length > 0) {
-                    mw = "";
-                    if (settings.isDelTime) {
-                        mw = "unset";
-                        t = "";
-                    } else {
-                        t = cinfo.timeStr;
-                    }
-                    //console.log(e,cinfo,m,jc.eq(j),j)
-                    setCopycome(jc.eq(j), m, u, cinfo.datetime, t, mw);
-                    j += 1;                    
-                    if (j >= 100) { break; }
-                }
-            }
-        }
-        //console.timeEnd('fullcp_loop')
-        if (settings.isUserHighlight) {
-            comeUserHighlight(jc);
-        }
-        if ((settings.isDelOldTime || settings.isDelTime) && isComeOpen(4) && isSideOpen(3)) setTimeout(comewidthfix, 0, 0, 0);
-        commentNum = EXcomelistChildren.length;//EXcomelist.childElementCount;
-        if (--copycomecount > 0) {
-            //番組ページ読込直後か番組開始直後でcopycomeに残ったままのコメントをfullcopyで上書き消去する
-            setTimeout(copycome, 800);
-        }
-    }
- 
-    //console.timeEnd('copycome');
-}*/
-/*function comewidthfix(i, h) {
-// コメ欄のwidth:unsetによって文字列分の幅になっているコメントが右コントロールと被っていたら縮める
-// スクロールするごとに改行位置を変えるのは忙しすぎるのでスクロール状態は無視する
-// コメ欄がスクロール状態でも未スクロールと同様に動作させるためtopの使用は避けてheightを加算している
-    //微妙に閉じてる時に作動すると酷いことになるので注意する(呼出時に)
-    if (!(i <= 100)) return;
-    if (i == 0) {
-        if (settings.isInpWinBottom)
-            h = window.innerHeight - EXcomesend.getBoundingClientRect().height;
-        else
-            h = EXcomesend.getBoundingClientRect().height;
-    }
-    var jo=$('#copycomec').children().eq(i);
-    var jc=jo.children().first();
-    var j = 1 + jo.height();
-    var ti, bi;
-    if (settings.isInpWinBottom) {
-        ti = h - j;
-        bi = h;
-    } else {
-        ti = h;
-        bi = h + j;
-    }
-    var ts = $(EXside).offset().top;
-    var bs = $(EXside).height() + ts;
-    if (ts < bi && ti < bs && jc.length>0) {
-        jc.css("width", ($(EXside).offset().left - jc.offset().left - 8) + "px");
-    } else if (settings.isInpWinBottom ? (bi < ts) : (ti < bs)) {
-        $('#copycomec').children().slice(i).children('p').first().css("width", "unset");
-        return;
-    } else {
-        jc.css("width", "unset");
-    }
-    j = 1 + $('#copycomec').children().eq(i).height();
-    setTimeout(comewidthfix, 0, i + 1, settings.isInpWinBottom ? h - j : h + j);
-}*/
 // コメ欄クリック時に呼び出され、NGワード追加画面表示
 function comecopy() {
     console.log('comecopy');
@@ -9574,8 +8527,10 @@ function appendTextNG(ev, inpstr) {
             }
         }
 
-        arrayFullNgMaker();
-        //copycome();
+        arFullNg = gcl.arrayFullNgMaker(settings.fullNg);
+        if (settings.isShareNGword) {
+            postShareNGwords(arFullNg, getInfo.getChannelByURL());
+        }
         applyCommentListNG();
     }
     if (inpstr === undefined) {
@@ -9642,8 +8597,10 @@ function appendUserNG(ev, inpstr) {
             }
         }
         console.log('apUsNg append');
-        arrayUserNgMaker();
-        //copycome();
+        arUserNg = gcl.arrayUserNgMaker(settings.userNg);
+        if (settings.isShareNGuser) {
+            postShareNGusers(arUserNg, getInfo.getChannelByURL());
+        }
         applyCommentListNG();
     }
     if (inpstr === undefined) {
@@ -9847,7 +8804,6 @@ function onairfunc() {
     ) {
         setTimeout(applySharedNG, 1000);
     }
-    copycomecount = 2;
     if (settings.mastodonInstance && settings.mastodonToken) {
         isTootEnabled = localStorage.getItem('isTootEnabled') == 'true';
     }
@@ -9938,24 +8894,7 @@ function onairBasefunc() {
         // コメント取得関係はonCommentChange()へ移動
 
         //console.timeEnd('obf_come');
-        //console.time('obf_1_2');
-        // if (settings.isComelistNG) {
-        //     //copycomeできていない場合はここで全copyする
-        //     var b = true;
-        //     if ($('#copycome').length > 0) {
-        //         //番組切替直後などでcopycomeはある場合は中身があるか数件チェックする
-        //         for (var i = 0, c = $('#copycomec').children(), j; i < 5; i++) {
-        //             if (c.eq(i).children().children().first().text().length > 0) {
-        //                 b = false;
-        //                 break;
-        //             }
-        //         }
-        //     }
-        //     if (b) {
-        //         copycome();
-        //     }
-        // }
-        //console.timeEnd('obf_1_2');
+
         //流れるコメントのうちmovingCommentSecond*2経過したものを削除
         if (settings.isMovingComment) {
             var arMovingComment = $('.movingComment');
@@ -10008,14 +8947,12 @@ function onairBasefunc() {
                 }
             } else {
             }
-            //comeLatestCount = commentCount;
             isComeLatestClickable = isComeClickable;
         }
         if (settings.useEyecatch) {
             //if ((EXwatchingnum !== undefined) && settings.useEyecatch) {
             //if ($(EXobli).find("object,video").first().parentsUntil(EXobli).last().children().length > 3) {
             if (EXvideoarea.childElementCount > 4) {
-                //if ($(EXobli.children[EXwatchingnum]).children('[class*="styles__eyecatch"]').length > 0) {
                 //eyecatchが有る
                 if (eyecatched == true) {
                     //前回も有った=eyecatchが引き続き出現中
@@ -10073,7 +9010,6 @@ function onairBasefunc() {
 
         //残り時間表示
         if (settings.isTimeVisible && EXinfo) {
-            //            var eProTime = $('[class^="TVContainer__right-slide___"] [class^="styles__time___"]');
             var eProTime = $(EXinfo)
                 .children('div:not(#copyinfo)')
                 .find('h2')
@@ -10232,8 +9168,6 @@ function onairBasefunc() {
                     if (settings.isProtitleVisible) {
                         $('#tProtitle').text(proTitle);
                     }
-                    copycomecount = 2;
-                    //setTimeout(copycome, 300);
                     setTimeout(applyCommentListNG, 300);
                     //番組情報(コピー)を更新
                     $(EXinfo)
@@ -10528,7 +9462,7 @@ function onCommentChange(mutations) {
     if (isCommentAdded) {
         //コメント取得(animation除外) ただし最初のanimationでも実行
         //console.time('obf_getComment_beforeif')
-        var commentDivParent = $(EXcomelist); //$('#main div[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div');//copycome除外
+        var commentDivParent = $(EXcomelist);
         var firstChild = commentDivParent.children().eq(0);
         var isAnimationIncluded = false; //parseInt(commentDivParent.children().eq(0).css("height"))<10;//EXcomelist.children[0].className.indexOf('uo_k') >= 0;
         if (
@@ -10540,7 +9474,6 @@ function onCommentChange(mutations) {
             isAnimationAdded = true; //コメントが追加されてanimationも含まれていればaimatonも追加されたとみなす
         }
         //console.log("isA",isAnimationIncluded,EXcomelist.children[0],commentDivParent.children().eq(0).css("height"))
-        //var comments = commentDivParent.children('div' + (isAnimationIncluded ? ':gt(1)' : '')).find(' [class^="styles__message___"]');//新着animetionも除外
         var comments = []; // 負荷軽減のためjQuery使わずに
         var commentDivs = EXcomelist.children;
         //if(isAnimationIncluded){console.log('div[1]:', commentDivs[1].innerHTML)}
@@ -10553,7 +9486,6 @@ function onCommentChange(mutations) {
             comments.push([cinfo.message, cinfo.userid, cinfo.datetime]);
         }
         var d = newCommentNum;
-        //var comments = $('[class*="styles__comment-list-wrapper___"]:not(#copycome)  > div > div[class*="styles__containerer___"] > p[class^="styles__message___"]');
         //console.timeEnd('obf_getComment_beforeif')
         if (EXcomelist && isComeOpen()) {
             var comeListLen = comments.length; //EXcomelist.childElementCount;
@@ -10561,7 +9493,7 @@ function onCommentChange(mutations) {
             //console.log('cl,cn,d', comeListLen,commentNum,d)
             //            if(comeListLen>commentNum){ //コメ増加あり
             //                if(!comeRefreshing||!settings.isSureReadComment){
-            var commentDivParentV = /*(settings.isComelistNG && $('#copycomec').length > 0) ? $('#copycomec') : */ commentDivParent;
+            var commentDivParentV = commentDivParent;
             var scrolled = false;
             if (!settings.isInpWinBottom)
                 scrolled =
@@ -10588,7 +9520,6 @@ function onCommentChange(mutations) {
                     comeColor($(EXfootcountcome), comeHealth);
                 }
                 commentNum = comeListLen;
-                //                if(settings.isSureReadComment&&commentNum>Math.max(comeHealth+20,settings.sureReadRefreshx)&&$(EXfootcome).filter('[class*="styles__right-container-not-clickable___"]').length==0&&$(EXcome).siblings('[class*="TVContainer__right-slide--shown___"]').length==0){
                 if (
                     /*settings.isSureReadComment && */ commentNum >
                         Math.max(comeHealth + 20, settings.sureReadRefreshx) &&
@@ -10613,9 +9544,6 @@ function onCommentChange(mutations) {
                                   '#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked'
                               ).val()
                           );
-                //if (settings.isComelistNG) {
-                //copycome(d, hlsw); //copycome内からcomehlを実行
-                //} else {
                 applyCommentListNG(d);
                 if (hlsw > 0) {
                     comehl(
@@ -10767,14 +9695,12 @@ function chkurl() {
         }
         commentNum = 0;
         $('.movingComment').remove();
-        comeclickcd = 2;
         bginfo = [0, [], -1, -1];
         endCM();
         proStart = new Date();
         proEnd = new Date();
         proTitle = '';
         $('#tProtitle').text('未取得');
-        //$('#copycome').remove();
         $('#copyotw').remove();
         if (EXcomesendinp) $(EXcomesendinp.parentElement).css('display', '');
         //全画面・音量ボタンの位置を戻す
@@ -10802,10 +9728,6 @@ function URLPatternSwitch() {
         case getInfo.URL_SLOTPAGE:
             //番組個別ページ
             notifyButton.putNotifyButton(settings.notifySeconds, url);
-            //放送画面へのリンク追加
-            // var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z\d]+/)[1];
-            // var channelUrl = "https://abema.tv/now-on-air/" + channel;
-            // $('<br><a href="' + channelUrl + '">放送画面</a>').appendTo('[class*="BroadcastingFrameContainer__left-contents___"] > div');
             onairCleaner();
             delaysetNotOA();
             break;
