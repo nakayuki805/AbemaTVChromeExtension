@@ -350,8 +350,8 @@ function timetableCss() {
         t += selPTitle+'{word-break:break-word;}';
     }
 
-    var c = checkUrlPattern(true);
-    if (c == 1) {
+    var c = getInfo.determineUrl();
+    if (c == getInfo.URL_DATETABLE) {
         if (allowChannelNum.length > 0) {
             selHead=dl.getElementSingleSelector(EXTThead);
             if($(selHead).length!=1){
@@ -455,8 +455,8 @@ function toggleChannel(targetUrl) {
     waitforloadtimetable(currentLocation);
 }
 function waitforloadtimetable(url) {
-    var c = checkUrlPattern(true);
-    if (c != 1 && c != 2) { clearInterval(timetableRunning); timetableRunning = false; return; }
+    var c = getInfo.determineUrl();
+    if (c != getInfo.URL_DATETABLE && c != getInfo.URL_CHANNELTABLE) { clearInterval(timetableRunning); timetableRunning = false; return; }
     if (url != currentLocation) return;
     // 10分インターバル
     if (timetableRunning === false) {
@@ -764,7 +764,7 @@ function timetabledtfix() {
     });
 }
 function timetabledtloop() {
-    if (checkUrlPattern(true) != 1) return;
+    if (getInfo.determineUrl() != getInfo.URL_DATETABLE) return;
     if (!settings.isChTimetablePlaybutton) return;
     if (settings.isChTimetablePlaybutton) {
         PlaybuttonEditor();
@@ -940,7 +940,7 @@ function getSatSun() {
 }*/
 function timetablechloop() {
     //URL変わったら終われるようにURLチェック
-    if (checkUrlPattern(true) != 2) return;
+    if (getInfo.determineUrl() != getInfo.URL_CHANNELTABLE) return;
 //    if (!settings.isChTimetableExpand && !settings.isChTimetablePlaybutton) { return; }
     if (!settings.isChTimetablePlaybutton) return;
 //    if (settings.isChTimetableExpand) {
@@ -1098,7 +1098,7 @@ function timetableCommonFix(retrycount) {
 //    }
 //読込に1秒以上かかる場合を考慮し、ヘッダと列の数を見るようにしてみる
     var cols = $(EXTTbody).children("div").map(function(i,e){if($(e).width()>50&&$(e).height()>window.innerHeight*2/3)return e;});
-    var c = checkUrlPattern(true);
+//    var c = getInfo.determineUrl();
 //    var j = $('[class^="styles__channel-content-header___"]');
 //    var h;
 //    if (c == 1) {
@@ -1150,7 +1150,7 @@ function timetableCommonFix(retrycount) {
 
 
 function onresize(oldTranslate) {
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
     //console.log("onresize()");
 
     var mode43=settings.isDAR43;
@@ -1227,7 +1227,7 @@ function onresize(oldTranslate) {
 }
 /*
 function onresize() {
-    if (checkUrlPattern(true) != 3) { return; }
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR) { return; }
     //console.log("onresize()");
     //視聴数の位置調整
     setTimeout(function(){
@@ -2047,7 +2047,7 @@ function optionHeightFix() {
 }
 
 function delayset(isInit,isOLS,isEXC,isInfo,isTwT,isVideo,isChli,isComeli) {
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
     if(!isOLS){
         if(!overlapSelector){//ページ遷移の再delayset時に本来のoverlapが無くなって映像枠が引っかかるので再探査しない
             //var jo=$('div').map(function(i,e){var b=e.getBoundingClientRect();if($(e).css("position")=="absolute"&&b.top<5&&b.left<5&&b.width>window.innerWidth-10&&b.height>window.innerHeight-10&&(!isNaN(parseInt($(e).css("z-index")))&&$(e).css("z-index")>0)&&parseInt($(e).css("opacity"))>0)return e;});
@@ -2230,7 +2230,7 @@ function delaysetNotOA(){
     }
 }
 function volumecheck() {
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
     //console.log("volumecheck");
     var t=getVolbarObject();
     if (t == null) return;
@@ -2313,7 +2313,7 @@ function createPIPbutton() {
     }
 }
 function optionStatsUpdate(outflg) {
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
     //console.log("optionStatusUpdate("+(outflg?"true":"false"));
     var out = [0, 0];
     if ($('#settcont').length == 0 || $('#settcont').css("display") == "none") return;
@@ -2476,7 +2476,7 @@ function optionStatsUpdate(outflg) {
     }
 }
 function createSettingWindow() {
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
     if (!EXside) {
         console.log("createSettingWindow retry");
         setTimeout(createSettingWindow, 1000);
@@ -3769,7 +3769,7 @@ function setEXs() {
     //ロード直後に取得が期待できるやつ
     //obliが遅くinfoはもっと遅い
     //infoはdelaysetの方でやる
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
     var b = true;
     if (                                                                                  $('#main' ).length == 0 || !( EXmain          = $('#main' )[0] ))    b = false;// console.log("#main"); }
     if (! EXhead          &&!( EXhead          = getElm.getHeaderElement()                 ) /*&& ($('.P_R'  ).length == 0 || !( EXhead          = $('.P_R'  )[0] ))*/) b = false;// console.log("head"); }//AppContainer__header-container___
@@ -4701,7 +4701,7 @@ function otoSize(ts) {
     }
 }
 function volbar() {
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
     var jo = $('#forProEndTxt');
     //    if(jo.filter('.forProEndTxt').length==0){
     if (jo.is('.vol')) {
@@ -4757,7 +4757,7 @@ function faintcheck(sw, fcd, bgi) {
     }
 }
 function comeColor(jo, inp) {
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
     //console.log("comeColor:"+inp);
     if (!EXfootcountcome) return;
     //console.log($(EXfootcountcome).css("color"));
@@ -5892,7 +5892,7 @@ function setFooterBGStyle(){
     }
 }
 function setOptionElement() {
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
 
     if (settings.isCustomPostWin) {
         $(EXcomesendinp).prop("wrap", "soft");
@@ -6126,7 +6126,7 @@ function waitforComemukouEnd(url) {
     //コメ欄常時開でComeMukou中に放送中一覧を閉じた場合、overlapをクリックしないために映像縮小が解除されない
     //そのままだとComeMukouが終わっても縮小が解除されないので、ComeMukouが終わるのを待つ
     //長時間になるので無限再試行が適切に終了されるようにする
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
     if (url != currentLocation) return;
     if (settings.isSureReadComment && isFootcomeClickable()) {
         setTimeout(overlapTriggerClick, 20);
@@ -6310,7 +6310,7 @@ function comeModuleEditor() {
     }
 }
 function setOptionEvent() {//放送画面用イベント設定
-    if (checkUrlPattern(true) != 3) return;
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
     //自作要素のイベントは自作部分で対応
     //console.log("setOptionEvent() eventAdded:", eventAdded);
     var butfs;
@@ -7347,8 +7347,8 @@ function mainfunc() { //初回に一度実行しておけば後でURL部分が�
     $("<script src='" + jquerypath + "'></script>").appendTo("head");
     var injectionpath = chrome.extension.getURL("/scripts/injection.js");
     $("<script src='" + injectionpath + "'></script>").appendTo("head");
-    //URLパターンチェック
-    checkUrlPattern(location.href);
+    //URLパターン別処理
+    URLPatternSwitch();
     //ウィンドウをリサイズ
     setTimeout(onresize, 1000);
     //解像度設定反映
@@ -7377,7 +7377,7 @@ function onairfunc() {
     }
     //何らかの不具合で放送ページに推移したのに放送画面が構築されない場合は5秒待って再読み込み
     setTimeout(function(){
-        if (checkUrlPattern(true) != 3) return;
+        if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
         if (previousLocation.indexOf('now-on-air')>=0) return;
         if (!EXfoot && !EXcome && !EXside) location.href = location.href;
     }, 5000);
@@ -7389,7 +7389,7 @@ function onairBasefunc() {
     onairSecCount++;
     try {
         //console.time('obf_1');
-        if (checkUrlPattern(true) != 3) { clearInterval(onairRunning); onairRunning = false; return; }
+        if (getInfo.determineUrl() !== getInfo.URL_ONAIR) { clearInterval(onairRunning); onairRunning = false; return; }
 
         // 1秒ごとに実行
         if($('.ext_abm-come').length==0){
@@ -8020,7 +8020,7 @@ function chkurl() {
         console.log("%curl changed", "background-color:yellow;");
         //console.log("old location:", previousLocation);
         setTimeout(onresize, 1000);
-        if (checkUrlPattern(false) != 3){
+        if (determinePreviousUrl() != getInfo.URL_ONAIR){
             eventAdded = false;//放送画面以外→放送画面と推移した場合イベント設定しなおし
         }
         commentNum = 0;
@@ -8043,106 +8043,77 @@ function chkurl() {
 
         window.dispatchEvent(urlChangeEvent);
 
-        checkUrlPattern(currentLocation);
+        URLPatternSwitch();
     }
 }
+function determinePreviousUrl(){
+    return getInfo.determineUrl(previousLocation);
+}
 //onloadからも呼ばれる
-function checkUrlPattern(url) {
-    //urlがtrueなら各部の実行はせず出力のみ(無限再試行でもURL切替で終了できるようにするURL判定用)
-    //↑判定出力はgetInfo.determineUrl(url)に移行
-    //urlがfalseなら各部の実行はせずpreviousLocationによる出力のみ
-    var output = false;
-    if (url === true) { url = currentLocation; output = true; } 
-    else if (url === false) { url = previousLocation; output = true; }
-    else {
-        console.log("cup", url);
-    }
+function URLPatternSwitch() {
+    //URLごとの分岐処理
+    //判定出力はgetInfo.determineUrl(url)に移行したのでここでは出力しない
+    const url = location.href;
+    console.log("cup", url);
+
     switch(getInfo.determineUrl(url)){
     case getInfo.URL_SLOTPAGE:
         //番組個別ページ
-        if (output) {
-            return 0;
-        } else {
-            notifyButton.putNotifyButton(settings.notifySeconds, url);
-            //放送画面へのリンク追加
-            // var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z\d]+/)[1];
-            // var channelUrl = "https://abema.tv/now-on-air/" + channel;
-            // $('<br><a href="' + channelUrl + '">放送画面</a>').appendTo('[class*="BroadcastingFrameContainer__left-contents___"] > div');
-            onairCleaner();
-            delaysetNotOA();
-        }
+        notifyButton.putNotifyButton(settings.notifySeconds, url);
+        //放送画面へのリンク追加
+        // var channel = url.match(/https:\/\/abema.tv\/channels\/([-a-z0-9]+)\/slots\/[a-zA-Z\d]+/)[1];
+        // var channelUrl = "https://abema.tv/now-on-air/" + channel;
+        // $('<br><a href="' + channelUrl + '">放送画面</a>').appendTo('[class*="BroadcastingFrameContainer__left-contents___"] > div');
+        onairCleaner();
+        delaysetNotOA();
         break;
     case getInfo.URL_DATETABLE:
         //日付別番組表
-        if (output) {
-            return 1;
-        } else {
-            //番組表(チャンネル個別ではない)のとき
-            //番組表に再生ボタンを追加する機能があるため、ここにあった放送画面へのリンクは廃止
-            onairCleaner();
-            delaysetNotOA();
-            waitforloadtimetable(url);
-        }
+        //番組表(チャンネル個別ではない)のとき
+        //番組表に再生ボタンを追加する機能があるため、ここにあった放送画面へのリンクは廃止
+        onairCleaner();
+        delaysetNotOA();
+        waitforloadtimetable(url);
         break;
     case getInfo.URL_CHANNELTABLE:
         //チャンネル別番組表
-        if (output) {
-            return 2;
-        } else {
-            onairCleaner();
-            delaysetNotOA();
-            waitforloadtimetable(url);
-        }
+        onairCleaner();
+        delaysetNotOA();
+        waitforloadtimetable(url);
         break;
     case getInfo.URL_ONAIR:
-        //放送ページ
-        if (output) {
-            return 3;
-        } else {
-            onairfunc();
-        }
+        //放送ページ     
+        onairfunc();
         break;
     case getInfo.URL_SEARCH:
         //番組検索結果(放送予定の番組)
-        if (output) {
-            return 4;
-        } else {
-            onairCleaner();
-            delaysetNotOA();
-            notifyButton.putSerachNotifyButtons(settings.notifySeconds);
-        }
+        onairCleaner();
+        delaysetNotOA();
+        notifyButton.putSerachNotifyButtons(settings.notifySeconds);
         break;
     case getInfo.URL_RESERVATION:
         //公式の視聴予約一覧
-        if (output) {
-            return 5;
-        } else {
-            onairCleaner();
-            delaysetNotOA();
-            notifyButton.putReminderNotifyButtons(settings.notifySeconds);
-            //スクロールで続きを読み込んだときのためチェック
-            var itemCount = 0;
-            var checkListInterval = setInterval(function(){
-                if(checkUrlPattern(true) != 5){
-                    clearInterval(checkListInterval);
-                    return;
-                }
-                var count = $('a[role=listitem]').length;
-                if(itemCount<count){
-                    notifyButton.putReminderNotifyButtons(settings.notifySeconds);
-                    itemCount = count;
-                }
-            },500);
-        }
+        onairCleaner();
+        delaysetNotOA();
+        notifyButton.putReminderNotifyButtons(settings.notifySeconds);
+        //スクロールで続きを読み込んだときのためチェック
+        var itemCount = 0;
+        var checkListInterval = setInterval(function(){
+            if(getInfo.determineUrl() != getInfo.URL_RESERVATION){
+                clearInterval(checkListInterval);
+                return;
+            }
+            var count = $('a[role=listitem]').length;
+            if(itemCount<count){
+                notifyButton.putReminderNotifyButtons(settings.notifySeconds);
+                itemCount = count;
+            }
+        },500);
         break;
     default:
         // それ以外のページ
-        if (output) {
-            return -1;
-        } else {
-            onairCleaner();
-            delaysetNotOA();
-        }
+        onairCleaner();
+        delaysetNotOA();
         break;
     }
 }

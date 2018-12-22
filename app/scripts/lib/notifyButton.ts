@@ -112,10 +112,10 @@ export function putNotifyButton(notifySeconds: number, url: string) {
     if (getInfo.determineUrl() != getInfo.URL_SLOTPAGE) return;
     const detailContainer = dl.last(dl.filter(document.getElementsByTagName('div'),{top14u:true,width12b:true,height12b:true, notBodyParent:true,notMatchSelector:'#main>*',filters:[e=>e.childElementCount==2]}));
     const buttonContainer = detailContainer&&dl.parentsFilterLastByArray(detailContainer.getElementsByTagName('button'),{height14s:true,filters:[e=>e.childElementCount>2]});
-    const header = detailContainer.getElementsByTagName('header');
+    const header = detailContainer&&detailContainer.getElementsByTagName('header');
 
     var titleElement = $(header).find('h1').eq(0);
-    if (titleElement.text() == ""||!buttonContainer) { setTimeout(function () { putNotifyButton(notifySeconds, url); }, 1000); console.log("putNotifyButton wait"); return; }
+    if (titleElement.text() == ""||!buttonContainer||!detailContainer||!header) { setTimeout(function () { putNotifyButton(notifySeconds, url); }, 1000); console.log("putNotifyButton wait"); return; }
     var urlarray = url.substring(17).split("/");
     var channel = urlarray[1];
     var channelName = titleElement.next().text();
