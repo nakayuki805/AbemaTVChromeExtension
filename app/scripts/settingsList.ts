@@ -459,14 +459,6 @@ export const settings: SettingList[] = [
                 isInstantChangable: true,
                 default: false
             },
-            //             {
-            //                 "name": "isComelistNG",
-            // //                "description": "NG設定を右コメント一覧にも適用する(流れるコメント用のNG設定がそのまま一覧にも適用されます。ただし、一覧のコメント表示数は直近100件まで、投稿時刻は新着のみ表示となります。)",
-            //                 "description": "この設定は無視され、常に右のコメ欄にもNGが適用されます。<s>NG設定を右コメント一覧にも適用する(これを有効にしないと流れるコメントにしかNGが効きません。ただし、一覧のコメント表示数は直近100件までとなります。)コメントを選択し、右クリックNGワード追加できます。 ◇☆</s>",
-            //                 "type": "boolean",
-            //                 "isInstantChangable": true,
-            //                 "default": false
-            //             },
             {
                 name: 'isComelistClickNG',
                 //                "description": "コメント一覧クリックでNG追加欄を表示(このNG追加欄による保存は一時的です。永久保存は設定画面へ。)",
@@ -564,7 +556,7 @@ export const settings: SettingList[] = [
                 description:
                     '番組通知を番組開始の何秒前にするか(番組表の番組ページから番組開始前の通知を設定できます。)',
                 type: 'number',
-                isInstantChangable: true,
+                isInstantChangable: false,
                 default: 60
             },
             {
@@ -670,7 +662,7 @@ export const settings: SettingList[] = [
             {
                 name: 'timetableScroll',
                 description:
-                    '番組表を開いたときに指定したチャンネルまで自動スクロール(abema-news、drama、anime24などのurl中のチャンネル名を一つ指定)',
+                    '番組表を開いたときに指定したチャンネルまで自動スクロール(abema-news、drama、abema-animeなどのurl中のチャンネル名を一つ指定)',
                 type: 'text',
                 default: '',
                 isInstantChangable: false
@@ -717,7 +709,7 @@ export const settings: SettingList[] = [
             {
                 name: 'isReplaceIcons',
                 description:
-                    '番組表のタイトルに付いているアイコンを開始時刻(分)の下へ移動',
+                    '番組表のタイトルに付いているアイコンを開始時刻(分)の下へ移動(現在機能しないようです。)',
                 type: 'boolean',
                 isInstantChangable: false,
                 default: false

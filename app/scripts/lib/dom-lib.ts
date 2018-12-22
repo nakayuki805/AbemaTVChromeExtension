@@ -401,3 +401,32 @@ export function getElementSingleSelector(
     ps = 'BODY>' + ps;
     return ps;
 }*/
+export function clickElement(element: HTMLElement) {
+    // clickOnairLink(jo)
+    // console.log("clickElement", jo);
+    let evt = document.createEvent('MouseEvents');
+    evt.initMouseEvent(
+        'click',
+        true,
+        true,
+        window,
+        0,
+        0,
+        0,
+        0,
+        0,
+        false,
+        false,
+        false,
+        false,
+        0,
+        null
+    );
+    // console.log("dispatch");
+    return element.dispatchEvent(evt);
+}
+export function addExtClass(elm: HTMLElement, className: string) {
+    className = 'ext_abm-' + className;
+    $('.' + className).removeClass(className);
+    $(elm).addClass(className);
+}

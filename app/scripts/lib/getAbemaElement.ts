@@ -1,6 +1,5 @@
 // AbemaTVのページから要素を取得する系の寄せ集め
 import * as $ from 'jquery';
-import './jquery-lib';
 import * as getInfo from './getAbemaInfo';
 import * as dl from './dom-lib';
 
