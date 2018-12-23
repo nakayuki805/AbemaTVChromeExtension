@@ -12,9 +12,41 @@ if (
 ) {
     this.chrome = chrome || browser;
 }
-
+const descImageDir = '/images/settings/';
 $(function() {
     $('#settingsArea').html(settings.generateOptionHTML(true));
+    $('.inputWrapper')
+        .mouseover(function(e) {
+            const name = this.id.match(/(.+)-wrapper/)[1];
+            const descImage = this.closest(
+                '.settingWrapper'
+            ).getElementsByClassName('descImage')[0];
+            if (
+                !descImage ||
+                !name ||
+                !settings.flatSettings[name].hasDescImage
+            )
+                return;
+            console.log('in', name, descImage);
+            const src = descImageDir + name + '.png';
+            descImage.setAttribute('src', src);
+        })
+        .mouseleave(function(e) {
+            const name = this.id.match(/(.+)-wrapper/)[1];
+            const descImage = this.closest(
+                '.settingWrapper'
+            ).getElementsByClassName('descImage')[0];
+            if (
+                !descImage ||
+                !name ||
+                !settings.flatSettings[name].hasDescImage
+            )
+                return;
+            console.log('out', name, descImage);
+            const src = descImageDir + name + '.png';
+            if (descImage.getAttribute('src') === src)
+                descImage.setAttribute('src', descImageDir + '1x1.png');
+        });
     $('#CommentMukouSettings').hide();
     $('#CommentColorSettings')
         .css('width', '600px')

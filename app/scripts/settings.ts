@@ -184,6 +184,10 @@ function generateOptionInput(
         isNotChangable = !isPermanent && !settingsArr[i].isInstantChangable;
         // 変更不可な項目は表示せず飛ばす
         if (isNotChangable) continue;
+        inputHTML +=
+            '<div class="inputWrapper" id="' +
+            settingsArr[i].name +
+            '-wrapper">';
         if (settingsArr[i].type === 'boolean') {
             inputHTML +=
                 '<div class="toggle-switch" id="' +
@@ -259,6 +263,7 @@ function generateOptionInput(
                 inputHTML += '</select><br/>';
             }
         }
+        inputHTML += '</div>';
     }
     return inputHTML;
 }
@@ -296,6 +301,7 @@ function generateRadioInput(settingsArr: typeof RadioSettingList) {
 }
 export function generateOptionHTML(isPermanent: boolean) {
     let htmlstr = '';
+    const dummySrc = '/images/settings/1x1.png';
     for (let i = 0; i < settingsList.length; i++) {
         let inputHtml = generateOptionInput(
             settingsList[i].settings,
@@ -312,7 +318,10 @@ export function generateOptionHTML(isPermanent: boolean) {
         htmlstr +=
             '<fieldset style=\'border: 1px solid silver;margin: 0 2px;padding: .35em .625em .75em;\'><legend>' +
             settingsList[i].description +
-            '</legend>';
+            '</legend><div class="settingWrapper' +
+            (settingsList[i].isShowImage && isPermanent ? ' showimage' : '') +
+            '">' +
+            '<div class="settingInputWrapper">';
         if (isPermanent) {
             htmlstr += settingsList[i].header || '';
         } else {
@@ -326,7 +335,13 @@ export function generateOptionHTML(isPermanent: boolean) {
             htmlstr +=
                 settingsList[i].instantFooter || settingsList[i].footer || '';
         }
-        htmlstr += '</fieldset>';
+        htmlstr += '</div>';
+        if (settingsList[i].isShowImage && isPermanent)
+            htmlstr +=
+                '<div class="imageSpace"><img class="descImage" src="' +
+                dummySrc +
+                '"></div>';
+        htmlstr += '</div></fieldset>';
     }
     htmlstr +=
         '<fieldset><legend>コメント色関連設定</legend><div id="CommentColorSettings">' +

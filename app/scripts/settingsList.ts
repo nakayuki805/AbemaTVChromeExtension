@@ -8,6 +8,7 @@ interface BasicSetting {
     isInstantChangable: boolean;
     range?: number[];
     selections?: (string | number)[];
+    hasDescImage?: boolean;
 }
 interface BooleanSetting extends BasicSetting {
     type: 'boolean';
@@ -45,6 +46,7 @@ export type Setting =
     | SelectSetting;
 export interface SettingList {
     description: string;
+    isShowImage?: boolean;
     header?: string;
     footer?: string;
     instantHeader?: string;
@@ -54,6 +56,7 @@ export interface SettingList {
 export const settings: SettingList[] = [
     {
         description: '映像・表示・操作関連設定',
+        isShowImage: true,
         settings: [
             {
                 name: 'isResizeScreen',
@@ -63,7 +66,8 @@ export const settings: SettingList[] = [
                     '映像をウィンドウに合わせてリサイズし、縮小させない (コメ欄などを開いても映像が縮まず、映像の上に重なります。) ◆',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isDAR43',
@@ -71,14 +75,16 @@ export const settings: SettingList[] = [
                     '映像4:3用の処理を使用する(左右の黒帯部分を無視して映像の最大化を行います)',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isMovieSpacingZeroTop',
                 description: '映像の上下位置を上に詰める',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isResizeSpacing',
@@ -86,7 +92,8 @@ export const settings: SettingList[] = [
                     '映像の上下位置を上に詰めるが、メニューの分だけ少し空ける',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isMovieSpacingZeroLeft',
@@ -94,7 +101,8 @@ export const settings: SettingList[] = [
                     '映像の左右位置を左に詰める(「映像をウィンドウに合わせてリサイズ」でコメントを映像にかぶせたくないときに便利です。)',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isDblFullscreen',
@@ -121,7 +129,8 @@ export const settings: SettingList[] = [
                     'マウスホイールで音量を操作する（&番組移動無効化）',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'changeMaxVolume',
@@ -136,7 +145,8 @@ export const settings: SettingList[] = [
                 description: '全画面ボタンと音量ボタンを非表示',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isHideTwitterPanel',
@@ -158,7 +168,8 @@ export const settings: SettingList[] = [
                 description: 'アンケート(投票機能)を非表示',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isStoreViewCounter',
@@ -166,7 +177,8 @@ export const settings: SettingList[] = [
                     'コメント欄開閉ボタンのコメント数の上に視聴数をコピーする',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'panelOpacity',
@@ -174,7 +186,8 @@ export const settings: SettingList[] = [
                 type: 'range',
                 isInstantChangable: true,
                 default: 127,
-                range: [0, 255]
+                range: [0, 255],
+                hasDescImage: true
             },
             {
                 name: 'audibleReloadWait',
@@ -214,6 +227,7 @@ export const settings: SettingList[] = [
     },
     {
         description: 'コメント欄関連設定',
+        isShowImage: false,
         settings: [
             {
                 name: 'isHideOldComment',
@@ -333,6 +347,7 @@ export const settings: SettingList[] = [
     },
     {
         description: 'コメント流し関連設定',
+        isShowImage: false,
         settings: [
             {
                 name: 'isMovingComment',
@@ -395,6 +410,7 @@ export const settings: SettingList[] = [
     },
     {
         description: 'コメントNG関連設定',
+        isShowImage: false,
         header:
             'コメントのワードNG、ユーザーNGを利用したいときはそれぞれ「指定した〜流さない」を有効にしてください。ユーザーNG追加には「コメント一覧クリックでNG追加欄を表示」も必要です。<br>',
         settings: [
@@ -515,6 +531,7 @@ export const settings: SettingList[] = [
     },
     {
         description: '番組時間・タイトル表示関連設定',
+        isShowImage: false,
         settings: [
             {
                 name: 'isTimeVisible',
@@ -542,15 +559,16 @@ export const settings: SettingList[] = [
             {
                 name: 'proTitleFontC',
                 description:
-                    '表示位置がコメント入力欄周辺の場合、番組残り時間・タイトルの文字色と残り時間バーの色をコメント欄に合わせる',
+                    '表示位置がコメント入力欄周辺の場合、番組残り時間・タイトルの文字色と残り時間バーの色をコメント欄に合わせる(現在この設定関係なく適用中)',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: true
             }
         ]
     },
     {
         description: '番組通知関連設定',
+        isShowImage: false,
         settings: [
             {
                 name: 'notifySeconds',
@@ -634,6 +652,7 @@ export const settings: SettingList[] = [
     },
     {
         description: '番組表関連設定',
+        isShowImage: false,
         settings: [
             {
                 name: 'isChTimetableBreak',
