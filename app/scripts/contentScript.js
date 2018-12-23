@@ -199,11 +199,6 @@ var popinput = [];
 var popacti = false; //脱出コマンドを受け付けるかどうか
 var onairRunning = false; //映像ページの定期実行のやつの複数起動防止用 setintervalの格納
 var comeNGmode = 0; //NG追加先の分岐用
-var NGshareURLbase = 'https://abema.nakayuki.net/ngshare/v1/'; //共有NGワードAPI
-var APIclientName = 'AbemaTVChromeExtension'; //↑のクライアント名
-var isNGShareInterval = false; //applySharedNGwordがinterval状態か
-var postedNGwords = []; //送信済みNGワード
-var postedNGusers = []; //送信済みNGユーザー
 var isComelistMouseDown = false;
 var movieWidth = 0; //.TVContainer__resize-screenの大きさ(onresize発火用)
 //var movieHeight = 0;
@@ -437,112 +432,6 @@ function toggleFullscreen() {
         }
     );
     setTimeout(onresize, 1000);
-}
-function postShareNGwords(words, channel) {
-    var postWords = [];
-    for (var i = 0; i < words.length; i++) {
-        if (!gl.hasArray(postedNGwords, words[i].toString())) {
-            postWords.push(words[i].toString());
-        }
-    }
-    if (postWords.length == 0) return;
-
-    var postData = {
-        client: APIclientName,
-        channel: channel,
-        words: postWords
-    };
-    postedNGwords = postedNGwords.concat(postWords); //重複送信防止のため送信前にpostedに追加する
-    gl.postJson(
-        NGshareURLbase + 'add_json.php',
-        postData,
-        {},
-        function(result) {
-            if (result.status == 'success') {
-                console.log('postShareNGwords success', postWords, channel);
-                //postedNGwords = postedNGwords.concat(postWords);
-            } else {
-                console.log('postShareNGwords failed', result);
-            }
-        },
-        function() {
-            console.log('postShareNGwords post error');
-        }
-    );
-}
-function postShareNGusers(users, channel) {
-    var postUsers = [];
-    for (var i = 0; i < users.length; i++) {
-        if (!gl.hasArray(postedNGusers, users[i].toString())) {
-            postUsers.push(users[i].toString());
-        }
-    }
-    if (postUsers.length == 0) return;
-
-    var postData = {
-        client: APIclientName,
-        channel: channel,
-        users: postUsers
-    };
-    postedNGusers = postedNGusers.concat(postUsers); //重複送信防止のため送信前にpostedに追加する
-    gl.postJson(
-        NGshareURLbase + 'add_json.php',
-        postData,
-        {},
-        function(result) {
-            if (result.status == 'success') {
-                console.log('postShareNGusers success', postUsers, channel);
-            } else {
-                console.log('postShareNGusers failed', result);
-            }
-        },
-        function() {
-            console.log('postShareNGusers post error');
-        }
-    );
-}
-function applySharedNG() {
-    var channel = getInfo.getChannelByURL();
-    isNGShareInterval = true;
-    gl.getJson(
-        NGshareURLbase + 'sharedng/' + channel + '.json',
-        { client: APIclientName },
-        function(data) {
-            if (settings.isShareNGword) {
-                var sharedNGwords = data.ngword;
-                var appendNGwords = [];
-                console.log('got shared NG words ');
-                console.table(sharedNGwords);
-                for (var asni = 0; asni < sharedNGwords.length; asni++) {
-                    if (!gl.hasArray(postedNGwords, sharedNGwords[asni].word)) {
-                        postedNGwords.push(sharedNGwords[asni].word);
-                    }
-                    appendNGwords.push(sharedNGwords[asni].word);
-                }
-                appendTextNG(null, appendNGwords);
-            }
-            if (settings.isShareNGuser) {
-                var sharedNGusers = data.nguser;
-                var appendNGusers = [];
-                console.log('got shared NG users ');
-                console.table(sharedNGusers);
-                for (let asni = 0; asni < sharedNGusers.length; asni++) {
-                    if (
-                        !gl.hasArray(postedNGusers, sharedNGusers[asni].userid)
-                    ) {
-                        postedNGusers.push(sharedNGusers[asni].userid);
-                    }
-                    appendNGusers.push(sharedNGusers[asni].userid);
-                }
-                appendUserNG(null, appendNGusers);
-            }
-        }
-    );
-    if (channel) {
-        setTimeout(applySharedNG, 300000); //5分毎
-    } else {
-        isNGShareInterval = false;
-    }
 }
 
 function putComeArray(inp) {
@@ -1212,14 +1101,8 @@ function delayset(
 
     if (!isInit && $(EXfootcome).length > 0 && $(EXcountview).length > 0) {
         createSettingWindow();
-        arFullNg = gcl.arrayFullNgMaker(settings.fullNg);
-        arUserNg = gcl.arrayUserNgMaker(settings.userNg);
-        if (settings.isShareNGword) {
-            postShareNGwords(arFullNg, getInfo.getChannelByURL());
-        }
-        if (settings.isShareNGuser) {
-            postShareNGusers(arUserNg, getInfo.getChannelByURL());
-        }
+        arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
+        arUserNg = gcl.arrayUserNgMaker(settings.userNg, settings.isShareNGuser);
         //映像のリサイズ
         onresize();
         if (!isResizeInterval) setInterval(onresize, 30000);
@@ -2524,12 +2407,15 @@ function epcountchange() {
         var x =
             60000 *
             parseInt($('#epnumedit input[type="number"][name="epfix"]').val());
+        const proTimeColorNum = (settings.timePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
+        const proTimeBkColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.2)`;
+        
         if (x > 0) {
             var y = Math.floor((310 * proLength) / (proLength + x));
             $('#proTimeEpNum')
                 .css('right', 310 - y + 'px')
                 .css('width', y + 'px')
-                .css('border-right', '1px solid rgba(255,255,255,0.2)');
+                .css('border-right', '1px solid '+proTimeBkColor);
             proLength -= x;
         } else {
             $('#proTimeEpNum')
@@ -2613,10 +2499,7 @@ function setSaveDisable() {
 }
 function setPSaveNG() {
     settings.fullNg = $('#fullNg').val();
-    arFullNg = gcl.arrayFullNgMaker(settings.fullNg);
-    if (settings.isShareNGword) {
-        postShareNGwords(arFullNg, getInfo.getChannelByURL());
-    }
+    arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
     applyCommentListNG();
     gl.setStorage(
         {
@@ -2792,23 +2675,15 @@ function setSaveClicked() {
     settings.minResolution = parseInt($('#minResolution').val());
     settings.maxResolution = parseInt($('#maxResolution').val());
 
-    arFullNg = gcl.arrayFullNgMaker(settings.fullNg);
-    arUserNg = gcl.arrayUserNgMaker(settings.userNg);
-    if (settings.isShareNGword) {
-        postShareNGwords(arFullNg, getInfo.getChannelByURL());
-    }
-    if (settings.isShareNGuser) {
-        postShareNGusers(arUserNg, getInfo.getChannelByURL());
-    }
+    arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
+    arUserNg = gcl.arrayUserNgMaker(settings.userNg, settings.isShareNGuser);
+
     onresize();
     setOptionHead();
     setOptionElement();
     pophideSelector(-1, 0);
-    if (
-        (settings.isShareNGword || settings.isShareNGuser) &&
-        !isNGShareInterval
-    ) {
-        applySharedNG();
+    if (settings.isShareNGword || settings.isShareNGuser) {
+        gcl.applySharedNG(sharedNGappender);
     }
     optionHeightFix();
     var sm = parseInt(
@@ -5147,6 +5022,8 @@ function createTime(sw, bt) {
                 });
         }
         if ($('#proTimeEpNum').length == 0) {
+            const proTimeColorNum = (settings.timePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
+            const proTimeBkColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.2)`;
             var eproTimeEpNum =
                 '<div id="proTimeEpNum" class="usermade forpros" style="';
             //            eproTimeEpNum.setAttribute("style","position:absolute;right:0;font-size:x-small;padding:4px 0px;background-color:transparent;z-index:13;width:310px;top:0px;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;");
@@ -5156,7 +5033,7 @@ function createTime(sw, bt) {
                 fsize +
                 ';position:absolute;top:0px;right:0;width:310px;';
             eproTimeEpNum += '">';
-            eproTimeEpNum += '<div style="border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;">&nbsp;</div>'.repeat(
+            eproTimeEpNum += ('<div style="border-left:1px solid '+proTimeBkColor+';flex:1 0 1px;">&nbsp;</div>').repeat(
                 2
             );
             //            EXcome.insertBefore(eproTimeEpNum,EXcome.firstChild);
@@ -5499,9 +5376,9 @@ function setOptionHead() {
         //↓コメント入力欄が二重枠にならないようにtextareaとその兄弟の背景は透明にしておく
         t +=
             selComesendinp +
-            '{background-color: transparent;color:' +
+            ',.com-o-CommentForm__can-post .com-o-CommentForm__opened-textarea{background-color: transparent;color:' +
             tc +
-            ';}';
+            ' !important;}';//公式標準の文字色(黒)を打ち消すため!important
         t +=
             selComesendinp +
             '+*{background-color: transparent;color:' +
@@ -5836,16 +5713,23 @@ function setOptionHead() {
         }
     }
     //残り時間用
+    const proTitleColorNum = (settings.protitlePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
+    const proTitleColor = `rgba(${proTitleColorNum},${proTitleColorNum},${proTitleColorNum},0.8)`;
+    const proTimeColorNum = (settings.timePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
+    const proTimeColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.8)`;
+    const proTimeBkColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.2)`;
+    const proTimeEpColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.3)`;
+
     t +=
-        '#forProEndBk{padding:0px 0px;margin:4px 0px;background-color:rgba(255,255,255,0.2);z-index:12!important;}';
+        '#forProEndBk{padding:0px 0px;margin:4px 0px;background-color:'+proTimeBkColor+';z-index:12!important;}';
     t +=
-        '#forProEndTxt{padding:4px 5px 4px 11px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
+        '#forProEndTxt{padding:4px 5px 4px 11px;color:'+proTimeColor+';text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
     t +=
-        '#proTimeEpNum{padding:4px 0px;background-color:transparent;z-index:13!important;text-align:center;color:rgba(255,255,255,0.3);display:flex;flex-direction:row;align-items:center;}';
+        '#proTimeEpNum{padding:4px 0px;background-color:transparent;z-index:13!important;text-align:center;color:'+proTimeEpColor+';display:flex;flex-direction:row;align-items:center;}';
     t +=
-        '#tProtitle{padding:4px 8px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
+        '#tProtitle{padding:4px 8px;color:'+proTitleColor+';text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
     t +=
-        '#proTimeEpNum>div{border-left:1px solid rgba(255,255,255,0.2);flex:1 0 1px;}';
+        '#proTimeEpNum>div{border-left:1px solid '+proTimeBkColor+';flex:1 0 1px;}';
 
     selFootcome = dl.getElementSingleSelector(EXfootcome);
     if ($(selFootcome).length != 1) {
@@ -7349,10 +7233,7 @@ function appendTextNG(ev, inpstr) {
             }
         }
 
-        arFullNg = gcl.arrayFullNgMaker(settings.fullNg);
-        if (settings.isShareNGword) {
-            postShareNGwords(arFullNg, getInfo.getChannelByURL());
-        }
+        arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
         applyCommentListNG();
     }
     if (inpstr === undefined) {
@@ -7421,7 +7302,7 @@ function appendUserNG(ev, inpstr) {
         console.log('apUsNg append');
         arUserNg = gcl.arrayUserNgMaker(settings.userNg);
         if (settings.isShareNGuser) {
-            postShareNGusers(arUserNg, getInfo.getChannelByURL());
+            gcl.postShareNGusers(arUserNg, getInfo.getChannelByURL());
         }
         applyCommentListNG();
     }
@@ -7436,6 +7317,14 @@ function appendUserNG(ev, inpstr) {
         paintcopyot(2);
         paintcopyotw(2);
         setTimeout(copyotuncolor, 800, 1);
+    }
+}
+function sharedNGappender(word, userid){
+    if(settings.isShareNGword){
+        appendTextNG(null, word);
+    }
+    if(settings.isShareNGuser){
+        appendUserNG(null, userid);
     }
 }
 function addPermanentNG(word, userid) {
@@ -7620,11 +7509,8 @@ function onairfunc() {
     }
 
     setTimeout(onresize, 5000);
-    if (
-        (settings.isShareNGword || settings.isShareNGuser) &&
-        !isNGShareInterval
-    ) {
-        setTimeout(applySharedNG, 1000);
+    if (settings.isShareNGword || settings.isShareNGuser) {
+        setTimeout(gcl.applySharedNG, 1000, sharedNGappender);
     }
     if (settings.mastodonInstance && settings.mastodonToken) {
         isTootEnabled = localStorage.getItem('isTootEnabled') == 'true';

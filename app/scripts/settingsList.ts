@@ -179,10 +179,11 @@ export const settings: SettingList[] = [
             {
                 name: 'audibleReloadWait',
                 description:
-                    '音声の再生が停止してから自動的にタブを更新するまでの秒数',
+                    '音声の再生が停止してから自動的にタブを更新するまでの秒数(3秒以上)',
                 type: 'number',
                 isInstantChangable: true,
-                default: 20
+                default: 20,
+                range: [3]
             }
         ]
     },

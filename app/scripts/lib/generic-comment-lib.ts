@@ -1,4 +1,11 @@
 // Abemaの仕様に依存しないコメント関係の関数群
+import * as gl from './generic-lib';
+import { getChannelByURL } from './getAbemaInfo';
+const NGshareURLbase = 'https://abema.nakayuki.net/ngshare/v1/'; // 共有NGワードAPI
+const APIclientName = 'AbemaTVChromeExtension'; // ↑のクライアント名
+let isNGShareInterval = false; // applySharedNGwordがinterval状態か
+const postedNGwords: string[] = []; // 送信済みNGワード
+const postedNGusers: string[] = []; // 送信済みNGユーザー
 
 function comeNG(prengcome: string, isDeleteStrangeCaps: boolean) {
     // 規定のNG処理
@@ -97,7 +104,10 @@ export function comefilter(
     }
     return m;
 }
-export function arrayFullNgMaker(fullNg: string) {
+export function arrayFullNgMaker(
+    fullNg: string,
+    isShareNGword: boolean
+): RegExp[] {
     // 自由入力欄からNG正規表現を生成
     let arFullNg = [];
     const spfullng = fullNg.split(/\r|\n|\r\n/);
@@ -126,12 +136,15 @@ export function arrayFullNgMaker(fullNg: string) {
         }
         // console.log(spfullng[ngi]);
 
-        arFullNg.push(NGregexp);
+        if (NGregexp) arFullNg.push(NGregexp);
     }
-
+    if (isShareNGword) postShareNGwords(arFullNg, getChannelByURL());
     return arFullNg;
 }
-export function arrayUserNgMaker(userNg: string) {
+export function arrayUserNgMaker(
+    userNg: string,
+    isShareNGuser: boolean
+): string[] {
     let arUserNg = [];
     const splitedUserNg = userNg.split(/\r|\n|\r\n/);
     for (let ngi = 0; ngi < splitedUserNg.length; ngi++) {
@@ -144,6 +157,120 @@ export function arrayUserNgMaker(userNg: string) {
         splitedUserNg[ngi] = splitedUserNg[ngi].replace(/\/\/.*$/, ''); // 文中コメントを除去
         arUserNg.push(splitedUserNg[ngi]);
     }
-
+    if (isShareNGuser) postShareNGusers(arUserNg, getChannelByURL());
     return arUserNg;
+}
+export function postShareNGwords(
+    words: (RegExp | string)[],
+    channel: string | null
+) {
+    if (!channel) return;
+    let postWords: string[] = [];
+    for (let i = 0; i < words.length; i++) {
+        if (!gl.hasArray(postedNGwords, words[i].toString())) {
+            postWords.push(words[i].toString());
+        }
+    }
+    if (postWords.length === 0) return;
+
+    let postData = {
+        client: APIclientName,
+        channel: channel,
+        words: postWords
+    };
+    postedNGwords.push(...postWords); // 重複送信防止のため送信前にpostedに追加する
+    gl.postJson(
+        NGshareURLbase + 'add_json.php',
+        postData,
+        {},
+        function(result: { status: string }) {
+            if (result.status === 'success') {
+                console.log('postShareNGwords success', postWords, channel);
+                // postedNGwords = postedNGwords.concat(postWords);
+            } else {
+                console.log('postShareNGwords failed', result);
+            }
+        },
+        function() {
+            console.log('postShareNGwords post error');
+        }
+    );
+}
+export function postShareNGusers(users: string[], channel: string | null) {
+    if (!channel) return;
+    let postUsers: string[] = [];
+    for (let i = 0; i < users.length; i++) {
+        if (!gl.hasArray(postedNGusers, users[i].toString())) {
+            postUsers.push(users[i].toString());
+        }
+    }
+    if (postUsers.length === 0) return;
+
+    let postData = {
+        client: APIclientName,
+        channel: channel,
+        users: postUsers
+    };
+    postedNGusers.push(...postUsers); // 重複送信防止のため送信前にpostedに追加する
+    gl.postJson(
+        NGshareURLbase + 'add_json.php',
+        postData,
+        {},
+        function(result: { status: string }) {
+            if (result.status === 'success') {
+                console.log('postShareNGusers success', postUsers, channel);
+            } else {
+                console.log('postShareNGusers failed', result);
+            }
+        },
+        function() {
+            console.log('postShareNGusers post error');
+        }
+    );
+}
+export function applySharedNG(
+    appender: (appendNGwords: string[], appendNGusers: string[]) => void,
+    isInterval?: boolean
+) {
+    if (isNGShareInterval && !isInterval) {
+        return;
+    }
+    const channel = getChannelByURL();
+    if (channel) {
+        isNGShareInterval = true;
+        setTimeout(applySharedNG, 300000, appender, true); // 5分毎
+    } else {
+        isNGShareInterval = false;
+        return;
+    }
+    gl.getJson(
+        NGshareURLbase + 'sharedng/' + channel + '.json',
+        { client: APIclientName },
+        function(data: {
+            ngword: { word: string }[];
+            nguser: { userid: string }[];
+        }) {
+            let sharedNGwords = data.ngword;
+            let appendNGwords = [];
+            console.log('got shared NG words ');
+            console.table(sharedNGwords);
+            for (let asni = 0; asni < sharedNGwords.length; asni++) {
+                if (!gl.hasArray(postedNGwords, sharedNGwords[asni].word)) {
+                    postedNGwords.push(sharedNGwords[asni].word);
+                }
+                appendNGwords.push(sharedNGwords[asni].word);
+            }
+            let sharedNGusers = data.nguser;
+            let appendNGusers = [];
+            console.log('got shared NG users ');
+            console.table(sharedNGusers);
+            for (let asni = 0; asni < sharedNGusers.length; asni++) {
+                if (!gl.hasArray(postedNGusers, sharedNGusers[asni].userid)) {
+                    postedNGusers.push(sharedNGusers[asni].userid);
+                }
+                appendNGusers.push(sharedNGusers[asni].userid);
+            }
+            appender(appendNGwords, appendNGusers);
+        }
+    );
 }
