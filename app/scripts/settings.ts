@@ -1,4 +1,5 @@
 import * as settings from './settingsList';
+import { stringify } from 'querystring';
 // edge等ブラウザ対応
 // if (typeof chrome === "undefined" || !chrome.extension) {
 //     console.log('!ch',chrome)
@@ -20,7 +21,7 @@ export const defaultSettingsIncludeNoIs: {
 export const settingNames = Object.keys(defaultSettings);
 export const settingNamesIncludeNoIs = Object.keys(defaultSettingsIncludeNoIs);
 export const flatSettings: {
-    [index: string]: settings.Setting | settings.RadioSetting;
+    [index: string]: settings.Setting | settings.RadioBlockSetting;
 } = _flatSettings();
 
 function removeIs(str: string) {
@@ -248,19 +249,41 @@ function generateOptionInput(
                 inputHTML += description;
                 inputHTML += ':</label>';
                 inputHTML += '<select id="' + settingsArr[i].name + '">';
-                if (settingsArr[i].selections !== undefined) {
-                    (settingsArr[i].selections as (string | number)[]).forEach(
-                        function(item) {
-                            inputHTML +=
-                                '<option value="' +
-                                item +
-                                '">' +
-                                item +
-                                '</option>';
-                        }
-                    );
+                const selections = settingsArr[i].selections;
+                if (selections !== undefined) {
+                    selections.forEach(function(item) {
+                        inputHTML +=
+                            '<option value="' +
+                            item.value +
+                            '">' +
+                            item.string +
+                            '</option>';
+                    });
                 }
                 inputHTML += '</select><br/>';
+            } else if (settingsArr[i].type === 'radio') {
+                inputHTML += '<label for="' + settingsArr[i].name + '">';
+                inputHTML += description;
+                inputHTML += ':</label>';
+                const selections = settingsArr[i].selections;
+                if (selections !== undefined) {
+                    selections.forEach(function(item) {
+                        const id = settingsArr[i].name + '-' + item.value;
+                        inputHTML +=
+                            '<input type="radio" value="' +
+                            item.value +
+                            '" id="' +
+                            id +
+                            '" name="' +
+                            settingsArr[i].name +
+                            '"><label for="' +
+                            id +
+                            '">' +
+                            item.string +
+                            '</label> ';
+                    });
+                }
+                inputHTML += '<br/>';
             }
         }
         inputHTML += '</div>';

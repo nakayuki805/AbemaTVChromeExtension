@@ -1,10 +1,10 @@
-/* コメントエリアの一番外側要素 *//* 透明にする 透明度は右の数字を0-1の間で opacityで指定すると子要素まで透明になってコメントが見づらい*/
+/* コメントエリアの一番外側要素 */ /* 透明にする 透明度は右の数字を0-1の間で opacityで指定すると子要素まで透明になってコメントが見づらい*/
 /*
 [class^="TVContainer__right-comment-area___"]{
     background: rgba(255, 255, 255, 0.2);
 }
 */
- /* コメントエリア内のdiv,form要素 */
+/* コメントエリア内のdiv,form要素 */
 /*
 [class^="TVContainer__right-comment-area___"] div,[class^="TVContainer__right-comment-area___"] form{
     background: rgba(255, 255, 255, 0);完全透明
@@ -23,7 +23,7 @@
     opacity: 0.5;
 }
 */
-/* コメント本文 *//* コメントの文字色 *//*コメントの縁取り 4つのblackを好きな色にすると縁の色を変更できます。 */
+/* コメント本文 */ /* コメントの文字色 */ /*コメントの縁取り 4つのblackを好きな色にすると縁の色を変更できます。 */
 /*
 [class^="TVContainer__right-comment-area___"] [class^="styles__message___"] {
     color: white;
@@ -43,21 +43,25 @@
     overflow: auto;
 }
 */
-.movingComment {/* 横に流れるコメント */
+.movingComment {
+    /* 横に流れるコメント */
     color: white;
     font-weight: bold;
     font-size: xx-large;
     white-space: nowrap;
-    text-shadow: black 1px 1px 0px, black -1px 1px 0px, black 1px -1px 0px, black -1px -1px 0px;
+    text-shadow: black 1px 1px 0px, black -1px 1px 0px, black 1px -1px 0px,
+        black -1px -1px 0px;
     opacity: 0.8;
     left: 100%;
     z-index: 7;
 }
-.movingCommentCSS {/* CSSで横に動かす */
+.movingCommentCSS {
+    /* CSSで横に動かす */
     transition: left 16s linear;
     left: -100%;
 }
-.movingComment.selfComment {/* 自分のコメント */
+.movingComment.selfComment {
+    /* 自分のコメント */
     border-color: yellow;
     border-style: solid;
     border-width: 1px;
@@ -71,8 +75,9 @@
     opacity: 0.5;
 }
 */
-[class*="styles__balloon-"] { /* 緑色吹き出し非表示 */
-    display:none;
+[class*='styles__balloon-'] {
+    /* 緑色吹き出し非表示 */
+    display: none;
 }
 /* 古いコメントを非表示 onairpage.jsで設定
 [class^="TVContainer__right-comment-area___"] [class*="styles__comment-list-wrapper___"]>* {
@@ -85,21 +90,25 @@
     border-top-color:rgba(255,255,255,0.5);
 }
 */
-body{
-    overflow-x: hidden;/*コメント流したときにスクロールバーが出るのを防止*/
+body {
+    overflow-x: hidden; /*コメント流したときにスクロールバーが出るのを防止*/
 }
-[class*="styles__continue-btn___"] { /* 新着コメのボタン */
-/*    display:none;*/
+[class*='styles__continue-btn___'] {
+    /* 新着コメのボタン */
+    /*    display:none;*/
     opacity: 0.5;
 }
-[class*="styles__side___"] button{ /* 画面右の番組表ボタンと番組移動ボタン */
-    opacity:0.5;
-    z-index:20;
+[class*='styles__side___'] button {
+    /* 画面右の番組表ボタンと番組移動ボタン */
+    opacity: 0.5;
+    z-index: 20;
 }
-[class*="styles__side___"] { /* 画面右の番組表ボタンと番組移動ボタンをコメント欄の上からクリックできるように */
-    z-index:20;
+[class*='styles__side___'] {
+    /* 画面右の番組表ボタンと番組移動ボタンをコメント欄の上からクリックできるように */
+    z-index: 20;
 }
-#NGConfig { /*「AbemaTV, ニコニコ風コメントスクロール」ユーザースクリプトのNG設定画面　コメ欄とかぶらないように*/
+#NGConfig {
+    /*「AbemaTV, ニコニコ風コメントスクロール」ユーザースクリプトのNG設定画面　コメ欄とかぶらないように*/
     z-index: 20;
     opacity: 0.7;
 }
@@ -116,15 +125,17 @@ body{
     margin-left: -200px;
     width: 400px;
 }
-.ext-toast p{
+.ext-toast p {
     margin: 10px;
 }
 /* 音量ゲージ下部の吹き出しを下へ伸ばす */
-[class*="styles__footer___"] [class^="styles__volume___"] [class^="styles__slider-container___"]:after{
-    border-top-width:15px;
+[class*='styles__footer___']
+    [class^='styles__volume___']
+    [class^='styles__slider-container___']:after {
+    border-top-width: 15px;
 }
 /* その他メニューがコメ欄の下にくぐらないように */
-[class*="Dropdown__column___"]{
+[class*='Dropdown__column___'] {
     z-index: 15;
 }
 /* z-indexが効かない→音量とフルスクリーンボタンがコメ欄をくぐらないように 
@@ -137,7 +148,7 @@ body{
 }
 */
 /*視聴数を下へ*/
-[class*="styles__view-counter___"] {
+[class*='styles__view-counter___'] {
     opacity: 0.5;
     background-color: transparent;
 }
@@ -160,17 +171,18 @@ body{
     left: 12px;
     position: relative;
 }
-.listAddNotifyWrapper .addNotify { /*検索結果と公式視聴予約一覧*/
+.listAddNotifyWrapper .addNotify {
+    /*検索結果と公式視聴予約一覧*/
     padding: 5px 0 4px;
     /* margin-left: 12px; */
     margin-top: 0;
     width: 200px;
 }
-.addNotify:hover{
+.addNotify:hover {
     opacity: 0.7;
 }
 /*公式通知画面の通知一括登録ボタン*/
-.addAllNotifyButton{
+.addAllNotifyButton {
     cursor: pointer;
     background: #fff;
     border: 1px solid orangered;
@@ -183,32 +195,34 @@ body{
     width: 100%;
     margin-top: 16px;
 }
-.addAllNotifyButton:hover{
+.addAllNotifyButton:hover {
     opacity: 0.7;
 }
 /*通知登録済み番組背景*/
-.registeredProgs>button>div{
-    background-color:rgba(255,238,187,0.7);
+.registeredProgs > button > div {
+    background-color: rgba(255, 238, 187, 0.7);
 }
-.registeredProgs>button>div:hover{
-    background-color:rgba(250,233,182,0.7);
+.registeredProgs > button > div:hover {
+    background-color: rgba(250, 233, 182, 0.7);
 }
 /*チャンネル別番組表で番組の枠を広げたときに途中までしかスクロールできない問題に対応*/
-[class*="styles__time-table___"] [class*="styles__col___1"] {
+[class*='styles__time-table___'] [class*='styles__col___1'] {
     overflow: visible;
 }
 /*視聴数*/
-[class*="styles__view-counter___"] {
-    transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);
+[class*='styles__view-counter___'] {
+    transition: transform 0.5s cubic-bezier(0.215, 0.61, 0.355, 1),
+        visibility 0.5s cubic-bezier(0.215, 0.61, 0.355, 1),
+        -webkit-transform 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
     width: 100px; /* 要素の幅が不安定なので決め打ち 100という数字はonairpage.css中の視聴数位置調整でも使用 */
     padding-left: 0px;
     padding-right: 0px;
 }
 /* トグルスイッチ */
-.toggle-switch{
+.toggle-switch {
     display: inline-block;
 }
-.toggle-switch input[type="checkbox"]{
+.toggle-switch input[type='checkbox'] {
     appearance: none;
     -webkit-appearance: none;
     -ms-appearance: none;
@@ -219,40 +233,40 @@ body{
     top: 5px;
     width: 32px;
     height: 10px;
-    border: 0px solid rgba(0,0,0,0.0);
+    border: 0px solid rgba(0, 0, 0, 0);
     border-radius: 50px;
     background-color: #ddd;
-    transition: background-color .4s ease;
+    transition: background-color 0.4s ease;
 }
-.toggle-switch input[type="checkbox"] + label {
+.toggle-switch input[type='checkbox'] + label {
     position: relative;
     display: inline-block;
     top: 2px;
     left: -38px;
     width: 14px;
     height: 14px;
-    border: 0px solid rgba(0,0,0,0.0);
+    border: 0px solid rgba(0, 0, 0, 0);
     border-radius: 50%;
     background-color: #eee;
-    box-shadow: 0 0 4px rgba(0,0,0,0.4);
-    transition: left .4s ease, background-color .4s ease;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+    transition: left 0.4s ease, background-color 0.4s ease;
 }
-.toggle-switch input[type="checkbox"]:checked + label {
+.toggle-switch input[type='checkbox']:checked + label {
     position: relative;
     display: inline-block;
     top: 2px;
     left: -18px;
     width: 14px;
     height: 14px;
-    border: 0px solid rgba(0,0,0,0.0);
+    border: 0px solid rgba(0, 0, 0, 0);
     border-radius: 50%;
     background-color: #00bbd3;
-    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
 }
-.toggle-switch input[type="checkbox"]:checked {
+.toggle-switch input[type='checkbox']:checked {
     background-color: #bbb;
 }
-.toggle-switch input[type="checkbox"]:focus {
+.toggle-switch input[type='checkbox']:focus {
     outline: none;
 }
 .ext-sideButton {
@@ -271,9 +285,16 @@ body{
     top: 0;
     right: 0;
     bottom: 0;
-    height:20px;
-    width:20px;
+    height: 20px;
+    width: 20px;
 }
-[data-ext-ngcomment="true"]{
-    display:none;
+[data-ext-ngcomment='true'] {
+    display: none;
+}
+.inputWrapper {
+    border-bottom: #ddd 1px solid;
+    padding-bottom: 5px;
+}
+.inputWrapper:first-child {
+    border-top: #ddd 1px solid;
 }

@@ -902,8 +902,7 @@ function openOption() {
     $('#isHideButtons').prop('checked', settings.isHideButtons);
     $('#isResizeSpacing').prop('checked', settings.isResizeSpacing);
     $('#isDeleteStrangeCaps').prop('checked', settings.isDeleteStrangeCaps);
-    //    $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
-    $('#ihighlightNewCome input[type="radio"][name="highlightNewCome"]').val([
+    $('input[type="radio"][name="highlightNewCome"]').val([
         settings.highlightNewCome
     ]);
     $('#isHidePopFresh').prop('checked', settings.isHidePopFresh);
@@ -915,10 +914,10 @@ function openOption() {
     );
     $('#timetableScroll').val(settings.timetableScroll);
     $('#isHideTwitterPanel').prop('checked', settings.isHideTwitterPanel);
-    $('#isHideTodayHighlitht').prop('checked', settings.isHideTodayHighlight);
+    $('#isHideTodayHighlight').prop('checked', settings.isHideTodayHighlight);
     $('#isComelistClickNG').prop('checked', settings.isComelistClickNG);
     $(
-        '#ihighlightComeColor input[type="radio"][name="highlightComeColor"]'
+        'input[type="radio"][name="highlightComeColor"]'
     ).val([settings.highlightComeColor]);
     $('#highlightComePower').val(settings.highlightComePower);
     $('#isComeClickNGautoClose').prop(
@@ -1719,7 +1718,10 @@ function createSettingWindow() {
         settcont += '</div>';
         settcont += '<div id="settcontfooter">';
         settcont += '<input type="button" id="saveBtn" value="一時保存"> ';
-        settcont += '<input type="button" class="closeBtn" value="閉じる"><br>';
+        settcont += '<input type="button" class="closeBtn" value="閉じる"> ';
+        settcont += '<input type="button" class="leftshift" value="←この設定画面を少し左へ">';
+        settcont += '<input type="button" class="rightshift" value="この設定画面を右へ→" style="display:none;">';
+        settcont += '<br>';
         settcont +=
             '※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。';
         settcont += '</div>';
@@ -1738,6 +1740,16 @@ function createSettingWindow() {
         $('#highlightComePower').change(setHighlightComePowerChanged);
         $('#panelOpacity').change(setPanelOpacityChanged);
         $('#comeFontsize').change(setComeFontsizeChanged);
+        $('.leftshift').on('click', function() {
+            $('#settcont').css('right', commentListWidth+'px');
+            $('.leftshift').css('display', 'none');
+            $('.rightshift').css('display', '');
+        });
+        $('.rightshift').on('click', function() {
+            $('#settcont').css('right', '40px');
+            $('.rightshift').css('display', 'none');
+            $('.leftshift').css('display', '');
+        });
     }
     $('#CommentMukouSettings').hide();
     $('#CommentColorSettings')
@@ -1791,30 +1803,7 @@ function createSettingWindow() {
             '<span id="prosamedesc" style="margin-left:4px;">↑と↓が同じ位置の場合: </span>'
         ).prependTo('#iproSamePosition>*');
     }
-    if ($('.leftshift').length == 0) {
-        $(
-            '<input type="button" class="leftshift" value="←この設定画面を少し左へ" style="float:right;margin-top:10px;padding:0px 3px;">'
-        ).insertBefore($('#CommentColorSettings').parent());
-        $('.leftshift').on('click', function() {
-            $('#settcont').css('right', '320px');
-            $('.leftshift').css('display', 'none');
-            $('.rightshift').css('display', '');
-        });
-    }
-    if ($('.rightshift').length == 0) {
-        $(
-            '<input type="button" class="rightshift" value="この設定画面を右へ→" style="float:right;margin-top:10px;display:none;padding:0px 3px;">'
-        ).insertBefore($('#CommentColorSettings').parent());
-        $('.rightshift').on('click', function() {
-            $('#settcont').css('right', '40px');
-            $('.rightshift').css('display', 'none');
-            $('.leftshift').css('display', '');
-            //$('#PsaveCome').prop("disabled", true)
-            //    .css("color", "gray")
-            //    ;
-            //setTimeout(clearBtnColored, 1200, $('#PsaveCome'));
-        });
-    }
+
     if ($('#windowresize').length == 0) {
         $(
             '<div id="windowresize">ウィンドウのサイズ変更<span id="windowsizes"></span></div>'
@@ -2233,7 +2222,7 @@ function createSettingWindow() {
             .next('br')
             .remove();
     }
-    if ($('#highlightdesc').length == 0) {
+    /*if ($('#highlightdesc').length == 0) {
         $('#ihighlightNewCome')
             .insertBefore('#isCommentWide-switch')
             .css('border', 'black solid 1px')
@@ -2248,8 +2237,8 @@ function createSettingWindow() {
             .before(
                 '<span id="highlightdesc">新着コメントを少し強調する</span>'
             );
-    }
-    if ($('#highlightCdesc').length == 0) {
+    }*/
+    /*if ($('#highlightCdesc').length == 0) {
         $('#ihighlightComeColor')
             .insertBefore('#isCommentWide-switch')
             .css('border', 'black solid 1px')
@@ -2282,7 +2271,7 @@ function createSettingWindow() {
                 settings.highlightComePower +
                 '</span>'
         ).insertBefore('#highlightComePower');
-    }
+    }*/
     $('#changeMaxVolume')
         .prop('max', '100')
         .prop('min', '0');
@@ -2306,7 +2295,7 @@ function setComeFontsizeChanged() {
     jo.css('font-size', nf + 'px');
 }
 function setHighlightComePowerChanged() {
-    $('#highlightPdesc').text('背景濃さ:' + $('#highlightComePower').val());
+    //$('#highlightPdesc').text('背景濃さ:' + $('#highlightComePower').val());
 }
 function setPanelOpacityChanged() {
     $('#panelOpacity')
@@ -2621,10 +2610,9 @@ function setSaveClicked() {
     settings.isHideButtons = $('#isHideButtons').prop('checked');
     settings.isResizeSpacing = $('#isResizeSpacing').prop('checked');
     settings.isDeleteStrangeCaps = $('#isDeleteStrangeCaps').prop('checked');
-    //    isHighlightNewCome=$('#isHighlightNewCome').prop("checked");
     settings.highlightNewCome = parseInt(
         $(
-            '#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked'
+            'input[type="radio"][name="highlightNewCome"]:checked'
         ).val()
     );
     settings.isHidePopFresh = $('#isHidePopFresh').prop('checked');
@@ -2636,7 +2624,7 @@ function setSaveClicked() {
     settings.isComelistClickNG = $('#isComelistClickNG').prop('checked');
     settings.highlightComeColor = parseInt(
         $(
-            '#ihighlightComeColor input[type="radio"][name="highlightComeColor"]:checked'
+            'input[type="radio"][name="highlightComeColor"]:checked'
         ).val()
     );
     settings.highlightComePower = parseInt($('#highlightComePower').val());
@@ -5360,7 +5348,7 @@ function setOptionHead() {
         t += selComesendinpp + '{background-color:' + uc + ' !important;}';
         //投稿可能時にabemaが付与すると思われるクラスがついたときは背景色を少し変える
         t +=
-            '.com-o-CommentForm__can-post .com-o-CommentForm__opened-textarea-wrapper{background-color:' +
+            '.com-o-CommentForm__can-post .com-o-CommentForm__opened-textarea-wrapper:not(#copytw){background-color:' +
             activeInputBack +
             ' !important;}';
     }
@@ -6713,7 +6701,7 @@ function comehl(jo, hlsw) {
         hlbt = parseInt($('#commentBackTrans').val());
         hlc = parseInt(
             $(
-                '#ihighlightComeColor input[type="radio"][name="highlightComeColor"]:checked'
+                'input[type="radio"][name="highlightComeColor"]:checked'
             ).val()
         );
         hlp = parseInt($('#highlightComePower').val());
@@ -8249,7 +8237,7 @@ function onCommentChange(mutations) {
                         ? settings.highlightNewCome
                         : parseInt(
                               $(
-                                  '#ihighlightNewCome input[type="radio"][name="highlightNewCome"]:checked'
+                                  'input[type="radio"][name="highlightNewCome"]:checked'
                               ).val()
                           );
                 applyCommentListNG(d);

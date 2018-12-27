@@ -18,31 +18,29 @@ $(function() {
     $('.inputWrapper')
         .mouseover(function(e) {
             const name = this.id.match(/(.+)-wrapper/)[1];
-            const descImage = this.closest(
-                '.settingWrapper'
-            ).getElementsByClassName('descImage')[0];
+            const wrapper = this.closest('.settingWrapper');
+            if (!wrapper) return;
+            const descImage = wrapper.getElementsByClassName('descImage')[0];
             if (
                 !descImage ||
                 !name ||
                 !settings.flatSettings[name].hasDescImage
             )
                 return;
-            console.log('in', name, descImage);
             const src = descImageDir + name + '.png';
             descImage.setAttribute('src', src);
         })
         .mouseleave(function(e) {
             const name = this.id.match(/(.+)-wrapper/)[1];
-            const descImage = this.closest(
-                '.settingWrapper'
-            ).getElementsByClassName('descImage')[0];
+            const wrapper = this.closest('.settingWrapper');
+            if (!wrapper) return;
+            const descImage = wrapper.getElementsByClassName('descImage')[0];
             if (
                 !descImage ||
                 !name ||
                 !settings.flatSettings[name].hasDescImage
             )
                 return;
-            console.log('out', name, descImage);
             const src = descImageDir + name + '.png';
             if (descImage.getAttribute('src') === src)
                 descImage.setAttribute('src', descImageDir + '1x1.png');
@@ -300,7 +298,7 @@ $(function() {
             .css('padding', '3px');
         $('#panelcustomTable td:first-child').css('text-align', 'center');
     }
-    $('#ihighlightNewCome')
+    /*$('#ihighlightNewCome')
         .insertBefore('#isCommentWide-switch')
         .css('border', 'black solid 1px')
         .children()
@@ -341,7 +339,7 @@ $(function() {
         .prop('min', '0');
     $(
         '<span id="highlightPdesc" style="margin-right:4px;margin-left:12px;">背景濃さ: </span>'
-    ).insertBefore('#highlightComePower');
+    ).insertBefore('#highlightComePower');*/
     $('#changeMaxVolume')
         .prop('max', '100')
         .prop('min', '0');
@@ -521,7 +519,7 @@ $(function() {
             ',' +
             commentTextTrans / 255 +
             ')';
-        $('#CommentColorSettings>div>span.desc')
+        $('#CommentColorSettings span.desc')
             .css('background-color', bc)
             .css('color', tc);
         $('#commentBackColor')
@@ -642,9 +640,7 @@ $(function() {
         $('#isResizeSpacing').prop('checked', isResizeSpacing);
         $('#isDeleteStrangeCaps').prop('checked', isDeleteStrangeCaps);
         //        $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
-        $('#ihighlightNewCome [type="radio"][name="highlightNewCome"]').val([
-            highlightNewCome
-        ]);
+        $('[type="radio"][name="highlightNewCome"]').val([highlightNewCome]);
         // $('#isChTimetableExpand').prop("checked",isChTimetableExpand);
         $('#isHidePopFresh').prop('checked', isHidePopFresh);
         $('#isChTimetableBreak').prop('checked', isChTimetableBreak);
@@ -655,9 +651,9 @@ $(function() {
         $('#isHideTodayHighlight').prop('checked', isHideTodayHighlight);
         $('#isComelistNG').prop('checked', isComelistNG);
         $('#isComelistClickNG').prop('checked', isComelistClickNG);
-        $('#ihighlightComeColor [type="radio"][name="highlightComeColor"]').val(
-            [highlightComeColor]
-        ); //
+        $('[type="radio"][name="highlightComeColor"]').val([
+            highlightComeColor
+        ]); //
         $('#highlightComePower').val(highlightComePower);
         $('#highlightPdesc').text('背景濃さ:' + highlightComePower); //
         $('#isComeClickNGautoClose').prop('checked', isComeClickNGautoClose);
@@ -820,9 +816,7 @@ $(function() {
                 resizeSpacing: $('#isResizeSpacing').prop('checked'),
                 deleteStrangeCaps: $('#isDeleteStrangeCaps').prop('checked'),
                 //            "highlightNewCome":$('#isHighlightNewCome').prop("checked"),
-                highlightNewCome: $(
-                    '#ihighlightNewCome [name="highlightNewCome"]:checked'
-                ).val(),
+                highlightNewCome: $('[name="highlightNewCome"]:checked').val(),
                 // "chTimetableExpand":$('#isChTimetableExpand').prop("checked"),
                 hidePopFresh: $('#isHidePopFresh').prop('checked'),
                 chTimetableBreak: $('#isChTimetableBreak').prop('checked'),
@@ -836,7 +830,7 @@ $(function() {
                 comelistNG: $('#isComelistNG').prop('checked'),
                 comelistClickNG: $('#isComelistClickNG').prop('checked'),
                 highlightComeColor: $(
-                    '#ihighlightComeColor [name="highlightComeColor"]:checked'
+                    '[name="highlightComeColor"]:checked'
                 ).val(),
                 highlightComePower: $('#highlightComePower').val(),
                 comeClickNGautoClose: $('#isComeClickNGautoClose').prop(
@@ -920,7 +914,7 @@ $(function() {
         //            $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
         //            p[i]=$(jo).val();
         //        });
-        $('#CommentColorSettings>div>span.desc')
+        $('#CommentColorSettings span.desc')
             .css(
                 'background-color',
                 'rgba(' +

@@ -3,11 +3,18 @@ interface BasicSetting {
     title?: string;
     description?: string;
     instantDescription?: string;
-    type: 'boolean' | 'number' | 'range' | 'text' | 'textarea' | 'select';
+    type:
+        | 'boolean'
+        | 'number'
+        | 'range'
+        | 'text'
+        | 'textarea'
+        | 'select'
+        | 'radio';
     default: boolean | string | number;
     isInstantChangable: boolean;
     range?: number[];
-    selections?: (string | number)[];
+    selections?: { value: string | number; string: string }[];
     hasDescImage?: boolean;
 }
 interface BooleanSetting extends BasicSetting {
@@ -35,7 +42,12 @@ interface TextareaSetting extends BasicSetting {
 interface SelectSetting extends BasicSetting {
     type: 'select';
     default: string | number;
-    selections: (string | number)[];
+    selections: { value: string | number; string: string }[];
+}
+interface RadioSetting extends BasicSetting {
+    type: 'radio';
+    default: string | number;
+    selections: { value: string | number; string: string }[];
 }
 export type Setting =
     | BooleanSetting
@@ -43,7 +55,8 @@ export type Setting =
     | RangeSetting
     | TextSetting
     | TextareaSetting
-    | SelectSetting;
+    | SelectSetting
+    | RadioSetting;
 export interface SettingList {
     description: string;
     isShowImage?: boolean;
@@ -116,8 +129,7 @@ export const settings: SettingList[] = [
             {
                 name: 'isCancelWheel',
                 //        "description": "マウスホイールによる番組移動を禁止する",
-                description:
-                    'マウスホイール及び上下矢印キーによる番組移動を無効化する',
+                description: '上下矢印キーによる番組移動を無効化する',
                 type: 'boolean',
                 isInstantChangable: true,
                 default: false
@@ -147,21 +159,6 @@ export const settings: SettingList[] = [
                 isInstantChangable: true,
                 default: false,
                 hasDescImage: true
-            },
-            {
-                name: 'isHideTwitterPanel',
-                description: 'パネル「twitterで通知を受け取る」を非表示',
-                type: 'boolean',
-                isInstantChangable: true,
-                default: false
-            },
-            {
-                name: 'isHideTodayHighlight',
-                description:
-                    '右上の「今日のみどころ」を放送中画面で非表示(このオプションはトップページには効きません)',
-                type: 'boolean',
-                isInstantChangable: true,
-                default: false
             },
             {
                 name: 'isHideVoting',
@@ -211,7 +208,13 @@ export const settings: SettingList[] = [
                 name: 'minResolution',
                 description: '最小解像度',
                 type: 'select',
-                selections: [0, 180, 240, 360, 480],
+                selections: [
+                    { value: 0, string: '0' },
+                    { value: 180, string: '180' },
+                    { value: 240, string: '240' },
+                    { value: 360, string: '360' },
+                    { value: 480, string: '480' }
+                ],
                 isInstantChangable: true,
                 default: 0
             },
@@ -219,7 +222,16 @@ export const settings: SettingList[] = [
                 name: 'maxResolution',
                 description: '最大解像度',
                 type: 'select',
-                selections: [180, 240, 360, 480, 720, 1080, 2160],
+                selections: [
+                    { value: 0, string: '0' },
+                    { value: 180, string: '180' },
+                    { value: 240, string: '240' },
+                    { value: 360, string: '360' },
+                    { value: 480, string: '480' },
+                    { value: 720, string: '720' },
+                    { value: 1080, string: '1080' },
+                    { value: 2160, string: '2160' }
+                ],
                 isInstantChangable: true,
                 default: 2160
             }
@@ -227,22 +239,15 @@ export const settings: SettingList[] = [
     },
     {
         description: 'コメント欄関連設定',
-        isShowImage: false,
+        isShowImage: true,
         settings: [
             {
                 name: 'isHideOldComment',
                 description: 'コメント欄のスクロールバーを非表示にする',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
-            },
-            {
-                name: 'isInpWinBottom',
-                description:
-                    '<s>コメント入力欄を下へ(コメント一覧は逆順・下スクロール)</s>公式で最新コメントが下に来るようになったのでこの設定は無視されます。(廃止予定)',
-                type: 'boolean',
-                isInstantChangable: false, // 無視するためにfalse
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isCustomPostWin',
@@ -251,7 +256,8 @@ export const settings: SettingList[] = [
                 type: 'boolean',
                 //        "isInstantChangable": false
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isSureReadComment',
@@ -261,7 +267,8 @@ export const settings: SettingList[] = [
                 type: 'boolean',
                 //        "isInstantChangable": false
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isCommentFormWithSide',
@@ -269,7 +276,8 @@ export const settings: SettingList[] = [
                     '↑有効時にコメント入力欄を右のボタンと連動して非表示(画面右のボタンがマウス無操作時に非表示になる場合、合わせて入力欄も非表示になります)',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isComeTriming',
@@ -277,63 +285,94 @@ export const settings: SettingList[] = [
                     '↑常にコメント欄を表示するような場合にコメント欄が上下に縮まないように上下黒帯を横に縮める',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'sureReadRefreshx',
                 //        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
                 //        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
                 description:
-                    '<s>常にコメント欄を表示する場合で、</s>読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、100以前の古いコメントが破棄されることで動作が軽くなります。重いときは少なくすると軽くなります。)',
+                    '読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、古いコメントが破棄されることで動作が軽くなります。重いときは少なくすると軽くなります。コメント欄の開き直しによるカクつき・ちらつきが気になる場合は多くしてください。)',
                 type: 'number',
                 isInstantChangable: true,
                 default: 500,
-                range: [101]
+                range: [101],
+                hasDescImage: true
             },
             {
                 name: 'isCommentPadZero',
                 description: 'コメントの縦の隙間を詰める',
-                instantDescription:
-                    'コメントの縦の隙間を詰める(一時適応すると今までのコメントが消えます)',
+                instantDescription: 'コメントの縦の隙間を詰める',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isCommentTBorder',
                 description: 'コメントの区切り線を付ける',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isCommentWide',
                 description: 'コメントを横にほんの少し広げる',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
-            },
-            {
-                name: 'isDelOldTime',
-                description:
-                    '<s>古いコメントの投稿時刻の表示を非表示にする。</s>現在機能しません。',
-                type: 'boolean',
-                isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isDelTime',
                 description: '各コメントの投稿時刻を全て非表示にする。',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
+            },
+            {
+                name: 'highlightNewCome',
+                description: '新着コメントを少し強調する',
+                isInstantChangable: true,
+                type: 'radio',
+                selections: [
+                    { value: 0, string: 'なし' },
+                    { value: 1, string: '先頭マーク' },
+                    { value: 2, string: '背景着色' },
+                    { value: 3, string: '両方' }
+                ],
+                default: 0,
+                hasDescImage: true
+            },
+            {
+                name: 'highlightComeColor',
+                description: '↑新着コメントの強調色',
+                type: 'radio',
+                isInstantChangable: true,
+                default: 0,
+                selections: [
+                    { value: 0, string: '黄' },
+                    { value: 1, string: '橙' },
+                    { value: 2, string: '赤' },
+                    { value: 3, string: '桃' },
+                    { value: 4, string: '紫' },
+                    { value: 5, string: '青' },
+                    { value: 6, string: '水' },
+                    { value: 7, string: '緑' },
+                    { value: 8, string: '白' },
+                    { value: 9, string: '黒' }
+                ]
             },
             {
                 name: 'highlightComePower',
-                description: '新着コメント強調の強度',
+                description: '↑新着コメント強調の強度',
                 type: 'number',
                 isInstantChangable: true,
-                default: 30
+                default: 30,
+                range: [0, 100]
             },
             {
                 name: 'isUserHighlight',
@@ -341,7 +380,8 @@ export const settings: SettingList[] = [
                     'コメントにマウスオーバーで同一ユーザーのコメントの背景を黄色くする(同一人物のコメントを見分けるのに便利です。)',
                 type: 'boolean',
                 isInstantChangable: true,
-                default: false
+                default: false,
+                hasDescImage: true
             }
         ]
     },
@@ -652,7 +692,7 @@ export const settings: SettingList[] = [
     },
     {
         description: '番組表関連設定',
-        isShowImage: false,
+        isShowImage: true,
         settings: [
             {
                 name: 'isChTimetableBreak',
@@ -669,15 +709,17 @@ export const settings: SettingList[] = [
                     'チャンネル別番組表ページにて、土曜を青、日曜を赤に着色する',
                 type: 'boolean',
                 isInstantChangable: false,
-                default: true
+                default: true,
+                hasDescImage: true
             },
             {
                 name: 'isChTimetablePlaybutton',
                 description:
-                    '各番組表ページに、放送中画面への直接リンクを設置する (丸型の再生ボタンの場合、番組詳細画面が一瞬だけ表示されます) ◆',
+                    '各番組表ページの放送中番組に放送画面へ移動するボタンを追加◆',
                 type: 'boolean',
                 isInstantChangable: false,
-                default: true
+                default: true,
+                hasDescImage: true
             },
             {
                 name: 'timetableScroll',
@@ -685,15 +727,17 @@ export const settings: SettingList[] = [
                     '番組表を開いたときに指定したチャンネルまで自動スクロール(abema-news、drama、abema-animeなどのurl中のチャンネル名を一つ指定)',
                 type: 'text',
                 default: '',
-                isInstantChangable: false
+                isInstantChangable: false,
+                hasDescImage: true
             },
             {
                 name: 'allowChannelNames',
                 description:
-                    '番組表で表示するチャンネル名を半角カンマ区切り(番組表を指定したチャンネルのみの表示にできます)(番組表で各チャンネルリンクの右クリックメニューやチャンネル一覧のチェックボックスから切替可)',
+                    '番組表で表示するチャンネル名を半角カンマ区切りで指定(番組表を指定したチャンネルのみの表示にできます)(番組表で各チャンネルリンクの右クリックメニューやチャンネル一覧のチェックボックスから切替可)',
                 type: 'text',
                 default: '',
-                isInstantChangable: false
+                isInstantChangable: false,
+                hasDescImage: true
             },
             {
                 name: 'isExpandLastItem',
@@ -716,12 +760,13 @@ export const settings: SettingList[] = [
                 description: '番組表の横移動ボタンを非表示',
                 type: 'boolean',
                 isInstantChangable: false,
-                default: false
+                default: false,
+                hasDescImage: true
             },
             {
                 name: 'isPutSideDetailHighlight',
                 description:
-                    '番組表の右枠に詳細文を追加する(番組表本体の枠内に記載がある場合のみ)',
+                    '番組表の右枠に詳細文を追加する(番組表本体の枠内に記載がある場合のみ、現在は記載がないことが多いようです。)',
                 type: 'boolean',
                 isInstantChangable: false,
                 default: true
@@ -732,6 +777,43 @@ export const settings: SettingList[] = [
                     '番組表のタイトルに付いているアイコンを開始時刻(分)の下へ移動(現在機能しないようです。)',
                 type: 'boolean',
                 isInstantChangable: false,
+                default: false
+            }
+        ]
+    },
+    {
+        description: '廃止予定の設定',
+        settings: [
+            {
+                name: 'isHideTwitterPanel',
+                description:
+                    'パネル「twitterで通知を受け取る」を非表示(最近出現していないので廃止検討中)',
+                type: 'boolean',
+                isInstantChangable: true,
+                default: false
+            },
+            {
+                name: 'isHideTodayHighlight',
+                description:
+                    '右上の「今日のみどころ」を放送中画面で非表示(このオプションはトップページには効きません)(最近出現していないので廃止検討中)',
+                type: 'boolean',
+                isInstantChangable: true,
+                default: false
+            },
+            {
+                name: 'isInpWinBottom',
+                description:
+                    '<s>コメント入力欄を下へ(コメント一覧は逆順・下スクロール)</s>公式で最新コメントが下に来るようになったのでこの設定は無視されます。(廃止予定)',
+                type: 'boolean',
+                isInstantChangable: false, // 無視するためにfalse
+                default: false
+            },
+            {
+                name: 'isDelOldTime',
+                description:
+                    '<s>古いコメントの投稿時刻の表示を非表示にする。</s>現在機能しません。(実装が難しく需要が少なそうなので廃止検討中)',
+                type: 'boolean',
+                isInstantChangable: true,
                 default: false
             }
         ]
@@ -767,14 +849,14 @@ export const comeColorSettings: Setting[] = [
         default: 255
     }
 ];
-export interface RadioSetting {
+export interface RadioBlockSetting {
     name: string;
     type: string;
     list: (string | number)[][][];
     default: string | number;
     range?: any; // エラー押さえ込み
 }
-export const radioSettings: RadioSetting[] = [
+export const radioSettings: RadioBlockSetting[] = [
     {
         name: 'timePosition',
         type: 'radio',
@@ -839,13 +921,13 @@ export const radioSettings: RadioSetting[] = [
             [[255879, 'デフォルト'], [531440, '常に表示'], [531441, 'カスタム']]
         ],
         default: 255879
-    },
+    } /*,
     {
         name: 'highlightNewCome',
         type: 'radio',
         list: [[[0, 'なし'], [1, '先頭マーク'], [2, '背景着色'], [3, '両方']]],
         default: 0
-    },
+    } */ /*,
     {
         name: 'highlightComeColor',
         type: 'radio',
@@ -864,7 +946,7 @@ export const radioSettings: RadioSetting[] = [
             ]
         ],
         default: 0
-    }
+    }*/
 ];
 export const CMSettings: Setting[] = [
     {
