@@ -2,6 +2,7 @@
 import * as $ from 'jquery';
 import './lib/jquery-lib';
 import * as settingslib from './settings';
+import * as settingHtml from './lib/settingHtml';
 import * as getElm from './lib/getAbemaElement';
 import * as getInfo from './lib/getAbemaInfo';
 import * as dl from './lib/dom-lib';
@@ -760,35 +761,8 @@ function openOption() {
     settcontjq.css('display', 'flex');
     optionHeightFix();
     //設定ウィンドウにロード
-    $('#isResizeScreen').prop('checked', settings.isResizeScreen);
-    $('#isDblFullscreen').prop('checked', settings.isDblFullscreen);
-    $('#isHideOldComment').prop('checked', settings.isHideOldComment);
-    $('#isCMBlack').prop('checked', settings.isCMBlack);
-    $('#isCMBkTrans').prop('checked', settings.isCMBkTrans);
-    $('#isCMsoundoff').prop('checked', settings.isCMsoundoff);
-    $('#CMsmall').val(settings.CMsmall);
-    $('#isMovingComment').prop('checked', settings.isMovingComment);
-    $('#movingCommentSecond').val(settings.movingCommentSecond);
-    $('#movingCommentLimit').val(settings.movingCommentLimit);
-    //    $("#isMoveByCSS").prop("checked", isMoveByCSS);
-    $('#isComeNg').prop('checked', settings.isComeNg);
-    $('#isComeDel').prop('checked', settings.isComeDel);
-    $('#fullNg').val(settings.fullNg);
-    $('#isInpWinBottom').prop('checked', settings.isInpWinBottom);
-    $('#isCustomPostWin').prop('checked', settings.isCustomPostWin);
-    $('#isCancelWheel').prop('checked', settings.isCancelWheel);
-    $('#isVolumeWheel').prop('checked', settings.isVolumeWheel);
-    $('#changeMaxVolume').val(settings.changeMaxVolume);
-    $('#isTimeVisible').prop('checked', settings.isTimeVisible);
-    $('#isSureReadComment').prop('checked', settings.isSureReadComment);
-    $('#isCommentFormWithSide').prop('checked', settings.isCommentFormWithSide);
-    $('#sureReadRefreshx').val(settings.sureReadRefreshx);
-    // $("#isAlwaysShowPanel").prop("checked", settings.isAlwaysShowPanel);
-    //    $("#isMovieMaximize").prop("checked", isMovieMaximize);
-    $('#commentBackColor').val(settings.commentBackColor);
-    $('#commentBackTrans').val(settings.commentBackTrans);
-    $('#commentTextColor').val(settings.commentTextColor);
-    $('#commentTextTrans').val(settings.commentTextTrans);
+    settingHtml.setSettingInputValue(settings, false);
+    settingHtml.setRangeNumberDisplayer();// rangeのprop反映
     var bc =
         'rgba(' +
         settings.commentBackColor +
@@ -815,52 +789,7 @@ function openOption() {
     jo.css('background-color', bc).css('color', tc);
     if (comelistClasses.message)
         jo.children('.' + comelistClasses.message).css('color', tc);
-    $('#commentBackColor')
-        .val(settings.commentBackColor)
-        .prev('span.prop')
-        .text(
-            settings.commentBackColor +
-                ' (' +
-                Math.round((settings.commentBackColor * 100) / 255) +
-                '%)'
-        );
-    $('#commentBackTrans')
-        .val(settings.commentBackTrans)
-        .prev('span.prop')
-        .text(
-            settings.commentBackTrans +
-                ' (' +
-                Math.round((settings.commentBackTrans * 100) / 255) +
-                '%)'
-        );
-    $('#commentTextColor')
-        .val(settings.commentTextColor)
-        .prev('span.prop')
-        .text(
-            settings.commentTextColor +
-                ' (' +
-                Math.round((settings.commentTextColor * 100) / 255) +
-                '%)'
-        );
-    $('#commentTextTrans')
-        .val(settings.commentTextTrans)
-        .prev('span.prop')
-        .text(
-            settings.commentTextTrans +
-                ' (' +
-                Math.round((settings.commentTextTrans * 100) / 255) +
-                '%)'
-        );
-    $('#isCommentPadZero').prop('checked', settings.isCommentPadZero);
-    $('#isCommentTBorder').prop('checked', settings.isCommentTBorder);
-    $('#itimePosition input[type="radio"][name="timePosition"]').val([
-        settings.timePosition
-    ]);
-    $('#itimePosition').css(
-        'display',
-        settings.isTimeVisible ? 'flex' : 'none'
-    );
-    $('#notifySeconds').val(settings.notifySeconds);
+    
     $(
         '#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]'
     ).val([0]);
@@ -869,92 +798,17 @@ function openOption() {
     ).val([0]);
     $('#beforeCMWait').val(cmblockia - 1);
     $('#afterCMWait').val(-cmblockib - 1);
-    $('#isManualKeyCtrlR').prop('checked', settings.isManualKeyCtrlR);
-    $('#isManualKeyCtrlL').prop('checked', settings.isManualKeyCtrlL);
-    $('#isManualMouseBR').prop('checked', settings.isManualMouseBR);
-    $('#isCMBkR').prop('checked', settings.isCMBkR);
-    $('#isCMsoundR').prop('checked', settings.isCMsoundR);
-    $('#isCMsmlR').prop('checked', settings.isCMsmlR);
-    $('#isTabSoundplay').prop('checked', settings.isTabSoundplay);
-    // $("#isOpenPanelwCome").prop("checked", isOpenPanelwCome);
-    $('#isProtitleVisible').prop('checked', settings.isProtitleVisible);
-    $('#iprotitlePosition input[type="radio"][name="protitlePosition"]').val([
-        settings.protitlePosition
-    ]);
     $('#iprotitlePosition').css(
         'display',
         settings.isProtitleVisible ? 'flex' : 'none'
     );
-    $('#iproSamePosition input[type="radio"][name="proSamePosition"]').val([
-        settings.proSamePosition
-    ]);
     $('#iproSamePosition').css(
         'display',
         settings.isProtitleVisible && settings.isTimeVisible ? 'flex' : 'none'
     );
-    $('#isCommentWide').prop('checked', settings.isCommentWide);
-    $('#isProTextLarge').prop('checked', settings.isProTextLarge);
-    $('#kakikomiwait').val(settings.kakikomiwait);
-    $('#useEyecatch').prop('checked', settings.useEyecatch);
-    $('#isHidePopTL').prop('checked', settings.isHidePopTL);
-    $('#isHidePopBL').prop('checked', settings.isHidePopBL);
-    $('#comeMovingAreaTrim').prop('checked', settings.comeMovingAreaTrim);
-    $('#isHideButtons').prop('checked', settings.isHideButtons);
-    $('#isResizeSpacing').prop('checked', settings.isResizeSpacing);
-    $('#isDeleteStrangeCaps').prop('checked', settings.isDeleteStrangeCaps);
-    $('input[type="radio"][name="highlightNewCome"]').val([
-        settings.highlightNewCome
-    ]);
-    $('#isHidePopFresh').prop('checked', settings.isHidePopFresh);
-    $('#isChTimetableBreak').prop('checked', settings.isChTimetableBreak);
-    $('#isChTimetableWeekend').prop('checked', settings.isChTimetableWeekend);
-    $('#isChTimetablePlaybutton').prop(
-        'checked',
-        settings.isChTimetablePlaybutton
-    );
-    $('#timetableScroll').val(settings.timetableScroll);
-    $('#isHideTwitterPanel').prop('checked', settings.isHideTwitterPanel);
-    $('#isHideTodayHighlight').prop('checked', settings.isHideTodayHighlight);
-    $('#isComelistClickNG').prop('checked', settings.isComelistClickNG);
-    $(
-        'input[type="radio"][name="highlightComeColor"]'
-    ).val([settings.highlightComeColor]);
-    $('#highlightComePower').val(settings.highlightComePower);
-    $('#isComeClickNGautoClose').prop(
-        'checked',
-        settings.isComeClickNGautoClose
-    );
-    $('#isShareNGword').prop('checked', settings.isShareNGword);
-    $('#isDelOldTime').prop('checked', settings.isDelOldTime);
-    $('#isMovieSpacingZeroTop').prop('checked', settings.isMovieSpacingZeroTop);
-    $('#isMovieSpacingZeroLeft').prop(
-        'checked',
-        settings.isMovieSpacingZeroLeft
-    );
-    $('#comeFontsize').val(settings.comeFontsize);
-    $('#isHideVoting').prop('checked', settings.isHideVoting);
-    $('#isStoreViewCounter').prop('checked', settings.isStoreViewCounter);
-    $('#isComeTriming').prop('checked', settings.isComeTriming);
-    $('#audibleReloadWait').val(settings.audibleReloadWait);
-    $('#isDAR43').prop('checked', settings.isDAR43);
-    $('#isUserDel').prop('checked', settings.isUserDel);
-    $('#userNg').val(settings.userNg);
-    $('#isUserHighlight').prop('checked', settings.isUserHighlight);
-    $('#isShareNGuser').prop('checked', settings.isShareNGuser);
-
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
 
-    $('#panelOpacity').val(settings.panelOpacity);
-    $('#panelOpacity')
-        .siblings('.prop')
-        .text(settings.panelOpacity);
-    $('#comeFontsizeV').prop('checked', settings.comeFontsizeV);
-    $('#proTitleFontC').prop('checked', settings.proTitleFontC);
-    $('#isDelTime').prop('checked', settings.isDelTime);
-    $('#mastodonFormat').val(settings.mastodonFormat);
-    $('#minResolution').val(settings.minResolution);
-    $('#maxResolution').val(settings.maxResolution);
 
     var panelopenses = 0;
     for (var i = 0; i < 4; i++) {
@@ -1706,7 +1560,7 @@ function createSettingWindow() {
             '" target="_blank">永久設定オプション画面はこちら</a><br>';
         settcont += '</div>';
         settcont += '<div id="settcontbody" style="overflow:scroll;">';
-        settcont += settingslib.generateOptionHTML(false) + '<br><hr>';
+        settcont += settingHtml.generateOptionHTML(false) + '<br><hr>';
         settcont +=
             '<input type="button" id="clearLocalStorage" value="localStorageクリア"><br>';
         settcont +=
@@ -1737,8 +1591,6 @@ function createSettingWindow() {
         );
         $('#iproSamePosition').change(setProSamePosiChanged);
         $('#isProTextLarge').change(setProTextSizeChanged);
-        $('#highlightComePower').change(setHighlightComePowerChanged);
-        $('#panelOpacity').change(setPanelOpacityChanged);
         $('#comeFontsize').change(setComeFontsizeChanged);
         $('.leftshift').on('click', function() {
             $('#settcont').css('right', commentListWidth+'px');
@@ -1909,7 +1761,6 @@ function createSettingWindow() {
             .css('border', '1px solid black');
         $('<table id="setTable">').appendTo('#ComeMukouO');
         var stjo = $('#setTable');
-        var sttr = stjo.contents().find('tr');
         stjo.css('border-collapse', 'collapse');
         $(
             '<tr><th></th><th colspan=2>画面真っ黒</th><th>画面縮小</th><th colspan=2>音量ミュート</th></tr>'
@@ -1921,7 +1772,7 @@ function createSettingWindow() {
             '<tr><td>画面クリックで<br>解除・再適用</td><td colspan=2></td><td></td><td colspan=2></td></tr>'
         ).appendTo(stjo);
 
-        sttr = stjo.contents().find('tr');
+        const sttr = stjo.contents('tr');
         var stra = sttr.eq(1).children('td');
         var strb = sttr.eq(2).children('td');
         $('#isCMBlack').appendTo(stra.eq(1));
@@ -2294,14 +2145,6 @@ function setComeFontsizeChanged() {
     var jo = $('.movingComment');
     jo.css('font-size', nf + 'px');
 }
-function setHighlightComePowerChanged() {
-    //$('#highlightPdesc').text('背景濃さ:' + $('#highlightComePower').val());
-}
-function setPanelOpacityChanged() {
-    $('#panelOpacity')
-        .siblings('.prop')
-        .text($('#panelOpacity').val());
-}
 function moviePositionVTypeChanged() {
     switch (
         +$(
@@ -2532,69 +2375,15 @@ function clearBtnColored(target) {
         .css('color', '');
 }
 function setSaveClicked() {
-    settings.isResizeScreen = $('#isResizeScreen').prop('checked');
-    settings.isDblFullscreen = $('#isDblFullscreen').prop('checked');
-    settings.isHideOldComment = $('#isHideOldComment').prop('checked');
-    settings.isCMBlack = $('#isCMBlack').prop('checked');
-    settings.isCMBkTrans = $('#isCMBkTrans').prop('checked');
-    settings.isCMsoundoff = $('#isCMsoundoff').prop('checked');
-    settings.CMsmall = Math.min(100, Math.max(5, $('#CMsmall').val()));
-    settings.isMovingComment = $('#isMovingComment').prop('checked');
-    settings.movingCommentSecond = parseInt($('#movingCommentSecond').val());
-    settings.movingCommentLimit = parseInt($('#movingCommentLimit').val());
-    settings.isComeNg = $('#isComeNg').prop('checked');
-    settings.isComeDel = $('#isComeDel').prop('checked');
-    settings.fullNg = $('#fullNg').val();
-    var beforeInpWinBottom = settings.isInpWinBottom;
-    settings.isInpWinBottom = $('#isInpWinBottom').prop('checked');
-    settings.isCustomPostWin = $('#isCustomPostWin').prop('checked');
-    settings.isCancelWheel = $('#isCancelWheel').prop('checked');
-    settings.isVolumeWheel = $('#isVolumeWheel').prop('checked');
-    settings.changeMaxVolume = Math.min(
-        100,
-        Math.max(0, parseInt($('#changeMaxVolume').val()))
-    );
-    settings.isTimeVisible = $('#isTimeVisible').prop('checked');
-    settings.isSureReadComment = $('#isSureReadComment').prop('checked');
-    settings.isCommentFormWithSide = $('#isCommentFormWithSide').prop(
-        'checked'
-    );
-    settings.sureReadRefreshx = Math.max(101, $('#sureReadRefreshx').val());
-    settings.commentBackColor = parseInt($('#commentBackColor').val());
-    settings.commentBackTrans = parseInt($('#commentBackTrans').val());
-    settings.commentTextColor = parseInt($('#commentTextColor').val());
-    settings.commentTextTrans = parseInt($('#commentTextTrans').val());
-    settings.isCommentPadZero = $('#isCommentPadZero').prop('checked');
-    settings.isCommentTBorder = $('#isCommentTBorder').prop('checked');
-    settings.timePosition = $(
-        '#itimePosition input[type="radio"][name="timePosition"]:checked'
-    ).val();
-    settings.notifySeconds = parseInt($('#notifySeconds').val());
+    Object.assign(settings, settingHtml.getSettingInputValue(false));
     cmblockia = Math.max(1, 1 + parseInt($('#beforeCMWait').val()));
     cmblockib = -Math.max(1, 1 + parseInt($('#afterCMWait').val()));
-    settings.isManualKeyCtrlR = $('#isManualKeyCtrlR').prop('checked');
-    settings.isManualKeyCtrlL = $('#isManualKeyCtrlL').prop('checked');
-    settings.isManualMouseBR = $('#isManualMouseBR').prop('checked');
     settings.isCMBkR =
         $('#isCMBkR').prop('checked') && $('#isCMBlack').prop('checked');
     settings.isCMsoundR =
         $('#isCMsoundR').prop('checked') && $('#isCMsoundoff').prop('checked');
     settings.isCMsmlR =
         $('#isCMsmlR').prop('checked') && $('#CMsmall').val() != 100;
-    settings.isTabSoundplay = $('#isTabSoundplay').prop('checked');
-    settings.isProtitleVisible = $('#isProtitleVisible').prop('checked');
-    settings.protitlePosition = $(
-        '#iprotitlePosition input[type="radio"][name="protitlePosition"]:checked'
-    ).val();
-    settings.proSamePosition = $(
-        '#iproSamePosition input[type="radio"][name="proSamePosition"]:checked'
-    ).val();
-    settings.isCommentWide = $('#isCommentWide').prop('checked');
-    settings.isProTextLarge = $('#isProTextLarge').prop('checked');
-    settings.kakikomiwait = parseInt($('#kakikomiwait').val());
-    settings.useEyecatch = $('#useEyecatch').prop('checked');
-    settings.isHidePopTL = $('#isHidePopTL').prop('checked');
-    settings.isHidePopBL = $('#isHidePopBL').prop('checked');
     for (var i = 0; i < 4; i++) {
         for (var j = 0; j < 3; j++) {
             panelopenset[i][j] = $(
@@ -2606,63 +2395,6 @@ function setSaveClicked() {
             ).val();
         }
     }
-    settings.comeMovingAreaTrim = $('#comeMovingAreaTrim').prop('checked');
-    settings.isHideButtons = $('#isHideButtons').prop('checked');
-    settings.isResizeSpacing = $('#isResizeSpacing').prop('checked');
-    settings.isDeleteStrangeCaps = $('#isDeleteStrangeCaps').prop('checked');
-    settings.highlightNewCome = parseInt(
-        $(
-            'input[type="radio"][name="highlightNewCome"]:checked'
-        ).val()
-    );
-    settings.isHidePopFresh = $('#isHidePopFresh').prop('checked');
-    //    settings.isChTimetableBreak=$('#isChTimetableBreak').prop("checked");
-    //    settings.isChTimetableWeekend=$('#isChTimetableWeekend').prop("checked");
-    //    settings.isChTimetablePlaybutton=$('#isChTimetablePlaybutton').prop("checked");
-    settings.isHideTwitterPanel = $('#isHideTwitterPanel').prop('checked');
-    settings.isHideTodayHighlight = $('#isHideTodayHighlight').prop('checked');
-    settings.isComelistClickNG = $('#isComelistClickNG').prop('checked');
-    settings.highlightComeColor = parseInt(
-        $(
-            'input[type="radio"][name="highlightComeColor"]:checked'
-        ).val()
-    );
-    settings.highlightComePower = parseInt($('#highlightComePower').val());
-    settings.isComeClickNGautoClose = $('#isComeClickNGautoClose').prop(
-        'checked'
-    );
-    settings.isShareNGword = $('#isShareNGword').prop('checked');
-    settings.isDelOldTime = $('#isDelOldTime').prop('checked');
-    settings.isMovieSpacingZeroTop = $('#isMovieSpacingZeroTop').prop(
-        'checked'
-    );
-    settings.isMovieSpacingZeroLeft = $('#isMovieSpacingZeroLeft').prop(
-        'checked'
-    );
-    settings.comeFontsize = Math.min(
-        99,
-        Math.max(1, parseInt($('#comeFontsize').val()))
-    );
-    settings.isHideVoting = $('#isHideVoting').prop('checked');
-    settings.isStoreViewCounter = $('#isStoreViewCounter').prop('checked');
-    settings.isComeTriming = $('#isComeTriming').prop('checked');
-    settings.panelOpacity = parseInt($('#panelOpacity').val());
-    settings.comeFontsizeV = $('#comeFontsizeV').prop('checked');
-    settings.proTitleFontC = $('#proTitleFontC').prop('checked');
-    settings.isDelTime = $('#isDelTime').prop('checked');
-    settings.mastodonFormat = $('#mastodonFormat').val();
-    settings.audibleReloadWait = Math.max(
-        0,
-        parseInt($('#audibleReloadWait').val())
-    );
-    settings.isDAR43 = $('#isDAR43').prop('checked');
-    settings.isUserDel = $('#isUserDel').prop('checked');
-    settings.userNg = $('#userNg').val();
-    settings.isUserHighlight = $('#isUserHighlight').prop('checked');
-    settings.isShareNGuser = $('#isShareNGuser').prop('checked');
-    settings.minResolution = parseInt($('#minResolution').val());
-    settings.maxResolution = parseInt($('#maxResolution').val());
-
     arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
     arUserNg = gcl.arrayUserNgMaker(settings.userNg, settings.isShareNGuser);
 
@@ -2925,9 +2657,6 @@ function setComeColorChanged() {
     for (var i = 0; i < jo.length; i++) {
         var jq = jo.eq(i);
         var jv = jq.val();
-        jq.prevAll('span.prop').text(
-            jv + ' (' + Math.round((jv * 100) / 255) + '%)'
-        );
         p[i] = jv;
     }
     var bc = 'rgba(' + p[0] + ',' + p[0] + ',' + p[0] + ',' + p[1] / 255 + ')';

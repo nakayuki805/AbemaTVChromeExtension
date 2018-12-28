@@ -6,7 +6,8 @@ import { stringify } from 'querystring';
 //     var chrome = browser;
 // }
 
-type StorageItems = { [index: string]: any };
+export type StorageItems = { [index: string]: any };
+export type Setting = settings.Setting;
 export const settingsList = settings.settings;
 export const ComeColorSettingList = settings.comeColorSettings;
 export const RadioSettingList = settings.radioSettings;
@@ -97,13 +98,18 @@ function _flatSettings() {
     }
     return ret;
 }
-export function valueFiler(name: string, value: boolean | string | number) {
+export function valueFiler(
+    name: string,
+    value: boolean | string | number | undefined
+) {
     let retVal = value;
+    if (retVal === undefined) retVal = flatSettings[name].default;
     if (
         flatSettings[name].type === 'number' ||
         flatSettings[name].type === 'range'
     ) {
         retVal = Number(retVal);
+        if (isNaN(retVal)) retVal = flatSettings[name].default;
     }
     if (flatSettings[name].range !== undefined) {
         const range = flatSettings[name].range;
@@ -167,213 +173,4 @@ export function removeCMsettings(obj: StorageItems) {
         }
     }
     return obj;
-}
-function generateOptionInput(
-    settingsArr: settings.Setting[],
-    isPermanent: boolean
-) {
-    let inputHTML = '';
-    let i = 0;
-    let description;
-    let isNotChangable;
-    let defaultVal;
-    for (i = 0; i < settingsArr.length; i += 1) {
-        description =
-            !isPermanent && settingsArr[i].instantDescription
-                ? settingsArr[i].instantDescription
-                : settingsArr[i].description;
-        isNotChangable = !isPermanent && !settingsArr[i].isInstantChangable;
-        // 変更不可な項目は表示せず飛ばす
-        if (isNotChangable) continue;
-        inputHTML +=
-            '<div class="inputWrapper" id="' +
-            settingsArr[i].name +
-            '-wrapper">';
-        if (settingsArr[i].type === 'boolean') {
-            inputHTML +=
-                '<div class="toggle-switch" id="' +
-                settingsArr[i].name +
-                '-switch"><input type="checkbox" id="' +
-                settingsArr[i].name +
-                '"><label for="' +
-                settingsArr[i].name +
-                '"></label></div><label for="' +
-                settingsArr[i].name +
-                '">:' +
-                description +
-                '</label>';
-            inputHTML += '<br/>';
-        } else {
-            if (settingsArr[i].type === 'number') {
-                inputHTML += '<label for="' + settingsArr[i].name + '">';
-                inputHTML += description;
-                inputHTML += ':</label>';
-                inputHTML +=
-                    '<input type="number" id="' + settingsArr[i].name + '">';
-                inputHTML += '<br/>';
-            } else if (settingsArr[i].type === 'textarea') {
-                inputHTML += '<label for="' + settingsArr[i].name + '">';
-                inputHTML +=
-                    '<textarea id="' +
-                    settingsArr[i].name +
-                    '" rows=3 cols=40 wrap=off></textarea>';
-                inputHTML += ':' + description;
-                inputHTML += '</label>';
-                inputHTML += '<br/>';
-            } else if (settingsArr[i].type === 'range') {
-                inputHTML +=
-                    '<div><span class="desc"><label for="' +
-                    settingsArr[i].name +
-                    '">' +
-                    description;
-                inputHTML += '</label></span>:';
-                inputHTML += '<span class="prop">-</span>';
-                inputHTML +=
-                    '<input type="range" id="' +
-                    settingsArr[i].name +
-                    '" max=255></div>';
-            } else if (settingsArr[i].type === 'text') {
-                defaultVal = settingsArr[i].default || '';
-                inputHTML += '<label for="' + settingsArr[i].name + '">';
-                inputHTML += description;
-                inputHTML += ':</label>';
-                inputHTML +=
-                    '<input type="input" id="' +
-                    settingsArr[i].name +
-                    '" placeholder=' +
-                    defaultVal +
-                    '>';
-                inputHTML += '<br/>';
-            } else if (settingsArr[i].type === 'select') {
-                inputHTML += '<label for="' + settingsArr[i].name + '">';
-                inputHTML += description;
-                inputHTML += ':</label>';
-                inputHTML += '<select id="' + settingsArr[i].name + '">';
-                const selections = settingsArr[i].selections;
-                if (selections !== undefined) {
-                    selections.forEach(function(item) {
-                        inputHTML +=
-                            '<option value="' +
-                            item.value +
-                            '">' +
-                            item.string +
-                            '</option>';
-                    });
-                }
-                inputHTML += '</select><br/>';
-            } else if (settingsArr[i].type === 'radio') {
-                inputHTML += '<label for="' + settingsArr[i].name + '">';
-                inputHTML += description;
-                inputHTML += ':</label>';
-                const selections = settingsArr[i].selections;
-                if (selections !== undefined) {
-                    selections.forEach(function(item) {
-                        const id = settingsArr[i].name + '-' + item.value;
-                        inputHTML +=
-                            '<input type="radio" value="' +
-                            item.value +
-                            '" id="' +
-                            id +
-                            '" name="' +
-                            settingsArr[i].name +
-                            '"><label for="' +
-                            id +
-                            '">' +
-                            item.string +
-                            '</label> ';
-                    });
-                }
-                inputHTML += '<br/>';
-            }
-        }
-        inputHTML += '</div>';
-    }
-    return inputHTML;
-}
-function generateRadioInput(settingsArr: typeof RadioSettingList) {
-    let inputHTML = '';
-    for (let i = 0; i < settingsArr.length; i++) {
-        inputHTML += '<div id="i' + settingsArr[i].name + '">';
-        for (let j = 0; j < settingsArr[i].list.length; j++) {
-            inputHTML += '<div>';
-            for (let k = 0; k < settingsArr[i].list[j].length; k++) {
-                let radioID =
-                    'radio-' +
-                    settingsArr[i].name +
-                    '-' +
-                    settingsArr[i].list[j][k][0];
-                inputHTML += '<div>';
-                inputHTML +=
-                    '<input type="radio" name="' +
-                    settingsArr[i].name +
-                    '" value="' +
-                    settingsArr[i].list[j][k][0] +
-                    '" id="' +
-                    radioID +
-                    '"><label for="' +
-                    radioID +
-                    '">';
-                inputHTML += settingsArr[i].list[j][k][1];
-                inputHTML += '</label></div>';
-            }
-            inputHTML += '</div>';
-        }
-        inputHTML += '</div>';
-    }
-    return inputHTML;
-}
-export function generateOptionHTML(isPermanent: boolean) {
-    let htmlstr = '';
-    const dummySrc = '/images/settings/1x1.png';
-    for (let i = 0; i < settingsList.length; i++) {
-        let inputHtml = generateOptionInput(
-            settingsList[i].settings,
-            isPermanent
-        );
-        // 一時設定で項目が空なら飛ばす
-        if (
-            !inputHtml &&
-            !isPermanent &&
-            !settingsList[i].instantHeader &&
-            !settingsList[i].instantFooter
-        )
-            continue;
-        htmlstr +=
-            '<fieldset style=\'border: 1px solid silver;margin: 0 2px;padding: .35em .625em .75em;\'><legend>' +
-            settingsList[i].description +
-            '</legend><div class="settingWrapper' +
-            (settingsList[i].isShowImage && isPermanent ? ' showimage' : '') +
-            '">' +
-            '<div class="settingInputWrapper">';
-        if (isPermanent) {
-            htmlstr += settingsList[i].header || '';
-        } else {
-            htmlstr +=
-                settingsList[i].instantHeader || settingsList[i].header || '';
-        }
-        htmlstr += inputHtml;
-        if (isPermanent) {
-            htmlstr += settingsList[i].footer || '';
-        } else {
-            htmlstr +=
-                settingsList[i].instantFooter || settingsList[i].footer || '';
-        }
-        htmlstr += '</div>';
-        if (settingsList[i].isShowImage && isPermanent)
-            htmlstr +=
-                '<div class="imageSpace"><img class="descImage" src="' +
-                dummySrc +
-                '"></div>';
-        htmlstr += '</div></fieldset>';
-    }
-    htmlstr +=
-        '<fieldset><legend>コメント色関連設定</legend><div id="CommentColorSettings">' +
-        generateOptionInput(ComeColorSettingList, isPermanent) +
-        '</div></fieldset>';
-    htmlstr += generateRadioInput(RadioSettingList);
-    htmlstr +=
-        '<div id="CommentMukouSettings"><fieldset><legend>コメント無効時関連設定</legend>' +
-        generateOptionInput(CMSettingList, isPermanent) +
-        '</fieldset></div>';
-    return htmlstr;
 }

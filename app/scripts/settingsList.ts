@@ -29,7 +29,7 @@ interface NumberSetting extends BasicSetting {
 interface RangeSetting extends BasicSetting {
     type: 'range';
     default: number;
-    range?: number[];
+    range: number[];
 }
 interface TextSetting extends BasicSetting {
     type: 'text';
@@ -273,7 +273,7 @@ export const settings: SettingList[] = [
             {
                 name: 'isCommentFormWithSide',
                 description:
-                    '↑有効時にコメント入力欄を右のボタンと連動して非表示(画面右のボタンがマウス無操作時に非表示になる場合、合わせて入力欄も非表示になります)',
+                    '↑有効時にコメント入力欄を右のボタンと連動して非表示(画面右のボタンがマウス無操作時に非表示になる場合、合わせて入力欄も非表示になります。この設定と併せて黒帯パネル開閉設定でコメント表示時に右のボタンをマウス反応で表示に設定してください。)',
                 type: 'boolean',
                 isInstantChangable: true,
                 default: false,
@@ -368,8 +368,8 @@ export const settings: SettingList[] = [
             },
             {
                 name: 'highlightComePower',
-                description: '↑新着コメント強調の強度',
-                type: 'number',
+                description: '↑新着コメントの背景着色の濃さ',
+                type: 'range',
                 isInstantChangable: true,
                 default: 30,
                 range: [0, 100]
@@ -825,28 +825,32 @@ export const comeColorSettings: Setting[] = [
         description: 'コメント一覧の背景色(黒0～灰～255白)',
         type: 'range',
         isInstantChangable: true,
-        default: 255
+        default: 255,
+        range: [0, 255]
     },
     {
         name: 'commentBackTrans',
         description: 'コメント一覧の背景の透明度(完全透明0～255不透明)',
         type: 'range',
         isInstantChangable: true,
-        default: 191
+        default: 191,
+        range: [0, 255]
     },
     {
         name: 'commentTextColor',
         description: 'コメントの文字色(黒0～灰～255白)',
         type: 'range',
         isInstantChangable: true,
-        default: 0
+        default: 0,
+        range: [0, 255]
     },
     {
         name: 'commentTextTrans',
         description: 'コメントの文字の透明度(完全透明0～255不透明)',
         type: 'range',
         isInstantChangable: true,
-        default: 255
+        default: 255,
+        range: [0, 255]
     }
 ];
 export interface RadioBlockSetting {
@@ -855,11 +859,12 @@ export interface RadioBlockSetting {
     list: (string | number)[][][];
     default: string | number;
     range?: any; // エラー押さえ込み
+    isInstantChangable: boolean;
 }
 export const radioSettings: RadioBlockSetting[] = [
     {
         name: 'timePosition',
-        type: 'radio',
+        type: 'radioblock',
         list: [
             [['windowtop', 'ウィンドウの右上（常時表示）']],
             [['windowbottom', 'ウィンドウの右下（常時表示）']],
@@ -868,11 +873,12 @@ export const radioSettings: RadioBlockSetting[] = [
             [['header', '右上のメニューの上']],
             [['footer', '右下のコメント数の下']]
         ],
-        default: 'windowtop'
+        default: 'windowtop',
+        isInstantChangable: true
     },
     {
         name: 'protitlePosition',
-        type: 'radio',
+        type: 'radioblock',
         list: [
             [
                 ['windowtopleft', 'ウィンドウの左上（常時表示）'],
@@ -899,11 +905,12 @@ export const radioSettings: RadioBlockSetting[] = [
                 ['footerright', '右下のコメント数の下']
             ]
         ],
-        default: 'windowtopleft'
+        default: 'windowtopleft',
+        isInstantChangable: true
     },
     {
         name: 'proSamePosition',
-        type: 'radio',
+        type: 'radioblock',
         list: [
             [
                 ['over', '重ねる'],
@@ -912,41 +919,18 @@ export const radioSettings: RadioBlockSetting[] = [
                 ['horizshort', 'タイトルを少し左へ']
             ]
         ],
-        default: 'over'
+        default: 'over',
+        isInstantChangable: true
     },
     {
         name: 'panelopenset',
-        type: 'radio',
+        type: 'panelopenset',
         list: [
             [[255879, 'デフォルト'], [531440, '常に表示'], [531441, 'カスタム']]
         ],
-        default: 255879
-    } /*,
-    {
-        name: 'highlightNewCome',
-        type: 'radio',
-        list: [[[0, 'なし'], [1, '先頭マーク'], [2, '背景着色'], [3, '両方']]],
-        default: 0
-    } */ /*,
-    {
-        name: 'highlightComeColor',
-        type: 'radio',
-        list: [
-            [
-                [0, '黄'],
-                [1, '橙'],
-                [2, '赤'],
-                [3, '桃'],
-                [4, '紫'],
-                [5, '青'],
-                [6, '水'],
-                [7, '緑'],
-                [8, '白'],
-                [9, '黒']
-            ]
-        ],
-        default: 0
-    }*/
+        default: 255879,
+        isInstantChangable: true
+    }
 ];
 export const CMSettings: Setting[] = [
     {

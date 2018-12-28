@@ -4,6 +4,7 @@ import 'chromereload/devonly';
 
 import * as $ from 'jquery';
 import * as settings from './settings';
+import * as settingHtml from './lib/settingHtml';
 
 // edge対応
 if (
@@ -14,9 +15,9 @@ if (
 }
 const descImageDir = '/images/settings/';
 $(function() {
-    $('#settingsArea').html(settings.generateOptionHTML(true));
+    $('#settingsArea').html(settingHtml.generateOptionHTML(true));
     $('.inputWrapper')
-        .mouseover(function(e) {
+        .mouseover(function() {
             const name = this.id.match(/(.+)-wrapper/)[1];
             const wrapper = this.closest('.settingWrapper');
             if (!wrapper) return;
@@ -30,7 +31,7 @@ $(function() {
             const src = descImageDir + name + '.png';
             descImage.setAttribute('src', src);
         })
-        .mouseleave(function(e) {
+        .mouseleave(function() {
             const name = this.id.match(/(.+)-wrapper/)[1];
             const wrapper = this.closest('.settingWrapper');
             if (!wrapper) return;
@@ -357,148 +358,19 @@ $(function() {
     $('#afterCMWait').prop('min', '0');
 
     settings.getSettings().then(function(value) {
-        var isResizeScreen = value.resizeScreen;
-        //console.log(value.movingCommentLimit)
-        var isDblFullscreen = value.dblFullscreen;
-        var isHideOldComment = value.hideOldComment;
         var isCMBlack = value.CMBlack;
         var isCMBkTrans = value.CMBkTrans;
         var isCMsoundoff = value.CMsoundoff;
-        var CMsmall = value.CMsmall;
-        var isMovingComment = value.movingComment;
-        var movingCommentSecond = value.movingCommentSecond;
-        var movingCommentLimit = value.movingCommentLimit;
-        //        var isMoveByCSS = value.moveByCSS;
-        var isComeNg = value.comeNg;
-        var isComeDel = value.comeDel;
-        var valFullNg = value.fullNg;
-        var isInpWinBottom = value.inpWinBottom;
-        var isCustomPostWin = value.customPostWin;
-        var isCancelWheel = value.cancelWheel;
-        var isVolumeWheel = value.volumeWheel;
-        var changeMaxVolume = value.changeMaxVolume;
-        var isTimeVisible = value.timeVisible;
-        var isSureReadComment = value.sureReadComment;
-        var isCommentFormWithSide = value.isCommentFormWithSide;
-        var sureReadRefreshx = value.sureReadRefreshx;
-        // var isAlwaysShowPanel = value.isAlwaysShowPanel;
-        //        var isMovieResize = value.movieResize;
-        //        var isMovieMaximize = value.movieMaximize;
         var commentBackColor = value.commentBackColor;
         var commentBackTrans = value.commentBackTrans;
         var commentTextColor = value.commentTextColor;
         var commentTextTrans = value.commentTextTrans;
-        var isCommentPadZero = value.commentPadZero;
-        var isCommentTBorder = value.commentTBorder;
-        var timePosition = value.timePosition;
-        var notifySeconds = value.notifySeconds;
-        var isNotifyAndOpen = value.isNotifyAndOpen;
-        var isNaOinActive = value.isNaOinActive;
-        var beforeCMWait = value.beforeCMWait;
-        var afterCMWait = value.afterCMWait;
-        var isManualKeyCtrlR = value.manualKeyCtrlR;
-        var isManualKeyCtrlL = value.manualKeyCtrlL;
-        var isManualMouseBR = value.manualMouseBR;
-        var isCMBkR = value.CMBkR && isCMBlack;
-        var isCMsoundR = value.CMsoundR && isCMsoundoff;
-        var isCMsmlR = value.CMsmlR && CMsmall != 100;
         var isTabSoundplay = value.tabSoundplay;
-        // var isOpenPanelwCome=(value.openPanelwCome!==undefined)?value.openPanelwCome : true;
-        var isProtitleVisible = value.protitleVisible;
-        var protitlePosition = value.protitlePosition;
-        var proSamePosition = value.proSamePosition;
-        var isProTextLarge = value.proTextLarge;
-        var isCommentWide = value.commentWide;
-        var kakikomiwait = value.kakikomiwait;
-        var useEyecatch = value.useEyecatch;
-        var isHidePopTL = value.hidePopTL;
-        var isHidePopBL = value.hidePopBL;
-        //var panelopenset = value.panelopenset || (isAlwaysShowPanel ? "222222222222" : (isOpenPanelwCome ? "111000000111" : "111000000000"));//isA..とisO..を初回のみ適用
         var panelopenset = value.panelopenset;
         console.log(panelopenset);
-        var comeMovingAreaTrim = value.comeMovingAreaTrim;
-        var isHideButtons = value.hideButtons;
-        var isResizeSpacing = value.resizeSpacing;
-        var isDeleteStrangeCaps = value.deleteStrangeCaps;
-        var highlightNewCome = value.highlightNewCome;
-        // var isChTimetableExpand=value.chTimetableExpand;
-        var isHidePopFresh = value.hidePopFresh;
-        var isChTimetableBreak = value.chTimetableBreak;
-        var isChTimetableWeekend = value.chTimetableWeekend;
-        var isChTimetablePlaybutton = value.chTimetablePlaybutton;
-        var timetableScroll = value.timetableScroll;
-        var isHideTwitterPanel = value.hideTwitterPanel;
-        var isHideTodayHighlight = value.hideTodayHighlight;
-        var isComelistNG = value.comelistNG;
-        var isComelistClickNG = value.comelistClickNG;
-        var highlightComeColor = value.highlightComeColor;
-        var highlightComePower =
-            value.highlightComePower !== undefined
-                ? Number(value.highlightComePower)
-                : 30;
-        var isComeClickNGautoClose = value.comeClickNGautoClose;
-        var isShareNGword = value.isShareNGword;
-        var isDelOldTime = value.delOldTime;
-        var isMovieSpacingZeroTop = value.movieSpacingZeroTop;
-        var isMovieSpacingZeroLeft = value.movieSpacingZeroLeft;
-        var comeFontsize = Math.min(
-            99,
-            Math.max(
-                1,
-                value.comeFontsize !== undefined
-                    ? Number(value.comeFontsize)
-                    : 32
-            )
-        );
-        var isHideVoting = value.hideVoting;
-        var isStoreViewCounter = value.storeViewCounter;
-        var isComeTriming = value.comeTriming;
-        var allowChannelNames = value.allowChannelNames;
-        var isExpandLastItem = value.expandLastItem;
-        var isExpandFewChannels = value.expandFewChannels;
-        var isHideArrowButton = value.hideArrowButton;
-        var isPutSideDetailHighlight =
-            value.putSideDetailHighlight !== undefined
-                ? value.putSideDetailHighlight
-                : true;
-        var panelOpacity =
-            value.panelOpacity !== undefined ? value.panelOpacity : 127;
-        var comeFontsizeV = value.comeFontsizeV;
-        var proTitleFontC = value.proTitleFontC;
-        var isDelTime = value.delTime;
-        var audibleReloadWait =
-            value.audibleReloadWait !== undefined
-                ? Number(value.audibleReloadWait)
-                : 20;
-        var isDAR43 = value.DAR43;
-        var isReplaceIcons = value.replaceIcons;
 
-        $('#isResizeScreen').prop('checked', isResizeScreen);
-        $('#isDblFullscreen').prop('checked', isDblFullscreen);
-        $('#isHideOldComment').prop('checked', isHideOldComment);
-        $('#isCMBlack').prop('checked', isCMBlack);
-        $('#isCMBkTrans').prop('checked', isCMBkTrans);
-        $('#isCMsoundoff').prop('checked', isCMsoundoff);
-        $('#CMsmall').val(CMsmall);
-        $('#isMovingComment').prop('checked', isMovingComment);
-        $('#movingCommentSecond').val(movingCommentSecond);
-        $('#movingCommentLimit').val(movingCommentLimit);
-        //        $("#isMoveByCSS").prop("checked", isMoveByCSS);
-        $('#isComeNg').prop('checked', isComeNg);
-        $('#isComeDel').prop('checked', isComeDel);
-        $('#fullNg').val(valFullNg);
-        $('#isInpWinBottom').prop('checked', isInpWinBottom);
-        $('#isCustomPostWin').prop('checked', isCustomPostWin);
-        $('#isCancelWheel').prop('checked', isCancelWheel);
-        $('#isVolumeWheel').prop('checked', isVolumeWheel);
-        $('#changeMaxVolume').val(changeMaxVolume);
-        $('#isTimeVisible').prop('checked', isTimeVisible);
-        $('#isSureReadComment').prop('checked', isSureReadComment);
-        $('#isCommentFormWithSide').prop('checked', isCommentFormWithSide);
-        $('#sureReadRefreshx').val(sureReadRefreshx);
-        // $("#isAlwaysShowPanel").prop("checked", isAlwaysShowPanel);
-        //        $("#isMovieResize").prop("checked", isMovieResize);
-        //        $("#isMovieMaximize").prop("checked", isMovieMaximize);
+        settingHtml.setSettingInputValue(value, true);
+
         var bc =
             'rgba(' +
             commentBackColor +
@@ -522,73 +394,6 @@ $(function() {
         $('#CommentColorSettings span.desc')
             .css('background-color', bc)
             .css('color', tc);
-        $('#commentBackColor')
-            .val(commentBackColor)
-            .prev('span.prop')
-            .text(
-                commentBackColor +
-                    ' (' +
-                    Math.round((commentBackColor * 100) / 255) +
-                    '%)'
-            );
-        $('#commentBackTrans')
-            .val(commentBackTrans)
-            .prev('span.prop')
-            .text(
-                commentBackTrans +
-                    ' (' +
-                    Math.round((commentBackTrans * 100) / 255) +
-                    '%)'
-            );
-        $('#commentTextColor')
-            .val(commentTextColor)
-            .prev('span.prop')
-            .text(
-                commentTextColor +
-                    ' (' +
-                    Math.round((commentTextColor * 100) / 255) +
-                    '%)'
-            );
-        $('#commentTextTrans')
-            .val(commentTextTrans)
-            .prev('span.prop')
-            .text(
-                commentTextTrans +
-                    ' (' +
-                    Math.round((commentTextTrans * 100) / 255) +
-                    '%)'
-            );
-        $('#isCommentPadZero').prop('checked', isCommentPadZero);
-        $('#isCommentTBorder').prop('checked', isCommentTBorder);
-        $('#itimePosition [type="radio"][name="timePosition"]').val([
-            timePosition
-        ]);
-        $('#notifySeconds').val(notifySeconds);
-        $('#isNotifyAndOpen').prop('checked', isNotifyAndOpen);
-        $('#isNaOinActive').prop('checked', isNaOinActive);
-        $('#beforeCMWait').val(beforeCMWait);
-        $('#afterCMWait').val(afterCMWait);
-        $('#isManualKeyCtrlR').prop('checked', isManualKeyCtrlR);
-        $('#isManualKeyCtrlL').prop('checked', isManualKeyCtrlL);
-        $('#isManualMouseBR').prop('checked', isManualMouseBR);
-        $('#isCMBkR').prop('checked', isCMBkR);
-        $('#isCMsoundR').prop('checked', isCMsoundR);
-        $('#isCMsmlR').prop('checked', isCMsmlR);
-        $('#isTabSoundplay').prop('checked', isTabSoundplay);
-        // $("#isOpenPanelwCome").prop("checked",isOpenPanelwCome);
-        $('#isProtitleVisible').prop('checked', isProtitleVisible);
-        $('#iprotitlePosition [type="radio"][name="protitlePosition"]').val([
-            protitlePosition
-        ]);
-        $('#iproSamePosition [type="radio"][name="proSamePosition"]').val([
-            proSamePosition
-        ]);
-        $('#isProTextLarge').prop('checked', isProTextLarge);
-        $('#isCommentWide').prop('checked', isCommentWide);
-        $('#kakikomiwait').val(kakikomiwait);
-        $('#useEyecatch').prop('checked', useEyecatch);
-        $('#isHidePopTL').prop('checked', isHidePopTL);
-        $('#isHidePopBL').prop('checked', isHidePopBL);
 
         $('#settingsArea input[type="radio"][name="cmbktype"]')
             .prop('disabled', !isCMBlack)
@@ -611,309 +416,42 @@ $(function() {
                 531441
             ]);
         }
-        var sp = panelopenset;
-        console.log(('0'.repeat(12) + sp.toString(3)).slice(-12));
-        if (sp < Math.pow(3, 12)) {
-            for (var i = 0; i < 4; i++) {
-                for (var j = 0, m, d; j < 3; j++) {
-                    m = Math.pow(3, (3 - i) * 3 + (2 - j));
-                    console.log('i=' + i + ',j=' + j + ',m=' + m.toString(3));
-                    d = 0;
-                    while (m <= sp) {
-                        sp -= m;
-                        d++;
-                    }
-                    console.log('sp=' + sp.toString(3) + ',d=' + d);
-                    if (d < 3)
-                        $(
-                            '#panelcustomTable [type="radio"][name="d' +
-                                i +
-                                '' +
-                                j +
-                                '"]'
-                        ).val([d]);
-                }
-            }
-        }
-        $('#comeMovingAreaTrim').prop('checked', comeMovingAreaTrim);
-        $('#isHideButtons').prop('checked', isHideButtons);
-        $('#isResizeSpacing').prop('checked', isResizeSpacing);
-        $('#isDeleteStrangeCaps').prop('checked', isDeleteStrangeCaps);
-        //        $('#isHighlightNewCome').prop("checked",isHighlightNewCome);
-        $('[type="radio"][name="highlightNewCome"]').val([highlightNewCome]);
-        // $('#isChTimetableExpand').prop("checked",isChTimetableExpand);
-        $('#isHidePopFresh').prop('checked', isHidePopFresh);
-        $('#isChTimetableBreak').prop('checked', isChTimetableBreak);
-        $('#isChTimetableWeekend').prop('checked', isChTimetableWeekend);
-        $('#isChTimetablePlaybutton').prop('checked', isChTimetablePlaybutton);
-        $('#timetableScroll').val(timetableScroll);
-        $('#isHideTwitterPanel').prop('checked', isHideTwitterPanel);
-        $('#isHideTodayHighlight').prop('checked', isHideTodayHighlight);
-        $('#isComelistNG').prop('checked', isComelistNG);
-        $('#isComelistClickNG').prop('checked', isComelistClickNG);
-        $('[type="radio"][name="highlightComeColor"]').val([
-            highlightComeColor
-        ]); //
-        $('#highlightComePower').val(highlightComePower);
-        $('#highlightPdesc').text('背景濃さ:' + highlightComePower); //
-        $('#isComeClickNGautoClose').prop('checked', isComeClickNGautoClose);
-        $('#isShareNGword').prop('checked', isShareNGword);
-        $('#isDelOldTime').prop('checked', isDelOldTime);
-        $('#isMovieSpacingZeroTop').prop('checked', isMovieSpacingZeroTop);
-        $('#isMovieSpacingZeroLeft').prop('checked', isMovieSpacingZeroLeft);
-        $('#comeFontsize').val(comeFontsize);
-        $('#isHideVoting').prop('checked', isHideVoting);
-        $('#isStoreViewCounter').prop('checked', isStoreViewCounter);
-        $('#isComeTriming').prop('checked', isComeTriming);
-        $('#allowChannelNames').val(allowChannelNames);
-        $('#isExpandLastItem').prop('checked', isExpandLastItem);
-        $('#isExpandFewChannels').prop('checked', isExpandFewChannels);
-        $('#isHideArrowButton').prop('checked', isHideArrowButton);
-        $('#isPutSideDetailHighlight').prop(
-            'checked',
-            isPutSideDetailHighlight
-        );
-        $('#panelOpacity').val(panelOpacity);
-        $('#panelOpacity')
-            .siblings('.prop')
-            .text(panelOpacity);
-        $('#comeFontsizeV').prop('checked', comeFontsizeV);
-        $('#proTitleFontC').prop('checked', proTitleFontC);
-        $('#isDelTime').prop('checked', isDelTime);
-        $('#audibleReloadWait').val(audibleReloadWait);
-        $('#isDAR43').prop('checked', isDAR43);
-        $('#isReplaceIcons').prop('checked', isReplaceIcons);
-        //以下1行で
-        $('#mastodonInstance').val(value.mastodonInstance);
-        $('#mastodonToken').val(value.mastodonToken);
-        $('#mastodonFormat').val(value.mastodonFormat);
-        $('#isNotifySound').prop('checked', value.isNotifySound);
-        $('#isNotifyOnline').prop('checked', value.isNotifyOnline);
-        $('#notifyOnlineMinutes').val(
-            value.notifyOnlineMinutes !== undefined
-                ? value.notifyOnlineMinutes
-                : 5
-        );
-        $('#notifyMailAddress').val(value.notifyMailAddress);
-        $('#notifyLNtoken').val(value.notifyLNtoken);
-        $('#notifyPostUrl').val(value.notifyPostUrl);
-        $('#isNotifyRemain').prop('checked', value.isNotifyRemain);
-        $('#isUserDel').prop('checked', value.isUserDel);
-        $('#isUserHighlight').prop('checked', value.isUserHighlight);
-        $('#userNg').val(value.userNg);
-        $('#isShareNGuser').prop('checked', value.isShareNGuser);
-        $('#minResolution').val(value.minResolution);
-        $('#maxResolution').val(value.maxResolution);
 
         isCMSettingsEnabled =
-            isCMBlack ||
-            isCMsoundoff ||
-            CMsmall != 100 ||
-            isHidePopTL ||
-            isHidePopBL ||
-            isHidePopFresh;
+            value.isCMBlack ||
+            value.isCMsoundoff ||
+            value.CMsmall != 100 ||
+            value.isHidePopTL ||
+            value.isHidePopBL ||
+            value.isHidePopFresh;
     });
     $('#saveBtn').click(function() {
-        var panelopenset = 0;
-        for (var i = 0; i < 4; i++) {
-            for (var j = 0; j < 3; j++) {
-                panelopenset +=
-                    parseInt(
-                        $(
-                            '#panelcustomTable [type="radio"][name="d' +
-                                i +
-                                '' +
-                                j +
-                                '"]:checked'
-                        ).val()
-                    ) * Math.pow(3, (3 - i) * 3 + (2 - j));
-            }
-        }
-        console.log(panelopenset);
-        chrome.storage.local.set(
-            {
-                resizeScreen: $('#isResizeScreen').prop('checked'),
-                dblFullscreen: $('#isDblFullscreen').prop('checked'),
-                hideOldComment: $('#isHideOldComment').prop('checked'),
-                CMBlack: $('#isCMBlack').prop('checked'),
-                CMBkTrans: $('#isCMBkTrans').prop('checked'),
-                CMsoundoff: $('#isCMsoundoff').prop('checked'),
-                CMsmall: Math.min(
-                    100,
-                    Math.max(5, parseInt($('#CMsmall').val()))
-                ),
-                movingComment: $('#isMovingComment').prop('checked'),
-                movingCommentSecond: parseInt($('#movingCommentSecond').val()),
-                movingCommentLimit: parseInt($('#movingCommentLimit').val()),
-                //            "moveByCSS": $("#isMoveByCSS").prop("checked"),
-                comeNg: $('#isComeNg').prop('checked'),
-                comeDel: $('#isComeDel').prop('checked'),
-                fullNg: $('#fullNg').val(),
-                inpWinBottom: $('#isInpWinBottom').prop('checked'),
-                customPostWin: $('#isCustomPostWin').prop('checked'),
-                cancelWheel: $('#isCancelWheel').prop('checked'),
-                volumeWheel: $('#isVolumeWheel').prop('checked'),
-                changeMaxVolume: Math.min(
-                    100,
-                    Math.max(0, parseInt($('#changeMaxVolume').val()))
-                ),
-                timeVisible: $('#isTimeVisible').prop('checked'),
-                sureReadComment: $('#isSureReadComment').prop('checked'),
-                isCommentFormWithSide: $('#isCommentFormWithSide').prop(
-                    'checked'
-                ),
-                sureReadRefreshx: Math.max(
-                    101,
-                    parseInt($('#sureReadRefreshx').val())
-                ),
-                // "isAlwaysShowPanel": $("#isAlwaysShowPanel").prop("checked"),
-                //            "movieResize": $("#isMovieResize").prop("checked")
-                //            "movieMaximize": $("#isMovieMaximize").prop("checked"),
-                commentBackColor: parseInt($('#commentBackColor').val()),
-                commentBackTrans: parseInt($('#commentBackTrans').val()),
-                commentTextColor: parseInt($('#commentTextColor').val()),
-                commentTextTrans: parseInt($('#commentTextTrans').val()),
-                commentPadZero: $('#isCommentPadZero').prop('checked'),
-                commentTBorder: $('#isCommentTBorder').prop('checked'),
-                timePosition: $(
-                    '#itimePosition [name="timePosition"]:checked'
-                ).val(),
-                notifySeconds: Math.max(0, parseInt($('#notifySeconds').val())),
-                isNotifyAndOpen: $('#isNotifyAndOpen').prop('checked'),
-                isNaOinActive: $('#isNaOinActive').prop('checked'),
-                beforeCMWait: Math.max(0, parseInt($('#beforeCMWait').val())),
-                afterCMWait: Math.max(0, parseInt($('#afterCMWait').val())),
-                manualKeyCtrlR: $('#isManualKeyCtrlR').prop('checked'),
-                manualKeyCtrlL: $('#isManualKeyCtrlL').prop('checked'),
-                manualMouseBR: $('#isManualMouseBR').prop('checked'),
-                CMBkR:
-                    $('#isCMBkR').prop('checked') &&
-                    $('#isCMBlack').prop('checked'),
-                CMsoundR:
-                    $('#isCMsoundR').prop('checked') &&
-                    $('#isCMsoundoff').prop('checked'),
-                CMsmlR:
-                    $('#isCMsmlR').prop('checked') &&
-                    parseInt($('#CMsmall').val()) != 100,
-                tabSoundplay: $('#isTabSoundplay').prop('checked'),
-                // "openPanelwCome":$("#isOpenPanelwCome").prop("checked"),
-                protitleVisible: $('#isProtitleVisible').prop('checked'),
-                protitlePosition: $(
-                    '#iprotitlePosition [name="protitlePosition"]:checked'
-                ).val(),
-                proSamePosition: $(
-                    '#iproSamePosition [name="proSamePosition"]:checked'
-                ).val(),
-                proTextLarge: $('#isProTextLarge').prop('checked'),
-                commentWide: $('#isCommentWide').prop('checked'),
-                kakikomiwait: parseInt($('#kakikomiwait').val()),
-                useEyecatch: $('#useEyecatch').prop('checked'),
-                hidePopBL: $('#isHidePopBL').prop('checked'),
-                hidePopTL: $('#isHidePopTL').prop('checked'),
-                panelopenset: panelopenset,
-                comeMovingAreaTrim: $('#comeMovingAreaTrim').prop('checked'),
-                hideButtons: $('#isHideButtons').prop('checked'),
-                resizeSpacing: $('#isResizeSpacing').prop('checked'),
-                deleteStrangeCaps: $('#isDeleteStrangeCaps').prop('checked'),
-                //            "highlightNewCome":$('#isHighlightNewCome').prop("checked"),
-                highlightNewCome: $('[name="highlightNewCome"]:checked').val(),
-                // "chTimetableExpand":$('#isChTimetableExpand').prop("checked"),
-                hidePopFresh: $('#isHidePopFresh').prop('checked'),
-                chTimetableBreak: $('#isChTimetableBreak').prop('checked'),
-                chTimetableWeekend: $('#isChTimetableWeekend').prop('checked'),
-                chTimetablePlaybutton: $('#isChTimetablePlaybutton').prop(
-                    'checked'
-                ),
-                timetableScroll: $('#timetableScroll').val(),
-                hideTwitterPanel: $('#isHideTwitterPanel').prop('checked'),
-                hideTodayHighlight: $('#isHideTodayHighlight').prop('checked'),
-                comelistNG: $('#isComelistNG').prop('checked'),
-                comelistClickNG: $('#isComelistClickNG').prop('checked'),
-                highlightComeColor: $(
-                    '[name="highlightComeColor"]:checked'
-                ).val(),
-                highlightComePower: $('#highlightComePower').val(),
-                comeClickNGautoClose: $('#isComeClickNGautoClose').prop(
-                    'checked'
-                ),
-                isShareNGword: $('#isShareNGword').prop('checked'),
-                delOldTime: $('#isDelOldTime').prop('checked'),
-                movieSpacingZeroTop: $('#isMovieSpacingZeroTop').prop(
-                    'checked'
-                ),
-                movieSpacingZeroLeft: $('#isMovieSpacingZeroLeft').prop(
-                    'checked'
-                ),
-                comeFontsize: Math.min(
-                    99,
-                    Math.max(1, parseInt($('#comeFontsize').val()))
-                ),
-                hideVoting: $('#isHideVoting').prop('checked'),
-                storeViewCounter: $('#isStoreViewCounter').prop('checked'),
-                comeTriming: $('#isComeTriming').prop('checked'),
-                allowChannelNames: $('#allowChannelNames').val(),
-                expandLastItem: $('#isExpandLastItem').prop('checked'),
-                expandFewChannels: $('#isExpandFewChannels').prop('checked'),
-                hideArrowButton: $('#isHideArrowButton').prop('checked'),
-                putSideDetailHighlight: $('#isPutSideDetailHighlight').prop(
-                    'checked'
-                ),
-                panelOpacity: parseInt($('#panelOpacity').val()),
-                comeFontsizeV: $('#comeFontsizeV').prop('checked'),
-                proTitleFontC: $('#proTitleFontC').prop('checked'),
-                delTime: $('#isDelTime').prop('checked'),
-                mastodonInstance: $('#mastodonInstance').val(),
-                mastodonToken: $('#mastodonToken').val(),
-                mastodonFormat: $('#mastodonFormat').val(),
-                isNotifySound: $('#isNotifySound').prop('checked'),
-                isNotifyOnline: $('#isNotifyOnline').prop('checked'),
-                notifyOnlineMinutes: Math.max(
-                    0,
-                    parseInt($('#notifyOnlineMinutes').val())
-                ),
-                notifyMailAddress: $('#notifyMailAddress').val(),
-                notifyLNtoken: $('#notifyLNtoken').val(),
-                notifyPostUrl: $('#notifyPostUrl').val(),
-                audibleReloadWait: Math.max(
-                    0,
-                    parseInt($('#audibleReloadWait').val())
-                ),
-                isNotifyRemain: $('#isNotifyRemain').prop('checked'),
-                DAR43: $('#isDAR43').prop('checked'),
-                replaceIcons: $('#isReplaceIcons').prop('checked'),
-                isUserDel: $('#isUserDel').prop('checked'),
-                userNg: $('#userNg').val(),
-                isUserHighlight: $('#isUserHighlight').prop('checked'),
-                isShareNGuser: $('#isShareNGuser').prop('checked'),
-                minResolution: parseInt($('#minResolution').val()),
-                maxResolution: parseInt($('#maxResolution').val())
-            },
-            function() {
-                $('#info')
-                    .show()
-                    .text('設定保存しました')
-                    .fadeOut(4000);
-            }
-        );
+        const saveSettings = settingHtml.getSettingInputValue(true);
+        Object.assign(saveSettings, {
+            CMBkR:
+                $('#isCMBkR').prop('checked') &&
+                $('#isCMBlack').prop('checked'),
+            CMsoundR:
+                $('#isCMsoundR').prop('checked') &&
+                $('#isCMsoundoff').prop('checked'),
+            CMsmlR:
+                $('#isCMsmlR').prop('checked') &&
+                parseInt($('#CMsmall').val()) != 100
+        });
+        settings.setStorage(saveSettings).then(function() {
+            $('#info')
+                .show()
+                .text('設定保存しました')
+                .fadeOut(4000);
+        });
     });
+    settingHtml.setRangeNumberDisplayer();
     $('#CommentColorSettings').change(function() {
         var p = [];
         var jo = $('#CommentColorSettings input[type="range"]');
         for (var i = 0; i < jo.length; i++) {
-            jo.eq(i)
-                .prev('span.prop')
-                .text(
-                    jo.eq(i).val() +
-                        ' (' +
-                        Math.round((jo.eq(i).val() * 100) / 255) +
-                        '%)'
-                );
             p[i] = jo.eq(i).val();
         }
-        //        $('#CommentColorSettings input[type="range"]').each(function(i,jo){
-        //            $(jo).prev('span.prop').text($(jo).val()+" ("+Math.round($(jo).val()*100/255)+"%)");
-        //            p[i]=$(jo).val();
-        //        });
         $('#CommentColorSettings span.desc')
             .css(
                 'background-color',
@@ -939,14 +477,6 @@ $(function() {
                     p[3] / 255 +
                     ')'
             );
-    });
-    $('#highlightComePower').change(function() {
-        $('#highlightPdesc').text('背景濃さ' + $('#highlightComePower').val());
-    });
-    $('#panelOpacity').change(function() {
-        $('#panelOpacity')
-            .siblings('.prop')
-            .text($('#panelOpacity').val());
     });
     //$('#alwaysShowPanelB').on("click",panelTableUpdateA);
     //$('#openPanelwComeB').on("click",panelTableUpdateO);
@@ -1061,7 +591,6 @@ $(function() {
         }
         changeDisableExtBtnVal();
         $('#disableExtensionBtn').click(function() {
-            var btnStr = '現在のバージョンで拡張機能の動作を停止';
             if (disableExtVersion == currentVer) {
                 disableExtVersion = '';
                 chrome.storage.local.set(
