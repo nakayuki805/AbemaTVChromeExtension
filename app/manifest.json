@@ -1,56 +1,56 @@
 {
-	"manifest_version": 2,
-	"name": "_bem_tv ext",
-	"version": "0.15.11",
-	"description": "abematvを快適にする非公式の拡張機能(番組通知自動再生、コメントNGワード、映像上コメント流し、映像サイズ固定など様々な機能を柔軟に設定できます)",
-	"__edge__author": "AbemaTVChromeExtension on github",
-	"__chrome__minimum_chrome_version": "55",
-	"icons": {
-		"128": "images/icon.png"
-	},
-	"__firefox__applications": {
-		"gecko": {
-			"id": "abematvextension@nakayuki.net",
-			"strict_min_version": "52.0",
-			"update_url": "https://www.nakayuki.net/abema-ext/update.json"
-		}
-	},
-	"permissions": [
-		"storage",
-		"alarms",
-		"notifications",
-		"tabs",
-		"contextMenus",
-		"webNavigation"
-	],
-	"content_scripts": [
-		{
-			"matches": ["https://abema.tv/*"],
-			"js": ["scripts/contentScript.js"],
-			"run_at": "document_start",
-			"__edge__run_at": "document_idle"
-	}
-	],
-	"web_accessible_resources": [
-		"scripts/contentScript.js",
-		"styles/content.css",
-		"jquery-3.2.1.min.js",
-		"pages/option.html",
-		"pages/notifylist.html",
-		"images/gear.svg",
-		"images/pip.svg",
-		"images/mastodon-icon.svg",
-		"images/mastodon-icon-blue.svg",
-		"scripts/injection.js",
-		"scripts/injection-xhr.js"
-	],
-	"__chrome__options_page": "pages/option.html",
-	"__opera__options_page": "pages/option.html",
-	"__edge__options_page": "pages/option.html",
-	"background": {
-		"scripts": ["scripts/eventPage.js"],
-		"__chrome__persistent": false,
-		"__opera__persistent": false,
-		"__edge__persistent": false
-	}
+    "manifest_version": 2,
+    "name": "_bem_tv ext",
+    "version": "0.16.0",
+    "description": "abematvを快適にする非公式の拡張機能(番組通知自動再生、コメントNGワード、映像上コメント流し、映像サイズ固定など様々な機能を柔軟に設定できます)",
+    "__edge__author": "AbemaTVChromeExtension on github",
+    "__chrome__minimum_chrome_version": "55",
+    "icons": {
+        "128": "images/icon.png"
+    },
+    "__firefox__applications": {
+        "gecko": {
+            "id": "abematvextension@nakayuki.net",
+            "strict_min_version": "52.0",
+            "update_url": "https://www.nakayuki.net/abema-ext/update.json"
+        }
+    },
+    "permissions": [
+        "storage",
+        "alarms",
+        "notifications",
+        "tabs",
+        "contextMenus",
+        "webNavigation"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["https://abema.tv/*"],
+            "js": ["scripts/contentScript.js"],
+            "run_at": "document_start",
+            "__edge__run_at": "document_idle"
+        }
+    ],
+    "web_accessible_resources": [
+        "scripts/contentScript.js",
+        "styles/content.css",
+        "jquery-3.2.1.min.js",
+        "pages/option.html",
+        "pages/notifylist.html",
+        "images/gear.svg",
+        "images/pip.svg",
+        "images/mastodon-icon.svg",
+        "images/mastodon-icon-blue.svg",
+        "scripts/injection.js",
+        "scripts/injection-xhr.js"
+    ],
+    "__chrome__options_page": "pages/option.html",
+    "__opera__options_page": "pages/option.html",
+    "__edge__options_page": "pages/option.html",
+    "background": {
+        "scripts": ["scripts/eventPage.js"],
+        "__chrome__persistent": false,
+        "__opera__persistent": false,
+        "__edge__persistent": false
+    }
 }
