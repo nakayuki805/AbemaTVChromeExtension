@@ -11,6 +11,9 @@ import * as gdl from './lib/generic-dom-lib';
 import * as notifyButton from './lib/notifyButton';
 import * as gcl from './lib/generic-comment-lib';
 import * as TT from './lib/timetable';
+import * as mc from './lib/movingComment';
+import * as replayComment from './lib/replayComment';
+
 import './updatenotify.js';
 
 // edge対応
@@ -19,7 +22,13 @@ if (process.env.VENDOR === 'edge') {
 }
 console.log(process.env.VENDOR);
 
-var settings = Object.assign({}, settingslib.defaultSettings);
+//複数ファイル間で参照を保つオブジェクト
+const settings = Object.assign({}, settingslib.defaultSettings);
+const arFullNg = [];
+const arUserNg = [];
+
+mc.applySettings(settings);
+replayComment.applySharedObjects(settings, arFullNg, arUserNg);
 //debug
 /*
 jQuery.noConflict();
@@ -137,19 +146,7 @@ const volumeRight = 20;
 const fullscrRight = 72;
 
 var commentNum = 0;
-var comeLatestPosi = [];
-var comeTTLmin = 3;
-var comeTTLmax = 13;
-var comeLatestLen = 10;
-comeLatestPosi.length = comeLatestLen;
-for (var i = 0; i < comeLatestLen; i++) {
-    comeLatestPosi[i] = [];
-    comeLatestPosi[i][0] = 0;
-    comeLatestPosi[i][1] = comeTTLmin;
-}
 var isComeLatestClickable = true; //右下コメント数をクリックできるか
-var arFullNg = [];
-var arUserNg = [];
 //var retrycount=0;
 var proStart = new Date(); //番組開始時刻として現在時刻を仮設定
 var proEnd = new Date(); //番組終了時刻として現時刻を仮定(日付が変わる直前で未来を仮定すると1日ずれる)
@@ -188,7 +185,6 @@ var eventAdded = false; //各イベントを1回だけ作成する用
 var setBlacked = [false, false, false]; //soundsetなどのスイッチ
 var keyinput = []; //コマンド入れ
 var keyCodes = '38,38,40,40,37,39,37,39,66,65';
-var comeArray = []; //流すコメントで、新着の複数コメントのうちNG処理等を経て実際に出力するコメントのリスト
 var proTitle = ''; //番組タイトル
 var proinfoOpened = false; //番組タイトルクリックで番組情報枠を開いた後にクリックで閉じれるようにする
 var optionStatsUpdated = false; //optionStatsUpdateの重複起動防止
@@ -234,9 +230,12 @@ var comelistClasses = {
 var currentVersion = chrome.runtime.getManifest().version;
 var resizeEventTimer = 0; //ウィンドウリサイズイベント用のタイマー
 var isBottomScrolled = false; //コメ欄逆順時初回で下にスクロールしたか
+
 var urlChangeEvent = new Event('urlChange');
 var comelistReadyEvent = new Event('commentListReady');
 var resolutionSetEvent = new Event('resolutionSet');
+const settingsChangeEvent = new Event('settingsChange');
+
 var delaysetConsoleStr = '';
 var delaysetConsoleRepeated = false;
 var lastMovedCommentTime = 0; //最後に流れたコメントの時間(コメントが二重に流れるのを防ぐ)
@@ -435,219 +434,6 @@ function toggleFullscreen() {
     setTimeout(onresize, 1000);
 }
 
-function putComeArray(inp) {
-    //console.log("putComeArray");
-    //console.table(inp);
-    // inp[i]=[ commentText , commentTop , leftOffset, isSelf]
-    var mci = $('#moveContainer');
-    if (mci.length == 0) {
-        $('<div id="moveContainer" class="usermade">').appendTo('body');
-        mci = $('#moveContainer');
-    }
-    var mcj = mci.children('.movingComment');
-    var mclen = mcj.length;
-    var inplen = inp.length;
-    var comeoverflowlen = inplen + mclen - settings.movingCommentLimit;
-    //あふれる分を削除
-    if (comeoverflowlen > 0) {
-        for (var cofi = 0; cofi < comeoverflowlen; cofi++) {
-            setTimeout(
-                function(cofi) {
-                    mcj.eq(cofi).remove();
-                },
-                (7000 * cofi) / comeoverflowlen,
-                cofi
-            ); //あふれた分を1つずつ順番に7秒かけて消す
-        }
-        //        mclen-=comeoverflowlen;
-    }
-    //    var jo = $("object,video").parent();
-    var jo = $(getElm.getVideo());
-    if (jo.isEmpty()) {
-        console.log('video empty in putComeArray', jo);
-    }
-    var er = jo[0].getBoundingClientRect();
-    var movieRightEdge;
-    //    if(isMovieMaximize){
-    //        if(jo.width()>jo.height()*16/9){ //横長
-    //            movieRightEdge=jo.width()/2+jo.height()*8/9; //画面半分+映像横長さ/2
-    //        }else{ //縦長
-    //            movieRightEdge=jo.width();
-    //        }
-    //    }else{
-    movieRightEdge = er.left + er.width / 2 + jo.width() / 2;
-    //    }
-    var winwidth = settings.comeMovingAreaTrim
-        ? movieRightEdge
-        : window.innerWidth;
-    var outxt = '';
-    var setfont = '';
-    if ($('#settcont').css('display') != 'none') {
-        setfont = 'font-size:' + parseInt($('#comeFontsize').val()) + 'px;';
-    }
-    for (var i = 0; i < inplen; i++) {
-        outxt +=
-            '<span class="movingComment' +
-            (inp[i][3] ? ' selfComment' : '') +
-            '" style="position:absolute;top:' +
-            inp[i][1] +
-            'px;left:' +
-            (inp[i][2] + winwidth) +
-            'px;' +
-            setfont +
-            '">' +
-            inp[i][0] +
-            '</span>';
-    }
-    $(outxt).appendTo(mci);
-    //    mclen+=inplen;
-    mcj = mci.children('.movingComment');
-    mclen = mcj.length;
-    for (let i = 0; i < inplen; i++) {
-        var mck = mcj.eq(-inplen + i);
-        var mcwidth = mck.width();
-        var mcleft = inp[i][2] + winwidth;
-        //コメント長さによって流れる速度が違いすぎるのでlogを速度計算部分に適用することで差を減らす
-        //長いコメントは遅くなるので設定値より少し時間がかかる
-        var mcfixedwidth =
-            mcwidth < 237 ? mcwidth : 100 * Math.floor(Math.log(mcwidth));
-
-        //コメント設置位置の更新
-        //コメント右端が画面右端に出てくるまでの時間を保持する
-        var r =
-            (settings.movingCommentSecond * (mcleft + mcwidth - winwidth)) /
-            (winwidth + mcfixedwidth);
-        for (var j = comeLatestPosi.length - 1; j >= 0; j--) {
-            if (
-                comeLatestPosi[j][1] > comeTTLmax &&
-                comeLatestPosi[j][0] == inp[i][1]
-            ) {
-                comeLatestPosi[j][1] = Math.min(
-                    comeTTLmax,
-                    Math.max(comeTTLmin, 1 + Math.ceil(r))
-                );
-                break;
-            }
-        }
-
-        var waitsec =
-            (settings.movingCommentSecond * (mcleft + mcwidth)) /
-            (winwidth + mcfixedwidth);
-        var movingDelta = -mcwidth - 2 - (inp[i][2] + winwidth);
-
-        setTimeout(
-            function(jo, w, delta) {
-                if (gl.isEdge) {
-                    jo = $(jo);
-                }
-                jo.css('transition', 'transform ' + w + 's linear')
-                    .css('transform', 'translateX(' + delta + 'px)')
-                    .attr('data-createdSec', onairSecCount);
-            },
-            0,
-            mck,
-            waitsec,
-            movingDelta
-        );
-    }
-}
-function putComment(commentText, userid, index, inmax, isSelf) {
-    //console.log('putComment', commentText, userid, index, inmax, isSelf)
-    var outflg = false;
-    if (index == 0) {
-        comeArray = [];
-    }
-    if (index == inmax - 1) {
-        outflg = true;
-    }
-    if (isSelf == undefined) {
-        isSelf = false;
-    }
-    //kakikomiwaitが0でない時は自分の書き込みをputCommentから除外する
-    //console.log("commentText="+commentText+", kakikomitxt="+kakikomitxt);
-    if (commentText.length > 0 && commentText == kakikomitxt) {
-        console.log('kakikomi match,wait=' + settings.kakikomiwait);
-        isSelf = true;
-        if (settings.kakikomiwait > 0) {
-            //waitがプラスなら後から単独で流す
-            setTimeout(
-                putComment,
-                'self',
-                settings.kakikomiwait * 1000,
-                commentText,
-                0,
-                1,
-                true
-            );
-            commentText = '';
-        } else if (settings.kakikomiwait < 0) {
-            commentText = '';
-        }
-        kakikomitxt = '';
-        // console.log("kakikomitxt reset: putComment")
-    }
-    commentText = gcl.comefilter(
-        commentText,
-        userid,
-        arFullNg,
-        arUserNg,
-        settings.isComeDel,
-        settings.isUserDel,
-        settings.isComeNg,
-        settings.isDeleteStrangeCaps
-    );
-    var commentTopMargin = 50;
-    var commentBottomMargin = 150;
-    if (EXhead.style.visibility == 'hidden') {
-        commentTopMargin = 10;
-    }
-    if (EXfoot.style.visibility == 'hidden') {
-        commentBottomMargin = 100;
-    }
-    var commentTop =
-        Math.floor(
-            Math.random() *
-                (window.innerHeight - (commentTopMargin + commentBottomMargin))
-        ) + commentTopMargin;
-    if (commentText.length > 0) {
-        i = 0;
-        var k = false;
-        while (i < 20) {
-            k = false;
-            for (var j = 0; j < comeLatestLen; j++) {
-                if (
-                    Math.abs(commentTop - comeLatestPosi[j][0]) <
-                    settings.comeFontsize * 1.5
-                ) {
-                    k = true;
-                }
-            }
-            if (k) {
-                commentTop =
-                    Math.floor(
-                        Math.random() *
-                            (window.innerHeight -
-                                (commentTopMargin + commentBottomMargin))
-                    ) + commentTopMargin;
-            } else {
-                break;
-            }
-            i += 1;
-        }
-    }
-    var maxLeftOffset = (window.innerWidth * 7) / settings.movingCommentSecond; //7秒の移動長さ
-    var leftOffset = Math.floor((maxLeftOffset * index) / inmax);
-    if (commentText.length > 0) {
-        comeArray.push([commentText, commentTop, leftOffset, isSelf]);
-    }
-    if (outflg && comeArray.length > 0) {
-        setTimeout(putComeArray, 50, comeArray);
-    }
-    //コメント設置位置の保持
-    //この時点では要素長さが未確定なので暫定的に異常値を入力してputComeArray側で拾う
-    comeLatestPosi.push([commentTop, comeTTLmax + 2]);
-    comeLatestPosi.shift();
-}
 //ミュート(false)・ミュート解除(true)する関数
 function soundSet(isSound) {
     //isSound=true:音を出す
@@ -954,8 +740,8 @@ function delayset(
 
     if (!isInit && $(EXfootcome).length > 0 && $(EXcountview).length > 0) {
         createSettingWindow();
-        arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
-        arUserNg = gcl.arrayUserNgMaker(settings.userNg, settings.isShareNGuser);
+        gcl.arrayFullNgMaker(arFullNg, settings.fullNg, settings.isShareNGword);
+        gcl.arrayUserNgMaker(arUserNg, settings.userNg, settings.isShareNGuser);
         //映像のリサイズ
         onresize();
         if (!isResizeInterval) setInterval(onresize, 30000);
@@ -1591,7 +1377,7 @@ function createSettingWindow() {
         );
         $('#iproSamePosition').change(setProSamePosiChanged);
         $('#isProTextLarge').change(setProTextSizeChanged);
-        $('#comeFontsize').change(setComeFontsizeChanged);
+        $('#comeFontsize').change(mc.setComeFontsizeChanged);
         $('.leftshift').on('click', function() {
             $('#settcont').css('right', commentListWidth+'px');
             $('.leftshift').css('display', 'none');
@@ -2140,11 +1926,7 @@ function createSettingWindow() {
     $('#afterCMWait').prop('min', '0');
     console.log('createSettingWindow ok');
 }
-function setComeFontsizeChanged() {
-    var nf = parseInt($('#comeFontsize').val());
-    var jo = $('.movingComment');
-    jo.css('font-size', nf + 'px');
-}
+
 function moviePositionVTypeChanged() {
     switch (
         +$(
@@ -2311,19 +2093,7 @@ function setClearStorageClicked() {
     window.localStorage.clear();
     console.info('cleared localStorage');
 }
-function moveComeTopFilter() {
-    var jo = $('.movingComment');
-    var i = jo.length - 1;
-    while (i >= 0) {
-        if (
-            jo.eq(i).position().top >
-            window.innerHeight - headerHeight - footerHeight
-        ) {
-            jo.eq(i).remove();
-        }
-        i -= 1;
-    }
-}
+
 function setSaveDisable() {
     $('#saveBtn')
         .prop('disabled', true)
@@ -2331,7 +2101,7 @@ function setSaveDisable() {
 }
 function setPSaveNG() {
     settings.fullNg = $('#fullNg').val();
-    arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
+    gcl.arrayFullNgMaker(arFullNg, settings.fullNg, settings.isShareNGword);
     applyCommentListNG();
     gl.setStorage(
         {
@@ -2395,8 +2165,8 @@ function setSaveClicked() {
             ).val();
         }
     }
-    arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
-    arUserNg = gcl.arrayUserNgMaker(settings.userNg, settings.isShareNGuser);
+    gcl.arrayFullNgMaker(arFullNg, settings.fullNg, settings.isShareNGword);
+    gcl.arrayUserNgMaker(arUserNg, settings.userNg, settings.isShareNGuser);
 
     onresize();
     setOptionHead();
@@ -2422,7 +2192,7 @@ function setSaveClicked() {
                 { type: 'windowresize', valw: s[0], valh: s[1] },
                 function(r) {
                     setTimeout(optionHeightFix, 1000);
-                    setTimeout(moveComeTopFilter, 1000);
+                    setTimeout(mc.moveComeTopFilter, 1000, headerHeight, footerHeight);
                 }
             );
         }
@@ -5468,12 +5238,7 @@ function setOptionHead() {
         t += '.comem:hover{color:' + rc + '!important;}';
     }
     //流れるコメントのフォントサイズ
-    if (settings.comeFontsizeV) {
-        var wh = $(window).height();
-        var vh = Math.round((1000 * settings.comeFontsize) / wh) / 10;
-        t += '.movingComment{font-size:' + vh + 'vh;}';
-    } else t += '.movingComment{font-size:' + settings.comeFontsize + 'px;}';
-
+    t += mc.generateCSS(false);
     //投票機能
     t += selInfo + '+div[style^="width:"]{z-index:8;'; //infoの隣でwidthがinnerWidthに直指定されてる
     if (settings.isHideVoting) {
@@ -6950,7 +6715,7 @@ function appendTextNG(ev, inpstr) {
             }
         }
 
-        arFullNg = gcl.arrayFullNgMaker(settings.fullNg, settings.isShareNGword);
+        gcl.arrayFullNgMaker(arFullNg, settings.fullNg, settings.isShareNGword);
         applyCommentListNG();
     }
     if (inpstr === undefined) {
@@ -7017,7 +6782,7 @@ function appendUserNG(ev, inpstr) {
             }
         }
         console.log('apUsNg append');
-        arUserNg = gcl.arrayUserNgMaker(settings.userNg);
+        gcl.arrayUserNgMaker(arUserNg, settings.userNg);
         if (settings.isShareNGuser) {
             gcl.postShareNGusers(arUserNg, getInfo.getChannelByURL());
         }
@@ -7320,24 +7085,8 @@ function onairBasefunc() {
 
         //console.timeEnd('obf_come');
 
-        //流れるコメントのうちmovingCommentSecond*2経過したものを削除
-        if (settings.isMovingComment) {
-            var arMovingComment = $('.movingComment');
-            for (let j = 0; j < arMovingComment.length; j++) {
-                //                if(arMovingComment.eq(j).offset().left + arMovingComment.eq(j).width()<=0){
-                //if (arMovingComment.eq(j).offset().left - parseInt(arMovingComment.eq(j)[0].style.left) < 1) {
-                if (
-                    parseInt(
-                        arMovingComment[j].getAttribute('data-createdSec')
-                    ) <
-                    onairSecCount - settings.movingCommentSecond * 2
-                ) {
-                    arMovingComment[j].remove();
-                } else {
-                    break; //前から順番に見ていって画面外のコメントを処理し終わったらbreak
-                }
-            }
-        }
+        
+        mc.intervalFunction();
         //console.time('obf_2');
         //2つに分かれていたのを統合
         //この後ろで結局コメ数チェックするのでここでついでに実行
@@ -7569,15 +7318,7 @@ function onairBasefunc() {
             }
         }
 
-        //コメント位置のTTLを減らす
-        for (let i = 0; i < comeLatestLen; i++) {
-            if (comeLatestPosi[i][1] > 0) {
-                comeLatestPosi[i][1] -= 1;
-                if (comeLatestPosi[i][1] <= 0) {
-                    comeLatestPosi[i][0] = 0;
-                }
-            }
-        }
+
 
         //番組タイトルの更新
         if (EXinfo) {
@@ -8017,11 +7758,18 @@ function onCommentChange(mutations) {
                         movingStarti = i; //movingStartiはlastMovedCommentTimeで弾いたコメントを除いた新着として流すコメントの起点
                     }
                     //console.log(comments[idx],idx,i,d,movingStarti)
-                    putComment(
+                    mc.putComment(
                         comments[idx][0],
                         comments[idx][1],
                         i - movingStarti,
-                        d - movingStarti
+                        d - movingStarti,
+                        undefined,
+                        // settings,
+                        arFullNg,
+                        arUserNg,
+                        kakikomitxt,
+                        EXhead,
+                        EXfoot
                     );
                     if (i == d - 1 && dt > 0) {
                         lastMovedCommentTime = dt;
@@ -8066,11 +7814,18 @@ function onCommentChange(mutations) {
                 } else if (movingStarti == 0) {
                     movingStarti = i;
                 }
-                putComment(
+                mc.putComment(
                     cinfo.message,
                     cinfo.userid,
                     i - movingStarti,
-                    animationCommentDivs.length - movingStarti
+                    animationCommentDivs.length - movingStarti,
+                    undefined,
+                    // settings,
+                    arFullNg,
+                    arUserNg,
+                    kakikomitxt,
+                    EXhead,
+                    EXfoot
                 );
                 if (i == animationCommentDivs.length - 1 && dt > 0) {
                     lastMovedCommentTime = dt;
@@ -8119,7 +7874,7 @@ function chkurl() {
             eventAdded = false; //放送画面以外→放送画面と推移した場合イベント設定しなおし
         }
         commentNum = 0;
-        $('.movingComment').remove();
+        mc.leavePage();
         bginfo = [0, [], -1, -1];
         endCM();
         proStart = new Date();
@@ -8133,6 +7888,8 @@ function chkurl() {
             EXfullscr.style.right = '';
             EXvolume.style.right = '';
         }
+
+        replayComment.leavePage();
 
         window.dispatchEvent(urlChangeEvent);
 
@@ -8155,6 +7912,7 @@ function URLPatternSwitch() {
             notifyButton.putNotifyButton(settings.notifySeconds, url);
             onairCleaner();
             delaysetNotOA();
+            replayComment.prepare();
             break;
         case getInfo.URL_DATETABLE:
             //日付別番組表

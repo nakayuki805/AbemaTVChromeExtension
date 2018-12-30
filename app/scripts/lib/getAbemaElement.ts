@@ -3,6 +3,12 @@ import * as $ from 'jquery';
 import * as getInfo from './getAbemaInfo';
 import * as dl from './dom-lib';
 
+export function getReplayVideo(): HTMLElement | null {
+    return dl.filter(document.getElementsByTagName('video'), {
+        displayNot: 'none',
+        notBodyParent: true
+    })[0];
+}
 export function getVideo() {
     // console.trace('getVideo()')
     let ret: HTMLElement | null = dl.filter(

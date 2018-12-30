@@ -202,12 +202,14 @@ export function putNotifyButton(notifySeconds: number, url: string) {
     if (getInfo.determineUrl() !== getInfo.URL_SLOTPAGE) return;
     const detailContainer = dl.last(
         dl.filter(document.getElementsByTagName('div'), {
-            top14u: true,
             width12b: true,
             height12b: true,
             notBodyParent: true,
             notMatchSelector: '#main>*',
-            filters: [e => e.childElementCount === 2]
+            filters: [
+                e => e.childElementCount === 2,
+                e => e.getElementsByTagName('header').length > 0
+            ]
         })
     );
     const buttonContainer =
@@ -231,7 +233,13 @@ export function putNotifyButton(notifySeconds: number, url: string) {
         setTimeout(function() {
             putNotifyButton(notifySeconds, url);
         }, 1000);
-        console.log('putNotifyButton wait');
+        console.log(
+            'putNotifyButton wait',
+            titleElement,
+            buttonContainer,
+            detailContainer,
+            header
+        );
         return;
     }
     let urlarray = url.substring(17).split('/');

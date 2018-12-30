@@ -36,7 +36,7 @@ function getRepresentations(mpd) {
 let inj_originalXHRopen = window.XMLHttpRequest.prototype.open;
 let inj_originalXHRsend = window.XMLHttpRequest.prototype.send;
 let inj_extXHRopen = function() {
-    let method = arguments[0];
+    // let method = arguments[0];
     let url = arguments[1];
     //console.log("XHR", method, url);
     if ((inj_maxRes != 2160 || inj_minRes != 0) && inj_maxRes >= inj_minRes) {

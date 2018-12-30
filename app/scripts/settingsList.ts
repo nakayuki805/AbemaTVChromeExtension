@@ -1,3 +1,7 @@
+// 拡張機能の設定一覧
+// ここのsettingsに設定を追加するだけで設定画面、contentScriptでの設定の読み込み、一時設定時の値反映は自動でやってくれる。
+// (settingsへの値の反映以外の反映処理は要実装) あとTS用にSettingItemsに型を追記必要
+
 interface BasicSetting {
     name: string;
     title?: string;
@@ -65,6 +69,118 @@ export interface SettingList {
     instantHeader?: string;
     instantFooter?: string;
     settings: Setting[];
+}
+// SettingItems one liner
+// logEval('window.slm=_settings__WEBPACK_IMPORTED_MODULE_2__')
+// t='';slm.settingsList.map(v=>v.settings).flat().map(a=>[a.name,a.type.replace(/range/,'number').replace(/text(area)?/,'string')]).forEach(a=>{t+=`    ${a[0]}: ${a[1]};\n`});t
+export interface SettingItems {
+    isResizeScreen: boolean;
+    isDAR43: boolean;
+    isMovieSpacingZeroTop: boolean;
+    isResizeSpacing: boolean;
+    isMovieSpacingZeroLeft: boolean;
+    isDblFullscreen: boolean;
+    isCancelWheel: boolean;
+    isVolumeWheel: boolean;
+    changeMaxVolume: number;
+    isHideButtons: boolean;
+    isHideVoting: boolean;
+    isStoreViewCounter: boolean;
+    panelOpacity: number;
+    audibleReloadWait: number;
+    isHideReplayCommentButton: boolean;
+    minResolution: number;
+    maxResolution: number;
+    isHideOldComment: boolean;
+    isCustomPostWin: boolean;
+    isSureReadComment: boolean;
+    isCommentFormWithSide: boolean;
+    isComeTriming: boolean;
+    sureReadRefreshx: number;
+    isCommentPadZero: boolean;
+    isCommentTBorder: boolean;
+    isCommentWide: boolean;
+    isDelTime: boolean;
+    highlightNewCome: number;
+    highlightComeColor: number;
+    highlightComePower: number;
+    isUserHighlight: boolean;
+    isMovingComment: boolean;
+    movingCommentSecond: number;
+    movingCommentLimit: number;
+    kakikomiwait: number;
+    comeMovingAreaTrim: boolean;
+    comeFontsize: number;
+    comeFontsizeV: boolean;
+    isComeNg: boolean;
+    isDeleteStrangeCaps: boolean;
+    isComeDel: boolean;
+    fullNg: string;
+    isUserDel: boolean;
+    userNg: string;
+    isShareNGword: boolean;
+    isShareNGuser: boolean;
+    isComelistClickNG: boolean;
+    isComeClickNGautoClose: boolean;
+    mastodonInstance: string;
+    mastodonToken: string;
+    mastodonFormat: string;
+    isTimeVisible: boolean;
+    isProtitleVisible: boolean;
+    isProTextLarge: boolean;
+    proTitleFontC: boolean;
+    notifySeconds: number;
+    isNotifyAndOpen: boolean;
+    isNaOinActive: boolean;
+    isNotifyRemain: boolean;
+    isNotifySound: boolean;
+    isNotifyOnline: boolean;
+    notifyOnlineMinutes: number;
+    notifyMailAddress: string;
+    notifyLNtoken: string;
+    notifyPostUrl: string;
+    isChTimetableBreak: boolean;
+    isChTimetableWeekend: boolean;
+    isChTimetablePlaybutton: boolean;
+    timetableScroll: string;
+    allowChannelNames: string;
+    isExpandLastItem: boolean;
+    isExpandFewChannels: boolean;
+    isHideArrowButton: boolean;
+    isPutSideDetailHighlight: boolean;
+    isReplaceIcons: boolean;
+    isHideTwitterPanel: boolean;
+    isHideTodayHighlight: boolean;
+    isInpWinBottom: boolean;
+    isDelOldTime: boolean;
+    // ComeColorSettings
+    commentBackColor: number;
+    commentBackTrans: number;
+    commentTextColor: number;
+    commentTextTrans: number;
+    // radioSettings
+    timePosition: string;
+    protitlePosition: string;
+    proSamePosition: string;
+    panelopenset: number;
+    // CMSettings
+    isCMBlack: boolean;
+    isCMBkTrans: boolean;
+    isCMBkR: boolean;
+    isCMsoundoff: boolean;
+    isTabSoundplay: boolean;
+    isCMsoundR: boolean;
+    CMsmall: number;
+    isCMsmlR: boolean;
+    beforeCMWait: number;
+    afterCMWait: number;
+    isManualKeyCtrlR: boolean;
+    isManualKeyCtrlL: boolean;
+    isManualMouseBR: boolean;
+    useEyecatch: boolean;
+    isHidePopTL: boolean;
+    isHidePopBL: boolean;
+    isHidePopFresh: boolean;
 }
 export const settings: SettingList[] = [
     {
@@ -194,6 +310,14 @@ export const settings: SettingList[] = [
                 isInstantChangable: true,
                 default: 20,
                 range: [3]
+            },
+            {
+                name: 'isHideReplayCommentButton',
+                description:
+                    '見逃し視聴でコメント数ボタンを隠す(見逃しコメント欄が開けなくなります。見逃し視聴時にコメントを絶対見ない場合に有効にしてください。)',
+                type: 'boolean',
+                isInstantChangable: false,
+                default: false
             }
         ]
     },

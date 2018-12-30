@@ -97,7 +97,6 @@ function getTTTimeClassesFromPT(proTitleClass) {
     for (let i = 0; i < 3; i++) if (!classes[i]) nc++;
     if (nc == 3 || nc == 2) return ret;
     //(2以上の要素内で)重複クラスを削除して1つにならなければ全体の該当要素が少ないのを選ぶ
-    for (let i = 0; i < 3; i++) {}
     var jc = 9999;
     var eq = true;
     ret = null;
@@ -161,7 +160,7 @@ function getTTLRArrowContainerElement(returnSingleSelector) {
             ? dl.getElementSingleSelector(jo[0])
             : jo[0];
 
-    for (let i = 0, z; i < jo.length; i++) {
+    for (let i = 0; i < jo.length; i++) {
         if (jo.eq(i).offset().left > 50) jo = jo.not(jo.eq(i));
     }
     if (jo.length == 0) return null;
@@ -289,7 +288,7 @@ function allowChannelNumMaker() {
     var eaHead = $(EXTThead).children('a');
     if (eaHead.length == 0) return -2;
     var n = [];
-    for (var i = 0, f, h, c; i < eaHead.length; i++) {
+    for (var i = 0, h, c; i < eaHead.length; i++) {
         if ((h = eaHead.eq(i).prop('href')) && h.indexOf(u) == 0) {
             c = h.replace(u, '');
             //console.log("c="+c);
@@ -321,9 +320,8 @@ function timetableCss() {
     $('head>link[title="usermade"]').remove();
     var t = '';
     var ts = '';
-    var to, tp;
+    var to;
     var selBody, selHead, selTime, selPTitle, selBodyS;
-    var eo, ep;
     var m;
     var alt = false;
 
@@ -723,7 +721,7 @@ export function waitforloadtimetable(url) {
                     timetableGrabbing.value = false;
                     timetableGrabbing.scrolled = false;
                 })
-                .mouseup(function(e) {
+                .mouseup(function() {
                     timetableGrabbing.value = false;
                 })
                 .mousedown(function(e) {
@@ -791,7 +789,7 @@ function putSideDetailHighlight() {
     if (!selPTitle) return;
     var searchTarget = $(EXTTbody).find('.' + selPTitle);
     var highlightString = '';
-    for (var i = 0, t, s; i < searchTarget.length; i++) {
+    for (var i = 0, t; i < searchTarget.length; i++) {
         t = searchTarget.eq(i).text();
         if (t != progTitle) continue;
         highlightString = searchTarget
@@ -820,7 +818,6 @@ function timetabledtfix() {
     //日付別番組表
     //今はオプション1つのみだがチャンネル別のコピー
     var ce = false;
-    var t = '';
     if (settings.isChTimetablePlaybutton) {
         ce = true;
     }
@@ -1048,8 +1045,6 @@ function PlaybuttonEditor() {
     var dr = /^https:\/\/abema\.tv\/timetable(?:\/dates\/.+)?$/;
     var umc = location.href.match(cr);
     var umd = location.href.match(dr);
-    var pn = -1;
-    var bn = -2;
     var titleClass = getTTProgramTitleClass();
     for (let i = b.length - 1, d, s; i >= 0; i--) {
         d = b.eq(i).parent('a');

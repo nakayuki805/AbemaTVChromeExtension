@@ -105,11 +105,12 @@ export function comefilter(
     return m;
 }
 export function arrayFullNgMaker(
+    arFullNg: RegExp[],
     fullNg: string,
     isShareNGword: boolean
-): RegExp[] {
+) {
     // 自由入力欄からNG正規表現を生成
-    let arFullNg = [];
+    arFullNg.length = 0; // 参照を保ったまま空にする
     const spfullng = fullNg.split(/\r|\n|\r\n/);
     for (let ngi = 0; ngi < spfullng.length; ngi++) {
         if (spfullng[ngi].length === 0 || spfullng[ngi].match(/^\/\//)) {
@@ -139,13 +140,13 @@ export function arrayFullNgMaker(
         if (NGregexp) arFullNg.push(NGregexp);
     }
     if (isShareNGword) postShareNGwords(arFullNg, getChannelByURL());
-    return arFullNg;
 }
 export function arrayUserNgMaker(
+    arUserNg: string[],
     userNg: string,
     isShareNGuser: boolean
-): string[] {
-    let arUserNg = [];
+) {
+    arUserNg.length = 0; // 参照を保ったままクリア
     const splitedUserNg = userNg.split(/\r|\n|\r\n/);
     for (let ngi = 0; ngi < splitedUserNg.length; ngi++) {
         if (
@@ -158,7 +159,6 @@ export function arrayUserNgMaker(
         arUserNg.push(splitedUserNg[ngi]);
     }
     if (isShareNGuser) postShareNGusers(arUserNg, getChannelByURL());
-    return arUserNg;
 }
 export function postShareNGwords(
     words: (RegExp | string)[],
