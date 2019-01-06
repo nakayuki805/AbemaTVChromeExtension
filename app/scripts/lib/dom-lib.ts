@@ -42,18 +42,60 @@ interface RectFilterOption {
     matchSelector?: string;
     notMatchSelector?: string;
     includeText?: string;
+    filter?: (element: HTMLElement, b: ClientRect) => boolean;
     filters?: Array<(element: HTMLElement, b: ClientRect) => boolean>;
+    notElement?: HTMLElement;
+    notElements?: HTMLElement[];
 }
 
 export function last(array: any[], isNull?: boolean) {
     if (array.length < 1) return isNull ? null : undefined;
     return array[array.length - 1];
 }
-export function parents(element: HTMLElement) {
-    let parents = [];
+export function parents(element: Element) {
+    const parents = [];
     while (element.parentElement) {
         parents.push(element.parentElement);
         element = element.parentElement;
+    }
+    return parents;
+}
+export function siblings(
+    element: HTMLElement,
+    isExcludeSelf?: boolean
+): HTMLElement[] {
+    if (element.parentElement) {
+        const parentChildren = element.parentElement
+            .children as HTMLCollectionOf<HTMLElement>;
+        if (isExcludeSelf) {
+            return filter(parentChildren, { notElement: element });
+        } else return Array.from(parentChildren);
+    } else {
+        return [];
+    }
+}
+export function prevAll(element: HTMLElement): HTMLElement[] {
+    const prevs = [];
+    const siblingElements = siblings(element, false);
+    for (let i = 0; i < siblingElements.length; i++) {
+        if (siblingElements[i] === element) {
+            break;
+        } else {
+            prevs.push(siblingElements[i]);
+        }
+    }
+    return prevs;
+}
+export function parentsUntil(
+    element: HTMLElement,
+    untilElement: HTMLElement
+): HTMLElement[] {
+    const parents = [];
+    if (!element) return [];
+    let parent = element.parentElement;
+    while (parent && parent !== untilElement) {
+        parents.push(parent);
+        parent = parent.parentElement;
     }
     return parents;
 }
@@ -154,15 +196,27 @@ export function filter(
             )
                 return false;
         }
-        if (option.filters && option.filters.length > 0) {
+        if ((option.filters && option.filters.length > 0) || option.filter) {
             let flag = true;
-            option.filters.forEach(filter => {
+            const filters: ((
+                element: HTMLElement,
+                b: ClientRect
+            ) => boolean)[] = [];
+            if (option.filters) filters.push(...option.filters);
+            if (option.filter) filters.push(option.filter);
+            filters.forEach(filter => {
                 if (flag) {
                     flag = filter(element, b);
                 }
             });
             if (!flag) return false;
         }
+        if (option.notElement && element === option.notElement) return false;
+        if (
+            option.notElements &&
+            Array.from(option.notElements).some(e => e === element)
+        )
+            return false;
         return true;
     });
 }
@@ -196,48 +250,69 @@ export function getElementSingleSelector(
 
     if (!element) return null;
     const tagName = element.tagName;
-    let rw = /\w/;
-    let rt = /^\s+|\s+$/g;
     const id = element.id.trim();
     if (id !== '') return tagName + '#' + id;
     let rs = /\s/;
-    const className = element.className.trim();
-    let jo;
-    let jolen;
+    const className = (element.className || '').trim();
     if (className === '') return null;
-    let jr: JQuery<HTMLElement> = $([]);
+    // let jr: JQuery<HTMLElement> = $([]);
+    const removeElements: HTMLElement[] = [];
     if (remove && remove.length > 0) {
-        jr = $(remove[0]);
-        for (let i = 1; i < remove.length; i++) jr = jr.add(remove[i]);
+        // jr = $(remove[0]);
+        // for (let i = 1; i < remove.length; i++) jr = jr.add(remove[i]);
+        remove.forEach(r => {
+            Array.from(document.querySelectorAll(r)).forEach(e => {
+                removeElements.push(e as HTMLElement);
+            });
+        });
     }
     const classArray = className.split(rs);
     let selector = className;
     for (let i = 0; i < classArray.length; i++) {
-        if (classArray[i] === '' && classArray[i].indexOf('ext_abm-') >= 0)
+        if (classArray[i] === '' && classArray[i].includes('ext_abm-'))
             continue; // 拡張機能が付与したclassは除外
         selector = tagName + '.' + classArray[i].trim();
-        jo = $(selector).not(jr);
-        jolen = jo.length;
-        if (jolen === 0) continue;
-        if (jolen === 1) return selector;
+        // jo = $(selector).not(jr);
+        // jolen = jo.length;
+        const hitElements = filter(document.querySelectorAll(selector), {
+            notElements: removeElements
+        });
+        if (hitElements.length === 0) continue;
+        if (hitElements.length === 1) return selector;
         else if (sw === 1) {
-            jo = $(element)
-                .siblings(selector)
-                .not(jr);
-            if (jolen === 1 + jo.length)
+            // const jo = $(element)
+            //     .siblings(selector)
+            //     .not(jr);
+            const siblingsWithSelf = element.parentElement
+                ? (element.parentElement.children as HTMLCollectionOf<
+                      HTMLElement
+                  >)
+                : [element];
+            const siblingHitElements = filter(siblingsWithSelf, {
+                notElements: removeElements
+            });
+            if (hitElements.length === siblingHitElements.length)
                 return (
                     selector +
                     ':eq(' +
-                    $(element)
-                        .prevAll(selector)
-                        .not(jr).length +
+                    filter(prevAll(element), {
+                        notElements: removeElements,
+                        matchSelector: selector
+                    }).length +
+                    // $(element)
+                    //     .prevAll(selector)
+                    //     .not(jr).length +
                     ')'
                 );
         } else if (
             sw === 2 &&
-            $(element)
-                .siblings(selector)
-                .not(jr).length === 0
+            filter(siblings(element, true), {
+                notElements: removeElements,
+                matchSelector: selector
+            }).length === 0
+            // $(element)
+            //     .siblings(selector)
+            //     .not(jr).length === 0
         )
             return selector;
     }
@@ -427,6 +502,8 @@ export function clickElement(element: HTMLElement) {
 }
 export function addExtClass(elm: HTMLElement, className: string) {
     className = 'ext_abm-' + className;
-    $('.' + className).removeClass(className);
-    $(elm).addClass(className);
+    Array.from(document.getElementsByClassName(className)).forEach(e =>
+        e.classList.remove(className)
+    );
+    elm.classList.add(className);
 }

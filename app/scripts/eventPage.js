@@ -10,7 +10,6 @@ time=(new Date());req = {type:"addProgramNotifyAlarm",channel:"abema-news", chan
 chrome.runtime.sendMessage(req, function(response) {console.log(response);})
 */
 import 'chromereload/devonly';
-import * as $ from 'jquery';
 // edge対応
 if (
     (typeof chrome === 'undefined' || !chrome.extension) &&
@@ -258,62 +257,90 @@ function registOnlineNotify(programID, progNotifyName) {
             if (val.notifyPostUrl != '') {
                 notifyto['postUrl'] = val.notifyPostUrl;
             }
-            $.post(
-                postUrl,
-                {
-                    client: client,
-                    slotid: programID,
-                    notifyminutes: val.notifyOnlineMinutes,
-                    notifyto: JSON.stringify(notifyto)
+
+            const failedNotify = function(error) {
+                chrome.notifications.create(
+                    'notifyRegistFailed',
+                    {
+                        type: 'basic',
+                        iconUrl: '/images/icon.png',
+                        title: '通知登録失敗',
+                        message:
+                            'メール等の通知登録に失敗しました。拡張機能自体の通知登録には影響ありません。\nエラー: ' +
+                            error
+                    },
+                    function(notificationID) {}
+                );
+            };
+            const body = new FormData();
+            body.set('client', client);
+            body.set('slotid', programID);
+            body.set('notifyminutes', val.notifyOnlineMinutes);
+            body.set('notifyto', JSON.stringify(notifyto));
+            fetch(postUrl, {
+                method: 'POST',
+                mode: 'cors',
+                headers: {
+                    Accept: 'application/json'
                 },
-                function(res) {
-                    if (res.status == 'OK') {
-                        var storeObj = {};
+                body: body
+            })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'OK') {
+                        const storeObj = {};
                         storeObj[progNotifyName] = val[progNotifyName];
-                        storeObj[progNotifyName].token = res.token;
+                        storeObj[progNotifyName].token = result.token;
                         chrome.storage.local.set(storeObj, function() {});
-                    } else if (res.status != 'past') {
-                        //エラー
-                        chrome.notifications.create(
-                            'notifyRegistFailed',
-                            {
-                                type: 'basic',
-                                iconUrl: '/images/icon.png',
-                                title: '通知登録失敗',
-                                message:
-                                    'メール等の通知登録に失敗しました。拡張機能自体の通知登録には影響ありません。\nエラー: ' +
-                                    res.error
-                            },
-                            function(notificationID) {}
-                        );
+                    } else if (result.status !== 'past') {
+                        failedNotify(result.error);
                     }
-                }
-            );
+                })
+                .catch(e => {
+                    console.warn(e);
+                    failedNotify(e);
+                });
         }
     });
 }
 function deleteOnlineNotify(token) {
-    var postUrl = 'https://abema.nakayuki.net/notify/delete.php';
-    $.post(postUrl, { token: token }, function(res) {
-        if (res.status == 'OK') {
-            //削除成功
-        } else {
-            //削除失敗
-            chrome.notifications.create(
-                'notifyRegistFailed',
-                {
-                    type: 'basic',
-                    iconUrl: '/images/icon.png',
-                    title: '通知登録削除失敗',
-                    message:
-                        'メール等の通知登録解除に失敗しました。拡張機能自体の通知登録解除には影響ありません。\nエラー: ' +
-                        res.error
-                },
-                function(notificationID) {}
-            );
-            //console.log(res);
-        }
-    });
+    const postUrl = 'https://abema.nakayuki.net/notify/delete.php';
+    function failedNotify(error) {
+        chrome.notifications.create(
+            'notifyRegistFailed',
+            {
+                type: 'basic',
+                iconUrl: '/images/icon.png',
+                title: '通知登録削除失敗',
+                message:
+                    'メール等の通知登録解除に失敗しました。拡張機能自体の通知登録解除には影響ありません。\nエラー: ' +
+                    error
+            },
+            function(notificationID) {}
+        );
+    }
+    const body = new FormData();
+    body.set('token', token);
+    fetch(postUrl, {
+        method: 'POST',
+        mode: 'cors',
+        headers: Object.assign({
+            Accept: 'application/json'
+        }),
+        body: body
+    })
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'OK') {
+                // 削除成功
+            } else {
+                failedNotify(result.error);
+            }
+        })
+        .catch(e => {
+            console.warn(e);
+            failedNotify(e);
+        });
 }
 function getNotificationPermission(callback) {
     if (chrome.notifications.getPermissionLevel) {
@@ -473,24 +500,32 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             sendResponse({ audible: t.audible });
         });
     } else if (request.type === 'postJson') {
-        $.ajax({
-            url: request.url,
-            type: 'POST',
-            data: JSON.stringify(request.data),
-            headers: request.headers,
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function(result) {
+        fetch(request.url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: Object.assign(
+                {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                request.headers || {}
+            ),
+            body: JSON.stringify(request.data)
+        })
+            .then(response => response.json())
+            .then(result => {
                 sendResponse({ status: 'success', result: result });
-            },
-            error: function() {
+            })
+            .catch(e => {
+                console.warn(e);
                 sendResponse({ status: 'error' });
-            }
-        });
+            });
     } else if (request.type === 'getJson') {
-        $.get(request.url, request.data, function(result) {
-            sendResponse({ status: 'success', result: result });
-        });
+        fetch(request.url, { mode: 'cors' })
+            .then(response => response.json())
+            .then(json => {
+                sendResponse({ status: 'success', result: json });
+            });
     } else {
         console.warn('message type not match:', request.type);
     }

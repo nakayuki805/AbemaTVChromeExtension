@@ -250,20 +250,20 @@ export function setSettingInputValue(
             }
         } else if (setting.type === 'panelopenset') {
             let sp = value as number;
-            console.log(sp.toString(3).padStart(12, '0'));
+            // console.log(sp.toString(3).padStart(12, '0'));
             if (sp < Math.pow(3, 12)) {
                 for (let i = 0; i < 4; i++) {
                     for (let j = 0, m, d; j < 3; j++) {
                         m = Math.pow(3, (3 - i) * 3 + (2 - j));
-                        console.log(
-                            'i=' + i + ',j=' + j + ',m=' + m.toString(3)
-                        );
+                        // console.log(
+                        //     'i=' + i + ',j=' + j + ',m=' + m.toString(3)
+                        // );
                         d = 0;
                         while (m <= sp) {
                             sp -= m;
                             d++;
                         }
-                        console.log('sp=' + sp.toString(3) + ',d=' + d);
+                        // console.log('sp=' + sp.toString(3) + ',d=' + d);
                         if (d < 3) {
                             const radios = document.querySelectorAll(
                                 '#panelcustomTable [type="radio"][name="d' +

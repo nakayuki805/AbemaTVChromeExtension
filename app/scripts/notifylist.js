@@ -1,3 +1,4 @@
+// 拡張機能の通知登録一覧ページのJS
 // edge対応
 if (
     (typeof chrome === 'undefined' || !chrome.extension) &&
@@ -23,7 +24,7 @@ function dateToStr(date) {
         '分'
     );
 }
-$(function() {
+window.addEventListener('load', function() {
     try {
         //firefoxでは予約一覧ページでstorageのgetがエラーになることがある
         chrome.storage.local.get(function(values) {
@@ -70,36 +71,43 @@ $(function() {
                     progNotifyName +
                     "'></td>";
                 trhtml += '</tr>';
-                $('#notifyProgTable tbody').append(trhtml);
-                $('#delbtn_' + progNotifyName).click(function(e) {
-                    //console.log(e.target.id)
-                    progNotifyName = e.target.id.slice(7);
-                    //console.log(progNotifyName)
-                    chrome.runtime.sendMessage(
-                        {
-                            type: 'removeProgramNotifyAlarm',
-                            progNotifyName: progNotifyName
-                                .replace(/__question__/g, '?')
-                                .replace(/__equal__/g, '=')
-                                .replace(/__and__/g, '&')
-                        },
-                        function(response) {
-                            if (response.result === 'removed') {
-                                $('#tr_' + progNotifyName).remove();
-                            } else {
-                                alert('削除できませんでした');
+                document
+                    .querySelector('#notifyProgTable tbody')
+                    .insertAdjacentHTML('beforeend', trhtml);
+                document
+                    .getElementById('delbtn_' + progNotifyName)
+                    .addEventListener('click', function(e) {
+                        //console.log(e.target.id)
+                        progNotifyName = e.target.id.slice(7);
+                        //console.log(progNotifyName)
+                        chrome.runtime.sendMessage(
+                            {
+                                type: 'removeProgramNotifyAlarm',
+                                progNotifyName: progNotifyName
+                                    .replace(/__question__/g, '?')
+                                    .replace(/__equal__/g, '=')
+                                    .replace(/__and__/g, '&')
+                            },
+                            function(response) {
+                                if (response.result === 'removed') {
+                                    const tr = document.getElementById(
+                                        'tr_' + progNotifyName
+                                    );
+                                    tr.parentElement.removeChild(tr);
+                                } else {
+                                    alert('削除できませんでした');
+                                }
                             }
-                        }
-                    );
-                });
+                        );
+                    });
             }
         });
     } catch (e) {
         if (location.search.indexOf('?reloaded=1') < 0) {
             location.href = location.href + '?reloaded=1';
         } else {
-            $('#notloaded').show();
-            $('table').hide();
+            document.getElementById('notloaded').style.display = 'block';
+            document.getElementById('notifyProgTable').style.display = 'none';
         }
     }
 });

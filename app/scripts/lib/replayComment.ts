@@ -1,6 +1,5 @@
 import * as dl from './dom-lib';
 import * as mc from './movingComment';
-import * as getInfo from './getAbemaInfo';
 
 let EXcommentButton: HTMLElement | null = null;
 let EXcommentsParent: HTMLElement | null = null;

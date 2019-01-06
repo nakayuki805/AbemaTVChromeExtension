@@ -1,6 +1,5 @@
 //import 'chromereload/devonly';//これがあるとfirefoxで動かなくなるしこの拡張には拡張リロード時に通知ポップアップをクリックしてAbemaのページをリロードする機能があるからcontent scriptには不要かと
 import * as $ from 'jquery';
-import './lib/jquery-lib';
 import * as settingslib from './settings';
 import * as settingHtml from './lib/settingHtml';
 import * as getElm from './lib/getAbemaElement';
@@ -60,15 +59,18 @@ $.fn.children = $.extend(function children(){
 }, oldchildren);
 */
 //devtoolのコンソールから呼び出せる関数
-window.logEval = function(varName) {
-    console.log(eval(varName));
-};
-window.logGetInfo = function(name) {
-    console.log(getInfo[name]());
-};
-window.logGetElm = function(name) {
-    console.log(getElm[name]());
-};
+if(process.env.NODE_ENV === 'development'){
+    window.logEval = function(varName) {
+        console.log(eval(varName));
+    };
+    window.logGetInfo = function(name) {
+        console.log(getInfo[name]());
+    };
+    window.logGetElm = function(name) {
+        console.log(getElm[name]());
+    };
+}
+
 /*設定
 拡張機能のオプション画面から設定できます。
 以下の変数のコメントにある機能を利用する場合はtrue、利用しない場合はfalseを代入してください。
@@ -203,7 +205,6 @@ var waitingforResize = false; //waitforresizeの複数起動防止用
 //var movieWidth2 = 0; //video.parentの大きさ(onresize発火用)
 var oldWindowState = 'normal'; // フルスクリーン切り替え前のウィンドウのstate
 var isTootEnabled = false; //コメントのトゥート有効か
-var onairSecCount = 0; //onairbasefuncでカウントアップされる
 var commentObserver = new MutationObserver(function(mutations) {
     setTimeout(
         function(mutations) {
@@ -239,8 +240,13 @@ const settingsChangeEvent = new Event('settingsChange');
 var delaysetConsoleStr = '';
 var delaysetConsoleRepeated = false;
 var lastMovedCommentTime = 0; //最後に流れたコメントの時間(コメントが二重に流れるのを防ぐ)
-let isResizeInterval = false;
+let resizeAgainTimer = 0;
 let isComeInpFocus = false;
+let isNowResizing = false;
+const resizeObserver = new MutationObserver(mutations=>{
+    // console.log('resize mutated,', isNowResizing)
+    if(!isNowResizing){onresize();}
+});
 
 function onairCleaner() {
     console.log('onairCleaner');
@@ -273,13 +279,16 @@ function onairCleaner() {
     EXfootcount = null;
     //DOM監視停止
     commentObserver.disconnect();
+    resizeObserver.disconnect();
 }
-function onresize(oldTranslate) {
+/*function onresize(oldTranslate) {
     if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
-    //console.log("onresize()");
-
+    // console.log("onresize()");
+    
     var mode43 = settings.isDAR43;
+    const NORESIZE = 0, NORESIZE43 = 1, RESIZE = 2, RESIZE43 = 3;
     var resizeType = (settings.isResizeScreen ? 2 : 0) + (mode43 ? 1 : 0); //0:左枠内で中央,1:左枠内で最大(4:3用),2:ウィンドウ内で最大,3:ウィンドウ内で最大(4:3用),
+    const VCENTER = 0, VTOP = 1, VHEAD = 2;
     var posiVType = settings.isMovieSpacingZeroTop
         ? 1
         : settings.isResizeSpacing
@@ -302,92 +311,94 @@ function onresize(oldTranslate) {
         ).val();
     }
 
-    var tar = $(getElm.getVideo());
-    if (tar.isEmpty()) return;
-    tar = tar.first(); //.parent();
-    var ori = tar.parent();
-    var o = {
-        w: {
-            l: ori.offset().left,
-            t: ori.offset().top,
-            w: ori.width(),
-            h: ori.height()
+    var video = $(getElm.getVideo());
+    if (video.length === 0) return;
+    video = video.first(); //.parent();
+    var videoParent = video.parent();
+    var videoParentRectObj = {
+        currentRect: {
+            left: videoParent.offset().left,
+            top: videoParent.offset().top,
+            width: videoParent.width(),
+            height: videoParent.height()
         },
-        v: { l: -1, t: -1, w: -1, h: -1 }
+        goalRect: { left: -1, top: -1, width: -1, height: -1 }
     };
-    var t = {
-        w: { l: -1, t: -1, w: -1, h: -1 },
-        v: { l: -1, t: -1, w: -1, h: -1 }
+    var videoRectObj = {
+        currentRect: { l: -1, t: -1, w: -1, h: -1 },
+        goalRect: { l: -1, t: -1, w: -1, h: -1 }
     };
-    o.v.h = 9 * o.w.w >= 16 * o.w.h ? o.w.h : (o.w.w * 9) / 16;
-    o.v.w = Math.min(o.w.w, o.v.h * (mode43 ? 4 / 3 : 16 / 9));
-    o.v.t = o.w.t + (o.w.h - o.v.h) / 2;
-    o.v.l = o.w.l + (o.w.w - o.v.w) / 2;
+    videoParentRectObj.goalRect.height = 9 * videoParentRectObj.currentRect.width >= 16 * videoParentRectObj.currentRect.height ? videoParentRectObj.currentRect.height : (videoParentRectObj.currentRect.width * 9) / 16;
+    videoParentRectObj.goalRect.width = Math.min(videoParentRectObj.currentRect.width, videoParentRectObj.goalRect.height * (mode43 ? 4 / 3 : 16 / 9));
+    videoParentRectObj.goalRect.top = videoParentRectObj.currentRect.top + (videoParentRectObj.currentRect.height - videoParentRectObj.goalRect.height) / 2;
+    videoParentRectObj.goalRect.left = videoParentRectObj.currentRect.left + (videoParentRectObj.currentRect.width - videoParentRectObj.goalRect.width) / 2;
 
-    var hh = posiVType == 2 && EXhead ? $(EXhead).height() : 0;
+    var headerHeight = posiVType == VHEAD && EXhead ? $(EXhead).height() : 0;
     var zz =
-        resizeType == 0
+        resizeType == NORESIZE
             ? 100
             : Math.min(
-                  (100 * (resizeType == 1 ? o.w.w : window.innerWidth)) / o.v.w,
-                  (100 * (window.innerHeight - hh)) / o.v.h
+                  (100 * (resizeType == NORESIZE43 ? videoParentRectObj.currentRect.width : window.innerWidth)) / videoParentRectObj.goalRect.width,
+                  (100 * (window.innerHeight - headerHeight)) / videoParentRectObj.goalRect.height
               );
-    t.v.w = (o.v.w * zz) / 100;
-    t.v.h = (o.v.h * zz) / 100;
-    t.w.w = tar.width(); //t.w.w=t.v.h*16/9;
-    t.w.h = tar.height(); //t.w.h=t.v.h;
-    t.w.l = o.w.l;
-    t.w.t = o.w.t;
-    t.v.l = t.w.l + (t.w.w - t.v.w) / 2;
-    t.v.t = t.w.t + (t.w.h - t.v.h) / 2;
+    videoRectObj.goalRect.w = (videoParentRectObj.goalRect.width * zz) / 100;
+    videoRectObj.goalRect.h = (videoParentRectObj.goalRect.height * zz) / 100;
+    videoRectObj.currentRect.w = video.width(); //t.w.w=t.v.h*16/9;
+    videoRectObj.currentRect.h = video.height(); //t.w.h=t.v.h;
+    videoRectObj.currentRect.l = videoParentRectObj.currentRect.left;
+    videoRectObj.currentRect.t = videoParentRectObj.currentRect.top;
+    videoRectObj.goalRect.l = videoRectObj.currentRect.l + (videoRectObj.currentRect.w - videoRectObj.goalRect.w) / 2;
+    videoRectObj.goalRect.t = videoRectObj.currentRect.t + (videoRectObj.currentRect.h - videoRectObj.goalRect.h) / 2;
     //tar.css("width",t.w.w+"px").css("height",t.w.h+"px");//px指定だと各ウィンドウ開閉時の自動リサイズ時にズレる(movieWidthで監視するから問題無さそうだけど一応%指定にしておく)
-    tar.css('width', zz + '%').css('height', zz + '%');
+    video.css('width', zz + '%').css('height', zz + '%');
     //console.log("tar", tar, zz, o, t)
 
-    var r = tar[0].style.transform
+    var transform = video[0].style.transform
         .replace(/\s*translate(X|Y)\([-0-9]*(\.[-0-9e]+)?(px|vw|%)\)/g, '')
         .replace(/^\s+|\s+$/g, '');
     switch (posiHType) {
         case 0:
-            r +=
+            transform +=
                 resizeType > 0
                     ? ' translateX(' +
-                      ((window.innerWidth - t.v.w) / 2 - t.v.l) +
+                      ((window.innerWidth - videoRectObj.goalRect.w) / 2 - videoRectObj.goalRect.l) +
                       'px)'
                     : '';
             break;
         case 1:
-            r += ' translateX(' + -t.v.l + 'px)';
+            transform += ' translateX(' + -videoRectObj.goalRect.l + 'px)';
             break;
     }
     switch (posiVType) {
-        case 0:
-            r +=
+        case VCENTER:
+            transform +=
                 resizeType > 0
                     ? ' translateY(' +
-                      ((window.innerHeight - t.v.h) / 2 - t.v.t) +
+                      ((window.innerHeight - videoRectObj.goalRect.h) / 2 - videoRectObj.goalRect.t) +
                       'px)'
                     : '';
             break;
-        case 1:
-            r += ' translateY(' + -t.v.t + 'px)';
+        case VTOP:
+            transform += ' translateY(' + -videoRectObj.goalRect.t + 'px)';
             break;
-        case 2:
-            r += ' translateY(' + (hh - t.v.t) + 'px)';
+        case VHEAD:
+            transform += ' translateY(' + (headerHeight - videoRectObj.goalRect.t) + 'px)';
             break;
     }
-    r = r.replace(/^\s+|\s+$/g, '');
+    transform = transform.replace(/^\s+|\s+$/g, '');
 
-    tar.css('transform', r);
-    tar.css('transition-delay', '0.4s');
-    var isVideoResized = r != oldTranslate; ///translate[XY]\([^0][-0-9e\.]*px\)/.test(r);
-    movieWidth = parseInt(tar.width());
+    video.css('transform', transform);
+    video.css('transition-delay', '0.4s');
+    var isVideoResized = transform !== oldTranslate; ///translate[XY]\([^0][-0-9e\.]*px\)/.test(r);
+    movieWidth = parseInt(video.width());
     if (isVideoResized) {
+        isNowResizing = true;
         //映像のリサイズが落ち着くまで(translateが落ち着くまで)リトライする
         console.log('screen resizing'); //,isVideoResized,r);
-        setTimeout(onresize, 1000, r);
+        setTimeout(onresize, 300, transform);
     } else {
         console.log('screen resize complete');
+        isNowResizing = false;
         //視聴数の位置調整
         setTimeout(function() {
             if (EXcountview) {
@@ -415,6 +426,119 @@ function onresize(oldTranslate) {
             }
         }, 2000);
     }
+}*/
+function onresize (isAgain){
+    const video = getElm.getVideo();
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR || !EXvideoarea || !video) return;
+    const videoContainer = dl.last(dl.parentsUntil(video, EXvideoarea));
+    if(!videoContainer) {console.warn('onresize: videoContainer not found');return;}
+    // console.log(videoContainer);
+    isNowResizing = true;
+    if(resizeAgainTimer>0) clearTimeout(resizeAgainTimer);
+    const settingWindow = document.getElementById('settcont');
+    const isSettingOpen = settingWindow && settingWindow.style.display !== 'none';
+    const isResizeScreen = isSettingOpen?document.getElementById('isResizeScreen').checked:settings.isResizeScreen;
+    const isMovieSpacingZeroTop = isSettingOpen?document.getElementById('isMovieSpacingZeroTop').checked:settings.isMovieSpacingZeroTop;
+    const isResizeSpacing = isSettingOpen?document.getElementById('isResizeSpacing').checked:settings.isResizeSpacing;
+    const isDAR43 = isSettingOpen?document.getElementById('isDAR43').checked:settings.isDAR43;
+    const isHeaderTop = isSettingOpen?document.getElementById('isResizeSpacing').checked:settings.isResizeSpacing;
+    const isMovieSpacingZeroLeft = isSettingOpen?document.getElementById('isMovieSpacingZeroLeft').checked:settings.isMovieSpacingZeroLeft;
+    const isVideoResizeNeeded = isDAR43 || isMovieSpacingZeroTop || isResizeSpacing || isMovieSpacingZeroLeft;
+
+    // ウィンドウの高さに合わす
+    if (isResizeScreen || isResizeSpacing || isMovieSpacingZeroTop || isDAR43) {
+        EXvideoarea.style.height = (window.innerHeight-(isHeaderTop?headerHeight:0))+'px';
+        if (isResizeSpacing){
+            EXvideoarea.style.height = (window.innerHeight-headerHeight)+'px';
+            EXvideoarea.style.marginTop = headerHeight+'px';
+        }else{
+            EXvideoarea.style.height = window.innerHeight+'px';
+            EXvideoarea.style.marginTop = '';
+        }
+    }else{
+        EXvideoarea.style.marginTop = '';
+    }
+    // ウィンドウの幅に合わす
+    // divを右側から幅や高さ絞り込んでそれの幅の最大値を得る
+    // const rightObjectWidth = dl.filter(document.getElementsByTagName('div'), {notBodyParent: true, left12r: true, height34b: true, filters: [(e,b)=>b.width>300, e=>e.parentElement.getBoundingClientRect().width>window.innerWidth/2]}).reduce((n,e)=>Math.max(n,e.getBoundingClientRect().width),0);        EXvideoarea.style.width = '';
+    // EXvideoarea.style.width = (window.innerWidth-rightObjectWidth)+'px';
+
+    if (isResizeScreen) {
+        // console.log(EXvideoarea, window.innerWidth)
+        EXvideoarea.style.width = window.innerWidth+'px';
+    }
+
+    const videoAreaRect = EXvideoarea.getBoundingClientRect();
+
+    if (isVideoResizeNeeded) {
+        let translateX = '0px';
+        let translateY = '0px';
+        let zoomRatio = 1;
+        if (isDAR43){
+            const videoAreaRatio = videoAreaRect.height/videoAreaRect.width;
+            if(videoAreaRatio>9/16){
+                // 16:9基準で高さが大きい→横が見切れるように拡大
+                if(videoAreaRatio>3/4){
+                    // 4:3基準でも大きいのでそのまま拡大
+                    zoomRatio = 4/3;
+                }else{
+                    // 9/16 < videoAreaRatio <= 3/4
+                    // 4:3基準ではまだ小さいので倍率を調節する
+                    // videoAreaRatioが9/16時にzoomRatioが1、3/4時に4/3として線形に倍率を決める
+                    zoomRatio = 1 + (4/3-1)*(videoAreaRatio-9/16)/(3/4-9/16);
+                }
+            }
+        }
+        // videoarea内のvideoContainerを実際に表示されている映像と同じ大きさにする
+        if (settings.isResizeScreen) {
+            // if (settings.isResizeSpacing){
+            //     videoContainer.style.height = `calc((100vh - ${headerHeight}px) * ${zoomRatio})`;
+            // }else {
+            //     videoContainer.style.height = 100*zoomRatio+'vh';
+            // }
+            videoContainer.style.height = `calc(100vh - ${isHeaderTop?headerHeight:0}px)`;
+            videoContainer.style.width = 100*zoomRatio+'vw';
+            videoContainer.style.maxHeight = `calc(100vw * ${zoomRatio} * 9 / 16)`;
+            videoContainer.style.maxWidth = `calc((100vh - ${isHeaderTop?headerHeight:0}px) * ${zoomRatio} * 16 / 9)`;
+        } else {
+
+            videoContainer.style.height = `calc(100%)`;// (100*zoomRatio)+'%';
+            videoContainer.style.width = (100*zoomRatio)+'%';
+            videoContainer.style.maxHeight = zoomRatio*videoAreaRect.width*9/16 + 'px';
+            videoContainer.style.maxWidth = zoomRatio*videoAreaRect.height*16/9 + 'px';
+        }
+        // 横方向の中央揃え
+        if (isMovieSpacingZeroLeft) {
+            const videoContainerRect = videoContainer.getBoundingClientRect();
+            const left = isDAR43?(-1*(videoContainerRect.width-videoContainerRect.height * (4/3))/2):0; 
+            // videoContainer.style.left = `-${offset}px`;
+            //console.log(left)
+            videoContainer.style.left = left+'px';
+        } else {
+            videoContainer.style.left = '50%';
+            translateX = '-50%';
+        }
+        // 縦方向の中央揃え
+        if (isMovieSpacingZeroTop || isResizeSpacing) {
+            videoContainer.style.top = '0px';
+        } else {
+            videoContainer.style.top = '50%';
+            translateY = '-50%';
+        }
+        // translate反映
+        videoContainer.style.transform = `translate(${translateX}, ${translateY})`;
+    }else{
+        videoContainer.style.height = '';
+        videoContainer.style.width = '';
+        videoContainer.style.top = '';
+        videoContainer.style.left = '';
+        videoContainer.style.maxHeight = '';
+        videoContainer.style.maxWidth = '';
+        videoContainer.style.transform = '';
+    }
+    isNowResizing = false;
+    if(!isAgain)resizeAgainTimer = setTimeout(onresize, 1000, true);
+    // console.log('resize done');
 }
 
 function onScreenDblClick() {
@@ -495,7 +619,7 @@ function screenBlackSet(type) {
         var h = window.innerHeight;
         var p = 0;
         var jo = $(getElm.getVideo());
-        if (!jo.isEmpty()) {
+        if (jo.length !== 0) {
             var eo = jo[0];
             var cr = eo.getBoundingClientRect();
             h = cr.height;
@@ -517,7 +641,7 @@ function screenBlackSet(type) {
 }
 function movieZoomOut(sw) {
     var j = $(getElm.getVideo());
-    if (j.isEmpty()) return;
+    if (j.length === 0) return;
     var t = j[0].style.transform.replace(/\s*scale\(\d*(\.\d+)?\)/, '');
     if (sw == 1 && settings.CMsmall < 100) {
         setBlacked[2] = true;
@@ -662,7 +786,7 @@ function closeOption() {
         .css('transition', ''); //新着強調
     if (comelistClasses.message)
         jo.children('.' + comelistClasses.message).css('color', '');
-    $('.movingComment').css('font-size', '');
+    mc.clearOptionTemporaryStyle();
     onresize();
     setOptionElement();
     optionStatsUpdated = false;
@@ -744,8 +868,8 @@ function delayset(
         gcl.arrayUserNgMaker(arUserNg, settings.userNg, settings.isShareNGuser);
         //映像のリサイズ
         onresize();
-        if (!isResizeInterval) setInterval(onresize, 30000);
-        isResizeInterval = true;
+        // if (!isResizeInterval) setInterval(onresize, 30000);
+        // isResizeInterval = true;
         volumecheck(); //1秒ごとに実行していた最大音量チェックを初回読込時の1回だけに変更
         if ($('#moveContainer').length == 0) {
             $('<div id="moveContainer" class="usermade">').appendTo('body');
@@ -801,7 +925,7 @@ function delayset(
             const chlogo = $(EXchli)
                 .find('img[src*="/channels/logo/' + cn + '"]')
                 .eq(0);
-            if (!chlogo.isEmpty())
+            if (chlogo.length !== 0)
                 $(EXchli).scrollTop(
                     chlogo.parentsUntil(EXchli).eq(-2)[0].offsetTop -
                         window.innerHeight / 2
@@ -1035,10 +1159,11 @@ function createPIPbutton() {
             'title',
             'ピクチャーインピクチャーモードの切り替え(拡張機能)'
         );
-        PIPbutton.innerHTML =
+        PIPbutton.insertAdjacentHTML('afterbegin',
             "<img src='" +
             chrome.extension.getURL('/images/pip.svg') +
-            "' alt='PIP' class='ext-sideButton-icon'>";
+            "' alt='PIP' class='ext-sideButton-icon'>"
+        );
         EXside.appendChild(PIPbutton);
         $('#PIPbutton').on('click', function() {
             if (
@@ -1102,7 +1227,7 @@ function optionStatsUpdate(outflg) {
     //    var jp = $('object,video').parent();
     var jp = $(getElm.getVideo());
     //    if(EXwatchingnum!==undefined&&tar.length>0){
-    if (!jp.isEmpty() && tar.length > 0) {
+    if (jp.length !== 0 && tar.length > 0) {
         //        var jo=$(EXobli.children[EXwatchingnum]);
         //        var omw=jo.width();
         //        var omh=jo.height();
@@ -1313,10 +1438,10 @@ function createSettingWindow() {
         optionbutton.id = 'optionbutton';
         optionbutton.classList.add('ext-sideButton');
         optionbutton.setAttribute('title', '拡張機能の一時設定');
-        optionbutton.innerHTML =
+        optionbutton.insertAdjacentHTML('afterbegin',
             "<img src='" +
             chrome.extension.getURL('/images/gear.svg') +
-            "' alt='拡張設定' class='ext-sideButton-icon'>";
+            "' alt='拡張設定' class='ext-sideButton-icon'>");
         slidecont.appendChild(optionbutton);
         $('#optionbutton').on('click', function() {
             if ($('#settcont').css('display') == 'none') {
@@ -1776,11 +1901,11 @@ function createSettingWindow() {
         $('#panelcustomTable').change(panelTableUpdateT);
     }
     if ($('#movieResizeContainer').length == 0) {
-        let jo = $('#isResizeScreen-switch');
+        let jo = $('#isResizeScreen-wrapper');
         let ja = jo.parent().contents();
         //        var jm=$('#isMovieMaximize');
-        let jm = $('#isDAR43-switch');
-        ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll(
+        let jm = $('#isDAR43-wrapper');
+        ja.slice(ja.index(jo), ja.index(jm)+1).wrapAll(
             '<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">'
         );
         let tres = '';
@@ -1792,27 +1917,31 @@ function createSettingWindow() {
             '</span></label>';
         tres +=
             '<br><input type="radio" name="movieResizeType" value=1 style="margin-left:16px;" id="radio-movieResizeType-1">:<label for="radio-movieResizeType-1">ウィンドウ全体に最大化</label>';
-        $('#isResizeScreen-switch')
+        $('#isResizeScreen-wrapper')
             .css('display', 'none')
             //            .before('<input type="radio" name="movieResizeType" value=0 style="margin-left:16px;">:上に詰める (空き無し)')
             .before(tres);
         let jc = $('#movieResizeContainer').contents();
-        jc.eq(jc.index($('#isResizeScreen-switch')) + 1)
-            .add(jc.eq(jc.index($('#isDAR43-switch')) + 1))
-            .remove();
-        $('#isDAR43-switch')
+        //既存のラベル除去
+        $('#isResizeScreen-switch+label').remove();
+        $('#isDAR43-switch+label').remove();
+        // jc.eq(jc.index($('#isResizeScreen-wrapper')) + 1)
+        //     .add(jc.eq(jc.index($('#isDAR43-wrapper')) + 1))
+        //     .remove();
+        $('#isDAR43-wrapper')
+            .css({display:'inline-block', border: 'none'})
             .prependTo('#movieResizeContainer')
             .before('映像の大きさ　')
-            .after(" <label for='isDAR43'>映像4:3モード</label>");
+            .after(" <label for='isDAR43'>: 映像4:3モード</label>");
         $('#movieResizeContainer input[type="radio"][name="movieResizeType"]')
             .add('#isDAR43')
             .change(movieResizeTypeChanged);
     }
     if ($('#moviePositionContainer').length == 0) {
-        let jo = $('#isMovieSpacingZeroTop-switch');
+        let jo = $('#isMovieSpacingZeroTop-wrapper');
         let ja = jo.parent().contents();
-        let jm = $('#isMovieSpacingZeroLeft-switch');
-        ja.slice(ja.index(jo), ja.index(jm.next())).wrapAll(
+        let jm = $('#isMovieSpacingZeroLeft-wrapper');
+        ja.slice(ja.index(jo), ja.index(jm)+1).wrapAll(
             '<div id="moviePositionContainer" style="margin:8px;padding:8px;border:1px solid black;">'
         );
         let tres = '映像の上下位置';
@@ -1820,20 +1949,20 @@ function createSettingWindow() {
             '<br><input type="radio" name="moviePositionVType" value=0 style="margin-left:16px;" id="radio-moviePositionVType-0"><label for="radio-moviePositionVType-0">:デフォルト (中央)</label>';
         tres +=
             '<br><input type="radio" name="moviePositionVType" value=1 style="margin-left:16px;" id="radio-moviePositionVType-1"><label for="radio-moviePositionVType-1">:上に詰める (空き無し) ※額縁は詰まりません</label>';
-        $('#isMovieSpacingZeroTop-switch')
+        $('#isMovieSpacingZeroTop-wrapper')
             .css('display', 'none')
             .before(tres);
-        $('#isResizeSpacing-switch')
+        $('#isResizeSpacing-wrapper')
             .css('display', 'none')
             .before(
-                '<input type="radio" name="moviePositionVType" value=2 style="margin-left:16px;" id="radio-moviePositionVType-2"><label for="radio-moviePositionVType-2">:上に詰めるが、上の黒帯の分だけ空ける ※額縁は詰まりません</label>'
+                '<br><input type="radio" name="moviePositionVType" value=2 style="margin-left:16px;" id="radio-moviePositionVType-2"><label for="radio-moviePositionVType-2">:上に詰めるが、上の黒帯の分だけ空ける ※額縁は詰まりません</label>'
             );
-        tres = '映像の左右位置';
+        tres = '<br>映像の左右位置';
         tres +=
             '<br><input type="radio" name="moviePositionHType" value=0 style="margin-left:16px;" id="radio-moviePositionHType-0"><label for="radio-moviePositionHType-0">:デフォルト <span id="moviePosiHDesc"></span></label>';
         tres +=
             '<br><input type="radio" name="moviePositionHType" value=1 style="margin-left:16px;" id="radio-moviePositionHType-1"><label for="radio-moviePositionHType-1">:左に詰める (空き無し)</label>';
-        $('#isMovieSpacingZeroLeft-switch')
+        $('#isMovieSpacingZeroLeft-wrapper')
             .css('display', 'none')
             .before(tres);
         $('#moviePosiHDesc').text(
@@ -1841,11 +1970,15 @@ function createSettingWindow() {
                 ? '(ウィンドウ全体の中央)'
                 : '(ウィンドウ左側内の中央)'
         );
-        var jc = $('#moviePositionContainer').contents();
-        jc.eq(jc.index($('#isMovieSpacingZeroTop-switch')) + 1)
-            .add(jc.eq(jc.index($('#isResizeSpacing-switch')) + 1))
-            .add(jc.eq(jc.index($('#isMovieSpacingZeroLeft-switch')) + 1))
-            .remove();
+        // var jc = $('#moviePositionContainer').contents();
+        // 既存のラベル除去
+        $('#isMovieSpacingZeroTop-switch+label').remove();
+        $('#isResizeSpacing-switch+label').remove();
+        $('#isMovieSpacingZeroLeft-switch+label').remove();
+        // jc.eq(jc.index($('#isMovieSpacingZeroTop-wrapper')) + 1)
+        //     .add(jc.eq(jc.index($('#isResizeSpacing-wrapper')) + 1))
+        //     .add(jc.eq(jc.index($('#isMovieSpacingZeroLeft-wrapper')) + 1))
+        //     .remove();
         $(
             '#moviePositionContainer input[type="radio"][name="moviePositionVType"]'
         ).change(moviePositionVTypeChanged);
@@ -3002,13 +3135,15 @@ function setEXs() {
         dl.addExtClass(EXfullscr, 'fullscr');
         //dl.addExtClass(EXobli, 'objectlist');
         dl.addExtClass(EXvideoarea, 'videoarea');
-        dl.addExtClass(EXcomelist, 'comelist');
 
         console.log('%csetEXs ok', 'color:green;');
         //setEX2(); 残ってたchli.scrollをdelaysetに移動させてsetex2を空にした
         setOptionHead(); //各オプションをhead内に記述
         setOptionElement(); //各オプションを要素に直接適用
         setOptionEvent(); //各オプションによるイベントを作成
+        // videoareaのリサイズ検知
+        resizeObserver.observe(EXvideoarea,{attributes: true, attributeFilter: ['style']});
+
     } else {
         console.log(
             'setEXs retry ' +
@@ -5344,7 +5479,7 @@ function setOptionHead() {
 
     let styleLink = $('head>link#extstyle');
     let dataUri = 'data:text/css,' + encodeURIComponent(t);
-    if (styleLink.isEmpty()) {
+    if (styleLink.length === 0) {
         styleLink = $(
             "<link title='usermade' id='extstyle' rel='stylesheet' href='" +
                 dataUri +
@@ -5359,7 +5494,7 @@ function setOptionHead() {
 function setFooterBGStyle() {
     let t = '';
     let selFoot = dl.getElementSingleSelector(EXfoot);
-    if ($(selFoot).isEmpty()) return;
+    if ($(selFoot).length === 0) return;
     //フッターの視聴数にかぶる部分を透明にした背景
     let barcolor = `rgba(0,0,0,${settings.panelOpacity / 255})`;
     let cvb = EXcountview.getBoundingClientRect();
@@ -5373,7 +5508,7 @@ function setFooterBGStyle() {
     t += selFoot + '>div>div.countviewtrans{background:' + fbbackImage + '}';
     let dataUri = 'data:text/css,' + encodeURIComponent(t);
     let footerBGstyle = $('#footerBGstyle');
-    if (footerBGstyle.isEmpty()) {
+    if (footerBGstyle.length === 0) {
         footerBGstyle = $(
             "<link title='usermade' id='footerBGstyle' rel='stylesheet' href='" +
                 dataUri +
@@ -5534,7 +5669,7 @@ function usereventWakuclick() {
         setTimeout(openInfo, 50, false);
     }
     var jo = $(getElm.getVideo());
-    if (!jo.isEmpty() && !waitingforResize) {
+    if (jo.length !== 0 && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width())); //, parseInt(jo[0].style.height));
     }
@@ -5710,7 +5845,7 @@ function usereventSideChliButClick() {
         pophideElement(phi);
     }
     var jo = $(getElm.getVideo());
-    if (!jo.isEmpty() && !waitingforResize) {
+    if (jo.length !== 0 && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width())); //, parseInt(jo[0].style.height));
     }
@@ -5734,7 +5869,7 @@ function usereventFootInfoButClick() {
         pophideElement(phi);
     }
     var jo = $(getElm.getVideo());
-    if (!jo.isEmpty() && !waitingforResize) {
+    if (jo.length !==0 && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width())); //, parseInt(jo[0].style.height));
     }
@@ -5808,7 +5943,7 @@ function usereventFCclick() {
         }
     }
     var jo = $(getElm.getVideo());
-    if (!jo.isEmpty() && !waitingforResize) {
+    if (jo.length !==0 && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width())); //, parseInt(jo[0].style.height));
     }
@@ -6924,7 +7059,7 @@ function closecotwclick() {
 
 function injectXHR() {
     if (
-        $('#ext-xhr-injection').isEmpty() &&
+        $('#ext-xhr-injection').length === 0 &&
         (settings.maxResolution != 2160 || settings.minResolution != 0)
     ) {
         var xhrinjectionpath = chrome.extension.getURL(
@@ -7008,7 +7143,6 @@ function onairfunc() {
 function onairBasefunc() {
     //console.log("1s");
     //console.time('onairbasefunc');
-    onairSecCount++;
     try {
         //console.time('obf_1');
         if (getInfo.determineUrl() !== getInfo.URL_ONAIR) {
@@ -7046,9 +7180,9 @@ function onairBasefunc() {
         //        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
         var jo = $(getElm.getVideo());
         //.resize-screenに設定されるwidth,heightをトリガーにする
-        if (!jo.isEmpty() && movieWidth != parseInt(jo.first().width())) {
+        if (jo.length !==0 && movieWidth != parseInt(jo.first().width()) && !isNowResizing) {
             // || movieHeight != parseInt(jo[0].style.height))) {
-            onresize();
+            // onresize();
         }
         /*
 //video.parentのwidthが外れた場合にonresizeをかけ直す用 onresize変更で一旦不要になった
@@ -7370,7 +7504,7 @@ function onairBasefunc() {
             //            var jo = $("object,video").parent();
             let jo = $(getElm.getVideo());
             //            if (jo.length > 0) {
-            if (!jo.isEmpty()) {
+            if (jo.length !==0) {
                 var er = jo[0].getBoundingClientRect();
                 var movieRightEdge;
                 //                if(isMovieMaximize){
@@ -7845,15 +7979,19 @@ $(window).on('resize', function() {
     }
     resizeEventTimer = setTimeout(function() {
         //ウィンドウのリサイズ完了時の処理
+        console.log('resize finished');
         if (settings.isResizeScreen /* && isComeOpen()*/) {
             setTimeout(function() {
                 //コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
-                $(EXvideoarea)
-                    .width(window.innerWidth)
-                    .height(window.innerHeight);
-                setTimeout(onresize, 1000); //1秒後にリサイズをかける
-                //setTimeout(onresize, 1500);//たまに映像がずれるので再度リサイズかけると落ち着く
-            }, 200);
+                // onresize() でやる
+                // $(EXvideoarea)
+                //     .width(window.innerWidth)
+                //     .height(window.innerHeight);
+                console.log('onresize()');
+                onresize();
+                // setTimeout(onresize, 1000); //1秒後にリサイズをかける
+                // setTimeout(onresize, 1500);//たまに映像がずれるので再度リサイズかけると落ち着く
+            }, 500);
         }
     }, 200);
 });

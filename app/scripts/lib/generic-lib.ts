@@ -1,5 +1,4 @@
 // 一般的な用途の関数集　DOM操作やAbemaに直接関わることはしないただの便利関数ファイル
-import * as $ from 'jquery';
 
 export const isFirefox = window.navigator.userAgent
     .toLowerCase()
@@ -46,7 +45,7 @@ export function setStorage(
     }
 }
 
-// jQuery ajax
+// HTTP通信
 export function postJson(
     url: string,
     data: any,
@@ -66,29 +65,51 @@ export function postJson(
             }
         );
     } else {
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: JSON.stringify(data),
-            headers: headers,
-            contentType: 'application/json',
-            dataType: 'json',
-            success: callback,
-            error: errorCallback
-        });
+        fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: Object.assign(
+                {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                headers || {}
+            ),
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(result => {
+                callback(result);
+            })
+            .catch(e => {
+                console.warn(e);
+                errorCallback({ status: 'error' });
+            });
     }
 }
 export function getJson(url: string, data: any, callback: any) {
-    if (isFirefox) {
-        chrome.runtime.sendMessage(
-            { type: 'getJson', url: url, data: data },
-            function(response) {
-                if (response.status === 'success') {
-                    callback(response.result);
-                }
-            }
+    let paramStr = '';
+    if (data) {
+        const params = Object.keys(data).map(
+            k => `${k}=${encodeURIComponent(data[k])}`
         );
+        if (params.length > 0) paramStr = '?';
+        paramStr += params.join('&');
+    }
+    url += paramStr;
+    if (isFirefox) {
+        chrome.runtime.sendMessage({ type: 'getJson', url: url }, function(
+            response
+        ) {
+            if (response.status === 'success') {
+                callback(response.result);
+            }
+        });
     } else {
-        $.get(url, data, callback);
+        fetch(url, { mode: 'cors' })
+            .then(response => response.json())
+            .then(json => {
+                callback(json);
+            });
     }
 }

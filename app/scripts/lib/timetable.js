@@ -6,9 +6,11 @@ import * as gdl from './generic-dom-lib';
 import * as notifyButton from './notifyButton';
 import * as settingslib from '../settings';
 
-window.logTTEval = function(varName) {
-    console.log(eval(varName));
-};
+if (process.env.NODE_ENV === 'development') {
+    window.logTTEval = function(varName) {
+        console.log(eval(varName));
+    };
+}
 
 var EXTThead; //timetableのヘッダ部分(チャンネル,日付の親)
 var EXTTbody; //timetableのボディ(チャンネル,日付の親)

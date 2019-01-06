@@ -1,6 +1,4 @@
 // AbemaTVのページからなにか情報を取得する系の寄せ集め
-import * as $ from 'jquery';
-import './jquery-lib';
 
 // URL判定
 export const URL_SLOTPAGE = 0; // 番組個別ページ
@@ -37,15 +35,24 @@ export function getChannelByURL(url?: string) {
 export function getChannelNameOnTimetable(
     channel: string,
     EXTTsideL: HTMLElement | null
-) {
+): string | null {
     // 番組表ページのチャンネルリストを利用してチャンネル名を得る
-    let hrefStr = '/timetable/channels/' + channel;
-    if (EXTTsideL != null)
-        return $(EXTTsideL)
-            .find('a[href$="' + hrefStr + '"]')
-            .text();
-    else
-        return $('.c-tv-TimeTableContainer__channels')
-            .find('a[href$="' + hrefStr + '"]')
-            .text();
+    const hrefStr = '/timetable/channels/' + channel;
+    if (EXTTsideL !== null) {
+        const chlink = EXTTsideL.querySelector('a[href$="' + hrefStr + '"]');
+        if (!chlink) {
+            console.warn('getChannelNameOnTimetable chlink=null');
+            return null;
+        }
+        return chlink.textContent;
+    } else {
+        const chlink = document.querySelector(
+            '.c-tv-TimeTableContainer__channels a[href$="' + hrefStr + '"]'
+        );
+        if (!chlink) {
+            console.warn('getChannelNameOnTimetable chlink=null');
+            return null;
+        }
+        return chlink.textContent;
+    }
 }

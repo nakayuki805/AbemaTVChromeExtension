@@ -120,10 +120,11 @@ body {
     border-radius: 20px;
     border-color: white;
     position: fixed;
-    top: 10%;
+    top: 20%;
     left: 50%;
-    margin-left: -200px;
-    width: 400px;
+    margin-left: -300px;
+    width: 600px;
+    font-size: large;
 }
 .ext-toast p {
     margin: 10px;
@@ -297,4 +298,20 @@ body {
 }
 .inputWrapper:first-child {
     border-top: #ddd 1px solid;
+}
+.ext-fadeOut3s {
+    animation: ext-fadeOut 3s;
+    animation-fill-mode: both;
+}
+.ext-fadeOut10s {
+    animation: ext-fadeOut 10s;
+    animation-fill-mode: both;
+}
+@keyframes ext-fadeOut {
+    0% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
 }

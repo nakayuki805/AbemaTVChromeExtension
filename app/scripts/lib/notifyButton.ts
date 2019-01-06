@@ -1,5 +1,5 @@
 // 通知ボタン関連
-// このファイルはまだ不完全で未使用(移行準備中)
+import * as $ from 'jquery';
 import * as dl from './dom-lib';
 import * as gl from './generic-lib';
 import * as gdl from './generic-dom-lib';
@@ -140,7 +140,7 @@ function putNotifyButtonElement(
                             },
                             function(response) {
                                 if (response.result === 'removed') {
-                                    gdl.toast('通知解除しました');
+                                    gdl.toast('通知解除しました', 3000);
                                     let clickedButtonParent = clickedButton.parent();
                                     clickedButton.remove();
                                     putNotifyButtonElement(
@@ -310,7 +310,7 @@ export function putSerachNotifyButtons(notifySeconds: number) {
     let listItems = listWrapper.find('a[role=listitem]');
     let noContentText = '該当する放送予定の番組はありませんでした';
     let noContentMessage = $('p').filter(function(i, e) {
-        return e.innerHTML.includes(noContentText);
+        return (e.textContent || '').includes(noContentText);
     });
     if (listItems.length === 0 && noContentMessage.length === 0) {
         setTimeout(function() {
@@ -367,7 +367,7 @@ export function putReminderNotifyButtons(notifySeconds: number) {
     let listItems = $('a[role=listitem]');
     let featureText = '見たい番組を見逃さないためには'; // 公式通知登録一覧で何も登録してないときの機能紹介文
     let featureMessage = $('p').filter(function(i, e) {
-        return e.innerHTML.includes(featureText);
+        return (e.textContent || '').includes(featureText);
     });
     if (listItems.length === 0 && featureMessage.length === 0) {
         setTimeout(function() {
@@ -476,7 +476,8 @@ export function putSideDetailNotifyButton(
     // console.log(fa,progLinkArr)
     if (urlchan < 0) return;
     let channel = progLinkArr[urlchan + 1];
-    let channelName = getInfo.getChannelNameOnTimetable(channel, EXTTsideL);
+    let channelName =
+        getInfo.getChannelNameOnTimetable(channel, EXTTsideL) || channel;
     //    let progID = progLinkArr[4];
     let progID = progLinkArr[urlchan + 3];
     let notifyButParent;

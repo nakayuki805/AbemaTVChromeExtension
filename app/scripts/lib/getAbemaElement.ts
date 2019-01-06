@@ -1,5 +1,4 @@
 // AbemaTVのページから要素を取得する系の寄せ集め
-import * as $ from 'jquery';
 import * as getInfo from './getAbemaInfo';
 import * as dl from './dom-lib';
 
@@ -19,8 +18,8 @@ export function getVideo() {
             filters: [
                 (e, b) => {
                     return (
-                        (b.height > window.innerHeight * 0.5 &&
-                            b.width > window.innerWidth * 0.5) ||
+                        (b.height > window.innerHeight * 0.1 &&
+                            b.width > window.innerWidth * 0.1) ||
                         (!!e.style.transform &&
                             e.style.transform.includes('scale'))
                     );
@@ -83,7 +82,7 @@ export function getViewCounterElement() {
         notBodyParent: true,
         filters: [
             function(e) {
-                return $(e).children('div').length < 2;
+                return e.querySelectorAll(':scope>div').length < 2;
             }
         ]
     });
@@ -131,7 +130,6 @@ export function getChannelListElement() {
             break;
         }
     }
-    // if(!ret)ret=$('.ext_ref-programList')[0];
     if (!ret) {
         /*console.log("?chli");*/ return null;
     }
@@ -156,11 +154,6 @@ export function getVolElement() {
 
 export function getFullScreenElement() {
     // console.log("?fullscreen");
-    let ret = $('[*|href*="/full_screen.svg"][*|href$="#svg-body"]:not([href])')
-        .first()
-        .parentsUntil('button')
-        .parent()
-        .get(0);
     let svg: HTMLElement | null = document.querySelector(
         '[*|href*="/full_screen.svg"][*|href$="#svg-body"]:not([href])'
     );

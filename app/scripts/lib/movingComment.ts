@@ -1,3 +1,4 @@
+import * as $ from 'jquery';
 import { getVideo, getReplayVideo } from './getAbemaElement';
 import * as getInfo from './getAbemaInfo';
 import * as gcl from './generic-comment-lib';
@@ -377,6 +378,9 @@ export function setComeFontsizeChanged() {
     const nf = parseInt(comeFontSize as string);
     const jo = $('.movingComment');
     jo.css('font-size', nf + 'px');
+}
+export function clearOptionTemporaryStyle() {
+    $('.movingComment').css('font-size', '');
 }
 export function moveComeTopFilter(headerHeight: number, footerHeight: number) {
     let jo = $('.movingComment');

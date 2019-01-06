@@ -11,7 +11,7 @@
     "__firefox__applications": {
         "gecko": {
             "id": "abematvextension@nakayuki.net",
-            "strict_min_version": "52.0",
+            "strict_min_version": "55.0",
             "update_url": "https://www.nakayuki.net/abema-ext/update.json"
         }
     },
