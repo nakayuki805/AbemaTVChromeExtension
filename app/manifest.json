@@ -52,5 +52,14 @@
         "__chrome__persistent": false,
         "__opera__persistent": false,
         "__edge__persistent": false
+    },
+    "externally_connectable": {
+        "ids": ["*"],
+        "matches": [
+            "https://abema.tv/*",
+            "https://abemagraph.info/*",
+            "https://appsweets.net/abeani/",
+            "https://abema.nakayuki.net/*"
+        ]
     }
 }

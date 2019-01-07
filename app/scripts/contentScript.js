@@ -86,6 +86,9 @@ var panelopenset = [[1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]]; //head,foot,sid
 
 var disableExtVersion = ''; //拡張機能の動作を停止するバージョン
 
+const extId = chrome.runtime.id;
+const manifest = chrome.runtime.getManifest();
+
 console.log('script loaded');
 //window.addEventListener(function () {console.log})
 //chrome.storageの関数
@@ -228,7 +231,7 @@ var comelistClasses = {
     posttime: '',
     newhilight: ''
 };
-var currentVersion = chrome.runtime.getManifest().version;
+var currentVersion = manifest.version;
 var resizeEventTimer = 0; //ウィンドウリサイズイベント用のタイマー
 var isBottomScrolled = false; //コメ欄逆順時初回で下にスクロールしたか
 
@@ -4972,8 +4975,8 @@ function setOptionHead() {
 
     selComesendinpp =
         (EXcomesendinp &&
-            dl.getElementSingleSelector(EXcomesendinp.parentElement)) ||
-        '.' + EXcomesendinp.parentElement.classList[0];
+            (dl.getElementSingleSelector(EXcomesendinp.parentElement) ||
+        '.' + EXcomesendinp.parentElement.classList[0]));
     if ($(selComesendinpp).not('#copyotw').length != 1) {
         console.log('?EXcomesendinp.parentElement ' + selComesendinpp);
         selComesendinpp = alt ? '.HH_HL' : '';
@@ -7085,6 +7088,11 @@ gl.getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(
             settings.maxResolution = val.maxResolution;
             settings.minResolution = val.minResolution;
         }
+        // 拡張機能の情報をページ内JSから参照できるようにする
+        const extInfoScript = document.createElement('script');
+        const extInfoJS = `window.abema_ext_info = {"id": "${extId}", "name": "${manifest.name}", "version": "${manifest.version}"};`;
+        extInfoScript.insertAdjacentHTML('afterbegin', extInfoJS);
+        document.head.appendChild(extInfoScript);
 
         injectXHR();
     } else {
@@ -7098,13 +7106,26 @@ gl.getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(
 function mainfunc() {
     //初回に一度実行しておけば後でURL部分が変わっても大丈夫なやつ
     console.log('loaded');
-    var csspath = chrome.extension.getURL('/styles/content.css');
-    $("<link rel='stylesheet' href='" + csspath + "'>").appendTo('head');
+    const csspath = chrome.extension.getURL('/styles/content.css');
+    // 静的なCSSを追加
+    // $("<link rel='stylesheet' href='" + csspath + "'>").appendTo('head');
+    const CSSlink = document.createElement('link');
+    CSSlink.setAttribute('rel', 'stylesheet');
+    CSSlink.setAttribute('href', csspath);
+    document.head.appendChild(CSSlink);
     // jqueryを開発者コンソールから使う
-    var jquerypath = chrome.extension.getURL('/jquery-3.2.1.min.js');
-    $("<script src='" + jquerypath + "'></script>").appendTo('head');
-    var injectionpath = chrome.extension.getURL('/scripts/injection.js');
-    $("<script src='" + injectionpath + "'></script>").appendTo('head');
+    const jquerypath = chrome.extension.getURL('/jquery-3.2.1.min.js');
+    // $("<script src='" + jquerypath + "'></script>").appendTo('head');
+    const jqScript = document.createElement('script');
+    jqScript.setAttribute('src', jquerypath);
+    document.head.appendChild(jqScript);
+    // ページにJSを注入
+    const injectionpath = chrome.extension.getURL('/scripts/injection.js');
+    // $("<script src='" + injectionpath + "'></script>").appendTo('head');
+    const injectionScript = document.createElement('script');
+    injectionScript.setAttribute('src', injectionpath);
+    document.head.appendChild(injectionScript);
+
     //URLパターン別処理
     URLPatternSwitch();
     //ウィンドウをリサイズ
@@ -7152,13 +7173,24 @@ function onairBasefunc() {
         }
 
         // 1秒ごとに実行
-        if ($('.ext_abm-come').length == 0) {
+        if (document.getElementsByClassName('ext_abm-come').length == 0) {
             dl.addExtClass(EXcome, 'come');
         }
-        if ($('.ext_abm-comelist').length == 0) {
+        if (document.getElementsByClassName('ext_abm-comelist').length == 0) {
             dl.addExtClass(EXcomelist, 'comelist');
         }
-        if (!EXcomelist || $(document).has(EXcomelist).length == 0) {
+        if (!EXvideoarea || document.getElementsByClassName('ext_abm-videoarea').length === 0) {
+            if (!EXvideoarea || !document.body.contains(EXvideoarea)) {
+                EXvideoarea = getElm.getVideoAreaElement();
+            }
+            if (EXvideoarea) {
+                dl.addExtClass(EXvideoarea, 'videoarea');
+                resizeObserver.disconnect();
+                resizeObserver.observe(EXvideoarea,{attributes: true, attributeFilter: ['style']});
+                setTimeout(onresize, 1000);
+            }
+        }
+        if (!EXcomelist || !document.body.contains(EXcomelist)) {
             EXcomelist = getComeListElement();
             if (EXcomelist) {
                 //console.log('ecl', EXcomelist, $('body').has(EXcomelist).length==0)
@@ -7169,7 +7201,7 @@ function onairBasefunc() {
                 commentObserver.observe(EXcomelist, { childList: true });
             }
         }
-        if (!EXinfo || $(document).has(EXinfo).length == 0) {
+        if (!EXinfo || !document.body.contains(EXinfo)) {
             EXinfo = getInfoElement();
             dl.addExtClass(EXinfo, 'info');
             setOptionHead();
@@ -8107,7 +8139,7 @@ function URLPatternSwitch() {
 
 chrome.runtime.onMessage.addListener(function(r) {
     //console.log(r);
-    if (r.name == 'bgsend') {
+    if (r.name === 'bgsend' || r.name === 'mediaUrlMatch') {
         if (r.type == 0) {
             bginfo[0] = r.value;
             if (bginfo[2] < 0) bginfo[2] = 0;
@@ -8164,6 +8196,13 @@ chrome.runtime.onMessage.addListener(function(r) {
         TT.toggleChannel(r.url);
     } else if (r.name == 'historyStateUpdated') {
         chkurl();
+    } else if (r.name == 'contentScriptEval') {
+        // 開発時のみevalを実行 抜け道がないように注意
+        if(process.env.NODE_ENV === 'development'){
+            const evalResult = eval(r.evalString);
+            window.tmp = evalResult;
+            console.log(evalResult);
+        }
     } else {
         console.warn('message not match');
     }

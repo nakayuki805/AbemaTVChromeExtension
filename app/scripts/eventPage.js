@@ -544,6 +544,28 @@ chrome.runtime.onMessageExternal &&
                 type: request.type,
                 value: request.value
             });
+        } else if (
+            request.name === 'mediaUrlMatch' &&
+            sender.url.startsWith('https://abema.tv/')
+        ) {
+            // console.log(request, sender);
+            chrome.tabs.sendMessage(sender.tab.id, {
+                name: request.name,
+                type: request.type,
+                value: request.value
+            });
+        } else if (
+            request.name === 'contentScriptEval' &&
+            sender.url.startsWith('https://abema.tv/')
+        ) {
+            // evalを実行するため開発時でabemaのページからの場合しか実行しない
+            // 抜け道がないように注意
+            if (process.env.NODE_ENV === 'development') {
+                chrome.tabs.sendMessage(sender.tab.id, {
+                    name: request.name,
+                    evalString: request.evalString
+                });
+            }
         } else if (request.name === 'addProgramNotify') {
             chrome.storage.local.get({ notifySeconds: 60 }, function(storeObj) {
                 var notifyTime =

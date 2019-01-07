@@ -269,8 +269,12 @@ export function getElementSingleSelector(
     const classArray = className.split(rs);
     let selector = className;
     for (let i = 0; i < classArray.length; i++) {
-        if (classArray[i] === '' && classArray[i].includes('ext_abm-'))
-            continue; // 拡張機能が付与したclassは除外
+        if (
+            classArray[i] === '' ||
+            // classArray[i].startsWith('ext_abm-') || // 拡張のclassが無いとコメント関係がうまくいかないので今はコメントアウト
+            classArray[i].startsWith('fade-')
+        )
+            continue; // 拡張機能が付与したclassや公式のfade-in,outのclassは除外
         selector = tagName + '.' + classArray[i].trim();
         // jo = $(selector).not(jr);
         // jolen = jo.length;
@@ -502,8 +506,11 @@ export function clickElement(element: HTMLElement) {
 }
 export function addExtClass(elm: HTMLElement, className: string) {
     className = 'ext_abm-' + className;
-    Array.from(document.getElementsByClassName(className)).forEach(e =>
-        e.classList.remove(className)
-    );
+    Array.from(document.getElementsByClassName(className)).forEach(e => {
+        e.classList.remove(className);
+        if (e.getAttribute('data-ext-class') === className)
+            e.removeAttribute('data-ext-class');
+    });
     elm.classList.add(className);
+    elm.setAttribute('data-ext-class', className);
 }

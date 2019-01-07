@@ -127,10 +127,11 @@ function getTTLRArrowContainerElement(returnSingleSelector) {
             return e;
     });
     if (jo.length == 0) return null;
-    else if (jo.length == 1)
+    else if (jo.length == 1) {
         return returnSingleSelector
             ? dl.getElementSingleSelector(jo[0])
             : jo[0];
+    }
 
     //特定条件でtimebarも取れるので除外する
     var ret = getTTtimebarElement();
@@ -175,34 +176,41 @@ function getTTLRArrowContainerElement(returnSingleSelector) {
 }
 function getTTtimebarElement(returnSingleSelector) {
     //横に長くて縦が短くtopが直接指定されてるのを選ぶ
-    let jo = $('div').map(function(i, e) {
-        if (
-            e.clientWidth > window.innerWidth / 2 &&
-            e.clientHeight < 30 &&
-            e.style.top != ''
-        )
-            return e;
+    // let jo = $('div').map(function(i, e) {
+    //     if (
+    //         e.clientWidth > window.innerWidth / 2 &&
+    //         e.clientHeight < 30 &&
+    //         e.style.top != ''
+    //     )
+    //         return e;
+    // });
+    const yokonagaDivs = dl.filter(document.getElementsByTagName('div'), {
+        width12b: true,
+        filters: [(e, b) => b.height < 30, e => e.style.top !== '']
     });
-    if (jo.length == 0) return null;
-    else if (jo.length == 1)
+    console.log(yokonagaDivs);
+    if (yokonagaDivs.length == 0) return null;
+    else if (yokonagaDivs.length == 1)
         return returnSingleSelector
-            ? dl.getElementSingleSelector(jo[0])
-            : jo[0];
+            ? dl.getElementSingleSelector(yokonagaDivs[0])
+            : yokonagaDivs[0];
 
     //もし2以上引っかかったら時刻を探す
     var re = /(^|[^\d])\d{1,2}:\d{2}($|[^\d])/;
-    jo = jo.map(function(i, e) {
-        if (re.test(e.textContent)) return e;
-    });
-    if (jo.length == 0) return null;
-    else if (jo.length == 1)
+    // jo = jo.map(function(i, e) {
+    //     if (re.test(e.textContent)) return e;
+    // });
+    const timeDivs = yokonagaDivs.filter(e => re.test(e.textContent));
+    // console.log(timeDivs);
+    if (timeDivs.length === 0) return null;
+    else if (timeDivs.length === 1)
         return returnSingleSelector
-            ? dl.getElementSingleSelector(jo[0])
-            : jo[0];
+            ? dl.getElementSingleSelector(timeDivs[0])
+            : timeDivs[0];
 
     //この時点でまだ取りきれないなら背景を使う
     var rt = /rgba? *\( *(\d+) *, *(\d+) *, *(\d+)(?: *,\d+ *,?)? *\)/;
-    jo = $('p').map(function(i, e) {
+    let jo = $('p').map(function(i, e) {
         if (e.offsetHeight > 0 && e.offsetHeight < 30 && re.test(e.textContent))
             return e;
     });
@@ -219,6 +227,7 @@ function getTTtimebarElement(returnSingleSelector) {
         ret = jo[i];
         break;
     }
+    // console.log(jo);
     if (!ret) return null;
     var p = ret.parentElement;
     while (p.tagName.toUpperCase() != 'BODY' && p.offsetHeight < 30) {
@@ -399,6 +408,7 @@ function timetableCss() {
         if (selTime) {
             timetableClasses.timebar = selTime;
             t += selTime + '{pointer-events:none;}';
+            console.log(selTime);
         }
     }
 

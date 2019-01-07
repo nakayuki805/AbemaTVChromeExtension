@@ -1,16 +1,9 @@
-import * as $ from 'jquery';
 import { getVideo, getReplayVideo } from './getAbemaElement';
 import * as getInfo from './getAbemaInfo';
 import * as gcl from './generic-comment-lib';
-import * as gl from './generic-lib';
 import { SettingItems } from '../settingsList';
-// import * as settingslib from '../settings';
 
-let settings: SettingItems; // Object.assign({}, settingslib.defaultSettings);
-// (async function() {
-//     const value = await settingslib.getSettings();
-//     Object.assign(settings, value);
-// })();
+let settings: SettingItems;
 export function applySettings(newSettings: SettingItems) {
     settings = newSettings;
 }
@@ -39,25 +32,26 @@ function putComeArray(inp: typeof comeArray, isReplay: boolean) {
     }
     let videoRect = video.getBoundingClientRect();
 
-    let mci = $('#moveContainer');
-    if (mci.length === 0) {
-        $(
-            '<div id="moveContainer" class="usermade" style="-webkit-mask-image: linear-gradient(black,black);mask-image: linear-gradient(black,black);">'
-        ).appendTo('body');
-        mci = $('#moveContainer');
+    let moveContainer = document.getElementById('moveContainer');
+    if (!moveContainer) {
+        moveContainer = document.createElement('div');
+        moveContainer.id = 'moveContainer';
+        moveContainer.classList.add('usermade');
+        moveContainer.style.cssText =
+            '-webkit-mask-image: linear-gradient(black,black);mask-image: linear-gradient(black,black);';
+        document.body.appendChild(moveContainer);
+
         if (isReplay) {
             // 見逃し視聴時は動画の上に配置
-            mci.css({
-                position: 'absolute',
-                height: videoRect.height + 'px',
-                width: videoRect.width + 'px',
-                top: videoRect.top,
-                left: videoRect.left
-            });
+            moveContainer.style.position = 'absolute';
+            moveContainer.style.height = videoRect.height + 'px';
+            moveContainer.style.width = videoRect.width + 'px';
+            moveContainer.style.top = videoRect.top + 'px';
+            moveContainer.style.left = videoRect.left + 'px';
         }
     }
-    let mcj = mci.children('.movingComment');
-    let mclen = mcj.length;
+    let movingComments = moveContainer.getElementsByClassName('movingComment');
+    let mclen = movingComments.length;
     let inplen = inp.length;
     let comeoverflowlen = inplen + mclen - settings.movingCommentLimit;
     // あふれる分を削除
@@ -65,27 +59,18 @@ function putComeArray(inp: typeof comeArray, isReplay: boolean) {
         for (let cofi = 0; cofi < comeoverflowlen; cofi++) {
             setTimeout(
                 function(cofi: number) {
-                    mcj.eq(cofi).remove();
+                    movingComments[cofi].remove();
                 },
                 (7000 * cofi) / comeoverflowlen,
                 cofi
             ); // あふれた分を1つずつ順番に7秒かけて消す
         }
-        //        mclen-=comeoverflowlen;
     }
-    //    var jo = $("object,video").parent();
-    // let jo = $(getVideo() || []);
     let movieRightEdge;
-    //    if(isMovieMaximize){
-    //        if(jo.width()>jo.height()*16/9){ //横長
-    //            movieRightEdge=jo.width()/2+jo.height()*8/9; //画面半分+映像横長さ/2
-    //        }else{ //縦長
-    //            movieRightEdge=jo.width();
-    //        }
-    //    }else{
     movieRightEdge =
-        videoRect.left + videoRect.width / 2 + ($(video).width() as number) / 2;
-    //    }
+        videoRect.left +
+        videoRect.width / 2 +
+        video.getBoundingClientRect().width / 2;
     let winwidth = isReplay
         ? videoRect.width
         : settings.comeMovingAreaTrim
@@ -93,9 +78,15 @@ function putComeArray(inp: typeof comeArray, isReplay: boolean) {
         : window.innerWidth;
     let outxt = '';
     let setfont = '';
-    if ($('#settcont').css('display') !== 'none') {
+    const settcont = document.getElementById('settcont');
+    if (settcont && settcont.style.display !== 'none') {
         setfont =
-            'font-size:' + parseInt($('#comeFontsize').val() as string) + 'px;';
+            'font-size:' +
+            parseInt(
+                (document.getElementById('comeFontsize') as HTMLInputElement)
+                    .value
+            ) +
+            'px;';
     }
     for (let i = 0; i < inplen; i++) {
         outxt +=
@@ -111,13 +102,12 @@ function putComeArray(inp: typeof comeArray, isReplay: boolean) {
             inp[i][0] +
             '</span>';
     }
-    $(outxt).appendTo(mci);
-    //    mclen+=inplen;
-    mcj = mci.children('.movingComment');
-    mclen = mcj.length;
+    moveContainer.insertAdjacentHTML('beforeend', outxt);
+    movingComments = moveContainer.getElementsByClassName('movingComment');
+    mclen = movingComments.length;
     for (let i = 0; i < inplen; i++) {
-        let mck = mcj.eq(-inplen + i);
-        let mcwidth = mck.width() as number;
+        const movingComment = movingComments[mclen - inplen + i];
+        let mcwidth = movingComment.getBoundingClientRect().width;
         let mcleft = inp[i][2] + winwidth;
         // コメント長さによって流れる速度が違いすぎるのでlogを速度計算部分に適用することで差を減らす
         // 長いコメントは遅くなるので設定値より少し時間がかかる
@@ -148,16 +138,13 @@ function putComeArray(inp: typeof comeArray, isReplay: boolean) {
         let movingDelta = -mcwidth - 2 - (inp[i][2] + winwidth);
 
         setTimeout(
-            function(jo: JQuery, w: number, delta: number) {
-                if (gl.isEdge) {
-                    jo = $(jo);
-                }
-                jo.css('transition', 'transform ' + w + 's linear')
-                    .css('transform', 'translateX(' + delta + 'px)')
-                    .attr('data-createdSec', onairSecCount);
+            function(mc: HTMLElement, w: number, delta: number) {
+                mc.style.transition = 'transform ' + w + 's linear';
+                mc.style.transform = 'translateX(' + delta + 'px)';
+                mc.setAttribute('data-createdSec', onairSecCount.toString());
             },
             0,
-            mck,
+            movingComment,
             waitsec,
             movingDelta
         );
@@ -362,43 +349,45 @@ export function resizeMoveContainer() {
     if (!video) return;
     if (getInfo.determineUrl() !== getInfo.URL_SLOTPAGE) return;
     const videoRect = video.getBoundingClientRect();
-
-    const mci = $('#moveContainer');
-    mci.css({
-        position: 'absolute',
-        height: videoRect.height + 'px',
-        width: videoRect.width + 'px',
-        top: videoRect.top,
-        left: videoRect.left
-    });
+    const moveContainer = document.getElementById('moveContainer');
+    if (moveContainer) {
+        moveContainer.style.position = 'absolute';
+        moveContainer.style.height = videoRect.height + 'px';
+        moveContainer.style.width = videoRect.width + 'px';
+        moveContainer.style.top = videoRect.top + 'px';
+        moveContainer.style.left = videoRect.left + 'px';
+    }
 }
 export function setComeFontsizeChanged() {
-    const comeFontSize = $('#comeFontsize').val();
+    const comeFontsizeInput = document.getElementById('comeFontsize');
+    if (!comeFontsizeInput) return;
+    const comeFontSize = (comeFontsizeInput as HTMLInputElement).value;
     if (comeFontSize === undefined || comeFontSize === '') return;
-    const nf = parseInt(comeFontSize as string);
-    const jo = $('.movingComment');
-    jo.css('font-size', nf + 'px');
+    const nf = parseInt(comeFontSize);
+    Array.from(document.getElementsByClassName('movingComment')).forEach(
+        mcElem => ((mcElem as HTMLElement).style.fontSize = nf + 'px')
+    );
 }
 export function clearOptionTemporaryStyle() {
-    $('.movingComment').css('font-size', '');
+    Array.from(document.getElementsByClassName('movingComment')).forEach(
+        mcElem => ((mcElem as HTMLElement).style.fontSize = '')
+    );
 }
 export function moveComeTopFilter(headerHeight: number, footerHeight: number) {
-    let jo = $('.movingComment');
-    let i = jo.length - 1;
-    while (i >= 0) {
-        if (
-            jo.eq(i).position().top >
-            window.innerHeight - headerHeight - footerHeight
-        ) {
-            jo.eq(i).remove();
+    const movingCommentElements = document.getElementsByClassName(
+        'movingComment'
+    );
+    for (let i = movingCommentElements.length; i >= 0; i--) {
+        const rect = movingCommentElements[i].getBoundingClientRect();
+        if (rect.top > window.innerHeight - headerHeight - footerHeight) {
+            movingCommentElements[i].remove();
         }
-        i -= 1;
     }
 }
 export function generateCSS(isReplay: boolean): string {
     let t = '';
     if (settings.comeFontsizeV && !isReplay) {
-        const wh = $(window).height() as number;
+        const wh = window.innerHeight;
         const vh = Math.round((1000 * settings.comeFontsize) / wh) / 10;
         t += '.movingComment{font-size:' + vh + 'vh;}';
     } else t += '.movingComment{font-size:' + settings.comeFontsize + 'px;}';
@@ -418,10 +407,8 @@ export function intervalFunction() {
     }
     // 流れるコメントのうちmovingCommentSecond*2経過したものを削除
     if (settings.isMovingComment) {
-        let arMovingComment = $('.movingComment');
+        let arMovingComment = document.getElementsByClassName('movingComment');
         for (let j = 0; j < arMovingComment.length; j++) {
-            //                if(arMovingComment.eq(j).offset().left + arMovingComment.eq(j).width()<=0){
-            // if (arMovingComment.eq(j).offset().left - parseInt(arMovingComment.eq(j)[0].style.left) < 1) {
             if (
                 parseInt(
                     arMovingComment[j].getAttribute('data-createdSec') || ''
@@ -430,11 +417,13 @@ export function intervalFunction() {
             ) {
                 arMovingComment[j].remove();
             } else {
-                break; // 前から順番に見ていって画面外のコメントを処理し終わったらbreak
+                break; // 前から順番に見ていって古いコメントを処理し終わったらbreak
             }
         }
     }
 }
 export function leavePage() {
-    $('.movingComment').remove();
+    Array.from(document.getElementsByClassName('movingComment')).forEach(
+        mcElem => mcElem.remove()
+    );
 }
