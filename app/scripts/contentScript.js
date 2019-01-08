@@ -2599,7 +2599,7 @@ function pophideElement(inp) {
     //console.log(inp);
     //inpを1(pop),-1(hide),0(除去)で受け取る
     //除去前の中身はチェックせずに除去する
-    if (EXfoot === undefined) return; //未setEXs：now-on-air未表示：pophideする必要が無い
+    if (EXfoot === undefined || EXfoot === null) return; //未setEXs：now-on-air未表示：pophideする必要が無い
     if (inp.allreset == true) {
         inp.head = 0;
         inp.foot = 0;
@@ -3249,43 +3249,33 @@ function getInfoElement(returnSingleSelector) {
     //copyinfo後だとinfoのdisplay:noneでclientrectが取れない
     let ret = null;
     let h3a = document.getElementsByTagName('h3');
-    ret = Array.from(h3a).filter(e => {
+    const h3 = Array.from(h3a).filter(e => {
         return e.textContent.indexOf('詳細情報') >= 0;
     })[0];
-    if (!ret) {
+    if (!h3) {
         //CM中など↑で取得できないことがあるのでEXchliの次もしくはsideButtonの次の次の次を使う
         if (EXchli) {
-            ret = $(EXchli)
-                .next()
-                .get(0);
+            ret = EXchli.nextElementSibling;
             console.log('?info -> EXchli next');
         } else if (EXside) {
-            ret = $(EXside)
-                .next()
-                .next()
-                .next()
-                .get(0);
-            console.log('?info -> EXside next next next');
+            try{
+                ret = EXside
+                .nextElementSibling
+                .nextElementSibling
+                .nextElementSibling;
+                console.log('?info -> EXside next next next');
+            }catch(e){
+                console.warn('?info -> EXside next next next failed');
+            }
         }
         if (!ret) {
             console.log('?info');
             return null;
+        }else{
+            return ret;
         }
     }
-    var rep = ret.parentElement;
-    var b = rep.getBoundingClientRect();
-    while (
-        rep.tagName.toUpperCase() != 'BODY' &&
-        b.left > window.innerWidth / 2
-    ) {
-        ret = rep;
-        rep = ret.parentElement;
-        b = rep.getBoundingClientRect();
-    }
-    if (rep.tagName.toUpperCase() == 'BODY') {
-        console.log('?info');
-        return null;
-    }
+    ret = dl.parentsFilterLast(h3||ret, {left12r: true, notBodyParent: true});
     return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
 }
 
@@ -3349,7 +3339,7 @@ function getComeListElement(returnSingleSelector) {
     //無ければ <p>この番組には<br>まだ投稿がありません</p> の親divとしてみたけどやめて大丈夫そうならやめたいが、
     //やっぱりanimatedに引っかかる(初回は全部animated)からまだ投稿～で取るようにする
     var ret = null;
-    var jo = $(EXcome).find('span,p');
+    var jo = $(EXcome).find('span:not(.usermade),p');
     if (jo.length < 5) {
         //無投稿メッセージ探す
         for (var i = 0, ji; i < jo.length; i++) {
@@ -3403,7 +3393,7 @@ function getComeListElement(returnSingleSelector) {
         return null;
     }
     ret = null;
-    console.log(jo);
+    // console.log(jo);
     for (let i = jo.length - 1, j; i >= 0; i--) {
         j = jo.eq(i);
         if (j.find(EXcomesend).length > 0) continue;
@@ -7173,10 +7163,10 @@ function onairBasefunc() {
         }
 
         // 1秒ごとに実行
-        if (document.getElementsByClassName('ext_abm-come').length == 0) {
+        if (EXcome && document.getElementsByClassName('ext_abm-come').length == 0) {
             dl.addExtClass(EXcome, 'come');
         }
-        if (document.getElementsByClassName('ext_abm-comelist').length == 0) {
+        if (EXcomelist && document.getElementsByClassName('ext_abm-comelist').length == 0) {
             dl.addExtClass(EXcomelist, 'comelist');
         }
         if (!EXvideoarea || document.getElementsByClassName('ext_abm-videoarea').length === 0) {
@@ -7203,8 +7193,10 @@ function onairBasefunc() {
         }
         if (!EXinfo || !document.body.contains(EXinfo)) {
             EXinfo = getInfoElement();
-            dl.addExtClass(EXinfo, 'info');
-            setOptionHead();
+            if(EXinfo){
+                dl.addExtClass(EXinfo, 'info');
+                setOptionHead();
+            }
         }
 
         //        //映像のtopが変更したらonresize()実行
@@ -8075,8 +8067,9 @@ function URLPatternSwitch() {
     //判定出力はgetInfo.determineUrl(url)に移行したのでここでは出力しない
     const url = location.href;
     console.log('cup', url);
+    const urlType = getInfo.determineUrl(url);
 
-    switch (getInfo.determineUrl(url)) {
+    switch (urlType) {
         case getInfo.URL_SLOTPAGE:
             //番組個別ページ
             notifyButton.putNotifyButton(settings.notifySeconds, url);
@@ -8135,13 +8128,21 @@ function URLPatternSwitch() {
             delaysetNotOA();
             break;
     }
+    // AbemaTV Timetable Viewer スクリプト用
+    if (urlType === getInfo.URL_ONAIR || urlType === getInfo.URL_DATETABLE || urlType === getInfo.URL_CHANNELTABLE){
+        setTimeout(function(){
+            const panelsTop = document.getElementById('TimetableViewer-panels');
+            if(panelsTop)notifyButton.TTViewerScriptPrepare(settings.notifySeconds);
+        }, 1000);
+    }
 }
 
 chrome.runtime.onMessage.addListener(function(r) {
     //console.log(r);
     if (r.name === 'bgsend' || r.name === 'mediaUrlMatch') {
         if (r.type == 0) {
-            bginfo[0] = r.value;
+            // 通常のhlsかdashセグメント
+            bginfo[0] = r.value; // 解像度
             if (bginfo[2] < 0) bginfo[2] = 0;
             else if (bginfo[2] == 2) bginfo[2] = 3;
         } else if (r.type == 1) {
@@ -8185,6 +8186,7 @@ chrome.runtime.onMessage.addListener(function(r) {
                 }
             }
         } else if (r.type == 2) {
+            // ADセグメント
             if (bginfo[2] < 1) bginfo[2] = 1;
         }
     } else if (r.name == 'addNGword') {

@@ -206,6 +206,20 @@ body {
 .registeredProgs > button > div:hover {
     background-color: rgba(250, 233, 182, 0.7);
 }
+/* TimetableViewerスクリプトに追加した通知登録ボタン */
+.TTVSNotifyButtonWrapper {
+    display: inline-block;
+    margin-left: 5px;
+}
+.TTVSNotifyButtonWrapper > .addNotify {
+    border-radius: calc(1.5vh);
+    padding: 0.1em calc(0.9vh - 0.1em) 0.1em 0;
+    margin: 0;
+    opacity: 0.7;
+}
+.TTVSNotifyButtonWrapper > .addNotify:hover {
+    opacity: 0.5;
+}
 /*チャンネル別番組表で番組の枠を広げたときに途中までしかスクロールできない問題に対応*/
 [class*='styles__time-table___'] [class*='styles__col___1'] {
     overflow: visible;

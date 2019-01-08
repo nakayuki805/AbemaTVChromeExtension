@@ -505,6 +505,10 @@ export function clickElement(element: HTMLElement) {
     return element.dispatchEvent(evt);
 }
 export function addExtClass(elm: HTMLElement, className: string) {
+    if (!elm) {
+        console.warn('addExtClass !elm');
+        return;
+    }
     className = 'ext_abm-' + className;
     Array.from(document.getElementsByClassName(className)).forEach(e => {
         e.classList.remove(className);

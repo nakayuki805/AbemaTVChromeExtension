@@ -188,7 +188,7 @@ function getTTtimebarElement(returnSingleSelector) {
         width12b: true,
         filters: [(e, b) => b.height < 30, e => e.style.top !== '']
     });
-    console.log(yokonagaDivs);
+    // console.log(yokonagaDivs);
     if (yokonagaDivs.length == 0) return null;
     else if (yokonagaDivs.length == 1)
         return returnSingleSelector
@@ -408,7 +408,7 @@ function timetableCss() {
         if (selTime) {
             timetableClasses.timebar = selTime;
             t += selTime + '{pointer-events:none;}';
-            console.log(selTime);
+            // console.log(selTime);
         }
     }
 

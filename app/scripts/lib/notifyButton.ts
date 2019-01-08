@@ -507,3 +507,196 @@ export function putSideDetailNotifyButton(
         notifySeconds
     );
 }
+// 番組表スクリプト関連
+let notifySeconds = 60; // 通知何秒前か 初期化時に設定に上書き
+let channelsData: TimetableViewerScriptChannelsObject | null = null;
+const channelKV: { [index: string]: Slot[] } = {}; // チャンネルIDと番組配列の連想配列
+const slotKV: { [index: string]: Slot } = {}; // 番組IDと番組情報の連想配列
+let watchdogCount = 0; // 万が一mutationobserverが暴走したときの抑制用
+setInterval(() => {
+    if (watchdogCount > 100) {
+        console.warn('watchdogCount>100');
+    }
+    watchdogCount = 0;
+}, 1000);
+const TTVSPanelObserver = new MutationObserver(mutations => {
+    const isNotifyButtonAdded = mutations.some((mutation: MutationRecord) => {
+        // mutationrecordに通知登録ボタンの追加が含まれているかチェック
+        const target = mutation.target as HTMLElement;
+        if (!target.tagName && !target.classList) return false;
+        const tagName = target.tagName.toUpperCase();
+        if (
+            target.classList.contains('addNotify') ||
+            target.classList.contains('TTVSNotifyButtonWrapper')
+        )
+            return true;
+        else if (
+            tagName !== 'P' &&
+            tagName !== 'LI' &&
+            !target.classList.contains('date')
+        )
+            return false;
+        const addedNodes = mutation.addedNodes;
+        if (addedNodes.length === 0) return false;
+        return Array.from(addedNodes).some((addedNode: HTMLElement) => {
+            if (!addedNode.classList) return false;
+            return addedNode.classList.contains('addNotify');
+        });
+    });
+    if (process.env.NODE_ENV === 'development') {
+        // console.log(mutations, isNotifyButtonAdded);
+    }
+    if (!isNotifyButtonAdded && watchdogCount <= 100) {
+        putTTVSNotifyButton();
+        watchdogCount++;
+    }
+});
+
+export function TTViewerScriptPrepare(SettingNotifySeconds: number) {
+    notifySeconds = SettingNotifySeconds;
+    const panelsTop = document.getElementById('TimetableViewer-panels');
+    if (!panelsTop) return;
+    if (panelsTop.getAttribute('data-ext-prepared') === 'true') return;
+    console.log('found AbemaTV Timetable Viewer');
+    if (panelsTop.childElementCount === 0) {
+        // まだ中身がない
+        const TTVSReadyObserver = new MutationObserver(mutations => {
+            TTVSPanelReady();
+            TTVSReadyObserver.disconnect();
+        });
+        TTVSReadyObserver.observe(panelsTop, { childList: true });
+    } else {
+        TTVSPanelReady();
+    }
+
+    panelsTop.setAttribute('data-ext-prepared', 'true');
+}
+function TTVSPanelReady() {
+    // 番組表スクリプト準備OK
+    const channelsDataJson = localStorage.getItem('TimetableViewer-channels');
+    if (!channelsDataJson) {
+        setTimeout(TTVSPanelReady, 2000);
+        console.log('TTVS channels data wait');
+        return;
+    }
+    channelsData = JSON.parse(
+        channelsDataJson
+    ) as TimetableViewerScriptChannelsObject;
+    const channelSchedule = channelsData.value;
+    channelSchedule.forEach(ch => {
+        channelKV[ch.id] = ch.programs;
+        ch.programs.forEach(slot => {
+            slotKV[slot.id] = slot;
+        });
+    });
+    const timetablePanel = document.getElementById(
+        'TimetableViewer-timetable-panel'
+    );
+    if (timetablePanel) {
+        const programArea = timetablePanel.getElementsByClassName('program')[0];
+        // console.log(programArea);
+        TTVSPanelObserver.observe(programArea, {
+            childList: true,
+            subtree: true
+        });
+    } else console.warn('!timetablePanel');
+}
+function putTTVSNotifyButton() {
+    console.log('putTTVSNB');
+    const timetablePanel = document.getElementById(
+        'TimetableViewer-timetable-panel'
+    );
+    if (!timetablePanel) return;
+    const programArea = timetablePanel.getElementsByClassName('program')[0];
+    const dateP = programArea.querySelector('.summary>.date');
+    if (!dateP) return;
+    Array.from(
+        programArea.getElementsByClassName('TTVSNotifyButtonWrapper')
+    ).forEach(e => e.remove());
+    const button = dateP.getElementsByTagName('button')[0];
+    const slotId = button.getAttribute('data-once');
+    if (button.classList.contains('current') || !slotId) {
+        if (!button.classList.contains('current') && !slotId) {
+            setTimeout(putTTVSNotifyButton, 1000);
+            console.log('no slot retry');
+            return;
+        }
+    } else {
+        // console.log('summary', slotId, slotKV[slotId]);
+        const slot = slotKV[slotId];
+        const notifyButtonWrapper = document.createElement('div');
+        notifyButtonWrapper.classList.add('TTVSNotifyButtonWrapper');
+        (dateP.parentElement as HTMLElement).insertBefore(
+            notifyButtonWrapper,
+            dateP.nextSibling
+        );
+        // console.log(dateP, notifyButtonWrapper);
+        putNotifyButtonElement(
+            slot.channel.id,
+            slot.channel.name,
+            slotId,
+            slot.title,
+            new Date(slot.startAt * 1000),
+            $(notifyButtonWrapper),
+            notifySeconds
+        );
+    }
+    // シリーズ・再放送
+    const lis = programArea.querySelectorAll('.program li');
+    Array.from(lis).forEach(li => {
+        const button = li.getElementsByTagName('button')[0];
+        if (!button) return;
+        const slotId = button.getAttribute('data-once');
+        if (!slotId) return;
+        // console.log(slotId, slotKV[slotId]);
+        const slot = slotKV[slotId];
+        const notifyButtonWrapper = document.createElement('div');
+        notifyButtonWrapper.classList.add('TTVSNotifyButtonWrapper');
+        li.appendChild(notifyButtonWrapper);
+        putNotifyButtonElement(
+            slot.channel.id,
+            slot.channel.name,
+            slotId,
+            slot.title,
+            new Date(slot.startAt * 1000),
+            $(notifyButtonWrapper),
+            notifySeconds
+        );
+    });
+}
+// TS型定義
+interface Slot {
+    casts: string[];
+    channel: { id: string; name: string };
+    content: string;
+    copyrights: string[];
+    crews: string[];
+    detailHighlight: string;
+    displayProgramId: string;
+    endAt: number;
+    id: string;
+    links?: { value: string; type: number; title: string }[];
+    marks: {};
+    noContent: boolean;
+    padding: boolean;
+    scheneThumbImgs: string[];
+    series: string;
+    slotGroup?: { id: string; name: string; lastSlotId: string };
+    startAt: number;
+    thumbImg: string;
+    timeshiftEndAt?: number;
+    timeshiftFreeEndAt?: number;
+    title: string;
+}
+interface Channel {
+    fullName: string;
+    id: string;
+    name: string;
+    order: number;
+    programs: Slot[];
+}
+interface TimetableViewerScriptChannelsObject {
+    expire?: number;
+    saved: number;
+    value: Channel[];
+}

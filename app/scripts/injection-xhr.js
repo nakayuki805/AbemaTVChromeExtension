@@ -28,8 +28,12 @@ const m4sAudioPattern = /^https:\/\/ds-linear-abematv.akamaized.net\/mp4[cde]*\/
 const m4sLiveVideoPattern = /^https:\/\/ds-linear-abematv.akamaized.net\/mp4live\/[a-zA-Z0-9]+\/[a-zA-Z0-9]+\/v(\d+)\/[0-9]+\/[0-9int]+.m4s/;
 const m4sAdVideoPattern = /^https:\/\/ds-linear-abematv\.akamaized\.net\/mp4ad\/[-a-zA-Z0-9]+\/\d+\/[a-zA-Z0-9]+\/(video-\d+)\/[0-9int]+.m4s/;
 const m4sAdAudioPattern = /^https:\/\/ds-linear-abematv\.akamaized\.net\/mp4ad\/[-a-zA-Z0-9]+\/\d+\/[a-zA-Z0-9]+\/(audio-\d+)\/[0-9int]+.m4s/;
-// ↓現状使われていない謎のURL(多分m3u8だと思うけどURLに含まれる3つの数字が謎)
+// ↓現状使われていない謎のURL
+// ドメインを手がかりに検索してみた結果多分これ→https://media.abema.io/tracks/glasgow/:channelId/:sequence/:elapsedTime/:duration
 const rcm = /^https:\/\/media\.abema\.io\/.*\/(\d+)\/(\d+)\/(\d+)\?[^\/]*$/;
+// トラック用アドレス
+// https://trk.ad.abema.io/v1/trk?rd={uuid}&tm=2&tid={cmid?}&qsui={userid}&qsgi=5%2C1&qpl=web&qos=PC&qua={UserAgent}&qt={url}&portrait=false&qccf=29&qfld=19
+const adtrackPattern = /^https:\/\/trk.ad.abema.io\/v1\/trk\?.+/;
 
 console.log('xhr open,send override');
 
@@ -121,6 +125,34 @@ xhook.before(req => {
             type: 1,
             value: [parseInt(re[1]), parseInt(re[2]), parseInt(re[3])]
         });
+    } else if (adtrackPattern.test(url)) {
+        const params = url
+            .slice(url.indexOf('?') + 1)
+            .split('&')
+            .reduce((o, v) => {
+                const p = v.split('=');
+                o[p[0]] = decodeURIComponent(p[1]);
+                return o;
+            }, {});
+        // const params2 = Object.assign({}, params);
+        // tm trackingTiming 1~6
+        // tid token
+        // qsgi segmentGroupId
+        // position
+        // [
+        //     'qua',// useragent
+        //     'qsui',// userid
+        //     'qt',// url
+        //     'rd',// uuid
+        //     'qos',// os
+        //     'qpl',// platform
+        //     'portrait',// 多分スマホで画面が縦向きかどうか
+        //     'qccf',//ccfId
+        //     'qfld'//failTimes
+        // ].forEach(k => {
+        //     if (params2[k]) delete params2[k];
+        // });
+        // console.log(params2);
     } else if (url.startsWith('https://ds-linear-abematv.akamaized.net')) {
         if (process.env.NODE_ENV === 'development') {
             console.warn('not match media url', url);
