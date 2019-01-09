@@ -20,25 +20,25 @@ let notifyButtonData: {
 // 拡張機能通知登録済みの番組に背景をつける
 export function setRegistProgsBackground() {
     gl.getStorage(null, function(values) {
-        let programIDs: string[] = [];
-        for (let key in values) {
-            if (key.indexOf('progNotify') === 0) {
-                // 通知登録データ
-                programIDs.push(values[key].programID);
-                // 登録済みなのでclass追加
-                $('#' + values[key].programID)
-                    .closest('article')
-                    .addClass('registeredProgs');
-            }
-        }
-        // 登録されてないのに背景がついてる番組のclass解除
-        $('.registeredProgs').each(function() {
-            let article = $(this);
-            let progID = article.find('input[type=checkbox]').attr('id');
-            if (!gl.hasArray(programIDs, progID)) {
-                article.removeClass('registeredProgs');
-            }
+        // 通知登録済み番組
+        const programIDs = Object.keys(values)
+            .filter(k => k.startsWith('progNotify'))
+            .map(k => values[k].programID);
+        programIDs.forEach(programID => {
+            const idElem = document.getElementById(programID);
+            const article = idElem && idElem.closest('article');
+            article && article.classList.add('registeredProgs');
         });
+        // 登録されてないのに背景がついてる番組のclass解除
+        Array.from(document.getElementsByClassName('registeredProgs')).forEach(
+            article => {
+                const checkbox = article.querySelector('input[type=checkbox]');
+                const progId = checkbox && checkbox.getAttribute('id');
+                if (progId && !programIDs.includes(progId)) {
+                    article.classList.remove('registeredProgs');
+                }
+            }
+        );
     });
 }
 function putNotifyButtonElement(
@@ -47,20 +47,27 @@ function putNotifyButtonElement(
     programID: string,
     programTitle: string,
     programTime: Date,
-    notifyButParent: JQuery,
+    notifyButParent: HTMLElement,
     notifySeconds: number
 ) {
     // console.log(notifySeconds)
-    let notifyTime = programTime.getTime() - notifySeconds * 1000;
-    let now = new Date();
+    const notifyTime = programTime.getTime() - notifySeconds * 1000;
+    const now = new Date();
+    const jnotifyButParent = $(notifyButParent);
     if (notifyTime > now.getTime()) {
-        let progNotifyName = 'progNotify_' + channel + '_' + programID;
-        notifyButParent.children('.addNotify').remove();
-        let notifyButton = $(
-            '<div class="addNotify" data-prognotifyname="' +
-                progNotifyName +
-                '" data-registered="false"></div>'
-        ).prependTo(notifyButParent);
+        const progNotifyName = 'progNotify_' + channel + '_' + programID;
+        Array.from(notifyButParent.getElementsByClassName('addNotify')).forEach(
+            e => e.remove()
+        );
+        const notifyButton = dl.createElement('div', {
+            class: 'addNotify',
+            'data-registered': 'false',
+            'data-prognotifyname': progNotifyName
+        });
+        notifyButParent.insertBefore(
+            notifyButton,
+            notifyButParent.firstElementChild
+        );
         gl.getStorage(progNotifyName, function(notifyData) {
             // console.log(notifyData, progNotifyName)
             notifyButtonData[progNotifyName] = {
@@ -73,32 +80,80 @@ function putNotifyButtonElement(
             };
             if (!notifyData[progNotifyName]) {
                 // 未登録
-                notifyButton
-                    .text('拡張機能の通知登録')
-                    .css('background-color', '#fff')
-                    .attr('data-registered', 'false')
-                    .click(function(e) {
-                        let clickedButton = $(e.target);
-                        let request =
-                            notifyButtonData[
-                                clickedButton.attr('data-prognotifyname') || ''
-                            ];
-                        request.type = 'addProgramNotifyAlarm';
-                        chrome.runtime.sendMessage(request, function(response) {
-                            if (response.result === 'added') {
-                                gdl.toast(
-                                    '通知登録しました<br>番組開始' +
-                                        notifySeconds +
-                                        '秒前にポップアップで通知します。設定されていた場合は自動で放送画面を開きます。通知設定やChromeが立ち上がってないなどにより通知されない場合があります。Chromeが起動していればAbemaTVを開いてなくても通知されます。'
-                                );
-                                let clickedButtonParent = clickedButton.parent();
+                notifyButton.textContent = '拡張機能の通知登録';
+                notifyButton.style.backgroundColor = '#fff';
+                notifyButton.setAttribute('data-registered', 'false');
+                notifyButton.addEventListener('click', function(e) {
+                    let clickedButton = e.target as HTMLElement;
+                    let request =
+                        notifyButtonData[
+                            clickedButton.getAttribute('data-prognotifyname') ||
+                                ''
+                        ];
+                    request.type = 'addProgramNotifyAlarm';
+                    chrome.runtime.sendMessage(request, function(response) {
+                        if (response.result === 'added') {
+                            gdl.toast(
+                                '通知登録しました<br>番組開始' +
+                                    notifySeconds +
+                                    '秒前にポップアップで通知します。設定されていた場合は自動で放送画面を開きます。通知設定やChromeが立ち上がってないなどにより通知されない場合があります。Chromeが起動していればAbemaTVを開いてなくても通知されます。'
+                            );
+                            let clickedButtonParent = clickedButton.parentElement as HTMLElement;
+                            clickedButton.remove();
+                            putNotifyButtonElement(
+                                request.channel,
+                                request.channelName,
+                                request.programID,
+                                request.programTitle,
+                                new Date(request.programTime),
+                                clickedButtonParent,
+                                notifySeconds
+                            );
+                            if (
+                                getInfo.determineUrl() === 1 ||
+                                getInfo.determineUrl() === 2
+                            ) {
+                                setRegistProgsBackground();
+                            }
+                        } else if (response.result === 'notificationDined') {
+                            gdl.toast(
+                                '拡張機能からの通知が拒否されているので通知できません'
+                            );
+                        } else if (response.result === 'pastTimeError') {
+                            gdl.toast('既に開始された番組です');
+                        }
+                    });
+                });
+            } else {
+                // 登録済み
+                notifyButton.textContent = '拡張機能の通知登録解除';
+                notifyButton.style.backgroundColor = '#feb';
+                notifyButton.setAttribute('data-registered', 'true');
+                notifyButton.addEventListener('click', function(e) {
+                    let clickedButton = e.target as HTMLElement;
+                    let progData =
+                        notifyButtonData[
+                            clickedButton.getAttribute('data-prognotifyname') ||
+                                ''
+                        ];
+                    chrome.runtime.sendMessage(
+                        {
+                            type: 'removeProgramNotifyAlarm',
+                            progNotifyName: clickedButton.getAttribute(
+                                'data-prognotifyname'
+                            )
+                        },
+                        function(response) {
+                            if (response.result === 'removed') {
+                                gdl.toast('通知解除しました', 3000);
+                                let clickedButtonParent = clickedButton.parentElement as HTMLElement;
                                 clickedButton.remove();
                                 putNotifyButtonElement(
-                                    request.channel,
-                                    request.channelName,
-                                    request.programID,
-                                    request.programTitle,
-                                    new Date(request.programTime),
+                                    progData.channel,
+                                    progData.channelName,
+                                    progData.programID,
+                                    progData.programTitle,
+                                    new Date(progData.programTime),
                                     clickedButtonParent,
                                     notifySeconds
                                 );
@@ -108,64 +163,16 @@ function putNotifyButtonElement(
                                 ) {
                                     setRegistProgsBackground();
                                 }
-                            } else if (
-                                response.result === 'notificationDined'
-                            ) {
-                                gdl.toast(
-                                    '拡張機能からの通知が拒否されているので通知できません'
-                                );
-                            } else if (response.result === 'pastTimeError') {
-                                gdl.toast('既に開始された番組です');
                             }
-                        });
-                    });
-            } else {
-                // 登録済み
-                notifyButton
-                    .text('拡張機能の通知登録解除')
-                    .css('background-color', '#feb')
-                    .attr('data-registered', 'true')
-                    .click(function(e) {
-                        let clickedButton = $(e.target);
-                        let progData =
-                            notifyButtonData[
-                                clickedButton.attr('data-prognotifyname') || ''
-                            ];
-                        chrome.runtime.sendMessage(
-                            {
-                                type: 'removeProgramNotifyAlarm',
-                                progNotifyName: clickedButton.attr(
-                                    'data-prognotifyname'
-                                )
-                            },
-                            function(response) {
-                                if (response.result === 'removed') {
-                                    gdl.toast('通知解除しました', 3000);
-                                    let clickedButtonParent = clickedButton.parent();
-                                    clickedButton.remove();
-                                    putNotifyButtonElement(
-                                        progData.channel,
-                                        progData.channelName,
-                                        progData.programID,
-                                        progData.programTitle,
-                                        new Date(progData.programTime),
-                                        clickedButtonParent,
-                                        notifySeconds
-                                    );
-                                    if (
-                                        getInfo.determineUrl() === 1 ||
-                                        getInfo.determineUrl() === 2
-                                    ) {
-                                        setRegistProgsBackground();
-                                    }
-                                }
-                            }
-                        );
-                    });
+                        }
+                    );
+                });
             }
         });
     } else {
-        notifyButParent.children('.addNotify').remove();
+        Array.from(notifyButParent.getElementsByClassName('addNotify')).forEach(
+            e => e.remove()
+        );
     }
 }
 function programTimeStrToTime(programTimeStr: string) {
@@ -273,7 +280,7 @@ export function putNotifyButton(notifySeconds: number, url: string) {
         programID,
         programTitle,
         programTime,
-        butParent,
+        butParent[0],
         notifySeconds
     );
     const observer = new MutationObserver(r => {
@@ -288,7 +295,7 @@ export function putNotifyButton(notifySeconds: number, url: string) {
             programID,
             programTitle,
             programTime,
-            butParent,
+            butParent[0],
             notifySeconds
         );
     });
@@ -351,7 +358,7 @@ export function putSerachNotifyButtons(notifySeconds: number) {
             programID,
             programTitle,
             programTime,
-            butParent,
+            butParent[0],
             notifySeconds
         );
     });
@@ -406,7 +413,7 @@ export function putReminderNotifyButtons(notifySeconds: number) {
             programID,
             programTitle,
             programTime,
-            butParent,
+            butParent[0],
             notifySeconds
         );
     });
@@ -503,7 +510,7 @@ export function putSideDetailNotifyButton(
         progID,
         progTitle,
         progTime,
-        notifyButParent,
+        notifyButParent[0],
         notifySeconds
     );
 }
@@ -520,33 +527,10 @@ setInterval(() => {
     watchdogCount = 0;
 }, 1000);
 const TTVSPanelObserver = new MutationObserver(mutations => {
-    const isNotifyButtonAdded = mutations.some((mutation: MutationRecord) => {
-        // mutationrecordに通知登録ボタンの追加が含まれているかチェック
-        const target = mutation.target as HTMLElement;
-        if (!target.tagName && !target.classList) return false;
-        const tagName = target.tagName.toUpperCase();
-        if (
-            target.classList.contains('addNotify') ||
-            target.classList.contains('TTVSNotifyButtonWrapper')
-        )
-            return true;
-        else if (
-            tagName !== 'P' &&
-            tagName !== 'LI' &&
-            !target.classList.contains('date')
-        )
-            return false;
-        const addedNodes = mutation.addedNodes;
-        if (addedNodes.length === 0) return false;
-        return Array.from(addedNodes).some((addedNode: HTMLElement) => {
-            if (!addedNode.classList) return false;
-            return addedNode.classList.contains('addNotify');
-        });
-    });
     if (process.env.NODE_ENV === 'development') {
-        // console.log(mutations, isNotifyButtonAdded);
+        console.log(mutations);
     }
-    if (!isNotifyButtonAdded && watchdogCount <= 100) {
+    if (watchdogCount <= 100) {
         putTTVSNotifyButton();
         watchdogCount++;
     }
@@ -595,10 +579,14 @@ function TTVSPanelReady() {
     if (timetablePanel) {
         const programArea = timetablePanel.getElementsByClassName('program')[0];
         // console.log(programArea);
-        TTVSPanelObserver.observe(programArea, {
-            childList: true,
-            subtree: true
-        });
+        const dateP = programArea.querySelector('.summary>.date');
+        if (dateP) {
+            TTVSPanelObserver.observe(dateP, {
+                childList: true
+            });
+        } else {
+            console.warn('!dateP');
+        }
     } else console.warn('!timetablePanel');
 }
 function putTTVSNotifyButton() {
@@ -615,8 +603,16 @@ function putTTVSNotifyButton() {
     ).forEach(e => e.remove());
     const button = dateP.getElementsByTagName('button')[0];
     const slotId = button.getAttribute('data-once');
-    if (button.classList.contains('current') || !slotId) {
-        if (!button.classList.contains('current') && !slotId) {
+    if (
+        button.classList.contains('current') ||
+        button.classList.contains('play') ||
+        !slotId
+    ) {
+        if (
+            !button.classList.contains('current') &&
+            !button.classList.contains('play') &&
+            !slotId
+        ) {
             setTimeout(putTTVSNotifyButton, 1000);
             console.log('no slot retry');
             return;
@@ -637,7 +633,7 @@ function putTTVSNotifyButton() {
             slotId,
             slot.title,
             new Date(slot.startAt * 1000),
-            $(notifyButtonWrapper),
+            notifyButtonWrapper,
             notifySeconds
         );
     }
@@ -659,7 +655,7 @@ function putTTVSNotifyButton() {
             slotId,
             slot.title,
             new Date(slot.startAt * 1000),
-            $(notifyButtonWrapper),
+            notifyButtonWrapper,
             notifySeconds
         );
     });

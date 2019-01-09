@@ -518,3 +518,55 @@ export function addExtClass(elm: HTMLElement, className: string) {
     elm.classList.add(className);
     elm.setAttribute('data-ext-class', className);
 }
+export function createElement(
+    tagName: string,
+    option?: {
+        [index: string]: string;
+    }
+): HTMLElement {
+    const newElement = document.createElement(tagName);
+    if (option) {
+        Object.keys(option).forEach(attr => {
+            if (attr === 'id') newElement.id = option.id;
+            else if (attr === 'class') {
+                newElement.classList.add(...option.class.split(' '));
+            } else {
+                newElement.setAttribute(attr, option[attr]);
+            }
+        });
+    }
+    return newElement;
+}
+export function setCSS(
+    element: HTMLElement,
+    styles: Partial<CSSStyleDeclaration>
+) {
+    const stylesArray = Object.keys(styles).map(s => [
+        s.replace(/-([a-z])/g, (m, p1) => p1.toUpperCase()),
+        (styles as any)[s]
+    ]);
+    console.log(stylesArray);
+    // !importantがないやつ
+    stylesArray
+        .filter(s => !s[1].endsWith('!important'))
+        .forEach(s => (element.style[s[0]] = s[1]));
+    // !importantがあるやつ
+    let cssText = element.style.cssText;
+    console.log(cssText);
+    stylesArray
+        .filter(s => s[1].endsWith('!important'))
+        .forEach(
+            s =>
+                (cssText +=
+                    s[0].replace(
+                        /[A-Z]/g,
+                        (m: string, o: number) =>
+                            (o > 0 ? '-' : '') + m.toLocaleLowerCase()
+                    ) +
+                    ':' +
+                    s[1] +
+                    ';')
+        );
+    console.log(cssText);
+    element.style.cssText = cssText;
+}

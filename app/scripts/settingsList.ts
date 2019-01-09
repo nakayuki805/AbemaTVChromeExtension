@@ -21,6 +21,7 @@ interface BasicSetting {
     selections?: { value: string | number; string: string }[];
     hasDescImage?: boolean;
 }
+
 interface BooleanSetting extends BasicSetting {
     type: 'boolean';
     default: boolean;
@@ -61,6 +62,26 @@ export type Setting =
     | TextareaSetting
     | SelectSetting
     | RadioSetting;
+// interface Setting {
+//         name: string;
+//         title?: string;
+//         description?: string;
+//         instantDescription?: string;
+//         type:
+//             | 'boolean'
+//             | 'number'
+//             | 'range'
+//             | 'text'
+//             | 'textarea'
+//             | 'select'
+//             | 'radio';
+//         default: Setting extends {type: 'boolean'; } ? boolean :
+//         Setting extends {type: 'number'; }|{type: 'range'} ? number: string;
+//         isInstantChangable: boolean;
+//         range?: number[];
+//         selections?: { value: string | number; string: string }[];
+//         hasDescImage?: boolean;
+//     }
 export interface SettingList {
     description: string;
     isShowImage?: boolean;
@@ -182,6 +203,7 @@ export interface SettingItems {
     isHidePopBL: boolean;
     isHidePopFresh: boolean;
 }
+
 export const settings: SettingList[] = [
     {
         description: '映像・表示・操作関連設定',
