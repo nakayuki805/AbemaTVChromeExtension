@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+      "module": "es6",
+      "target": "es5",
+      "noImplicitAny": true,
+      "noImplicitUseStrict": true,
+      "noImplicitReturns": true,
+      "strictNullChecks": true,
+      "jsx": "react",
+      "lib": ["dom", "es2017"],
+      "traceResolution": true,
+      "baseUrl": ".",
+      "paths": {
+        "*": ["node_modules/@types/*","types/*"]
+      }
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
