@@ -7,7 +7,7 @@ import {
     flatSettings,
     StorageItems,
     Setting
-} from '../settings';
+} from './settings';
 function generateOptionInput(settingsArr: Setting[], isPermanent: boolean) {
     let inputHTML = '';
     let i = 0;

@@ -1,8 +1,8 @@
 // 通知ボタン関連
 import * as $ from 'jquery';
-import * as dl from './dom-lib';
-import * as gl from './generic-lib';
-import * as gdl from './generic-dom-lib';
+import * as dl from '../lib/dom-lib';
+import * as gl from '../lib/generic-lib';
+import * as gdl from '../lib/generic-dom-lib';
 import * as getInfo from './getAbemaInfo';
 
 let notifyButtonData: {

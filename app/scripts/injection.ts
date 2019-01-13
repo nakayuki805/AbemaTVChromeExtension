@@ -1,7 +1,7 @@
 // onairpage.jsからscriptタグとしてこのスクリプトを挿入する
 // 拡張機能のコンテキストではできないReactへのアクセスなどをページのコンテキストで行う
-import * as getElm from './lib/getAbemaElement';
-import * as getInfo from './lib/getAbemaInfo';
+import * as getElm from './contentScript/getAbemaElement';
+import * as getInfo from './contentScript/getAbemaInfo';
 import * as dl from './lib/dom-lib';
 
 // findReactでTSエラーを押さえ込むための型定義

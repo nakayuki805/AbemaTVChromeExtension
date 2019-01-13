@@ -1,4 +1,4 @@
-import * as settings from './settingsList';
+import * as settings from '../settingsList';
 import { stringify } from 'querystring';
 // edge等ブラウザ対応
 // if (typeof chrome === "undefined" || !chrome.extension) {
@@ -173,4 +173,11 @@ export function removeCMsettings(obj: StorageItems) {
         }
     }
     return obj;
+}
+export function deleteNoIs() {
+    Object.keys(flatSettings)
+        .filter(n => n.startsWith('is'))
+        .forEach(settingName => {
+            chrome.storage.local.remove(removeIs(settingName));
+        });
 }

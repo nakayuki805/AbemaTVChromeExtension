@@ -3,7 +3,7 @@
 import 'chromereload/devonly';
 
 import * as $ from 'jquery';
-import * as settings from './settings';
+import * as settings from './lib/settings';
 import * as settingHtml from './lib/settingHtml';
 
 // edge対応
@@ -428,21 +428,23 @@ $(function() {
     $('#saveBtn').click(function() {
         const saveSettings = settingHtml.getSettingInputValue(true);
         Object.assign(saveSettings, {
-            CMBkR:
+            isCMBkR:
                 $('#isCMBkR').prop('checked') &&
                 $('#isCMBlack').prop('checked'),
-            CMsoundR:
+            isCMsoundR:
                 $('#isCMsoundR').prop('checked') &&
                 $('#isCMsoundoff').prop('checked'),
-            CMsmlR:
+            isCMsmlR:
                 $('#isCMsmlR').prop('checked') &&
                 parseInt($('#CMsmall').val()) != 100
         });
+        // isなしを削除
         settings.setStorage(saveSettings).then(function() {
             $('#info')
                 .show()
                 .text('設定保存しました')
                 .fadeOut(4000);
+            settings.deleteNoIs();
         });
     });
     settingHtml.setRangeNumberDisplayer();

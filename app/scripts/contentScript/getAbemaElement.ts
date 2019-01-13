@@ -1,6 +1,6 @@
 // AbemaTVのページから要素を取得する系の寄せ集め
 import * as getInfo from './getAbemaInfo';
-import * as dl from './dom-lib';
+import * as dl from '../lib/dom-lib';
 
 export function getReplayVideo(): HTMLElement | null {
     return dl.filter(document.getElementsByTagName('video'), {

@@ -1,22 +1,23 @@
-import * as dl from './dom-lib';
+import * as dl from '../lib/dom-lib';
 import * as mc from './movingComment';
+import { SettingItems } from '../settingsList';
+import { defaultSettings } from '../lib/settings';
 
 let EXcommentButton: HTMLElement | null = null;
 let EXcommentsParent: HTMLElement | null = null;
 
-let settings: { [index: string]: boolean | string | number } = {};
+let settings: SettingItems;
 let arFullNg: RegExp[] = [];
 let arUserNg: string[] = [];
 export function applySharedObjects(
-    newSettings: {
-        [index: string]: boolean | string | number;
-    },
+    newSettings: SettingItems,
     newArFullNg: RegExp[],
     newArUserNg: string[]
 ) {
     settings = newSettings;
     arFullNg = newArFullNg;
     arUserNg = newArUserNg;
+    mc.applySettings(settings);
 }
 
 let delaysetConsoleStr = '';

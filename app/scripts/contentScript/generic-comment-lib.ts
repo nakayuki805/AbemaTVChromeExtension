@@ -1,5 +1,5 @@
 // Abemaの仕様に依存しないコメント関係の関数群
-import * as gl from './generic-lib';
+import * as gl from '../lib/generic-lib';
 import { getChannelByURL } from './getAbemaInfo';
 const NGshareURLbase = 'https://abema.nakayuki.net/ngshare/v1/'; // 共有NGワードAPI
 const APIclientName = 'AbemaTVChromeExtension'; // ↑のクライアント名

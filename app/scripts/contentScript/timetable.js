@@ -1,10 +1,10 @@
 import * as $ from 'jquery';
-import * as dl from './dom-lib';
+import * as dl from '../lib/dom-lib';
 import * as getInfo from './getAbemaInfo';
-import * as gl from './generic-lib';
-import * as gdl from './generic-dom-lib';
+import * as gl from '../lib/generic-lib';
+import * as gdl from '../lib/generic-dom-lib';
 import * as notifyButton from './notifyButton';
-import * as settingslib from '../settings';
+import * as settingslib from '../lib/settings';
 
 if (process.env.NODE_ENV === 'development') {
     window.logTTEval = function(varName) {
