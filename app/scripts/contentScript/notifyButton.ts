@@ -341,7 +341,7 @@ export function putSerachNotifyButtons(notifySeconds: number) {
         let butParent = $(
             '<span class="listAddNotifyWrapper"></span>'
         ).insertAfter(elem);
-        linkArea.children().css('border-bottom', 'none');
+        // linkArea.children().css('border-bottom', 'none');
         let progUrl = linkArea.attr('href') || '';
         let urlarray = progUrl.substring(1).split('/');
         // console.log(urlarray);
@@ -396,7 +396,7 @@ export function putReminderNotifyButtons(notifySeconds: number) {
             butParent = $(
                 '<span class="listAddNotifyWrapper"></span>'
             ).insertAfter(elem);
-            linkArea.css('border-bottom', 'none');
+            // linkArea.css('border-bottom', 'none');
         }
         let progUrl = linkArea.attr('href') || '';
         let urlarray = progUrl.substring(1).split('/');
@@ -541,7 +541,7 @@ export function TTViewerScriptPrepare(SettingNotifySeconds: number) {
     const panelsTop = document.getElementById('TimetableViewer-panels');
     if (!panelsTop) return;
     if (panelsTop.getAttribute('data-ext-prepared') === 'true') return;
-    console.log('found AbemaTV Timetable Viewer');
+    console.log('found AbemaTV Timetable Viewer'); // , panelsTop, panelsTop.innerHTML);
     if (panelsTop.childElementCount === 0) {
         // まだ中身がない
         const TTVSReadyObserver = new MutationObserver(mutations => {
@@ -557,6 +557,7 @@ export function TTViewerScriptPrepare(SettingNotifySeconds: number) {
 }
 function TTVSPanelReady() {
     // 番組表スクリプト準備OK
+    console.log('TTVS panel ready');
     const channelsDataJson = localStorage.getItem('TimetableViewer-channels');
     if (!channelsDataJson) {
         setTimeout(TTVSPanelReady, 2000);

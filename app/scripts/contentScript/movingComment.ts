@@ -6,7 +6,7 @@ import { SettingItems } from '../settingsList';
 let settings: SettingItems;
 export function applySettings(newSettings: SettingItems) {
     settings = newSettings;
-    console.log(settings);
+    // console.log(settings);
 }
 
 let comeArray: [string, number, number, boolean][] = []; // 流すコメントで、新着の複数コメントのうちNG処理等を経て実際に出力するコメントのリスト

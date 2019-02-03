@@ -167,10 +167,10 @@ body {
     margin-bottom: 12px;
 }
 .listAddNotifyWrapper {
-    border-bottom: #333 1px solid;
     width: calc(100% - 24px);
     left: 12px;
     position: relative;
+    height: 0px;
 }
 .listAddNotifyWrapper .addNotify {
     /*検索結果と公式視聴予約一覧*/
@@ -178,6 +178,9 @@ body {
     /* margin-left: 12px; */
     margin-top: 0;
     width: 200px;
+    position: relative;
+    top: -45px;
+    left: 204px;
 }
 .addNotify:hover {
     opacity: 0.7;

@@ -5924,10 +5924,11 @@ function fastEyecatching(retrycount) {
     }
 }
 function comehl(jo, hlsw) {
-    //console.log(jo,hlsw)
+    hlsw = parseInt(hlsw);
+    // console.log('comehl',jo,hlsw)
     var hlbc = settings.commentBackColor;
     var hlbt = settings.commentBackTrans;
-    var hlc = settings.highlightComeColor;
+    var hlc = parseInt(settings.highlightComeColor);
     var hlp = settings.highlightComePower;
     if ($('#settcont').css('display') != 'none') {
         hlbc = parseInt($('#commentBackColor').val());
@@ -6007,7 +6008,7 @@ function comehl(jo, hlsw) {
             jo.css(
                 'background-color',
                 'rgba(' + r + ',' + g + ',' + b + ',' + a / 255 + ')'
-            ).css('transition', '');
+            ).css('transition', '').attr('data-test-hl', 'rgba(' + r + ',' + g + ',' + b + ',' + a / 255 + ')');
             break;
         default:
     }
