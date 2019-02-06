@@ -53,7 +53,7 @@
         "__opera__persistent": false,
         "__edge__persistent": false
     },
-    "externally_connectable": {
+    "__chrome__externally_connectable": {
         "ids": ["*"],
         "matches": [
             "https://abema.tv/*",

@@ -45,6 +45,7 @@ window.addEventListener('resolutionSet', function() {
 });
 
 xhook.before(req => {
+    console.log(req)
     let url = req.url;
     if ((inj_maxRes != 2160 || inj_minRes != 0) && inj_maxRes >= inj_minRes) {
         //console.log('resch enabled');

@@ -1917,10 +1917,13 @@ function clearBtnColored(target) {
         .css('background-color', '')
         .css('color', '');
 }
-export function injectXHR() {
+// 現在無効
+// デバッグ目的で強制的にinjectXHRしたい場合は引数でtrueを渡す(映らなくなる)
+export function injectXHR(isForce) {
     if (
         $('#ext-xhr-injection').length === 0 &&
-        (settings.maxResolution != 2160 || settings.minResolution != 0)
+        (settings.maxResolution != 2160 || settings.minResolution != 0) &&
+        isForce
     ) {
         var xhrinjectionpath = chrome.extension.getURL(
             '/scripts/injection-xhr.js'
