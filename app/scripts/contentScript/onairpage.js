@@ -301,7 +301,7 @@ function onresize (isAgain){
         // 横方向の中央揃え
         if (isMovieSpacingZeroLeft) {
             const videoContainerRect = videoContainer.getBoundingClientRect();
-            const left = isDAR43?(-1*(videoContainerRect.width-videoContainerRect.height * (4/3))/2):0; 
+            const left = isDAR43?(-1*(videoContainerRect.width-videoContainerRect.height * (4/3))/2):0;
             // videoContainer.style.left = `-${offset}px`;
             //console.log(left)
             videoContainer.style.left = left+'px';
@@ -490,7 +490,7 @@ function openOption() {
     jo.css('background-color', bc).css('color', tc);
     if (comelistClasses.message)
         jo.children('.' + comelistClasses.message).css('color', tc);
-    
+
     $(
         '#settcont>#windowresize>#movieheight input[type="radio"][name="movieheight"]'
     ).val([0]);
@@ -1796,7 +1796,7 @@ function epcountchange() {
             parseInt($('#epnumedit input[type="number"][name="epfix"]').val());
         const proTimeColorNum = (settings.timePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
         const proTimeBkColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.2)`;
-        
+
         if (x > 0) {
             var y = Math.floor((310 * proLength) / (proLength + x));
             $('#proTimeEpNum')
@@ -3799,6 +3799,8 @@ function proPositionAllReset(bigtext) {
         .css('margin-bottom', '')
         .next()
         .css('margin-bottom', '');
+    if(EXvolume) EXvolume.style.marginBottom = '';
+    if(EXfullscr) EXfullscr.style.marginBottom = '';
 }
 function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
     //console.log("proSameFix time="+inptime+", title="+inptitle+", same="+inpsame);
@@ -4356,6 +4358,8 @@ function setTimePosition(timepar, titlepar, samepar, bigpar) {
                 .css('border-left', '1px solid #444')
                 .prev()
                 .css('border-right', 'none');
+            if(EXvolume) EXvolume.style.marginBottom = fmb+'px';
+            if(EXfullscr) EXfullscr.style.marginBottom = fmb+'px';
             break;
         default:
     }
@@ -5721,13 +5725,14 @@ function setOptionEvent() {
     });
     //右下にコメント一覧表示切替を設置
     $(EXfootcome).on('click', usereventFCclick);
-    //コメント一覧の表示切替
-    $(EXcomesend).on('click', function(e) {
-        if (e.target.tagName.toLowerCase() == 'form') {
-            console.log('toggleCommentList EXcomesendclick');
-            toggleCommentList();
-        }
-    });
+    //コメント一覧の表示切替 コレの存在意義が分からず、コメ常時表示してない時にコメント入力しようとしてコメ欄が消えてしまうのでコメントアウト
+    // $(EXcomesend).on('click', function(e) {
+    //     console.log('excomesend clicked',e.target)
+    //     if (e.target.tagName.toLowerCase() == 'form') {
+    //         console.log('toggleCommentList EXcomesendclick',e.target);
+    //         toggleCommentList();
+    //     }
+    // });
     //入力欄のすぐ周りのクリックは何もしない
     $(EXcomesendinp)
         .parent()
@@ -6791,7 +6796,7 @@ function onairBasefunc() {
 
         //console.timeEnd('obf_come');
 
-        
+
         mc.intervalFunction();
         //console.time('obf_2');
         //2つに分かれていたのを統合

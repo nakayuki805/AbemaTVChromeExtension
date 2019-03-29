@@ -13,7 +13,7 @@ var currentUpdateNotifyVersion = 15; //0.13.1の時
 var optionUrl = chrome.extension.getURL('/pages/option.html');
 var notifyContent = [
     '_bem_tv ext (AbemaTV非公式拡張機能) 最近追加された機能:', //表示させたいときはcurrentUpdateNotifyVersionの更新を忘れずに
-    'Abemaプレミアムの見逃しコメント表示時にコメントを流す(放送画面でのコメント流しの設定に準ずる)',
+    // 'Abemaプレミアムの見逃しコメント表示時にコメントを流す(放送画面でのコメント流しの設定に準ずる)',
     'ピクチャーインピクチャーモードへの切り替え(Chrome 70以降、仕様によりCM等で再生停止するためその都度手動で再度切り替えが必要です。)',
     '解像度変更(実験的、有効にすると不具合が発生する可能性あり)',
     'などの機能が追加されています。',
