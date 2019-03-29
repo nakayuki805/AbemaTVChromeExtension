@@ -3088,20 +3088,24 @@ function getVolbarObject() {
     var ret = null;
     //EXvolume内で細くて背景に彩度がありそうなのを選ぶ
     var jo = $(EXvolume).find('div');
+    // console.log(jo)
     var re = /rgba? *\( *(\d+) *, *(\d+) *, *(\d+)(?: *, *\d+ *,?)? *\)/;
     for (var i = 0, j, r, g, b, w; i < jo.length; i++) {
         w = jo.eq(i).width();
+        // console.log('w',i,w)
         if (w < 5 && w > 0) {
             j = re.exec(jo.eq(i).css('background-color'));
             r = parseInt(j[1]);
             g = parseInt(j[2]);
             b = parseInt(j[3]);
-            if ((r < 5 || g < 5 || b < 5) && (r > 5 || g > 5 || b > 5)) {
+            // console.log(j,r,g,b)
+            if ((r < 50 || g < 50 || b < 50) && (r > 50 || g > 50 || b > 50)) {
                 ret = jo.eq(i);
                 break;
             }
         }
     }
+    // console.log('gVbO:',ret)
     return ret;
 }
 function getReceiveNotifyElement(returnSingleSelector) {
@@ -3451,22 +3455,24 @@ function otosageru() {
     return teki[0].dispatchEvent(teka);
 }
 function moVol(d) {
-    console.log('movol ' + d);
+    // console.log('movol ' + d);
     if (!EXvolume) return;
-    var teka = document.createEvent('MouseEvents');
-    var teki = getVolbarObject();
-    if (teki == null) return;
-    var orivol = teki.height();
-    teki = teki.parent();
-    var maxvol = teki.height();
+    // console.log(EXvolume);
+    var mouseEvent = document.createEvent('MouseEvents');
+    var volbarObj = getVolbarObject();
+    if (volbarObj == null) return;
+    // console.log(volbarObj);
+    var orivol = volbarObj.height();
+    volbarObj = volbarObj.parent();
+    var maxvol = volbarObj.height();
     var targetvolume = Math.min(maxvol, Math.max(0, orivol + d));
-    teki = teki.parent();
-    var teku =
-        teki.offset().top +
-        parseInt(teki.css('padding-top')) +
+    volbarObj = volbarObj.parent();
+    var evtPosY =
+        volbarObj.offset().top +
+        parseInt(volbarObj.css('padding-top')) +
         maxvol -
         targetvolume;
-    teka.initMouseEvent(
+    mouseEvent.initMouseEvent(
         'mousedown',
         true,
         true,
@@ -3474,18 +3480,20 @@ function moVol(d) {
         0,
         0,
         0,
-        teki.offset().left + 15,
-        teku
+        volbarObj.offset().left + 15,
+        evtPosY
     );
-    setTimeout(otomouseup, 100, teku);
-    return teki[0].dispatchEvent(teka);
+    setTimeout(otomouseup, 100, evtPosY);
+    return volbarObj[0].dispatchEvent(mouseEvent);
 }
 function otomouseup(p) {
     if (!EXvolume) return;
-    var teka = document.createEvent('MouseEvents');
-    var teki = getVolbarObject();
-    if (teki == null) return;
-    teka.initMouseEvent(
+    // console.log(EXvolume);
+    var mouseEvent = document.createEvent('MouseEvents');
+    var volbarObj = getVolbarObject();
+    if (volbarObj == null) return;
+    // console.log(volbarObj);
+    mouseEvent.initMouseEvent(
         'mouseup',
         true,
         true,
@@ -3493,7 +3501,7 @@ function otomouseup(p) {
         0,
         0,
         0,
-        teki
+        volbarObj
             .parent()
             .parent()
             .offset().left + 15,
@@ -3504,7 +3512,7 @@ function otomouseup(p) {
         const vol = getVolbarObject().height();
         isSoundFlag = vol > 0 ? true : false;
     }, 100);
-    return teki[0].dispatchEvent(teka);
+    return volbarObj[0].dispatchEvent(mouseEvent);
 }
 function otoColor() {
     var jo = $(EXvolume)
@@ -5675,8 +5683,8 @@ function setOptionEvent() {
             ) {
                 //AbemaTV Screen Comment Scrollerスクリプトを併用しているとdiv[data-selector=closer]な要素が上にかぶさる(data-selectorはスクリプト側による属性)
                 console.log(
-                    'onmousewheel on ComeMukouMask or [data-selector=closer]',
-                    e
+                    'onmousewheel on ComeMukouMask or [data-selector=closer]' // ,
+                    // e
                 );
                 //イベントが映像上なら
                 if (

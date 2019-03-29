@@ -334,7 +334,9 @@ export function putSerachNotifyButtons(notifySeconds: number) {
             .children()
             .eq(1)
             .children('span');
-        if (spans.length < 3) return;
+        console.log(spans);
+        if (spans.length < 2) return;
+        console.log(elem);
         if ($(elem).next('.listAddNotifyWrapper').length > 0) {
             return;
         }
@@ -346,12 +348,20 @@ export function putSerachNotifyButtons(notifySeconds: number) {
         let urlarray = progUrl.substring(1).split('/');
         // console.log(urlarray);
         let channel = urlarray[1];
-        let channelNameElem = spans.eq(1);
-        let channelName = channelNameElem.text();
+        // let channelNameElem = spans.eq(1);
+        let channelName = channel; // channelNameElem.text();
         let programID = urlarray[3];
         let programTitle = spans.eq(0).text();
-        let programTime = programTimeStrToTime(spans.eq(2).text());
-        // console.log(linkArea, channel, channelName, programID, programTitle, programTime, butParent);
+        let programTime = programTimeStrToTime(spans.eq(1).text());
+        // console.log(
+        //     linkArea,
+        //     channel,
+        //     channelName,
+        //     programID,
+        //     programTitle,
+        //     programTime,
+        //     butParent
+        // );
         putNotifyButtonElement(
             channel,
             channelName,
@@ -400,13 +410,13 @@ export function putReminderNotifyButtons(notifySeconds: number) {
         }
         let progUrl = linkArea.attr('href') || '';
         let urlarray = progUrl.substring(1).split('/');
-        // console.log(urlarray);
+        // console.log(urlarray, spans);
         let channel = urlarray[1];
         let titleElem = spans.eq(0);
-        let channelName = spans.eq(1).text();
+        let channelName = channel; // spans.eq(1).text();
         let programID = urlarray[3];
         let programTitle = spans.eq(0).text();
-        let programTime = programTimeStrToTime(spans.eq(2).text());
+        let programTime = programTimeStrToTime(spans.eq(1).text());
         putNotifyButtonElement(
             channel,
             channelName,
