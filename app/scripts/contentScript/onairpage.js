@@ -3228,7 +3228,9 @@ function getComeModuleElements(returnSingleSelector) {
 }
 function getVideoRouteClasses() {
     //EXobli>各chコンテナ>背景画像,videoの親..からvideoの親のclassを選ぶ
-    let videoContainer = dl.parentsFilterLast(getElm.getVideo(), {
+    const videoElem = getElm.getVideo();
+    if(!videoElem){console.log('?getVideoRouteClasses no video'); return ['',''];}
+    let videoContainer = dl.parentsFilterLast(videoElem, {
         filters: [e => e.parentElement === EXvideoarea]
     });
     //var jo= $(EXobli).find('video,object').first().parentsUntil(EXobli).eq(-2);
@@ -5725,14 +5727,15 @@ function setOptionEvent() {
     });
     //右下にコメント一覧表示切替を設置
     $(EXfootcome).on('click', usereventFCclick);
-    //コメント一覧の表示切替 コレの存在意義が分からず、コメ常時表示してない時にコメント入力しようとしてコメ欄が消えてしまうのでコメントアウト
-    // $(EXcomesend).on('click', function(e) {
-    //     console.log('excomesend clicked',e.target)
-    //     if (e.target.tagName.toLowerCase() == 'form') {
-    //         console.log('toggleCommentList EXcomesendclick',e.target);
-    //         toggleCommentList();
-    //     }
-    // });
+    //コメ入力欄クリックでコメント一覧の表示切替
+    $(EXcomesend).on('click', function(e) {
+        // console.log('excomesend clicked',e.target);
+        // コメ欄を常に表示時のみ
+        if (e.target.tagName.toLowerCase() == 'form' && settings.isSureReadComment) {
+            console.log('toggleCommentList EXcomesendclick',e.target);
+            toggleCommentList();
+        }
+    });
     //入力欄のすぐ周りのクリックは何もしない
     $(EXcomesendinp)
         .parent()

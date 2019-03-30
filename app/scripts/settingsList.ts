@@ -1072,9 +1072,9 @@ export const radioSettings: RadioBlockSetting[] = [
         name: 'panelopenset',
         type: 'panelopenset',
         list: [
-            [[255879, 'デフォルト'], [531440, '常に表示'], [531441, 'カスタム']]
+            [[255879, 'デフォルト'], [255892, '拡張機能おすすめ'], [531440, '常に表示'], [531441, 'カスタム']]
         ],
-        default: 255879,
+        default: 255892,
         isInstantChangable: true
     }
 ];
