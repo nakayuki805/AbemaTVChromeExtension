@@ -46,6 +46,10 @@ interface RectFilterOption {
     filters?: Array<(element: HTMLElement, b: ClientRect) => boolean>;
     notElement?: HTMLElement;
     notElements?: HTMLElement[];
+    containElement?: HTMLElement;
+    containElements?: HTMLElement[];
+    notContainElement?: HTMLElement;
+    notContainElements?: HTMLElement[];
 }
 
 export function last(array: any[], isNull?: boolean) {
@@ -215,6 +219,18 @@ export function filter(
         if (
             option.notElements &&
             Array.from(option.notElements).some(e => e === element)
+        )
+            return false;
+        if (option.containElement && !element.contains(option.containElement)) return false;
+        if (
+            option.containElements &&
+            Array.from(option.containElements).every(e => !element.contains(e))
+        )
+            return false;
+        if (option.notContainElement && element.contains(option.notContainElement)) return false;
+        if (
+            option.notContainElements &&
+            Array.from(option.notContainElements).some(e => element.contains(e))
         )
             return false;
         return true;

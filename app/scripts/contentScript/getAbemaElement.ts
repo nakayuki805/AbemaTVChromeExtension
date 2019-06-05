@@ -69,14 +69,14 @@ export function getHeaderElement() {
     );
 }
 export function getViewCounterElement() {
-    const p = dl.filter(document.getElementsByTagName('p'), {
-        includeText: '視聴数'
-    });
-    if (p.length === 0) {
-        console.log('?viewCounter(!p)');
+    const svg = document.querySelectorAll(
+        '[*|href*="/view.svg"][*|href$="#svg-body"]:not([href]),.com-tv-TVViewCounter__icon'
+    ) as ArrayLike<HTMLElement>;
+    if (svg.length === 0) {
+        console.log('?viewCounter(!svg)');
         return null;
     }
-    return dl.parentsFilterLastByArray(p, {
+    return dl.parentsFilterLastByArray(svg, {
         width14s: true,
         height14s: true,
         notBodyParent: true,

@@ -8,8 +8,7 @@ import * as gdl from '../lib/generic-dom-lib';
 import * as gcl from './generic-comment-lib';
 import * as mc from './movingComment';
 import * as replayComment from './replayComment';
-import {createPIPbutton} from './picture-in-picture';
-
+import { createPIPbutton } from './picture-in-picture';
 
 //devtoolのコンソールから呼び出せる関数
 if (process.env.NODE_ENV === 'development') {
@@ -25,13 +24,10 @@ let bginfo = [0, [], -1, -1]; //ソースの縦長さなど主にwebrequestメ�
 
 const arFullNg = [];
 const arUserNg = [];
-export function applySharedObjects(
-    newSettings
-) {
+export function applySharedObjects(newSettings) {
     settings = newSettings;
     mc.applySettings(settings);
     replayComment.applySharedObjects(settings, arFullNg, arUserNg);
-
 }
 
 var currentLocation = window.location.href;
@@ -83,7 +79,6 @@ var comeRefreshing = false; //コメ欄自動開閉中はソートを実行し�
 var comeFastOpen = false;
 //var newtop = 0;//映像位置のtop
 var comeHealth = 100; //コメント欄を開く時の初期読込時に読み込まれたコメント数（公式NGがあると100未満になる）
-
 
 var eventAdded = false; //各イベントを1回だけ作成する用
 var setBlacked = [false, false, false]; //soundsetなどのスイッチ
@@ -138,21 +133,24 @@ var comelistReadyEvent = new Event('commentListReady');
 const settingsChangeEvent = new Event('settingsChange');
 export const resolutionSetEvent = new Event('resolutionSet');
 
-
-var delaysetConsoleStr = '';
-var delaysetConsoleRepeated = false;
+let delaysetConsoleStr = '';
+let delaysetConsoleRepeated = false;
+let setEXsConsoleStr = '';
+let setEXsConsoleRepeated = false;
 var lastMovedCommentTime = 0; //最後に流れたコメントの時間(コメントが二重に流れるのを防ぐ)
 let resizeAgainTimer = 0;
 let isComeInpFocus = false;
 let isNowResizing = false;
-const resizeObserver = new MutationObserver(mutations=>{
+const resizeObserver = new MutationObserver(mutations => {
     // console.log('resize mutated,', isNowResizing)
-    if(!isNowResizing){onresize();}
+    if (!isNowResizing) {
+        onresize();
+    }
 });
 
 //
 
-export function afterLoadSetting(value){
+export function afterLoadSetting(value) {
     cmblockia = Math.max(
         1,
         value.beforeCMWait !== undefined ? 1 + value.beforeCMWait : cmblockia
@@ -183,7 +181,6 @@ export function afterLoadSetting(value){
     }
     //無視する設定
     settings.isInpWinBottom = false;
-
 }
 export function onairCleaner() {
     console.log('onairCleaner');
@@ -218,35 +215,57 @@ export function onairCleaner() {
     commentObserver.disconnect();
     resizeObserver.disconnect();
 }
-function onresize (isAgain){
+function onresize(isAgain) {
     const video = getElm.getVideo();
-    if (getInfo.determineUrl() !== getInfo.URL_ONAIR || !EXvideoarea || !video) return;
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR || !EXvideoarea || !video)
+        return;
     const videoContainer = dl.last(dl.parentsUntil(video, EXvideoarea));
-    if(!videoContainer) {console.warn('onresize: videoContainer not found');return;}
+    if (!videoContainer) {
+        console.warn('onresize: videoContainer not found');
+        return;
+    }
     // console.log(videoContainer);
     isNowResizing = true;
-    if(resizeAgainTimer>0) clearTimeout(resizeAgainTimer);
+    if (resizeAgainTimer > 0) clearTimeout(resizeAgainTimer);
     const settingWindow = document.getElementById('settcont');
-    const isSettingOpen = settingWindow && settingWindow.style.display !== 'none';
-    const isResizeScreen = isSettingOpen?document.getElementById('isResizeScreen').checked:settings.isResizeScreen;
-    const isMovieSpacingZeroTop = isSettingOpen?document.getElementById('isMovieSpacingZeroTop').checked:settings.isMovieSpacingZeroTop;
-    const isResizeSpacing = isSettingOpen?document.getElementById('isResizeSpacing').checked:settings.isResizeSpacing;
-    const isDAR43 = isSettingOpen?document.getElementById('isDAR43').checked:settings.isDAR43;
-    const isHeaderTop = isSettingOpen?document.getElementById('isResizeSpacing').checked:settings.isResizeSpacing;
-    const isMovieSpacingZeroLeft = isSettingOpen?document.getElementById('isMovieSpacingZeroLeft').checked:settings.isMovieSpacingZeroLeft;
-    const isVideoResizeNeeded = isDAR43 || isMovieSpacingZeroTop || isResizeSpacing || isMovieSpacingZeroLeft;
+    const isSettingOpen =
+        settingWindow && settingWindow.style.display !== 'none';
+    const isResizeScreen = isSettingOpen
+        ? document.getElementById('isResizeScreen').checked
+        : settings.isResizeScreen;
+    const isMovieSpacingZeroTop = isSettingOpen
+        ? document.getElementById('isMovieSpacingZeroTop').checked
+        : settings.isMovieSpacingZeroTop;
+    const isResizeSpacing = isSettingOpen
+        ? document.getElementById('isResizeSpacing').checked
+        : settings.isResizeSpacing;
+    const isDAR43 = isSettingOpen
+        ? document.getElementById('isDAR43').checked
+        : settings.isDAR43;
+    const isHeaderTop = isSettingOpen
+        ? document.getElementById('isResizeSpacing').checked
+        : settings.isResizeSpacing;
+    const isMovieSpacingZeroLeft = isSettingOpen
+        ? document.getElementById('isMovieSpacingZeroLeft').checked
+        : settings.isMovieSpacingZeroLeft;
+    const isVideoResizeNeeded =
+        isDAR43 ||
+        isMovieSpacingZeroTop ||
+        isResizeSpacing ||
+        isMovieSpacingZeroLeft;
 
     // ウィンドウの高さに合わす
     if (isResizeScreen || isResizeSpacing || isMovieSpacingZeroTop || isDAR43) {
-        EXvideoarea.style.height = (window.innerHeight-(isHeaderTop?headerHeight:0))+'px';
-        if (isResizeSpacing){
-            EXvideoarea.style.height = (window.innerHeight-headerHeight)+'px';
-            EXvideoarea.style.marginTop = headerHeight+'px';
-        }else{
-            EXvideoarea.style.height = window.innerHeight+'px';
+        EXvideoarea.style.height =
+            window.innerHeight - (isHeaderTop ? headerHeight : 0) + 'px';
+        if (isResizeSpacing) {
+            EXvideoarea.style.height = window.innerHeight - headerHeight + 'px';
+            EXvideoarea.style.marginTop = headerHeight + 'px';
+        } else {
+            EXvideoarea.style.height = window.innerHeight + 'px';
             EXvideoarea.style.marginTop = '';
         }
-    }else{
+    } else {
         EXvideoarea.style.marginTop = '';
     }
     // ウィンドウの幅に合わす
@@ -256,7 +275,7 @@ function onresize (isAgain){
 
     if (isResizeScreen) {
         // console.log(EXvideoarea, window.innerWidth)
-        EXvideoarea.style.width = window.innerWidth+'px';
+        EXvideoarea.style.width = window.innerWidth + 'px';
     }
 
     const videoAreaRect = EXvideoarea.getBoundingClientRect();
@@ -265,18 +284,21 @@ function onresize (isAgain){
         let translateX = '0px';
         let translateY = '0px';
         let zoomRatio = 1;
-        if (isDAR43){
-            const videoAreaRatio = videoAreaRect.height/videoAreaRect.width;
-            if(videoAreaRatio>9/16){
+        if (isDAR43) {
+            const videoAreaRatio = videoAreaRect.height / videoAreaRect.width;
+            if (videoAreaRatio > 9 / 16) {
                 // 16:9基準で高さが大きい→横が見切れるように拡大
-                if(videoAreaRatio>3/4){
+                if (videoAreaRatio > 3 / 4) {
                     // 4:3基準でも大きいのでそのまま拡大
-                    zoomRatio = 4/3;
-                }else{
+                    zoomRatio = 4 / 3;
+                } else {
                     // 9/16 < videoAreaRatio <= 3/4
                     // 4:3基準ではまだ小さいので倍率を調節する
                     // videoAreaRatioが9/16時にzoomRatioが1、3/4時に4/3として線形に倍率を決める
-                    zoomRatio = 1 + (4/3-1)*(videoAreaRatio-9/16)/(3/4-9/16);
+                    zoomRatio =
+                        1 +
+                        ((4 / 3 - 1) * (videoAreaRatio - 9 / 16)) /
+                            (3 / 4 - 9 / 16);
                 }
             }
         }
@@ -287,24 +309,34 @@ function onresize (isAgain){
             // }else {
             //     videoContainer.style.height = 100*zoomRatio+'vh';
             // }
-            videoContainer.style.height = `calc(100vh - ${isHeaderTop?headerHeight:0}px)`;
-            videoContainer.style.width = 100*zoomRatio+'vw';
+            videoContainer.style.height = `calc(100vh - ${
+                isHeaderTop ? headerHeight : 0
+            }px)`;
+            videoContainer.style.width = 100 * zoomRatio + 'vw';
             videoContainer.style.maxHeight = `calc(100vw * ${zoomRatio} * 9 / 16)`;
-            videoContainer.style.maxWidth = `calc((100vh - ${isHeaderTop?headerHeight:0}px) * ${zoomRatio} * 16 / 9)`;
+            videoContainer.style.maxWidth = `calc((100vh - ${
+                isHeaderTop ? headerHeight : 0
+            }px) * ${zoomRatio} * 16 / 9)`;
         } else {
-
-            videoContainer.style.height = `calc(100%)`;// (100*zoomRatio)+'%';
-            videoContainer.style.width = (100*zoomRatio)+'%';
-            videoContainer.style.maxHeight = zoomRatio*videoAreaRect.width*9/16 + 'px';
-            videoContainer.style.maxWidth = zoomRatio*videoAreaRect.height*16/9 + 'px';
+            videoContainer.style.height = `calc(100%)`; // (100*zoomRatio)+'%';
+            videoContainer.style.width = 100 * zoomRatio + '%';
+            videoContainer.style.maxHeight =
+                (zoomRatio * videoAreaRect.width * 9) / 16 + 'px';
+            videoContainer.style.maxWidth =
+                (zoomRatio * videoAreaRect.height * 16) / 9 + 'px';
         }
         // 横方向の中央揃え
         if (isMovieSpacingZeroLeft) {
             const videoContainerRect = videoContainer.getBoundingClientRect();
-            const left = isDAR43?(-1*(videoContainerRect.width-videoContainerRect.height * (4/3))/2):0;
+            const left = isDAR43
+                ? (-1 *
+                      (videoContainerRect.width -
+                          videoContainerRect.height * (4 / 3))) /
+                  2
+                : 0;
             // videoContainer.style.left = `-${offset}px`;
             //console.log(left)
-            videoContainer.style.left = left+'px';
+            videoContainer.style.left = left + 'px';
         } else {
             videoContainer.style.left = '50%';
             translateX = '-50%';
@@ -318,7 +350,7 @@ function onresize (isAgain){
         }
         // translate反映
         videoContainer.style.transform = `translate(${translateX}, ${translateY})`;
-    }else{
+    } else {
         videoContainer.style.height = '';
         videoContainer.style.width = '';
         videoContainer.style.top = '';
@@ -328,7 +360,7 @@ function onresize (isAgain){
         videoContainer.style.transform = '';
     }
     isNowResizing = false;
-    if(!isAgain)resizeAgainTimer = setTimeout(onresize, 1000, true);
+    if (!isAgain) resizeAgainTimer = setTimeout(onresize, 1000, true);
     // console.log('resize done');
 }
 
@@ -463,7 +495,7 @@ function openOption() {
     optionHeightFix();
     //設定ウィンドウにロード
     settingHtml.setSettingInputValue(settings, false);
-    settingHtml.setRangeNumberDisplayer();// rangeのprop反映
+    settingHtml.setRangeNumberDisplayer(); // rangeのprop反映
     var bc =
         'rgba(' +
         settings.commentBackColor +
@@ -509,7 +541,6 @@ function openOption() {
     );
     $('#movieheight input[type="radio"][name="movieheight"]').val([0]);
     $('#windowheight input[type="radio"][name="windowheight"]').val([0]);
-
 
     var panelopenses = 0;
     for (var i = 0; i < 4; i++) {
@@ -666,32 +697,32 @@ function delayset(
             $('<div id="moveContainer" class="usermade">').appendTo('body');
         }
         //視聴数の位置調整
-        var fixCountViewLeft = function() {
-            if (EXcountview) {
-                let oldLeft = EXcountview.getBoundingClientRect().left;
-                let footer = $(EXfootcome)
-                    .parent()
-                    .addClass('countviewtrans');
-                $(EXcountview)
-                    .css({
-                        position: 'fixed',
-                        'margin-bottom': footer.css('margin-bottom'),
-                        height: footer.height() + 'px'
-                    })
-                    .offset({
-                        left:
-                            EXfootcome.getBoundingClientRect().left -
-                            EXcountview.getBoundingClientRect().width / 2 -
-                            50
-                    });
-                if (oldLeft != EXcountview.getBoundingClientRect().left) {
-                    setFooterBGStyle();
-                }
-            }
-        };
-        setTimeout(fixCountViewLeft, 3000); //コメント数が表示されるまで待つ
-        setTimeout(fixCountViewLeft, 10000); //再度修正
-        setInterval(fixCountViewLeft, 30000); //30秒ごとに再調整
+        // var fixCountViewLeft = function() {
+        //     if (EXcountview) {
+        //         let oldLeft = EXcountview.getBoundingClientRect().left;
+        //         let footer = $(EXfootcome)
+        //             .parent()
+        //             .addClass('countviewtrans');
+        //         $(EXcountview)
+        //             .css({
+        //                 position: 'fixed',
+        //                 'margin-bottom': footer.css('margin-bottom'),
+        //                 height: footer.height() + 'px'
+        //             })
+        //             .offset({
+        //                 left:
+        //                     EXfootcome.getBoundingClientRect().left -
+        //                     EXcountview.getBoundingClientRect().width / 2 -
+        //                     50
+        //             });
+        //         if (oldLeft != EXcountview.getBoundingClientRect().left) {
+        //             setFooterBGStyle();
+        //         }
+        //     }
+        // };
+        // setTimeout(fixCountViewLeft, 3000); //コメント数が表示されるまで待つ
+        // setTimeout(fixCountViewLeft, 10000); //再度修正
+        // setInterval(fixCountViewLeft, 30000); //30秒ごとに再調整
 
         //初期読込時にマウス反応の要素が閉じないのを直したい
         forElementClose = 1;
@@ -1078,10 +1109,12 @@ function createSettingWindow() {
         optionbutton.id = 'optionbutton';
         optionbutton.classList.add('ext-sideButton');
         optionbutton.setAttribute('title', '拡張機能の一時設定');
-        optionbutton.insertAdjacentHTML('afterbegin',
+        optionbutton.insertAdjacentHTML(
+            'afterbegin',
             "<img src='" +
-            chrome.extension.getURL('/images/gear.svg') +
-            "' alt='拡張設定' class='ext-sideButton-icon'>");
+                chrome.extension.getURL('/images/gear.svg') +
+                "' alt='拡張設定' class='ext-sideButton-icon'>"
+        );
         slidecont.appendChild(optionbutton);
         $('#optionbutton').on('click', function() {
             if ($('#settcont').css('display') == 'none') {
@@ -1124,8 +1157,10 @@ function createSettingWindow() {
         settcont += '<div id="settcontfooter">';
         settcont += '<input type="button" id="saveBtn" value="一時保存"> ';
         settcont += '<input type="button" class="closeBtn" value="閉じる"> ';
-        settcont += '<input type="button" class="leftshift" value="←この設定画面を少し左へ">';
-        settcont += '<input type="button" class="rightshift" value="この設定画面を右へ→" style="display:none;">';
+        settcont +=
+            '<input type="button" class="leftshift" value="←この設定画面を少し左へ">';
+        settcont +=
+            '<input type="button" class="rightshift" value="この設定画面を右へ→" style="display:none;">';
         settcont += '<br>';
         settcont +=
             '※ここでの設定はこのタブでのみ保持され、このタブを閉じると全て破棄されます。';
@@ -1144,7 +1179,7 @@ function createSettingWindow() {
         $('#isProTextLarge').change(setProTextSizeChanged);
         $('#comeFontsize').change(mc.setComeFontsizeChanged);
         $('.leftshift').on('click', function() {
-            $('#settcont').css('right', commentListWidth+'px');
+            $('#settcont').css('right', commentListWidth + 'px');
             $('.leftshift').css('display', 'none');
             $('.rightshift').css('display', '');
         });
@@ -1545,7 +1580,7 @@ function createSettingWindow() {
         let ja = jo.parent().contents();
         //        var jm=$('#isMovieMaximize');
         let jm = $('#isDAR43-wrapper');
-        ja.slice(ja.index(jo), ja.index(jm)+1).wrapAll(
+        ja.slice(ja.index(jo), ja.index(jm) + 1).wrapAll(
             '<div id="movieResizeContainer" style="margin:8px;padding:8px;border:1px solid black;">'
         );
         let tres = '';
@@ -1569,7 +1604,7 @@ function createSettingWindow() {
         //     .add(jc.eq(jc.index($('#isDAR43-wrapper')) + 1))
         //     .remove();
         $('#isDAR43-wrapper')
-            .css({display:'inline-block', border: 'none'})
+            .css({ display: 'inline-block', border: 'none' })
             .prependTo('#movieResizeContainer')
             .before('映像の大きさ　')
             .after(" <label for='isDAR43'>: 映像4:3モード</label>");
@@ -1581,7 +1616,7 @@ function createSettingWindow() {
         let jo = $('#isMovieSpacingZeroTop-wrapper');
         let ja = jo.parent().contents();
         let jm = $('#isMovieSpacingZeroLeft-wrapper');
-        ja.slice(ja.index(jo), ja.index(jm)+1).wrapAll(
+        ja.slice(ja.index(jo), ja.index(jm) + 1).wrapAll(
             '<div id="moviePositionContainer" style="margin:8px;padding:8px;border:1px solid black;">'
         );
         let tres = '映像の上下位置';
@@ -1794,7 +1829,11 @@ function epcountchange() {
         var x =
             60000 *
             parseInt($('#epnumedit input[type="number"][name="epfix"]').val());
-        const proTimeColorNum = (settings.timePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
+        const proTimeColorNum =
+            settings.timePosition.includes('commentinput') &&
+            settings.commentBackColor > 127
+                ? 0
+                : 255;
         const proTimeBkColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.2)`;
 
         if (x > 0) {
@@ -1802,7 +1841,7 @@ function epcountchange() {
             $('#proTimeEpNum')
                 .css('right', 310 - y + 'px')
                 .css('width', y + 'px')
-                .css('border-right', '1px solid '+proTimeBkColor);
+                .css('border-right', '1px solid ' + proTimeBkColor);
             proLength -= x;
         } else {
             $('#proTimeEpNum')
@@ -1983,7 +2022,12 @@ function setSaveClicked() {
                 { type: 'windowresize', valw: s[0], valh: s[1] },
                 function(r) {
                     setTimeout(optionHeightFix, 1000);
-                    setTimeout(mc.moveComeTopFilter, 1000, headerHeight, footerHeight);
+                    setTimeout(
+                        mc.moveComeTopFilter,
+                        1000,
+                        headerHeight,
+                        footerHeight
+                    );
                 }
             );
         }
@@ -2281,29 +2325,29 @@ function pophideElement(inp) {
         }
     }
     if (inp.foot !== undefined) {
-        //EXcountviewもfootに連動させる
+        //EXcountviewもfootに連動させる→公式で下帯に統合されたため不要
         comefix = true;
         if (inp.foot == 1) {
             EXfoot.style.visibility = 'visible';
             EXfoot.style.opacity = '1';
             EXfoot.style.transform = 'translate(0)';
-            EXcountview.style.visibility = 'visible';
-            EXcountview.style.opacity = '1';
-            EXcountview.style.transform = 'translate(0)';
+            // EXcountview.style.visibility = 'visible';
+            // EXcountview.style.opacity = '1';
+            // EXcountview.style.transform = 'translate(0)';
         } else if (inp.foot == -1) {
             EXfoot.style.visibility = 'hidden';
             EXfoot.style.opacity = '0';
             EXfoot.style.transform = 'translateY(100%)';
-            EXcountview.style.visibility = 'hidden';
-            EXcountview.style.opacity = '0';
-            EXcountview.style.transform = 'translateY(100%)';
+            // EXcountview.style.visibility = 'hidden';
+            // EXcountview.style.opacity = '0';
+            // EXcountview.style.transform = 'translateY(100%)';
         } else if (inp.foot == 0) {
             EXfoot.style.visibility = '';
             EXfoot.style.opacity = '';
             EXfoot.style.transform = '';
-            EXcountview.style.visibility = '';
-            EXcountview.style.opacity = '';
-            EXcountview.style.transform = '';
+            // EXcountview.style.visibility = '';
+            // EXcountview.style.opacity = '';
+            // EXcountview.style.transform = '';
         }
     }
     if (inp.side == 1) {
@@ -2800,26 +2844,41 @@ function setEXs() {
         setOptionElement(); //各オプションを要素に直接適用
         setOptionEvent(); //各オプションによるイベントを作成
         // videoareaのリサイズ検知
-        resizeObserver.observe(EXvideoarea,{attributes: true, attributeFilter: ['style']});
-
+        resizeObserver.observe(EXvideoarea, {
+            attributes: true,
+            attributeFilter: ['style']
+        });
     } else {
-        console.log(
+        const cstr =
             'setEXs retry ' +
-                (EXhead ? '.' : 'H') +
-                (EXmenu ? '.' : 'M') +
-                (EXfoot ? '.' : 'F') +
-                (EXfootcome ? '..' : 'Fc') +
-                (EXcountview ? '.' : 'V') +
-                (EXfootcountcome ? '..' : 'Fb') +
-                (EXside ? '.' : 'S') +
-                (EXcomesendinp ? '..' : 'Ct') +
-                (EXcomesend ? '..' : 'Cf') +
-                (EXcome ? '.' : 'C') +
-                (EXvolume ? '..' : 'Vo') +
-                (EXfullscr ? '..' : 'Fs') +
-                (EXvideoarea ? '..' : 'Va') +
-                (EXcomelist ? '..' : 'Cl')
-        );
+            (EXhead ? '.' : 'H') +
+            (EXmenu ? '.' : 'M') +
+            (EXfoot ? '.' : 'F') +
+            (EXfootcome ? '..' : 'Fc') +
+            (EXcountview ? '.' : 'V') +
+            (EXfootcountcome ? '..' : 'Fb') +
+            (EXside ? '.' : 'S') +
+            (EXcomesendinp ? '..' : 'Ct') +
+            (EXcomesend ? '..' : 'Cf') +
+            (EXcome ? '.' : 'C') +
+            (EXvolume ? '..' : 'Vo') +
+            (EXfullscr ? '..' : 'Fs') +
+            (EXvideoarea ? '..' : 'Va') +
+            (EXcomelist ? '..' : 'Cl');
+        if (setEXsConsoleStr !== cstr) {
+            console.log(cstr);
+            setEXsConsoleStr = cstr;
+            setEXsConsoleRepeated = false;
+        } else {
+            if (!setEXsConsoleRepeated) {
+                console.log(
+                    '%crepeating:%c ' + cstr,
+                    'background-color: orange;',
+                    ''
+                );
+                setEXsConsoleRepeated = true;
+            }
+        }
         setTimeout(setEXs, 1000);
     }
 }
@@ -2832,11 +2891,11 @@ function getFootcomeElement(returnSingleSelector) {
         console.log('?footcome(!cn)');
         return null;
     }
-    var reb = $(EXfoot)
+    var chlogo = $(EXfoot)
         .find('img[src*="/channels/logo/' + cn + '"]')
         .get(0);
-    if (!reb) {
-        console.log('?footcome(!reb)');
+    if (!chlogo) {
+        console.log('?footcome(!chlogo)');
         return null;
     }
     var ret = $(EXfoot)
@@ -2847,10 +2906,11 @@ function getFootcomeElement(returnSingleSelector) {
         return null;
     }
     var rep = ret.parentElement;
-    while (!$(ret).is(EXfoot) && $(rep).find(reb).length == 0) {
-        ret = rep;
-        rep = ret.parentElement;
-    }
+    // while (!$(ret).is(EXfoot) && $(rep).find(chlogo).length == 0) {
+    //     ret = rep;
+    //     rep = ret.parentElement;
+    // }
+    ret = dl.parentsFilterLast(ret,{notElement: EXfoot, notContainElements: [chlogo, EXcountview], filter: e=>!e.querySelector('[*|href*="/view.svg"][*|href$="#svg-body"]:not([href])')});
     if ($(ret).is(EXfoot)) {
         console.log('?footcome(ret=EXfoot)');
         return null;
@@ -2913,24 +2973,26 @@ function getInfoElement(returnSingleSelector) {
             ret = EXchli.nextElementSibling;
             console.log('?info -> EXchli next');
         } else if (EXside) {
-            try{
-                ret = EXside
-                .nextElementSibling
-                .nextElementSibling
-                .nextElementSibling;
+            try {
+                ret =
+                    EXside.nextElementSibling.nextElementSibling
+                        .nextElementSibling;
                 console.log('?info -> EXside next next next');
-            }catch(e){
+            } catch (e) {
                 console.warn('?info -> EXside next next next failed');
             }
         }
         if (!ret) {
             console.log('?info');
             return null;
-        }else{
+        } else {
             return ret;
         }
     }
-    ret = dl.parentsFilterLast(h3||ret, {left12r: true, notBodyParent: true});
+    ret = dl.parentsFilterLast(h3 || ret, {
+        left12r: true,
+        notBodyParent: true
+    });
     return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
 }
 
@@ -3229,7 +3291,10 @@ function getComeModuleElements(returnSingleSelector) {
 function getVideoRouteClasses() {
     //EXobli>各chコンテナ>背景画像,videoの親..からvideoの親のclassを選ぶ
     const videoElem = getElm.getVideo();
-    if(!videoElem){console.log('?getVideoRouteClasses no video'); return ['',''];}
+    if (!videoElem) {
+        console.log('?getVideoRouteClasses no video');
+        return ['', ''];
+    }
     let videoContainer = dl.parentsFilterLast(videoElem, {
         filters: [e => e.parentElement === EXvideoarea]
     });
@@ -3801,8 +3866,8 @@ function proPositionAllReset(bigtext) {
         .css('margin-bottom', '')
         .next()
         .css('margin-bottom', '');
-    if(EXvolume) EXvolume.style.marginBottom = '';
-    if(EXfullscr) EXfullscr.style.marginBottom = '';
+    if (EXvolume) EXvolume.style.marginBottom = '';
+    if (EXfullscr) EXfullscr.style.marginBottom = '';
 }
 function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
     //console.log("proSameFix time="+inptime+", title="+inptitle+", same="+inpsame);
@@ -4263,7 +4328,11 @@ function createTime(sw, bt) {
                 });
         }
         if ($('#proTimeEpNum').length == 0) {
-            const proTimeColorNum = (settings.timePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
+            const proTimeColorNum =
+                settings.timePosition.includes('commentinput') &&
+                settings.commentBackColor > 127
+                    ? 0
+                    : 255;
             const proTimeBkColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.2)`;
             var eproTimeEpNum =
                 '<div id="proTimeEpNum" class="usermade forpros" style="';
@@ -4274,9 +4343,11 @@ function createTime(sw, bt) {
                 fsize +
                 ';position:absolute;top:0px;right:0;width:310px;';
             eproTimeEpNum += '">';
-            eproTimeEpNum += ('<div style="border-left:1px solid '+proTimeBkColor+';flex:1 0 1px;">&nbsp;</div>').repeat(
-                2
-            );
+            eproTimeEpNum += (
+                '<div style="border-left:1px solid ' +
+                proTimeBkColor +
+                ';flex:1 0 1px;">&nbsp;</div>'
+            ).repeat(2);
             //            EXcome.insertBefore(eproTimeEpNum,EXcome.firstChild);
             $(eproTimeEpNum).prependTo(EXcome);
             $('#proTimeEpNum')
@@ -4360,8 +4431,8 @@ function setTimePosition(timepar, titlepar, samepar, bigpar) {
                 .css('border-left', '1px solid #444')
                 .prev()
                 .css('border-right', 'none');
-            if(EXvolume) EXvolume.style.marginBottom = fmb+'px';
-            if(EXfullscr) EXfullscr.style.marginBottom = fmb+'px';
+            if (EXvolume) EXvolume.style.marginBottom = fmb + 'px';
+            if (EXfullscr) EXfullscr.style.marginBottom = fmb + 'px';
             break;
         default:
     }
@@ -4592,9 +4663,9 @@ function setOptionHead() {
     }
 
     selComesendinpp =
-        (EXcomesendinp &&
-            (dl.getElementSingleSelector(EXcomesendinp.parentElement) ||
-        '.' + EXcomesendinp.parentElement.classList[0]));
+        EXcomesendinp &&
+        (dl.getElementSingleSelector(EXcomesendinp.parentElement) ||
+            '.' + EXcomesendinp.parentElement.classList[0]);
     if ($(selComesendinpp).not('#copyotw').length != 1) {
         console.log('?EXcomesendinp.parentElement ' + selComesendinpp);
         selComesendinpp = alt ? '.HH_HL' : '';
@@ -4621,7 +4692,7 @@ function setOptionHead() {
             selComesendinp +
             ',.com-o-CommentForm__can-post .com-o-CommentForm__opened-textarea{background-color: transparent;color:' +
             tc +
-            ' !important;}';//公式標準の文字色(黒)を打ち消すため!important
+            ' !important;}'; //公式標準の文字色(黒)を打ち消すため!important
         t +=
             selComesendinp +
             '+*{background-color: transparent;color:' +
@@ -4884,7 +4955,7 @@ function setOptionHead() {
             t += selVideoarea + '>img:not(' + to[1] + '){display:none;}';
         }
     }
-    if (selVideoarea) t += selVideoarea + '{transition-delay:0.5s;}'; // onresizeで設定していたtransitionをheadに付けてみる fastrefreshでガクっとなるのを防ぐ
+    if (selVideoarea) t += selVideoarea + '{transition-delay:0.5s; background-color: black;}'; // onresizeで設定していたtransitionをheadに付けてみる fastrefreshでガクっとなるのを防ぐ 映像の背景を純粋な黒にする
     //アベマショッピング等で情報表示時の下のバー
     if (selVideoarea) {
         t += selVideoarea + '~div[style^="width:"]{z-index:8;}';
@@ -4956,23 +5027,41 @@ function setOptionHead() {
         }
     }
     //残り時間用
-    const proTitleColorNum = (settings.protitlePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
+    const proTitleColorNum =
+        settings.protitlePosition.includes('commentinput') &&
+        settings.commentBackColor > 127
+            ? 0
+            : 255;
     const proTitleColor = `rgba(${proTitleColorNum},${proTitleColorNum},${proTitleColorNum},0.8)`;
-    const proTimeColorNum = (settings.timePosition.includes('commentinput')&&settings.commentBackColor>127)?0:255;
+    const proTimeColorNum =
+        settings.timePosition.includes('commentinput') &&
+        settings.commentBackColor > 127
+            ? 0
+            : 255;
     const proTimeColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.8)`;
     const proTimeBkColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.2)`;
     const proTimeEpColor = `rgba(${proTimeColorNum},${proTimeColorNum},${proTimeColorNum},0.3)`;
 
     t +=
-        '#forProEndBk{padding:0px 0px;margin:4px 0px;background-color:'+proTimeBkColor+';z-index:12!important;}';
+        '#forProEndBk{padding:0px 0px;margin:4px 0px;background-color:' +
+        proTimeBkColor +
+        ';z-index:12!important;}';
     t +=
-        '#forProEndTxt{padding:4px 5px 4px 11px;color:'+proTimeColor+';text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
+        '#forProEndTxt{padding:4px 5px 4px 11px;color:' +
+        proTimeColor +
+        ';text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
     t +=
-        '#proTimeEpNum{padding:4px 0px;background-color:transparent;z-index:13!important;text-align:center;color:'+proTimeEpColor+';display:flex;flex-direction:row;align-items:center;}';
+        '#proTimeEpNum{padding:4px 0px;background-color:transparent;z-index:13!important;text-align:center;color:' +
+        proTimeEpColor +
+        ';display:flex;flex-direction:row;align-items:center;}';
     t +=
-        '#tProtitle{padding:4px 8px;color:'+proTitleColor+';text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
+        '#tProtitle{padding:4px 8px;color:' +
+        proTitleColor +
+        ';text-align:right;letter-spacing:1px;z-index:14!important;background-color:transparent;}';
     t +=
-        '#proTimeEpNum>div{border-left:1px solid '+proTimeBkColor+';flex:1 0 1px;}';
+        '#proTimeEpNum>div{border-left:1px solid ' +
+        proTimeBkColor +
+        ';flex:1 0 1px;}';
 
     selFootcome = dl.getElementSingleSelector(EXfootcome);
     if ($(selFootcome).length != 1) {
@@ -5005,30 +5094,30 @@ function setOptionHead() {
     selCountview = dl.getElementSingleSelector(EXcountview);
     if ($(selCountview).length != 1) {
         console.log('?EXcountview ' + selCountview);
-        selCountview = alt ? '.v3_wX' : '';
+        selCountview = alt ? '.com-tv-TVFooter__view-counter' : '';
     }
     if (selCountview) {
-        t +=
-            selCountview +
-            ',.ext_abm-countview{position:fixed;z-index:11;bottom:0px;';
-        t += 'background:rgba(0,0,0,' + settings.panelOpacity / 255 + ');';
-        //下から出てくるアニメーション
-        t +=
-            'transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);';
-        //パディング
-        t += 'padding:4px 0px;'; //4=(footerHeight-EXcountview.getBoundingClientRect().height)/2)
-        t += '}';
-        t +=
-            selCountview +
-            '>div,.ext_abm-countview>div{background:transparent;}';
+        // t +=
+        //     selCountview +
+        //     ',.ext_abm-countview{position:fixed;z-index:11;bottom:0px;';
+        // t += 'background:rgba(0,0,0,' + settings.panelOpacity / 255 + ');';
+        // //下から出てくるアニメーション
+        // t +=
+        //     'transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);';
+        // //パディング
+        // t += 'padding:4px 0px;'; //4=(footerHeight-EXcountview.getBoundingClientRect().height)/2)
+        // t += '}';
+        // t +=
+        //     selCountview +
+        //     '>div,.ext_abm-countview>div{background:transparent;}';
 
-        t +=
-            selCountview +
-            '>div>*,.ext_abm-countview>div>*{opacity:' +
-            (settings.panelOpacity / 255 < 0.7
-                ? 0.7
-                : settings.panelOpacity / 255) +
-            ';}';
+        // t +=
+        //     selCountview +
+        //     '>div>*,.ext_abm-countview>div>*{opacity:' +
+        //     (settings.panelOpacity / 255 < 0.7
+        //         ? 0.7
+        //         : settings.panelOpacity / 255) +
+        //     ';}';
     }
     //視聴数格納
     if (settings.isStoreViewCounter && selFoot) {
@@ -5062,7 +5151,7 @@ function setOptionHead() {
     if (selHead && selFoot) {
         t +=
             selFoot +
-            '>div>div:nth-child(3),' +
+            '>div>div:nth-child(2),' +
             selHead +
             '{background:rgba(0,0,0,' +
             settings.panelOpacity / 255 +
@@ -5070,7 +5159,7 @@ function setOptionHead() {
 
         t +=
             selFoot +
-            '>div>div:nth-child(3)>*,' +
+            '>div>div:nth-child(2)>*,' +
             selHead +
             '>*{opacity:' +
             (settings.panelOpacity / 255 < 0.7
@@ -5079,7 +5168,7 @@ function setOptionHead() {
             '}';
         t +=
             selFoot +
-            '>div>div:nth-child(3)>div:nth-child(1):hover{background:rgba(32,32,32,' +
+            '>div>div:nth-child(2)>div:nth-child(1):hover{background:rgba(32,32,32,' +
             settings.panelOpacity / 255 +
             ')}';
         //フッターチャンネルアイコンの背景を透過
@@ -5109,36 +5198,36 @@ function setOptionHead() {
     } else {
         styleLink.attr('href', dataUri);
     }
-    setFooterBGStyle();
+    // setFooterBGStyle();
     console.log('setOptionHead ok');
 }
-function setFooterBGStyle() {
-    let t = '';
-    let selFoot = dl.getElementSingleSelector(EXfoot);
-    if ($(selFoot).length === 0) return;
-    //フッターの視聴数にかぶる部分を透明にした背景
-    let barcolor = `rgba(0,0,0,${settings.panelOpacity / 255})`;
-    let cvb = EXcountview.getBoundingClientRect();
-    let fbb = EXfootcome.parentElement.getBoundingClientRect();
-    let cvLeft = Math.round(cvb.left);
-    let cvWidth = Math.round(cvb.width);
-    let fbWidth = Math.round(fbb.width);
-    let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvLeft}px, transparent ${cvLeft}px, transparent ${cvLeft +
-        cvWidth}px, ${barcolor} ${cvLeft +
-        cvWidth}px, ${barcolor} ${fbWidth}px);`;
-    t += selFoot + '>div>div.countviewtrans{background:' + fbbackImage + '}';
-    let dataUri = 'data:text/css,' + encodeURIComponent(t);
-    let footerBGstyle = $('#footerBGstyle');
-    if (footerBGstyle.length === 0) {
-        footerBGstyle = $(
-            "<link title='usermade' id='footerBGstyle' rel='stylesheet' href='" +
-                dataUri +
-                "'>"
-        ).appendTo('head');
-    } else {
-        footerBGstyle.attr('href', dataUri);
-    }
-}
+// function setFooterBGStyle() {
+//     let t = '';
+//     let selFoot = dl.getElementSingleSelector(EXfoot);
+//     if ($(selFoot).length === 0) return;
+//     //フッターの視聴数にかぶる部分を透明にした背景
+//     let barcolor = `rgba(0,0,0,${settings.panelOpacity / 255})`;
+//     let cvb = EXcountview.getBoundingClientRect();
+//     let fbb = EXfootcome.parentElement.getBoundingClientRect();
+//     let cvLeft = Math.round(cvb.left);
+//     let cvWidth = Math.round(cvb.width);
+//     let fbWidth = Math.round(fbb.width);
+//     let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvLeft}px, transparent ${cvLeft}px, transparent ${cvLeft +
+//         cvWidth}px, ${barcolor} ${cvLeft +
+//         cvWidth}px, ${barcolor} ${fbWidth}px);`;
+//     t += selFoot + '>div>div.countviewtrans{background:' + fbbackImage + '}';
+//     let dataUri = 'data:text/css,' + encodeURIComponent(t);
+//     let footerBGstyle = $('#footerBGstyle');
+//     if (footerBGstyle.length === 0) {
+//         footerBGstyle = $(
+//             "<link title='usermade' id='footerBGstyle' rel='stylesheet' href='" +
+//                 dataUri +
+//                 "'>"
+//         ).appendTo('head');
+//     } else {
+//         footerBGstyle.attr('href', dataUri);
+//     }
+// }
 function setOptionElement() {
     if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
 
@@ -5490,7 +5579,7 @@ function usereventFootInfoButClick() {
         pophideElement(phi);
     }
     var jo = $(getElm.getVideo());
-    if (jo.length !==0 && !waitingforResize) {
+    if (jo.length !== 0 && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width())); //, parseInt(jo[0].style.height));
     }
@@ -5564,7 +5653,7 @@ function usereventFCclick() {
         }
     }
     var jo = $(getElm.getVideo());
-    if (jo.length !==0 && !waitingforResize) {
+    if (jo.length !== 0 && !waitingforResize) {
         waitingforResize = true;
         waitforResize(5, jo.first(), parseInt(jo.first().width())); //, parseInt(jo[0].style.height));
     }
@@ -5731,8 +5820,11 @@ function setOptionEvent() {
     $(EXcomesend).on('click', function(e) {
         // console.log('excomesend clicked',e.target);
         // コメ欄を常に表示時のみ
-        if (e.target.tagName.toLowerCase() == 'form' && settings.isSureReadComment) {
-            console.log('toggleCommentList EXcomesendclick',e.target);
+        if (
+            e.target.tagName.toLowerCase() == 'form' &&
+            settings.isSureReadComment
+        ) {
+            console.log('toggleCommentList EXcomesendclick', e.target);
             toggleCommentList();
         }
     });
@@ -5953,9 +6045,7 @@ function comehl(jo, hlsw) {
         hlbc = parseInt($('#commentBackColor').val());
         hlbt = parseInt($('#commentBackTrans').val());
         hlc = parseInt(
-            $(
-                'input[type="radio"][name="highlightComeColor"]:checked'
-            ).val()
+            $('input[type="radio"][name="highlightComeColor"]:checked').val()
         );
         hlp = parseInt($('#highlightComePower').val());
     }
@@ -6027,7 +6117,12 @@ function comehl(jo, hlsw) {
             jo.css(
                 'background-color',
                 'rgba(' + r + ',' + g + ',' + b + ',' + a / 255 + ')'
-            ).css('transition', '').attr('data-test-hl', 'rgba(' + r + ',' + g + ',' + b + ',' + a / 255 + ')');
+            )
+                .css('transition', '')
+                .attr(
+                    'data-test-hl',
+                    'rgba(' + r + ',' + g + ',' + b + ',' + a / 255 + ')'
+                );
             break;
         default:
     }
@@ -6560,11 +6655,11 @@ function appendUserNG(ev, inpstr) {
         setTimeout(copyotuncolor, 800, 1);
     }
 }
-function sharedNGappender(word, userid){
-    if(settings.isShareNGword){
+function sharedNGappender(word, userid) {
+    if (settings.isShareNGword) {
         appendTextNG(null, word);
     }
-    if(settings.isShareNGuser){
+    if (settings.isShareNGuser) {
         appendUserNG(null, userid);
     }
 }
@@ -6719,20 +6814,32 @@ function onairBasefunc() {
         }
 
         // 1秒ごとに実行
-        if (EXcome && document.getElementsByClassName('ext_abm-come').length == 0) {
+        if (
+            EXcome &&
+            document.getElementsByClassName('ext_abm-come').length == 0
+        ) {
             dl.addExtClass(EXcome, 'come');
         }
-        if (EXcomelist && document.getElementsByClassName('ext_abm-comelist').length == 0) {
+        if (
+            EXcomelist &&
+            document.getElementsByClassName('ext_abm-comelist').length == 0
+        ) {
             dl.addExtClass(EXcomelist, 'comelist');
         }
-        if (!EXvideoarea || document.getElementsByClassName('ext_abm-videoarea').length === 0) {
+        if (
+            !EXvideoarea ||
+            document.getElementsByClassName('ext_abm-videoarea').length === 0
+        ) {
             if (!EXvideoarea || !document.body.contains(EXvideoarea)) {
                 EXvideoarea = getElm.getVideoAreaElement();
             }
             if (EXvideoarea) {
                 dl.addExtClass(EXvideoarea, 'videoarea');
                 resizeObserver.disconnect();
-                resizeObserver.observe(EXvideoarea,{attributes: true, attributeFilter: ['style']});
+                resizeObserver.observe(EXvideoarea, {
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
                 setTimeout(onresize, 1000);
             }
         }
@@ -6749,7 +6856,7 @@ function onairBasefunc() {
         }
         if (!EXinfo || !document.body.contains(EXinfo)) {
             EXinfo = getInfoElement();
-            if(EXinfo){
+            if (EXinfo) {
                 dl.addExtClass(EXinfo, 'info');
                 setOptionHead();
             }
@@ -6760,7 +6867,11 @@ function onairBasefunc() {
         //        if($("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
         var jo = $(getElm.getVideo());
         //.resize-screenに設定されるwidth,heightをトリガーにする
-        if (jo.length !==0 && movieWidth != parseInt(jo.first().width()) && !isNowResizing) {
+        if (
+            jo.length !== 0 &&
+            movieWidth != parseInt(jo.first().width()) &&
+            !isNowResizing
+        ) {
             // || movieHeight != parseInt(jo[0].style.height))) {
             // onresize();
         }
@@ -6798,7 +6909,6 @@ function onairBasefunc() {
         // コメント取得関係はonCommentChange()へ移動
 
         //console.timeEnd('obf_come');
-
 
         mc.intervalFunction();
         //console.time('obf_2');
@@ -7032,8 +7142,6 @@ function onairBasefunc() {
             }
         }
 
-
-
         //番組タイトルの更新
         if (EXinfo) {
             let jo = $(EXinfo)
@@ -7084,7 +7192,7 @@ function onairBasefunc() {
             //            var jo = $("object,video").parent();
             let jo = $(getElm.getVideo());
             //            if (jo.length > 0) {
-            if (jo.length !==0) {
+            if (jo.length !== 0) {
                 var er = jo[0].getBoundingClientRect();
                 var movieRightEdge;
                 //                if(isMovieMaximize){
@@ -7576,10 +7684,8 @@ $(window).on('resize', function() {
     }, 200);
 });
 
-
-
-export function onChangeURL(isBeforeNotOnair){
-    if(currentLocation != window.location.href){
+export function onChangeURL(isBeforeNotOnair) {
+    if (currentLocation != window.location.href) {
         previousLocation = currentLocation;
         currentLocation = window.location.href;
     }
@@ -7604,11 +7710,9 @@ export function onChangeURL(isBeforeNotOnair){
         EXvolume.style.right = '';
     }
     replayComment.leavePage();
-
-
 }
 
-export function bgUpdate(type,value){
+export function bgUpdate(type, value) {
     if (type == 0) {
         // 通常のhlsかdashセグメント
         bginfo[0] = value; // 解像度
@@ -7658,5 +7762,4 @@ export function bgUpdate(type,value){
         // ADセグメント
         if (bginfo[2] < 1) bginfo[2] = 1;
     }
-
 }
