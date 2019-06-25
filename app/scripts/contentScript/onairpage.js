@@ -5134,7 +5134,7 @@ function setOptionHead() {
             to = alt ? selFoot + ' .mb_mo' : '';
         }
         if (to) {
-            t += to + ' button{line-height:1;}';
+            t += to + ' button{line-height:1;height:50px;padding:0px 12px;display:initial;}';
             t +=
                 to +
                 ' button>span:not(#viewcountcont):not(#comecountcont){display:none;}';
@@ -5314,7 +5314,7 @@ function pophideSelector(sv, sw) {
 }
 function isFootcomeClickable() {
     //コメント数ボタンがクリックできるかどうか
-    return $(EXfootcountcome).css('pointer-events') != 'none';
+    return !EXfootcountcome.disabled;
 }
 function usereventMouseover() {
     if (forElementClose < 4) {
@@ -5819,13 +5819,25 @@ function setOptionEvent() {
     //コメ入力欄クリックでコメント一覧の表示切替
     $(EXcomesend).on('click', function(e) {
         // console.log('excomesend clicked',e.target);
-        // コメ欄を常に表示時のみ
         if (
-            e.target.tagName.toLowerCase() == 'form' &&
-            settings.isSureReadComment
+            e.target.tagName.toLowerCase() === 'form' &&
+            EXcomesendinp
         ) {
-            console.log('toggleCommentList EXcomesendclick', e.target);
-            toggleCommentList();
+            // コメント常時表示オフ時にコメント入力欄のクリックが誤爆することがあるのでフォームの周囲であるか座標判定する
+            const pageX = e.originalEvent.pageX;
+            const pageY = e.originalEvent.pageY;
+            const formRect = EXcomesend.getBoundingClientRect();
+            const formPad = 12;
+            const formInnerLeft = formRect.left+formPad;
+            const formInnerLeft2 = formRect.left+formRect.width-formPad;
+            const formInnerTop = formRect.top+formPad;
+            const formInnerTop2 = formRect.top+formRect.height-formPad;
+            // console.log({pageX,pageY,formInnerLeft,formInnerLeft2,formInnerTop,formInnerTop2});
+            if((pageX < formInnerLeft || pageX > formInnerLeft2) || (pageY < formInnerTop || pageY > formInnerTop2)){
+                console.log('toggleCommentList EXcomesendclick'/*, e.originalEvent*/);
+                toggleCommentList();
+            }
+            
         }
     });
     //入力欄のすぐ周りのクリックは何もしない
@@ -7269,6 +7281,10 @@ function onairBasefunc() {
                     }
                 }
             }
+            // CSS設定(setOptionHeadでも設定しているが公式に上書きされるのでここでも設定)
+            EXfootcountcome.style.height = '50px';
+            EXfootcountcome.style.padding = '0px 12px';
+            EXfootcountcome.style.display = 'initial';
         }
 
         //タブの音声再生状態を取得して停止してたらリロードまでカウントダウン

@@ -15,14 +15,15 @@ var notifyContent = [
     '_bem_tv ext (AbemaTV非公式拡張機能) 最近追加された機能:', //表示させたいときはcurrentUpdateNotifyVersionの更新を忘れずに
     // 'Abemaプレミアムの見逃しコメント表示時にコメントを流す(放送画面でのコメント流しの設定に準ずる)',
     'ピクチャーインピクチャーモードへの切り替え(Chrome 70以降、仕様によりCM等で再生停止するためその都度手動で再度切り替えが必要です。)',
-    '解像度変更(実験的、有効にすると不具合が発生する可能性あり)',
+    // '解像度変更(実験的、有効にすると不具合が発生する可能性あり)',
     'などの機能が追加されています。',
     //    "<b>※設定変更により機能が有効</b>になるので必要に応じて有効にしてください。→<a href='"+optionUrl+"' target='_blank'>オプション設定画面</a>",
     "<span style='font-size:small'>コメント欄がちらつく場合はコメント欄関連設定の「読込済コメント数がxを超えた時にコメ欄を閉じる」を500以上にしてください。",
     "</span><span style='font-size:x-small;'>不具合等あれば設定画面の不具合報告フォームから詳細を報告お願いします。</span>",
     "<a href='" +
         optionUrl +
-        "' target='_blank'>オプション設定画面</a> 一部の設定項目に説明画像を追加しました。"
+        "' target='_blank'>オプション設定画面</a> 一部の設定項目に説明画像を追加しました。",
+    "映像上コメント流しもできるAndroid用の<a href='https://abema.nakayuki.net/android-comeviewer/' target='_blank'>AbemaTVコメントビューア</a>を公開しています。"
     //"abematv拡張機能の実験的なfirefox版<a href='https://www.nakayuki.net/abema-ext/' target='_blank'>公開中</a>です。"
 ].join('<br>');
 
