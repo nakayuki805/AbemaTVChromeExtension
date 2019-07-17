@@ -113,12 +113,22 @@ function inj_delaysetComment() {
 }
 function inj_onCommentChange(mutations: MutationRecord[]) {
     // 新着animationは廃止されたようなので無いものとしてコメントアウトされている(今後復活したときのために残しておく)
-    const comelistInstance = inj_findReact(inj_EXcome);
+    const instanceElement = inj_EXcomelist.parentElement;
+    if (!instanceElement || !instanceElement.parentElement) {
+        console.warn('inj_occ !instanceElement');
+        return;
+    }
+    const comelistInstance = inj_findReact(instanceElement);
     // console.log('inj_occ comelistInstance:', comelistInstance);
     const newCommentCount = 0; // comelistInstance.props.newCommentCount; // animationのコメ数
     let hasCommentAnimation = false; // comelistInstance.props.hasCommentAnimation;
     const comments = comelistInstance.props.comments;
-    // console.log('inj_occ newComeC,hasComeAni,comeli[0]', newCommentCount, hasCommentAnimation, inj_EXcomelist.firstChild);
+    // console.log(
+    //     'inj_occ newComeC,hasComeAni,comeli[0]',
+    //     newCommentCount,
+    //     hasCommentAnimation,
+    //     inj_EXcomelist.firstChild
+    // );
     inj_EXcomelist.setAttribute(
         'data-ext-hasCommentAnimation',
         hasCommentAnimation.toString()
@@ -217,5 +227,8 @@ if (process.env.NODE_ENV === 'development') {
             name: 'contentScriptEval',
             evalString: evalString
         });
+    };
+    (<AnyPropertyWindow>window).logInjEval = function(evalString: string) {
+        console.log(eval(evalString));
     };
 }
