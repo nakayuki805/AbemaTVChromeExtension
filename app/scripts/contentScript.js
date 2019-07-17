@@ -99,8 +99,9 @@ var currentVersion = manifest.version;
 var urlChangeEvent = new Event('urlChange');
 
 function delaysetNotOA() {
-    var hoverContents = getMenuObject();
-    if (hoverContents == null) hoverContents = $('.zC_zJ'); //todo
+    const menuElement = getMenuObject();
+    var hoverContents = $(menuElement);
+    if (menuElement === null) hoverContents = $('.zC_zJ'); //todo
     if (hoverContents.children().length == 0) {
         console.log('delaysetNotOA retry');
         setTimeout(delaysetNotOA, 1000);
@@ -145,45 +146,30 @@ function delaysetNotOA() {
 }
 
 function getMenuObject() {
-    console.log('?menu');
-    //2番目に多くリンクを子にもつ親をMenuとする(1番目は放送中一覧)
-    var ret = null;
-    var links = document.links;
-    var alinks = [];
-    for (
-        var i = links.length - 1, ilink, ilinkp, tlinkp = null, tlinkc = 0;
-        i >= 0;
-        i--
-    ) {
-        ilink = links[i];
-        ilinkp = ilink.parentElement;
-        if (ilinkp == tlinkp) {
-            tlinkc++;
+    //1番目に多くリンクを子にもつ親をMenuとする(最低6以上)
+    const minLinkParentChildren = 6;
+    const linkParentMap = new Map();
+    const links = document.links;
+    Array.from(links).forEach(l => {
+        if (!linkParentMap.has(l.parentElement)) {
+            linkParentMap.set(l.parentElement, [l]);
         } else {
-            if (tlinkc > 5) {
-                //6以上のリンクを持つものに限る
-                alinks[alinks.length] = [tlinkp, tlinkc];
-            }
-            tlinkp = ilinkp;
-            tlinkc = 0;
+            linkParentMap.get(l.parentElement).push(l);
         }
+    });
+    const linkParentRanking = Array.from(linkParentMap.entries()).sort(
+        (a, b) => b[1].length - a[1].length
+    );
+    const linkParentRankingTop = linkParentRanking[0];
+    if (
+        !linkParentRankingTop ||
+        linkParentRankingTop[1].length < minLinkParentChildren
+    ) {
+        console.log('?menu', linkParentRankingTop);
+        return null;
+    } else {
+        return linkParentRankingTop[0];
     }
-    if (alinks.length == 1) {
-        ret = $(alinks[0][0]);
-    } else if (alinks.length > 1) {
-        var si = -1;
-        for (let i = alinks.length - 1, m = 0, mi = -1; i >= 0; i--) {
-            if (m < alinks[i][1]) {
-                si = mi;
-                m = alinks[i][1];
-                mi = i;
-            }
-        }
-        if (si >= 0) {
-            ret = $(alinks[si][0]);
-        }
-    }
-    return ret;
 }
 
 gl.getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(

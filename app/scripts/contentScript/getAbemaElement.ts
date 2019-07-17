@@ -61,12 +61,13 @@ export function getVideoAreaElement() {
     });
 }
 export function getHeaderElement() {
-    return dl.parentsFilterLastByArray(
-        document.querySelectorAll(
-            '[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])'
-        ),
-        { bottom14u: true, notBodyParent: true }
-    );
+    return document.getElementsByTagName('header')[0];
+    // return dl.parentsFilterLastByArray(
+    //     document.querySelectorAll(
+    //         '[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])'
+    //     ),
+    //     { bottom14u: true, notBodyParent: true }
+    // );
 }
 export function getViewCounterElement() {
     const svg = document.querySelectorAll(

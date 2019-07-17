@@ -633,7 +633,10 @@ function delayset(
     isTwT,
     isVideo,
     isChli,
-    isComeli
+    isComeli,
+    isCome,
+    isComesend,
+    isComesendinp
 ) {
     if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
     if (!isOLS) {
@@ -735,6 +738,14 @@ function delayset(
 
     var resetOptionHead = false;
     if (!isInfo && (EXinfo = getInfoElement())) {
+        EXcome = null;
+        EXcomesend = null;
+        EXcomesendinp = null;
+        EXchli = null;
+        isCome = false;
+        isComesend = false;
+        isComesendinp = false;
+        isChli = false;
         dl.addExtClass(EXinfo, 'info');
         console.log('setOptionHead delayset(EXinfo)');
         resetOptionHead = true;
@@ -759,6 +770,17 @@ function delayset(
         console.log('setOptionHead delayset(EXchli)');
         resetOptionHead = true;
         isChli = true;
+
+        EXcome = null;
+        EXcomesend = null;
+        EXcomesendinp = null;
+        EXinfo = null;
+        const ci = document.getElementById('copyinfo');
+        if(ci)ci.remove();
+        isCome = false;
+        isComesend = false;
+        isComesendinp = false;
+        isInfo = false;
         //放送中一覧のスクロール
         //↑のinfoと同じもの
         let cn = getInfo.getChannelByURL();
@@ -802,6 +824,33 @@ function delayset(
         resetOptionHead = true;
         isVideo = true;
     }
+    // 19/7/17仕様変更でコメントcome,comesend,comesendinpをdelaysetに退避
+    if(!isCome && (EXcome = getComeFormElement(2))){
+        console.log('setOptionHead delayset(come)');
+        dl.addExtClass(EXcome, 'come');
+        resetOptionHead = true;
+        isCome = true;
+
+        EXinfo = null;
+        const ci = document.getElementById('copyinfo');
+        if(ci)ci.remove();
+        EXchli = null;
+        isInfo = false;
+        isChli = false;
+    }
+    if(!isComesend && (EXcomesend = getComeFormElement(1))){
+        console.log('setOptionHead delayset(comesend)');
+        dl.addExtClass(EXcomesend, 'comesend');
+        resetOptionHead = true;
+        isComesend = true;
+    }
+    if(!isComesendinp && (EXcomesendinp = getComeFormElement(0))){
+        console.log('setOptionHead delayset(comesendinp)');
+        dl.addExtClass(EXcomesendinp, 'comesendinp');
+        resetOptionHead = true;
+        isComesendinp = true;
+    }
+
     try {
         //タイミングによってはsetEXsが完了する前にここでsetOptionHead()が実行されエラーになってdelaysetが完遂されないのでとりあえずtryで囲む
         if (resetOptionHead) setOptionHead();
@@ -817,7 +866,10 @@ function delayset(
         isTwT &&
         isVideo &&
         isChli &&
-        isComeli
+        isComeli &&
+        isCome &&
+        isComesend &&
+        isComesendinp
     )
         console.log('%cdelayset ok', 'color:green;');
     else {
@@ -830,7 +882,10 @@ function delayset(
             (isTwT ? '.' : 'T') +
             (isVideo ? '.' : 'V') +
             (isChli ? '.' : 'L') +
-            (isComeli ? '.' : 'Cl');
+            (isComeli ? '.' : 'Cl') +
+            (EXcomesendinp ? '..' : 'Ct') +
+            (EXcomesend ? '..' : 'Cf') +
+            (EXcome ? '..' : 'Cm');
         if (delaysetConsoleStr !== cstr) {
             console.log(cstr);
             delaysetConsoleStr = cstr;
@@ -855,7 +910,10 @@ function delayset(
             isTwT,
             isVideo,
             isChli,
-            isComeli
+            isComeli,
+            isCome,
+            isComesend,
+            isComesendinp
         );
         return;
     }
@@ -2783,27 +2841,27 @@ function setEXs() {
         !(EXside = getSideElement()) /*&& ($('.v3_v5').length == 0 || !( EXside          = $('.v3_v5')[0] ))*/
     )
         b = false; // console.log("side"); }//TVContainer__side___
-    if (
-        !EXcomesendinp &&
-        !(EXcomesendinp = getComeFormElement(
-            0
-        )) /*&& ($('.HH_HN').length == 0 || !( EXcomesendinp   = $('.HH_HN')[0] ))*/
-    )
-        b = false; // console.log("comesendinp"); }
-    if (
-        !EXcomesend &&
-        !(EXcomesend = getComeFormElement(
-            1
-        )) /*&& ($('.HH_e' ).length == 0 || !( EXcomesend      = $('.HH_e' )[0] ))*/
-    )
-        b = false; // console.log("comesend"); }
-    if (
-        !EXcome &&
-        !(EXcome = getComeFormElement(
-            2
-        )) /*&& ($('.v3_wi').length == 0 || !( EXcome          = $('.v3_wi')[0] ))*/
-    )
-        b = false; // console.log("come"); }//TVContainer__right-comment-area___
+    // if (
+    //     !EXcomesendinp &&
+    //     !(EXcomesendinp = getComeFormElement(
+    //         0
+    //     )) /*&& ($('.HH_HN').length == 0 || !( EXcomesendinp   = $('.HH_HN')[0] ))*/
+    // )
+    //     b = false; // console.log("comesendinp"); }
+    // if (
+    //     !EXcomesend &&
+    //     !(EXcomesend = getComeFormElement(
+    //         1
+    //     )) /*&& ($('.HH_e' ).length == 0 || !( EXcomesend      = $('.HH_e' )[0] ))*/
+    // )
+    //     b = false; // console.log("comesend"); }
+    // if (
+    //     !EXcome &&
+    //     !(EXcome = getComeFormElement(
+    //         2
+    //     )) /*&& ($('.v3_wi').length == 0 || !( EXcome          = $('.v3_wi')[0] ))*/
+    // )
+    //     b = false; // console.log("come"); }//TVContainer__right-comment-area___
     if (
         !EXvolume &&
         !(EXvolume = getElm.getVolElement()) /*&& ($('.mb_mk').length == 0 || !( EXvolume        = $('.mb_mk')[0] ))*/
@@ -2830,9 +2888,9 @@ function setEXs() {
         dl.addExtClass(EXside, 'sideButton');
         //dl.addExtClass(EXchli, "channelList");
         //dl.addExtClass(EXinfo, 'info');
-        dl.addExtClass(EXcome, 'come');
-        dl.addExtClass(EXcomesend, 'comesend');
-        dl.addExtClass(EXcomesendinp, 'comesendinput');
+        // dl.addExtClass(EXcome, 'come');
+        // dl.addExtClass(EXcomesend, 'comesend');
+        // dl.addExtClass(EXcomesendinp, 'comesendinput');
         dl.addExtClass(EXvolume, 'volume');
         dl.addExtClass(EXfullscr, 'fullscr');
         //dl.addExtClass(EXobli, 'objectlist');
@@ -2858,9 +2916,9 @@ function setEXs() {
             (EXcountview ? '.' : 'V') +
             (EXfootcountcome ? '..' : 'Fb') +
             (EXside ? '.' : 'S') +
-            (EXcomesendinp ? '..' : 'Ct') +
-            (EXcomesend ? '..' : 'Cf') +
-            (EXcome ? '.' : 'C') +
+            // (EXcomesendinp ? '..' : 'Ct') +
+            // (EXcomesend ? '..' : 'Cf') +
+            // (EXcome ? '.' : 'C') +
             (EXvolume ? '..' : 'Vo') +
             (EXfullscr ? '..' : 'Fs') +
             (EXvideoarea ? '..' : 'Va') +
@@ -2964,12 +3022,14 @@ function getInfoElement(returnSingleSelector) {
     //copyinfo後だとinfoのdisplay:noneでclientrectが取れない
     let ret = null;
     let h3a = document.getElementsByTagName('h3');
+    let copyinfo = document.getElementById('copyinfo');
     const h3 = Array.from(h3a).filter(e => {
-        return e.textContent.indexOf('詳細情報') >= 0;
+        return e.textContent.indexOf('詳細情報') >= 0 && (!copyinfo||!copyinfo.contains(e));
     })[0];
     if (!h3) {
         //CM中など↑で取得できないことがあるのでEXchliの次もしくはsideButtonの次の次の次を使う
-        if (EXchli) {
+        // 19/7/17仕様変更でinfo専用の要素がなくなったのでコメントアウト
+        /*if (EXchli) {
             ret = EXchli.nextElementSibling;
             console.log('?info -> EXchli next');
         } else if (EXside) {
@@ -2981,9 +3041,9 @@ function getInfoElement(returnSingleSelector) {
             } catch (e) {
                 console.warn('?info -> EXside next next next failed');
             }
-        }
+        }*/
         if (!ret) {
-            console.log('?info');
+            // console.log('?info');
             return null;
         } else {
             return ret;
@@ -2997,13 +3057,13 @@ function getInfoElement(returnSingleSelector) {
 }
 
 function getComeFormElement(sw, returnSingleSelector) {
-    //sw 0:come 1:form 2:textarea
+    //sw 0:textarea 1:form 2:come
     //0 placeholderにコメントを含むtextarea
     //1 〃を含むform
     //2 〃を含んで右にあるやつ
     var e;
     if (sw != 0 && !(e = EXcomesendinp)) {
-        console.log('?comeform' + sw + '(EX=null)');
+        // console.log('?comeform' + sw + '(EX=null)');
         return null;
     }
     //console.log("?comesend");
@@ -3041,10 +3101,14 @@ function getComeFormElement(sw, returnSingleSelector) {
             console.log('?comeform' + sw + '(p=BODY)');
             return null;
         }
+        if(e == EXcomesendinp){
+            console.log('?comeform' + sw + '(come=comesendinp)');
+            return null;
+        }
         ret = e;
     }
     if (!ret) {
-        console.log('?comeform' + sw + '(ret=null)');
+        if(EXcome)console.log('?comeform' + sw + '(ret=null)');
         return null;
     }
     return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
@@ -3086,7 +3150,7 @@ function getComeListElement(returnSingleSelector) {
             }
         }
         if (!ret) {
-            console.log('?comelist(emptylist or progress notfound)');
+            if(EXcome)console.log('?comelist(emptylist or progress notfound)');
             return null;
         }
         return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
@@ -3114,7 +3178,7 @@ function getComeListElement(returnSingleSelector) {
     for (let i = jo.length - 1, j; i >= 0; i--) {
         j = jo.eq(i);
         if (j.find(EXcomesend).length > 0) continue;
-        //console.log(j,j.children(),j.css('height'),j.css('transition'))
+        // console.log(j[0],j.children());
         if (j.children().length < 5) continue;
         //if(j.parent())
         ret = jo[i];
@@ -3307,9 +3371,30 @@ function getVideoRouteClasses() {
             .getAttribute('class')
     ];
 }
-function getMenuElement(returnSingleSelector) {
-    //head内にあること前提でリンクが多いのを選ぶ
-    var ret = null;
+function getMenuElement() {
+    //header内にあること前提でリンクを多く子に持つ親を選ぶ
+    const linkParentMap = new Map();
+    const links = document.querySelectorAll('header a');
+    Array.from(links).forEach(l => {
+        if (!linkParentMap.has(l.parentElement)) {
+            linkParentMap.set(l.parentElement, [l]);
+        } else {
+            linkParentMap.get(l.parentElement).push(l);
+        }
+    });
+    const linkParentRanking = Array.from(linkParentMap.entries()).sort(
+        (a, b) => b[1].length - a[1].length
+    );
+    const linkParentRankingTop = linkParentRanking[0];
+    if (
+        !linkParentRankingTop
+    ) {
+        console.log('?menu', linkParentRankingTop);
+        return null;
+    } else {
+        return linkParentRankingTop[0];
+    }
+    /*var ret = null;
     var jo = $(EXhead).find('a');
     var la = [];
     var ac = 0;
@@ -3334,7 +3419,7 @@ function getMenuElement(returnSingleSelector) {
         console.log('?menu');
         return null;
     }
-    return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
+    return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;*/
 }
 
 function hasNotTransformed(jo) {
@@ -5153,7 +5238,7 @@ function setOptionHead() {
             selFoot +
             '>div>div:nth-child(2),' +
             selHead +
-            '{background:rgba(0,0,0,' +
+            '>nav{background:rgba(0,0,0,' +
             settings.panelOpacity / 255 +
             ')}';
 
@@ -5183,7 +5268,7 @@ function setOptionHead() {
 
     //番組情報のコピー置換
     if (selInfo) {
-        t += selInfo + '>*:not(#copyinfo){display:none;}';
+        t += selInfo + '>.originalinfo{display:none;}';
         t += selInfo + '>#copyinfo{width:100%;padding:15px;}';
     }
 
@@ -6826,6 +6911,20 @@ function onairBasefunc() {
         }
 
         // 1秒ごとに実行
+        if(!EXfoot || !document.body.contains(EXfoot)){
+            EXfoot = getElm.getFooterElement();
+            if (EXfoot) {
+                dl.addExtClass(EXfoot, 'foot');
+                setOptionHead();
+            }
+        }
+        if(!EXcome || !document.body.contains(EXcome)){
+            EXcome = getComeFormElement(2);
+            if (EXcome) {
+                dl.addExtClass(EXcome, 'come');
+                setOptionHead();
+            }
+        }
         if (
             EXcome &&
             document.getElementsByClassName('ext_abm-come').length == 0
@@ -6837,6 +6936,20 @@ function onairBasefunc() {
             document.getElementsByClassName('ext_abm-comelist').length == 0
         ) {
             dl.addExtClass(EXcomelist, 'comelist');
+        }
+        if(!EXfootcome || !document.body.contains(EXfootcome)){
+            EXfootcome = getFootcomeElement();
+            if (EXfootcome) {
+                dl.addExtClass(EXfootcome, 'footcome');
+                setOptionHead();
+            }
+        }
+        if(!EXfootcountcome || !document.body.contains(EXfootcountcome)){
+            EXfootcountcome = getFootcomeBtnElement();
+            if (EXfootcountcome) {
+                dl.addExtClass(EXfootcountcome, 'footcountcome');
+                setOptionHead();
+            }
         }
         if (
             !EXvideoarea ||
@@ -6858,7 +6971,7 @@ function onairBasefunc() {
         if (!EXcomelist || !document.body.contains(EXcomelist)) {
             EXcomelist = getComeListElement();
             if (EXcomelist) {
-                //console.log('ecl', EXcomelist, $('body').has(EXcomelist).length==0)
+                // console.log('ecl', EXcomelist, $('body').has(EXcomelist).length==0)
                 dl.addExtClass(EXcomelist, 'comelist');
                 setOptionHead();
                 window.dispatchEvent(comelistReadyEvent);
@@ -6870,6 +6983,10 @@ function onairBasefunc() {
             EXinfo = getInfoElement();
             if (EXinfo) {
                 dl.addExtClass(EXinfo, 'info');
+                EXcome = null;
+                EXcomesend = null;
+                EXcomesendinp = null;
+                EXchli = null;
                 setOptionHead();
             }
         }
@@ -7162,7 +7279,7 @@ function onairBasefunc() {
                 .find('h2');
             if (jo.length > 0) {
                 var tp = jo.first().text();
-                if (tp && proTitle != tp) {
+                if (tp && proTitle != tp || !document.getElementById('copyinfo')) {
                     //if (proTitle != jo.first().text()) {//if ($('#tProtitle').text() != jo.first().text()) {
                     proTitle = tp;
                     if (settings.isProtitleVisible) {
@@ -7177,6 +7294,7 @@ function onairBasefunc() {
                         .children()
                         .not('#copyinfo')
                         .first()
+                        .addClass('originalinfo')
                         .clone()
                         .removeClass()
                         .addClass('usermade')
