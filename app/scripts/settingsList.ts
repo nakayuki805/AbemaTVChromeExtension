@@ -435,18 +435,6 @@ export const settings: SettingList[] = [
                 hasDescImage: true
             },
             {
-                name: 'sureReadRefreshx',
-                //        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
-                //        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
-                description:
-                    '読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、古いコメントが破棄されることで動作が軽くなります。重いときは少なくすると軽くなります。コメント欄の開き直しによるカクつき・ちらつきが気になる場合は多くしてください。)',
-                type: 'number',
-                isInstantChangable: true,
-                default: 500,
-                range: [101],
-                hasDescImage: true
-            },
-            {
                 name: 'isCommentPadZero',
                 description: 'コメントの縦の隙間を詰める',
                 instantDescription: 'コメントの縦の隙間を詰める',
@@ -961,6 +949,18 @@ export const settings: SettingList[] = [
                 type: 'boolean',
                 isInstantChangable: true,
                 default: false
+            },
+            {
+                name: 'sureReadRefreshx',
+                //        "description": "読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+                //        "description": "常にコメント欄を表示する場合で、読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(再度開く時に100以降の古いコメントが破棄される)",
+                description:
+                    '公式で表示コメント数に上限ができたので現在無効<s>読込済コメント数がx(101以上)を超えた時にコメ欄を閉じる(直ちに開き直され、古いコメントが破棄されることで動作が軽くなります。重いときは少なくすると軽くなります。コメント欄の開き直しによるカクつき・ちらつきが気になる場合は多くしてください。)</s>',
+                type: 'number',
+                isInstantChangable: true,
+                default: 500,
+                range: [101],
+                hasDescImage: true
             }
         ]
     }
@@ -971,7 +971,7 @@ export const comeColorSettings: Setting[] = [
         description: 'コメント一覧の背景色(黒0～灰～255白)',
         type: 'range',
         isInstantChangable: true,
-        default: 255,
+        default: 20,
         range: [0, 255]
     },
     {
@@ -987,7 +987,7 @@ export const comeColorSettings: Setting[] = [
         description: 'コメントの文字色(黒0～灰～255白)',
         type: 'range',
         isInstantChangable: true,
-        default: 0,
+        default: 255,
         range: [0, 255]
     },
     {
@@ -1072,7 +1072,12 @@ export const radioSettings: RadioBlockSetting[] = [
         name: 'panelopenset',
         type: 'panelopenset',
         list: [
-            [[255879, 'デフォルト'], [255892, '拡張機能おすすめ'], [531440, '常に表示'], [531441, 'カスタム']]
+            [
+                [255879, 'デフォルト'],
+                [255892, '拡張機能おすすめ'],
+                [531440, '常に表示'],
+                [531441, 'カスタム']
+            ]
         ],
         default: 255892,
         isInstantChangable: true

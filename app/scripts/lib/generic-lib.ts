@@ -53,18 +53,19 @@ export function postJson(
     callback: any,
     errorCallback: any
 ) {
-    if (isFirefox) {
-        chrome.runtime.sendMessage(
-            { type: 'postJson', url: url, data: data, headers: headers },
-            function(response) {
-                if (response.status === 'success') {
-                    callback(response.result);
-                } else {
-                    errorCallback();
-                }
+    // Chromeの仕様変更でcontent scriptからの通信がCORBブロックされるのでfirefox以外でもevent page経由で通信
+    // if (isFirefox) {
+    chrome.runtime.sendMessage(
+        { type: 'postJson', url: url, data: data, headers: headers },
+        function(response) {
+            if (response.status === 'success') {
+                callback(response.result);
+            } else {
+                errorCallback();
             }
-        );
-    } else {
+        }
+    );
+    /*} else {
         fetch(url, {
             method: 'POST',
             mode: 'cors',
@@ -85,7 +86,7 @@ export function postJson(
                 console.warn(e);
                 errorCallback({ status: 'error' });
             });
-    }
+    }*/
 }
 export function getJson(url: string, data: any, callback: any) {
     let paramStr = '';
@@ -97,19 +98,19 @@ export function getJson(url: string, data: any, callback: any) {
         paramStr += params.join('&');
     }
     url += paramStr;
-    if (isFirefox) {
-        chrome.runtime.sendMessage({ type: 'getJson', url: url }, function(
-            response
-        ) {
-            if (response.status === 'success') {
-                callback(response.result);
-            }
-        });
-    } else {
+    // if (isFirefox) {
+    chrome.runtime.sendMessage({ type: 'getJson', url: url }, function(
+        response
+    ) {
+        if (response.status === 'success') {
+            callback(response.result);
+        }
+    });
+    /*} else {
         fetch(url, { mode: 'cors' })
             .then(response => response.json())
             .then(json => {
                 callback(json);
             });
-    }
+    }*/
 }

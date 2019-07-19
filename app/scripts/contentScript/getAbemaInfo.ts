@@ -7,6 +7,7 @@ export const URL_CHANNELTABLE = 2; // チャンネル別番組表
 export const URL_ONAIR = 3; // 放送ページ
 export const URL_SEARCH = 4; // 番組検索結果(未来)
 export const URL_RESERVATION = 5; // 公式の視聴予約一覧
+export const URL_TOPPAGE = 6; // 公式の視聴予約一覧
 export const URL_OTHER = -1; // その他
 
 export function determineUrl(url?: string) {
@@ -23,6 +24,7 @@ export function determineUrl(url?: string) {
     else if (/^https:\/\/abema.tv\/search\?q=.+/.test(url)) return URL_SEARCH;
     else if (/^https:\/\/abema.tv\/my\/lists\/reservation/.test(url))
         return URL_RESERVATION;
+    else if (url === 'https://abema.tv/') return URL_TOPPAGE;
     else return URL_OTHER;
 }
 

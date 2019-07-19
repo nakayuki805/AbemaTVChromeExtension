@@ -63,6 +63,7 @@ var EXfootcount;
 var EXcountview;
 var EXfootcountcome;
 var EXside;
+var EXsidepanel;
 var EXchli;
 var EXinfo;
 var EXcome;
@@ -181,6 +182,7 @@ export function afterLoadSetting(value) {
     }
     //無視する設定
     settings.isInpWinBottom = false;
+    settings.sureReadRefreshx = 1000;
 }
 export function onairCleaner() {
     console.log('onairCleaner');
@@ -200,6 +202,7 @@ export function onairCleaner() {
     EXcountview = null;
     EXfootcountcome = null;
     EXside = null;
+    EXsidepanel = null;
     EXchli = null;
     EXinfo = null;
     EXcomesendinp = null;
@@ -639,6 +642,9 @@ function delayset(
     isComesendinp
 ) {
     if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
+    let resetOptionHead = false;
+    let reSetOptionEvent = false;
+
     if (!isOLS) {
         if (!overlapSelector) {
             //ページ遷移の再delayset時に本来のoverlapが無くなって映像枠が引っかかるので再探査しない
@@ -736,7 +742,6 @@ function delayset(
         isInit = true;
     }
 
-    var resetOptionHead = false;
     if (!isInfo && (EXinfo = getInfoElement())) {
         EXcome = null;
         EXcomesend = null;
@@ -829,6 +834,7 @@ function delayset(
         console.log('setOptionHead delayset(come)');
         dl.addExtClass(EXcome, 'come');
         resetOptionHead = true;
+        reSetOptionEvent = true;
         isCome = true;
 
         EXinfo = null;
@@ -842,18 +848,21 @@ function delayset(
         console.log('setOptionHead delayset(comesend)');
         dl.addExtClass(EXcomesend, 'comesend');
         resetOptionHead = true;
+        reSetOptionEvent = true;
         isComesend = true;
     }
     if(!isComesendinp && (EXcomesendinp = getComeFormElement(0))){
         console.log('setOptionHead delayset(comesendinp)');
         dl.addExtClass(EXcomesendinp, 'comesendinp');
         resetOptionHead = true;
+        reSetOptionEvent = true;
         isComesendinp = true;
     }
 
     try {
         //タイミングによってはsetEXsが完了する前にここでsetOptionHead()が実行されエラーになってdelaysetが完遂されないのでとりあえずtryで囲む
         if (resetOptionHead) setOptionHead();
+        if (reSetOptionEvent) setOptionEvent();
     } catch (e) {
         console.warn(e);
     }
@@ -4973,7 +4982,7 @@ function setOptionHead() {
         selSide = alt ? '.v3_v5' : '';
     }
     if (selSide) {
-        t += selSide + '{transform:translateY(-50%);z-index:20;opacity:0.5}';
+        t += selSide + '{transform:translateY(-50%);opacity:0.5}';
     }
 
     selChli = dl.getElementSingleSelector(EXchli);
@@ -5227,8 +5236,9 @@ function setOptionHead() {
     }
     //コメ欄常時表示時に伸張する
     if (settings.isComeTriming && settings.isSureReadComment) {
-        if (selHead && selFoot)
-            t += selHead + ',' + selFoot + '{width:calc(100% - 310px);}';
+        // フッターは公式で縮むようなのでコメントアウト
+        if (selHead/* && selFoot*/)
+            t += selHead + /*',' + selFoot*/ + '{width:calc(100% - 310px);}';
         if (selHead) t += selHead + '>*{min-width:unset;}';
         //
     }
@@ -5715,7 +5725,7 @@ function usereventSendButClick() {
     }
 }
 function usereventFCclick() {
-    //console.log("usereventFCclick");
+    console.log("usereventFCclick");
     if (isComeOpen()) {
         //console.log("toggleCommentList EXfootcomeclick");
         toggleCommentList();
@@ -5833,13 +5843,13 @@ function setOptionEvent() {
     //放送画面用イベント設定
     if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
     //自作要素のイベントは自作部分で対応
-    //console.log("setOptionEvent() eventAdded:", eventAdded);
+    console.log("setOptionEvent() eventAdded:", eventAdded);
     var butfs;
     var pwaku;
     if (
         (butfs = EXfullscr) == null ||
-        (pwaku = $(overlapSelector)[0]) == null ||
-        !EXcome
+        (pwaku = $(overlapSelector)[0]) == null/* ||
+        !EXcome*/
     ) {
         console.log('setOptionEvent retry');
         setTimeout(setOptionEvent, 1000);
@@ -5851,7 +5861,103 @@ function setOptionEvent() {
         pwaku.addEventListener('dblclick', onScreenDblClick);
         pwaku.setAttribute('data-ext-event-added', 'true');
     }
+
+    //フルスクリーンボタンの割り当て変更
+    if(butfs.getAttribute('data-ext-event-added')!=='true'){
+        butfs.addEventListener('click', function(e) {
+            if (settings.isDblFullscreen) {
+                toggleFullscreen();
+                e.stopImmediatePropagation();
+            }
+        });
+        butfs.setAttribute('data-ext-event-added', 'true');
+    }
+    //右下のコメント数表示
+    if(EXfootcome&&EXfootcome.getAttribute('data-ext-event-added')!=='true'){
+        // 一覧表示切替を設置
+        $(EXfootcome).on('click', usereventFCclick);
+        // 
+        $(EXfootcome)
+        //
+        .on('mousemove', usereventFCMousemove)
+        .on('mouseleave', usereventFCMouseleave);
+        // 番組情報を開く
+        $(EXfootcome)
+            .parent()
+            .prev()
+            .on('click', usereventFootInfoButClick);
+        EXfootcome.setAttribute('data-ext-event-added', 'true');
+    }
+    //コメ入力欄クリックでコメント一覧の表示切替
+    if(EXcomesend&&EXcomesend.getAttribute('data-ext-event-added')!=='true'){
+        $(EXcomesend).on('click', function(e) {
+            // console.log('excomesend clicked',e.target);
+            if (
+                e.target.tagName.toLowerCase() === 'form' &&
+                EXcomesendinp
+            ) {
+                // コメント常時表示オフ時にコメント入力欄のクリックが誤爆することがあるのでフォームの周囲であるか座標判定する
+                const pageX = e.originalEvent.pageX;
+                const pageY = e.originalEvent.pageY;
+                const formRect = EXcomesend.getBoundingClientRect();
+                const formPad = 12;
+                const formInnerLeft = formRect.left+formPad;
+                const formInnerLeft2 = formRect.left+formRect.width-formPad;
+                const formInnerTop = formRect.top+formPad;
+                const formInnerTop2 = formRect.top+formRect.height-formPad;
+                // console.log({pageX,pageY,formInnerLeft,formInnerLeft2,formInnerTop,formInnerTop2});
+                if((pageX < formInnerLeft || pageX > formInnerLeft2) || (pageY < formInnerTop || pageY > formInnerTop2)){
+                    console.log('toggleCommentList EXcomesendclick'/*, e.originalEvent*/);
+                    toggleCommentList();
+                }
+                
+            }
+        });
+        EXcomesend.setAttribute('data-ext-event-added', 'true');
+    }
+    // コメ入力欄
+    if(EXcomesendinp&&EXcomesendinp.getAttribute('data-ext-event-added')!=='true'){
+        // 入力欄のすぐ周りのクリックは何もしない
+        $(EXcomesendinp)
+            .parent()
+            .on('click', function(e) {
+                if (e.target.tagName.toLowerCase() == 'div') {
+                    e.stopPropagation();
+                }
+            });
+        //投稿ボタンを押した時
+        $(EXcomesendinp).on('keydown keyup', usereventSendInpKeyinput);
+        //コメ入力欄がフォーカスされた時
+        $(EXcomesendinp).on('focus', comeModuleEditor);
+
+        EXcomesendinp.setAttribute('data-ext-event-added', 'true');
+    }
+    //放送中番組一覧を開く
+    if(EXside.getAttribute('data-ext-event-added')!=='true'){
+        $(EXside)
+            .contents()
+            .find('button')
+            .eq(1)
+            .on('click', usereventSideChliButClick);
+        EXside.setAttribute('data-ext-event-added', 'true');
+    }
+
+    //コメ一覧をクリック時
+    if(EXcome&&EXcome.getAttribute('data-ext-event-added')!=='true'){
+        $(EXcome).on('click', '.ext_abm-comelist', comecopy);
+        EXcome.setAttribute('data-ext-event-added', 'true');
+    }
+    if(EXvolume.getAttribute('data-ext-event-added')!=='true'){
+        $(EXvolume)
+        .on('mousemove', usereventVolMousemove)
+        .on('mouseout', usereventVolMouseout)
+        .on('click', usereventVolClick);
+        EXvolume.setAttribute('data-ext-event-added', 'true');
+    }
+
     if (eventAdded) return;
+    // 以下windowに対するイベント設定
+
     //    $(window).on("click",usereventWindowclick);
     //マウスホイール無効か音量操作
     window.addEventListener(
@@ -5892,54 +5998,8 @@ function setOptionEvent() {
         },
         true
     );
-    //フルスクリーンボタンの割り当て変更
-    butfs.addEventListener('click', function(e) {
-        if (settings.isDblFullscreen) {
-            toggleFullscreen();
-            e.stopImmediatePropagation();
-        }
-    });
-    //右下にコメント一覧表示切替を設置
-    $(EXfootcome).on('click', usereventFCclick);
-    //コメ入力欄クリックでコメント一覧の表示切替
-    $(EXcomesend).on('click', function(e) {
-        // console.log('excomesend clicked',e.target);
-        if (
-            e.target.tagName.toLowerCase() === 'form' &&
-            EXcomesendinp
-        ) {
-            // コメント常時表示オフ時にコメント入力欄のクリックが誤爆することがあるのでフォームの周囲であるか座標判定する
-            const pageX = e.originalEvent.pageX;
-            const pageY = e.originalEvent.pageY;
-            const formRect = EXcomesend.getBoundingClientRect();
-            const formPad = 12;
-            const formInnerLeft = formRect.left+formPad;
-            const formInnerLeft2 = formRect.left+formRect.width-formPad;
-            const formInnerTop = formRect.top+formPad;
-            const formInnerTop2 = formRect.top+formRect.height-formPad;
-            // console.log({pageX,pageY,formInnerLeft,formInnerLeft2,formInnerTop,formInnerTop2});
-            if((pageX < formInnerLeft || pageX > formInnerLeft2) || (pageY < formInnerTop || pageY > formInnerTop2)){
-                console.log('toggleCommentList EXcomesendclick'/*, e.originalEvent*/);
-                toggleCommentList();
-            }
-            
-        }
-    });
-    //入力欄のすぐ周りのクリックは何もしない
-    $(EXcomesendinp)
-        .parent()
-        .on('click', function(e) {
-            if (e.target.tagName.toLowerCase() == 'div') {
-                e.stopPropagation();
-            }
-        });
     window.addEventListener('mousemove', usereventMouseover, true);
     window.addEventListener('keydown', usereventMouseover, true); //コメント入力時などキー入力時もマウスが動いたのと同じ扱いにしてelementをhideするカウントダウンをさせない
-    //pwakuと同じイベントを#ComeMukouMaskにも設置
-    $(EXvolume)
-        .on('mousemove', usereventVolMousemove)
-        .on('mouseout', usereventVolMouseout)
-        .on('click', usereventVolClick);
     window.addEventListener(
         'keydown',
         function(e) {
@@ -6053,28 +6113,10 @@ function setOptionEvent() {
         },
         true
     );
-    $(EXfootcome)
-        .on('mousemove', usereventFCMousemove)
-        .on('mouseleave', usereventFCMouseleave);
-    //放送中番組一覧を開く
-    $(EXside)
-        .contents()
-        .find('button')
-        .eq(1)
-        .on('click', usereventSideChliButClick);
-    //番組情報を開く
-    $(EXfootcome)
-        .prev()
-        .on('click', usereventFootInfoButClick);
-    //投稿ボタンを押した時
-    $(EXcomesendinp).on('keydown keyup', usereventSendInpKeyinput);
-    //コメ一覧をクリック時
-    $(EXcome).on('click', '.ext_abm-comelist', comecopy);
-    //コメ入力欄がフォーカスされた時
-    $(EXcomesendinp).on('focus', comeModuleEditor);
+
 
     eventAdded = true;
-    console.log('setOptionEvent ok');
+    console.log('setOptionEvent()');
 }
 export function startCM() {
     console.log('startCM');
@@ -6916,6 +6958,7 @@ function onairBasefunc() {
             if (EXfoot) {
                 dl.addExtClass(EXfoot, 'foot');
                 setOptionHead();
+                setOptionEvent();
             }
         }
         if(!EXcome || !document.body.contains(EXcome)){
@@ -6923,6 +6966,7 @@ function onairBasefunc() {
             if (EXcome) {
                 dl.addExtClass(EXcome, 'come');
                 setOptionHead();
+                setOptionEvent();
             }
         }
         if (
@@ -7258,6 +7302,12 @@ function onairBasefunc() {
             !isComeOpen()
         ) {
             waitforCloseCome(0);
+        }
+        // コメント欄を常に表示時でコメ欄が開かれているときはコメ開閉ボタンのイベント無効化(拡張のtoggleCommentListに割り当てるため)
+        if(EXfootcountcome&&settings.isSureReadComment && isComeOpen()){
+            EXfootcountcome.style.pointerEvents = 'none';
+        }else{
+            EXfootcountcome.style.pointerEvents = 'auto';
         }
         //各要素を隠すまでのカウントダウン (マウスが動かずに時間経過)
         if (forElementClose > 0 && eventAdded) {

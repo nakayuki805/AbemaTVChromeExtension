@@ -146,8 +146,9 @@ function delaysetNotOA() {
 }
 
 function getMenuObject() {
-    //1番目に多くリンクを子にもつ親をMenuとする(最低6以上)
+    //1番目に多くリンクを子にもつ親をMenuとする(子の数は6以上15以下)
     const minLinkParentChildren = 6;
+    const maxLinkParentChildren = 10;
     const linkParentMap = new Map();
     const links = document.links;
     Array.from(links).forEach(l => {
@@ -160,15 +161,16 @@ function getMenuObject() {
     const linkParentRanking = Array.from(linkParentMap.entries()).sort(
         (a, b) => b[1].length - a[1].length
     );
-    const linkParentRankingTop = linkParentRanking[0];
-    if (
-        !linkParentRankingTop ||
-        linkParentRankingTop[1].length < minLinkParentChildren
-    ) {
-        console.log('?menu', linkParentRankingTop);
+    const filteredLinkParentRankingTop = linkParentRanking.filter(
+        lp =>
+            lp[1].length >= minLinkParentChildren &&
+            lp[1].length <= maxLinkParentChildren
+    )[0];
+    if (!filteredLinkParentRankingTop) {
+        console.log('?menu', filteredLinkParentRankingTop);
         return null;
     } else {
-        return linkParentRankingTop[0];
+        return filteredLinkParentRankingTop[0];
     }
 }
 
@@ -316,6 +318,11 @@ function URLPatternSwitch() {
                     itemCount = count;
                 }
             }, 500);
+            break;
+        case getInfo.URL_TOPPAGE:
+            onair.onairCleaner();
+            // トップページではhoverメニューの追加のため少し待ってからdelaysetNotOAする
+            setTimeout(delaysetNotOA, 1000);
             break;
         default:
             // それ以外のページ
