@@ -1,7 +1,7 @@
 {
     "name": "abematv-chrome-extension",
     "private": true,
-    "version": "0.16.11",
+    "version": "0.16.12",
     "description": "AbemaTVを快適にする非公式の拡張機能",
     "scripts": {
         "start": "npm run dev:chrome",
