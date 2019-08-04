@@ -62,7 +62,7 @@ var EXfootcome;
 var EXfootcount;
 var EXcountview;
 var EXfootcountcome;
-var EXside;
+var EXsidebtn;
 var EXsidepanel;
 var EXchli;
 var EXinfo;
@@ -189,8 +189,17 @@ export function onairCleaner() {
     //onairfunc以降に作成した要素を削除
     $('.usermade').remove();
     if (EXhead && EXfoot) {
-        pophideElement({ allreset: true });
-        pophideElement({ head: 1 }); //allresetしてもヘッダーが表示されないので
+        try{
+            // 放送画面から他の画面に推移した際、EXinfo等がnullでエラーになる
+            pophideElement({ allreset: true });
+        }catch(e){
+            console.warn(e);
+        }
+        try{
+            pophideElement({ head: 1 }); //allresetしてもヘッダーが表示されないので
+        }catch(e){
+            console.warn(e);
+        }
     }
     //変数クリア
     EXcomemodule = null;
@@ -201,7 +210,7 @@ export function onairCleaner() {
     EXfootcome = null;
     EXcountview = null;
     EXfootcountcome = null;
-    EXside = null;
+    EXsidebtn = null;
     EXsidepanel = null;
     EXchli = null;
     EXinfo = null;
@@ -737,7 +746,7 @@ function delayset(
         forElementClose = 1;
 
         // ピクチャーインピクチャーボタン設置
-        createPIPbutton(EXside);
+        createPIPbutton(EXsidebtn);
 
         isInit = true;
     }
@@ -1164,14 +1173,14 @@ function optionStatsUpdate(outflg) {
 }
 function createSettingWindow() {
     if (getInfo.determineUrl() != getInfo.URL_ONAIR) return;
-    if (!EXside) {
+    if (!EXsidebtn) {
         console.log('createSettingWindow retry');
         setTimeout(createSettingWindow, 1000);
         return;
     }
-    var slidecont = EXside;
+    var slidecont = EXsidebtn;
     //設定ウィンドウ・開くボタン設置
-    if ($(EXside).children('#optionbutton').length == 0) {
+    if ($(EXsidebtn).children('#optionbutton').length == 0) {
         var optionbutton = document.createElement('div');
         optionbutton.id = 'optionbutton';
         optionbutton.classList.add('ext-sideButton');
@@ -2418,7 +2427,8 @@ function pophideElement(inp) {
         }
     }
     if (inp.side == 1) {
-        EXside.style.transform = 'translateY(-50%)';
+        EXsidebtn.style.transform = 'translateY(-50%)';
+        EXsidebtn.style.visibility = 'visible';
         if (
             settings.isSureReadComment &&
             settings.isCommentFormWithSide &&
@@ -2428,14 +2438,16 @@ function pophideElement(inp) {
             if (isComeInpFocus) EXcomesendinp.focus();
         }
     } else if (inp.side == -1) {
-        EXside.style.transform = 'translate(100%, -50%)';
+        EXsidebtn.style.transform = 'translate(100%, -50%)';
+        EXsidebtn.style.visibility = 'hidden';
         if (settings.isSureReadComment && settings.isCommentFormWithSide) {
             $(EXcomesend).hide();
             isComeInpFocus =
                 EXcomesendinp == document.activeElement ? true : false;
         }
     } else if (inp.side == 0) {
-        EXside.style.transform = '';
+        EXsidebtn.style.transform = '';
+        EXsidebtn.style.visibility = '';
     }
     if (inp.programinfo == 1) {
         EXinfo.style.transform = 'translateX(0px)';
@@ -2640,7 +2652,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
             if (isComeOpen()) {
                 volshift = true;
             }
-            jfmbot = footerHeight; //old:61
+            jfmbot = 0; //old:footerHeight abema公式でフッター部がコメント欄部を開けるようになったので0に
             if (
                 ptime == 'commentinputbottom' &&
                 ptitle == 'commentinputbottomright' &&
@@ -2846,8 +2858,8 @@ function setEXs() {
     )
         b = false; // console.log("footcountcome"); }//コメント数
     if (
-        !EXside &&
-        !(EXside = getSideElement()) /*&& ($('.v3_v5').length == 0 || !( EXside          = $('.v3_v5')[0] ))*/
+        !EXsidebtn &&
+        !(EXsidebtn = getSideBtnElement()) /*&& ($('.v3_v5').length == 0 || !( EXsidebtn          = $('.v3_v5')[0] ))*/
     )
         b = false; // console.log("side"); }//TVContainer__side___
     // if (
@@ -2894,7 +2906,7 @@ function setEXs() {
         dl.addExtClass(EXfootcome, 'footcome');
         dl.addExtClass(EXcountview, 'countview');
         dl.addExtClass(EXfootcountcome, 'footcountcome');
-        dl.addExtClass(EXside, 'sideButton');
+        dl.addExtClass(EXsidebtn, 'sideButton');
         //dl.addExtClass(EXchli, "channelList");
         //dl.addExtClass(EXinfo, 'info');
         // dl.addExtClass(EXcome, 'come');
@@ -2924,7 +2936,7 @@ function setEXs() {
             (EXfootcome ? '..' : 'Fc') +
             (EXcountview ? '.' : 'V') +
             (EXfootcountcome ? '..' : 'Fb') +
-            (EXside ? '.' : 'S') +
+            (EXsidebtn ? '.' : 'S') +
             // (EXcomesendinp ? '..' : 'Ct') +
             // (EXcomesend ? '..' : 'Cf') +
             // (EXcome ? '.' : 'C') +
@@ -2991,9 +3003,9 @@ function getFootcomeBtnElement(returnSingleSelector) {
     if (!ret) return null;
     return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
 }
-function getSideElement(returnSingleSelector) {
-    //console.log("?side");
-    //リストアイコンを孫にもち右方にあるものをsideとする
+function getSideBtnElement(returnSingleSelector) {
+    //console.log("?sidebtn");
+    //リストアイコンを孫にもち右方にあるものをsidebtnとする
     var listIcon = $('[*|href*="/list.svg"][*|href$="#svg-body"]:not([href])');
     //フッターにあるものを除外
     if (!EXfoot) {
@@ -3006,7 +3018,7 @@ function getSideElement(returnSingleSelector) {
         }
     }
     if (!ret) {
-        console.log('?side');
+        console.log('?sidebtn');
         return null;
     }
     var rep = ret.parentElement;
@@ -3020,7 +3032,7 @@ function getSideElement(returnSingleSelector) {
         b = rep.getBoundingClientRect();
     }
     if (rep.tagName.toUpperCase() == 'BODY') {
-        console.log('?side');
+        console.log('?sidebtn');
         return null;
     }
     return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
@@ -3036,21 +3048,6 @@ function getInfoElement(returnSingleSelector) {
         return e.textContent.indexOf('詳細情報') >= 0 && (!copyinfo||!copyinfo.contains(e));
     })[0];
     if (!h3) {
-        //CM中など↑で取得できないことがあるのでEXchliの次もしくはsideButtonの次の次の次を使う
-        // 19/7/17仕様変更でinfo専用の要素がなくなったのでコメントアウト
-        /*if (EXchli) {
-            ret = EXchli.nextElementSibling;
-            console.log('?info -> EXchli next');
-        } else if (EXside) {
-            try {
-                ret =
-                    EXside.nextElementSibling.nextElementSibling
-                        .nextElementSibling;
-                console.log('?info -> EXside next next next');
-            } catch (e) {
-                console.warn('?info -> EXside next next next failed');
-            }
-        }*/
         if (!ret) {
             // console.log('?info');
             return null;
@@ -3069,7 +3066,7 @@ function getComeFormElement(sw, returnSingleSelector) {
     //sw 0:textarea 1:form 2:come
     //0 placeholderにコメントを含むtextarea
     //1 〃を含むform
-    //2 〃を含んで右にあるやつ
+    //2 〃を含んでwidthの2/3か右から(320+余裕10=330)pxの小さい方より右にあるやつ
     var e;
     if (sw != 0 && !(e = EXcomesendinp)) {
         // console.log('?comeform' + sw + '(EX=null)');
@@ -3100,7 +3097,7 @@ function getComeFormElement(sw, returnSingleSelector) {
         let b = p.getBoundingClientRect();
         while (
             p.tagName.toUpperCase() != 'BODY' &&
-            b.left > (window.innerWidth * 2) / 3
+            b.left >= Math.min((window.innerWidth * 2) / 3,window.innerWidth-(320+10))
         ) {
             e = p;
             p = e.parentElement;
@@ -3558,7 +3555,7 @@ function isChliOpen(sw) {
 }
 function isSideOpen(sw) {
     if (sw === undefined) sw = 0;
-    var eo = EXside;
+    var eo = EXsidebtn;
     var jo = $(eo);
     var bs = jo.attr('aria-hidden');
     var bb;
@@ -3864,20 +3861,25 @@ function waitforOpenCome(retrycount) {
         comeFastOpen = false;
     }
 }
+let lastFootcomeTriggeredTime = 0;
 function waitforOpenableCome(retrycount) {
-    //console.log("waitforOpenableCome#"+retrycount);
-    if (!isSlideOpen() && isFootcomeClickable()) {
+    // console.log("waitforOpenableCome#"+retrycount);
+    const nowTime = (new Date()).getTime();
+    // コメ欄自動開閉が暴走しないようトリガーは最低3秒は開ける
+    if (!isSlideOpen() && isFootcomeClickable() && (nowTime-lastFootcomeTriggeredTime)>=3000) {
         $(EXfootcome)
             .children('button')
             .trigger('click');
         //console.log("comeopen waitforopenable");
         waitforOpenCome(5);
+        lastFootcomeTriggeredTime = nowTime;
     } else if (retrycount > 0) {
         setTimeout(waitforOpenableCome, 10, retrycount - 1);
     } else {
         comeRefreshing = false;
         comeFastOpen = false;
     }
+    
 }
 function waitforCloseSlide(retrycount) {
     //console.log("waitforCloseSlide#"+retrycount);
@@ -4976,9 +4978,9 @@ function setOptionHead() {
         t += selFoot + '{visibility:visible;opacity:1;transform:translate(0);}';
     }
 
-    selSide = dl.getElementSingleSelector(EXside);
+    selSide = dl.getElementSingleSelector(EXsidebtn);
     if ($(selSide).length != 1) {
-        console.log('?EXside ' + selSide);
+        console.log('?EXsidebtn ' + selSide);
         selSide = alt ? '.v3_v5' : '';
     }
     if (selSide) {
@@ -5497,12 +5499,12 @@ function waitforResize(retrycount, jo, w) {
     }
 }
 function usereventVolMousemove() {
-    if (!EXside) return;
-    $(EXside).css('transform', 'translate(50%,-50%)');
+    if (!EXsidebtn) return;
+    $(EXsidebtn).css('transform', 'translate(50%,-50%)');
 }
 function usereventVolMouseout() {
-    if (!EXside) return;
-    $(EXside).css('transform', 'translate(0px,-50%)');
+    if (!EXsidebtn) return;
+    $(EXsidebtn).css('transform', 'translate(0px,-50%)');
 }
 function usereventVolClick() {
     setTimeout(function() {
@@ -5731,6 +5733,7 @@ function usereventFCclick() {
         toggleCommentList();
     } else if (isFootcomeClickable()) {
         //閉じている＝これから開く
+        console.log(5731+comeRefreshing)
         if (!comeRefreshing) {
             pophideSelector(3, 0);
         }
@@ -5891,7 +5894,7 @@ function setOptionEvent() {
     //コメ入力欄クリックでコメント一覧の表示切替
     if(EXcomesend&&EXcomesend.getAttribute('data-ext-event-added')!=='true'){
         $(EXcomesend).on('click', function(e) {
-            // console.log('excomesend clicked',e.target);
+            console.log('excomesend clicked',e.target);
             if (
                 e.target.tagName.toLowerCase() === 'form' &&
                 EXcomesendinp
@@ -5933,13 +5936,13 @@ function setOptionEvent() {
         EXcomesendinp.setAttribute('data-ext-event-added', 'true');
     }
     //放送中番組一覧を開く
-    if(EXside.getAttribute('data-ext-event-added')!=='true'){
-        $(EXside)
+    if(EXsidebtn.getAttribute('data-ext-event-added')!=='true'){
+        $(EXsidebtn)
             .contents()
             .find('button')
             .eq(1)
             .on('click', usereventSideChliButClick);
-        EXside.setAttribute('data-ext-event-added', 'true');
+        EXsidebtn.setAttribute('data-ext-event-added', 'true');
     }
 
     //コメ一覧をクリック時
@@ -6937,7 +6940,7 @@ export function onairfunc() {
     setTimeout(function() {
         if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
         if (previousLocation.indexOf('now-on-air') >= 0) return;
-        if (!EXfoot && !EXcome && !EXside) location.href = location.href;
+        if (!EXfoot && !EXcome && !EXsidebtn) location.href = location.href;
     }, 5000);
 }
 //    setInterval(function () {
@@ -7696,7 +7699,7 @@ function onCommentChange(mutations) {
                     /*settings.isSureReadComment && */ commentNum >
                         Math.max(comeHealth + 20, settings.sureReadRefreshx) &&
                     isFootcomeClickable() &&
-                    !hasNotTransformed($(EXside).add(EXchli))
+                    !hasNotTransformed($(EXsidebtn).add(EXchli))
                 ) {
                     // $(EXcome).siblings('.v3_wo').length == 0) {
                     ///*コメ常時表示 &*/ コメ数>設定値 & コメ開可 & 他枠(番組詳細と放送中一覧)非表示
