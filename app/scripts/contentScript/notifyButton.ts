@@ -223,7 +223,14 @@ export function putNotifyButton(notifySeconds: number, url: string) {
         detailContainer &&
         dl.parentsFilterLastByArray(
             detailContainer.getElementsByTagName('button'),
-            { height14s: true, filters: [e => e.childElementCount > 2] }
+            {
+                height14s: true,
+                filters: [
+                    e =>
+                        e.childElementCount >= 2 &&
+                        e.tagName.toUpperCase() !== 'ul'
+                ]
+            }
         );
     const header =
         detailContainer && detailContainer.getElementsByTagName('header');

@@ -49,6 +49,8 @@ function putComeArray(inp: typeof comeArray, isReplay: boolean) {
             moveContainer.style.width = videoRect.width + 'px';
             moveContainer.style.top = videoRect.top + 'px';
             moveContainer.style.left = videoRect.left + 'px';
+            moveContainer.style.zIndex = '15';
+            moveContainer.style.pointerEvents = 'none';
         }
     }
     let movingComments = moveContainer.getElementsByClassName('movingComment');
@@ -285,7 +287,17 @@ export function putReplayComment(
         console.warn('putReplayComment: video not found');
         return;
     }
+    const videoRatio = video.videoWidth / video.videoHeight;
     const videoRect = video.getBoundingClientRect();
+    const videoActualHeight = Math.min(
+        videoRect.width / videoRatio,
+        videoRect.height * videoRatio
+    );
+    const videoTopBlank = Math.max(
+        0,
+        (videoRect.height - videoActualHeight) / 2
+    );
+    // console.log({ videoRatio, videoRect, videoActualHeight, videoTopBlank });
 
     commentText = gcl.comefilter(
         commentText,
@@ -301,10 +313,12 @@ export function putReplayComment(
     let commentBottomMargin = 30;
 
     let commentTop =
+        videoTopBlank +
         Math.floor(
             Math.random() *
-                (videoRect.height - (commentTopMargin + commentBottomMargin))
-        ) + commentTopMargin;
+                (videoActualHeight - (commentTopMargin + commentBottomMargin))
+        ) +
+        commentTopMargin;
     if (commentText.length > 0) {
         let i = 0;
         let k = false;
@@ -320,11 +334,13 @@ export function putReplayComment(
             }
             if (k) {
                 commentTop =
+                    videoTopBlank +
                     Math.floor(
                         Math.random() *
-                            (videoRect.height -
+                            (videoActualHeight -
                                 (commentTopMargin + commentBottomMargin))
-                    ) + commentTopMargin;
+                    ) +
+                    commentTopMargin;
             } else {
                 break;
             }

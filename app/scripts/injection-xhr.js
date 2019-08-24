@@ -10,6 +10,9 @@ if (process.env.NODE_ENV === 'development') {
     };
 }
 xhook.enable();
+window.disableXhook = function() {
+    xhook.disable();
+};
 const extId = window.abema_ext_info.id;
 let inj_maxRes = window.localStorage.getItem('ext_maxResolution');
 let inj_minRes = window.localStorage.getItem('ext_minResolution');
@@ -45,8 +48,12 @@ window.addEventListener('resolutionSet', function() {
 });
 
 xhook.before(req => {
-    console.log(req)
     let url = req.url;
+    if (typeof url === 'object') {
+        url = url.url;
+    }
+    // console.log('before ' + url, req);
+
     if ((inj_maxRes != 2160 || inj_minRes != 0) && inj_maxRes >= inj_minRes) {
         //console.log('resch enabled');
         if (hlsPlaylistPattern.test(url)) {
@@ -163,6 +170,7 @@ xhook.before(req => {
     req.url = url;
 });
 xhook.after((req, res) => {
+    // console.log('after ' + req.url, req, res);
     if (dashMpdPattern.test(req.url)) {
         //console.log("XHR .mpd onload", this.responseURL);
         let dom = new DOMParser().parseFromString(res.text, 'text/xml');

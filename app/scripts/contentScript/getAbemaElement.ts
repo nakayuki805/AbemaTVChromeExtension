@@ -2,11 +2,11 @@
 import * as getInfo from './getAbemaInfo';
 import * as dl from '../lib/dom-lib';
 
-export function getReplayVideo(): HTMLElement | null {
+export function getReplayVideo(): HTMLVideoElement | null {
     return dl.filter(document.getElementsByTagName('video'), {
         displayNot: 'none',
         notBodyParent: true
-    })[0];
+    })[0] as HTMLVideoElement;
 }
 export function getVideo() {
     // console.trace('getVideo()')
@@ -71,7 +71,7 @@ export function getHeaderElement() {
 }
 export function getViewCounterElement() {
     const svg = document.querySelectorAll(
-        '[*|href*="/view.svg"][*|href$="#svg-body"]:not([href]),.com-tv-TVViewCounter__icon'
+        '[*|href*="/view.svg"][*|href$="#svg-body"]:not([href]),.com-tv-TVViewCounter__icon>use'
     ) as ArrayLike<HTMLElement>;
     if (svg.length === 0) {
         console.log('?viewCounter(!svg)');
@@ -82,9 +82,8 @@ export function getViewCounterElement() {
         height14s: true,
         notBodyParent: true,
         filters: [
-            function(e) {
-                return e.querySelectorAll(':scope>div').length < 2;
-            }
+            e => e.querySelectorAll(':scope>div').length < 2,
+            e => e.getElementsByTagName('button').length === 0
         ]
     });
 }

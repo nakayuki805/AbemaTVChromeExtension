@@ -47,6 +47,7 @@ const fullscrRight = 72;
 var commentNum = 0;
 var isComeLatestClickable = true; //右下コメント数をクリックできるか
 //var retrycount=0;
+const initDate = new Date();
 var proStart = new Date(); //番組開始時刻として現在時刻を仮設定
 var proEnd = new Date(); //番組終了時刻として現時刻を仮定(日付が変わる直前で未来を仮定すると1日ずれる)
 var forElementClose = 0; //コメント表示中でも各要素を表示させた時に自動で隠す場合のカウントダウン
@@ -714,33 +715,6 @@ function delayset(
         if ($('#moveContainer').length == 0) {
             $('<div id="moveContainer" class="usermade">').appendTo('body');
         }
-        //視聴数の位置調整
-        // var fixCountViewLeft = function() {
-        //     if (EXcountview) {
-        //         let oldLeft = EXcountview.getBoundingClientRect().left;
-        //         let footer = $(EXfootcome)
-        //             .parent()
-        //             .addClass('countviewtrans');
-        //         $(EXcountview)
-        //             .css({
-        //                 position: 'fixed',
-        //                 'margin-bottom': footer.css('margin-bottom'),
-        //                 height: footer.height() + 'px'
-        //             })
-        //             .offset({
-        //                 left:
-        //                     EXfootcome.getBoundingClientRect().left -
-        //                     EXcountview.getBoundingClientRect().width / 2 -
-        //                     50
-        //             });
-        //         if (oldLeft != EXcountview.getBoundingClientRect().left) {
-        //             setFooterBGStyle();
-        //         }
-        //     }
-        // };
-        // setTimeout(fixCountViewLeft, 3000); //コメント数が表示されるまで待つ
-        // setTimeout(fixCountViewLeft, 10000); //再度修正
-        // setInterval(fixCountViewLeft, 30000); //30秒ごとに再調整
 
         //初期読込時にマウス反応の要素が閉じないのを直したい
         forElementClose = 1;
@@ -755,10 +729,12 @@ function delayset(
         EXcome = null;
         EXcomesend = null;
         EXcomesendinp = null;
+        EXcomelist = null;
         EXchli = null;
         isCome = false;
         isComesend = false;
         isComesendinp = false;
+        isComeli = false;
         isChli = false;
         dl.addExtClass(EXinfo, 'info');
         console.log('setOptionHead delayset(EXinfo)');
@@ -788,12 +764,14 @@ function delayset(
         EXcome = null;
         EXcomesend = null;
         EXcomesendinp = null;
+        EXcomelist = null;
         EXinfo = null;
         const ci = document.getElementById('copyinfo');
         if(ci)ci.remove();
         isCome = false;
         isComesend = false;
         isComesendinp = false;
+        isComeli = false;
         isInfo = false;
         //放送中一覧のスクロール
         //↑のinfoと同じもの
@@ -2033,12 +2011,12 @@ function clearBtnColored(target) {
         .css('color', '');
 }
 // 現在無効
-// デバッグ目的で強制的にinjectXHRしたい場合は引数でtrueを渡す(映らなくなる)
+// デバッグ目的で強制的にinjectXHRしたい場合は引数でtrueを渡す
 export function injectXHR(isForce) {
     if (
         $('#ext-xhr-injection').length === 0 &&
         (settings.maxResolution != 2160 || settings.minResolution != 0) &&
-        isForce
+        (isForce)
     ) {
         var xhrinjectionpath = chrome.extension.getURL(
             '/scripts/injection-xhr.js'
@@ -2401,29 +2379,19 @@ function pophideElement(inp) {
         }
     }
     if (inp.foot !== undefined) {
-        //EXcountviewもfootに連動させる→公式で下帯に統合されたため不要
         comefix = true;
         if (inp.foot == 1) {
             EXfoot.style.visibility = 'visible';
             EXfoot.style.opacity = '1';
             EXfoot.style.transform = 'translate(0)';
-            // EXcountview.style.visibility = 'visible';
-            // EXcountview.style.opacity = '1';
-            // EXcountview.style.transform = 'translate(0)';
         } else if (inp.foot == -1) {
             EXfoot.style.visibility = 'hidden';
             EXfoot.style.opacity = '0';
             EXfoot.style.transform = 'translateY(100%)';
-            // EXcountview.style.visibility = 'hidden';
-            // EXcountview.style.opacity = '0';
-            // EXcountview.style.transform = 'translateY(100%)';
         } else if (inp.foot == 0) {
             EXfoot.style.visibility = '';
             EXfoot.style.opacity = '';
             EXfoot.style.transform = '';
-            // EXcountview.style.visibility = '';
-            // EXcountview.style.opacity = '';
-            // EXcountview.style.transform = '';
         }
     }
     if (inp.side == 1) {
@@ -2672,7 +2640,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
             jcchd += jfmbot;
         } else {
             // jftop,jcbot
-            jcmbot = footerHeight; //old:61
+            jcmbot = 0; //old:footerHeight abema公式でフッター部がコメント欄部を開けるようになったので0に
             jcchd += jcmbot;
         }
     } else {
@@ -3120,7 +3088,7 @@ function getComeFormElement(sw, returnSingleSelector) {
     return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
 }
 function getComeListElement(returnSingleSelector) {
-    //console.log("?comelist");
+    // console.log("?comelist");
     //EXcomeの中で秒前とかを探して5人以上の親をcomelistとする
     //下からだとanimatedが引っかかるので上から探す
     //無ければ <p>この番組には<br>まだ投稿がありません</p> の親divとしてみたけどやめて大丈夫そうならやめたいが、
@@ -3400,32 +3368,6 @@ function getMenuElement() {
     } else {
         return linkParentRankingTop[0];
     }
-    /*var ret = null;
-    var jo = $(EXhead).find('a');
-    var la = [];
-    var ac = 0;
-    for (var i = 0, ji, jp, et = null, lc = 0; i < jo.length; i++) {
-        ji = jo.eq(i);
-        jp = ji.parent();
-        if (et == jp[0]) lc++;
-        else {
-            if (lc > 0) la[ac++] = [et, lc];
-            et = jp[0];
-            lc = 0;
-        }
-    }
-    if (lc > 0) la[ac++] = [et, lc]; //上のループがet==jp[0]で終わった時用
-    for (let i = 0, m = 0; i < la.length; i++) {
-        if (m < la[i][1]) {
-            m = la[i][1];
-            ret = la[i][0];
-        }
-    }
-    if (!ret) {
-        console.log('?menu');
-        return null;
-    }
-    return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;*/
 }
 
 function hasNotTransformed(jo) {
@@ -3868,9 +3810,9 @@ function waitforOpenableCome(retrycount) {
     // コメ欄自動開閉が暴走しないようトリガーは最低3秒は開ける
     if (!isSlideOpen() && isFootcomeClickable() && (nowTime-lastFootcomeTriggeredTime)>=3000) {
         $(EXfootcome)
-            .children('button')
+            .find('button')
             .trigger('click');
-        //console.log("comeopen waitforopenable");
+        // console.log("comeopen waitforopenable");
         waitforOpenCome(5);
         lastFootcomeTriggeredTime = nowTime;
     } else if (retrycount > 0) {
@@ -4159,7 +4101,7 @@ function openInfo(sw) {
     }
 }
 function createProtitle(sw, bt) {
-    if (!EXcome) return;
+    // if (!EXcome) return;
     if (sw == 0) {
         if ($('#tProtitle').length == 0) {
             var eProtitle = '<span id="tProtitle" class="usermade" style="';
@@ -4168,9 +4110,9 @@ function createProtitle(sw, bt) {
                 'font-size:' +
                 (bt ? 'medium' : 'x-small') +
                 ';position:absolute;top:0px;right:0';
-            eProtitle += '">' + (proTitle ? proTitle : '未取得') + '</span>';
+            eProtitle += '">' + (proTitle ? proTitle : '未取得(番組詳細パネルを開いて取得)') + '</span>';
             //            EXcome.insertBefore(eProtitle,EXcome.firstChild);
-            $(eProtitle).prependTo(EXcome);
+            $(eProtitle).prependTo(document.body);
             //番組名クリックで番組情報タブ開閉
             $('#tProtitle').on('click', function() {
                 if (!EXinfo) return;
@@ -4386,7 +4328,7 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
 }
 function createTime(sw, bt) {
     //console.log("createTime:"+sw);
-    if (!EXcome) return;
+    // if (!EXcome) return;
     if (sw == 0) {
         var fsize = bt ? 'medium' : 'x-small';
         if ($('#forProEndBk').length == 0) {
@@ -4399,7 +4341,7 @@ function createTime(sw, bt) {
                 ';position:absolute;top:0px;right:0;width:310px;';
             eForProEndBk += '"></span>';
             //            EXcome.insertBefore(eForProEndBk,EXcome.firstChild);
-            $(eForProEndBk).prependTo(EXcome);
+            $(eForProEndBk).prependTo(document.body);
             $('#forProEndBk').html('&nbsp;');
         }
         if ($('#forProEndTxt').length == 0) {
@@ -4408,9 +4350,9 @@ function createTime(sw, bt) {
             //            eForProEndTxt+='position:absolute;right:0;font-size:'+fsize+';padding:4px 5px 4px 11px;color:rgba(255,255,255,0.8);text-align:right;letter-spacing:1px;z-index:14;background-color:transparent;top:0px;';
             eForProEndTxt +=
                 'font-size:' + fsize + ';position:absolute;top:0px;right:0;';
-            eForProEndTxt += '"></span>';
+            eForProEndTxt += '">未取得(番組詳細パネルを開いて取得)</span>';
             //            EXcome.insertBefore(eForProEndTxt,EXcome.firstChild);
-            $(eForProEndTxt).prependTo(EXcome);
+            $(eForProEndTxt).prependTo(document.body);
             $('#forProEndTxt').html('&nbsp;');
             //残り時間クリックで設定ウィンドウ開閉
             $('#forProEndTxt')
@@ -4445,7 +4387,7 @@ function createTime(sw, bt) {
                 ';flex:1 0 1px;">&nbsp;</div>'
             ).repeat(2);
             //            EXcome.insertBefore(eproTimeEpNum,EXcome.firstChild);
-            $(eproTimeEpNum).prependTo(EXcome);
+            $(eproTimeEpNum).prependTo(document.body);
             $('#proTimeEpNum')
                 .children()
                 .html('&nbsp;');
@@ -5193,27 +5135,7 @@ function setOptionHead() {
         selCountview = alt ? '.com-tv-TVFooter__view-counter' : '';
     }
     if (selCountview) {
-        // t +=
-        //     selCountview +
-        //     ',.ext_abm-countview{position:fixed;z-index:11;bottom:0px;';
-        // t += 'background:rgba(0,0,0,' + settings.panelOpacity / 255 + ');';
-        // //下から出てくるアニメーション
-        // t +=
-        //     'transition: transform .5s cubic-bezier(.215,.61,.355,1),visibility .5s cubic-bezier(.215,.61,.355,1),-webkit-transform .5s cubic-bezier(.215,.61,.355,1);';
-        // //パディング
-        // t += 'padding:4px 0px;'; //4=(footerHeight-EXcountview.getBoundingClientRect().height)/2)
-        // t += '}';
-        // t +=
-        //     selCountview +
-        //     '>div,.ext_abm-countview>div{background:transparent;}';
-
-        // t +=
-        //     selCountview +
-        //     '>div>*,.ext_abm-countview>div>*{opacity:' +
-        //     (settings.panelOpacity / 255 < 0.7
-        //         ? 0.7
-        //         : settings.panelOpacity / 255) +
-        //     ';}';
+        // t += selCountview + '{}';
     }
     //視聴数格納
     if (settings.isStoreViewCounter && selFoot) {
@@ -5295,36 +5217,9 @@ function setOptionHead() {
     } else {
         styleLink.attr('href', dataUri);
     }
-    // setFooterBGStyle();
     console.log('setOptionHead ok');
 }
-// function setFooterBGStyle() {
-//     let t = '';
-//     let selFoot = dl.getElementSingleSelector(EXfoot);
-//     if ($(selFoot).length === 0) return;
-//     //フッターの視聴数にかぶる部分を透明にした背景
-//     let barcolor = `rgba(0,0,0,${settings.panelOpacity / 255})`;
-//     let cvb = EXcountview.getBoundingClientRect();
-//     let fbb = EXfootcome.parentElement.getBoundingClientRect();
-//     let cvLeft = Math.round(cvb.left);
-//     let cvWidth = Math.round(cvb.width);
-//     let fbWidth = Math.round(fbb.width);
-//     let fbbackImage = `linear-gradient(90deg, ${barcolor}, ${barcolor} ${cvLeft}px, transparent ${cvLeft}px, transparent ${cvLeft +
-//         cvWidth}px, ${barcolor} ${cvLeft +
-//         cvWidth}px, ${barcolor} ${fbWidth}px);`;
-//     t += selFoot + '>div>div.countviewtrans{background:' + fbbackImage + '}';
-//     let dataUri = 'data:text/css,' + encodeURIComponent(t);
-//     let footerBGstyle = $('#footerBGstyle');
-//     if (footerBGstyle.length === 0) {
-//         footerBGstyle = $(
-//             "<link title='usermade' id='footerBGstyle' rel='stylesheet' href='" +
-//                 dataUri +
-//                 "'>"
-//         ).appendTo('head');
-//     } else {
-//         footerBGstyle.attr('href', dataUri);
-//     }
-// }
+
 function setOptionElement() {
     if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
 
@@ -5733,7 +5628,7 @@ function usereventFCclick() {
         toggleCommentList();
     } else if (isFootcomeClickable()) {
         //閉じている＝これから開く
-        console.log(5731+comeRefreshing)
+        // console.log(5731+comeRefreshing)
         if (!comeRefreshing) {
             pophideSelector(3, 0);
         }
@@ -7182,8 +7077,8 @@ function onairBasefunc() {
             }
         }
 
-        //残り時間表示
-        if (settings.isTimeVisible && EXinfo) {
+        //残り時間取得
+        if(EXinfo){
             var eProTime = $(EXinfo)
                 .children('div:not(#copyinfo)')
                 .find('h2')
@@ -7271,6 +7166,9 @@ function onairBasefunc() {
                 }
                 proEnd.setSeconds(0);
             }
+        }
+        // 残り時間表示
+        if (settings.isTimeVisible) {
             //console.log(eProTime, arProTime, proStart, proEnd)
             var forProEnd = proEnd.getTime() - Date.now(); //番組の残り時間
             var proLength = proEnd.getTime() - proStart.getTime(); //番組の全体長さ
@@ -7304,6 +7202,7 @@ function onairBasefunc() {
             !comeFastOpen &&
             !isComeOpen()
         ) {
+            // console.log('sureRead waitforCloseCome(0)')
             waitforCloseCome(0);
         }
         // コメント欄を常に表示時でコメ欄が開かれているときはコメ開閉ボタンのイベント無効化(拡張のtoggleCommentListに割り当てるため)
@@ -7888,7 +7787,7 @@ export function onChangeURL(isBeforeNotOnair) {
     proEnd = new Date();
     proTitle = '';
     bginfo = [0, [], -1, -1];
-    $('#tProtitle').text('未取得');
+    $('#tProtitle').text('未取得(番組詳細パネルを開いて取得)');
     $('#copyotw').remove();
     if (EXcomesendinp) $(EXcomesendinp.parentElement).css('display', '');
     //全画面・音量ボタンの位置を戻す
