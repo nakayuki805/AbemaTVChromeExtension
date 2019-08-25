@@ -711,14 +711,16 @@ export const settings: SettingList[] = [
                 name: 'isTimeVisible',
                 //        "description": "コメント入力欄の近くに番組残り時間を表示",
                 //        "description": "画面右上に番組残り時間を表示",
-                description: '番組残り時間を表示(AbemaTVの仕様上、一旦番組詳細パネルを開かないと取得できません) ◆',
+                description:
+                    '番組残り時間を表示(AbemaTVの仕様上、一旦番組詳細パネルを開かないと取得できません) ',
                 type: 'boolean',
                 isInstantChangable: true,
                 default: false
             },
             {
                 name: 'isProtitleVisible',
-                description: '番組タイトルを表示(AbemaTVの仕様上、一旦番組詳細パネルを開かないと取得できません)  ◆',
+                description:
+                    '番組タイトルを表示(AbemaTVの仕様上、一旦番組詳細パネルを開かないと取得できません)  ',
                 type: 'boolean',
                 isInstantChangable: true,
                 default: false

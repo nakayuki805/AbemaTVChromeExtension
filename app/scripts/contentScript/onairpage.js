@@ -75,7 +75,8 @@ let EXvideoarea;
 //var EXwatchingnum;//EXobliの現在視聴中のチャンネルの子供のindex
 var EXvolume;
 var EXfullscr;
-var EXcomemodule; //Twitterボタンや投稿ボタンを含む要素 入力欄をフォーカスしたときにセットし放送画面以外ではnull
+var EXcomemodule; //Twitterボタンや投稿ボタンを含む要素 放送画面以外ではnull
+let EXcometwmodule; // コメ入力欄のTwitterボタン　入力欄をフォーカスしたときにセット
 var cmblockcd = 0; //カウント用
 var comeRefreshing = false; //コメ欄自動開閉中はソートを実行したいのでコメント更新しない用
 var comeFastOpen = false;
@@ -204,6 +205,7 @@ export function onairCleaner() {
     }
     //変数クリア
     EXcomemodule = null;
+    EXcometwmodule = null;
     //放送画面のEX*をクリアする、一旦非放送画面に移った後放送画面に戻ると再利用できないため再度setEXsで取得する必要がある
     EXhead = null;
     EXmenu = null;
@@ -837,6 +839,7 @@ function delayset(
         resetOptionHead = true;
         reSetOptionEvent = true;
         isComesend = true;
+        comeModuleEditor();
     }
     if(!isComesendinp && (EXcomesendinp = getComeFormElement(0))){
         console.log('setOptionHead delayset(comesendinp)');
@@ -3262,59 +3265,30 @@ function getReceiveTwtElement(returnSingleSelector) {
 }
 function getComeModuleElements(returnSingleSelector) {
     //投稿ボタンの祖先でtextareaと共通の祖先の子 と投稿ボタン とtwtコンテナを返す
-    let jo = $(EXcomesend).find('button');
-    var ret = [null, null, null];
-    for (var i = 0; i < jo.length; i++) {
-        if (
-            jo
-                .eq(i)
-                .text()
-                .indexOf('投稿') < 0
-        )
-            continue;
-        ret[1] = jo[i];
-        jo = jo.eq(i).parentsUntil(EXcome);
-        break;
-    }
-    if (!ret[1]) return ret;
-    if (jo.length < 2) return ret;
-    for (let i = 1; i < jo.length; i++) {
-        if (jo.eq(i).find(EXcomesendinp).length == 0) continue;
-        ret[0] = jo[i - 1];
-        break;
-    }
-    if (!ret[0]) return ret;
+    const ret = [null, null, null];
 
-    jo = $(ret[0]).find(
-        $(
-            '[*|href*="/images/icons/twitter.svg"][*|href$="#svg-body"]:not([href])'
-        )
-    );
-    if (jo.length == 0) return null;
-    var jp = jo.first().parentsUntil(ret[0]);
-    for (var r = 0, js, jd; r < jp.length; r++) {
-        js = jp.eq(r).find('span');
-        if (js.length == 0) continue;
-        jd = null;
-        for (var c = 0; c < js.length; c++) {
-            if (
-                js
-                    .eq(c)
-                    .text()
-                    .indexOf('連携') < 0
-            )
-                continue;
-            jd = js.eq(c);
-            break;
-        }
-        if (!jd) continue;
-        for (var k = r; k + 1 < jp.length; k++) {
-            //console.log(4363,jp.eq(k+1).innerWidth(),jp.eq(k).innerWidth())
-            if (jp.eq(k + 1).innerWidth() == 0 || jp.eq(k).innerWidth() == 0)
+    const postButton = dl.last(dl.filter(EXcomesend.getElementsByTagName('button'),{filter: e=>e.innerText.includes('投稿')}),true);
+    ret[1] = postButton;
+    if (!postButton) return ret;
+
+    const modulesTopElement = dl.parentsFilterLast(postButton,{notContainElement: EXcomesendinp, notElement: EXcome});
+    ret[0] = modulesTopElement;
+    if (!modulesTopElement) return ret;
+
+    const twIcon = modulesTopElement.querySelector('[*|href*="/images/icons/twitter.svg"][*|href$="#svg-body"]:not([href])');
+    if (!twIcon) return ret;
+    const twIconParents = dl.parentsUntil(twIcon,modulesTopElement);
+    for (var r = 0; r < twIconParents.length; r++) {
+        const twIconParentSpan = twIconParents[r].getElementsByTagName('span');
+        if (twIconParentSpan.length == 0) continue;
+        if(Array.from(twIconParentSpan).some(s=>s.innerText.includes('連携')));
+        for (var k = r; k + 1 < twIconParents.length; k++) {
+            console.log(4363,twIconParents[k+1].clientWidth,twIconParents[k].clientWidth)
+            if (twIconParents[k + 1].clientWidth == 0 || twIconParents[k].clientWidth == 0)
                 break;
-            if (jp.eq(k + 1).innerWidth() < jp.eq(k).innerWidth() + 10)
+            if (twIconParents[k + 1].clientWidth < twIconParents[k].clientWidth + 10)
                 continue;
-            ret[2] = jp[k];
+            ret[2] = twIconParents[k];
             break;
         }
         break;
@@ -4573,7 +4547,7 @@ function setOptionHead() {
     var alt = false;
 
     //投稿ボタン削除（入力欄1行化はこの下のコメ見た目のほうとoptionElementでやる）
-    //後から生成される場合ここだとクラス名決め打ちになるのでfocus時のcomemoduleeditorでやる
+    //後から生成される場合ここだとクラス名決め打ちになるのでcomemoduleeditorでやる
     //if (settings.isCustomPostWin) {
     //    t += '.hw_hy.HH_HR{display:none;}'
     //}
@@ -5688,9 +5662,9 @@ function usereventSendInpKeyinput() {
     $(EXcomesendinp).scrollTop(s);
 }
 function comeModuleEditor() {
-    if (EXcomemodule) return;
+    if (EXcomemodule && document.body.contains(EXcomemodule)) return;
     var ret = getComeModuleElements();
-    if (!ret[0] || !ret[1] || !ret[2]) {
+    if (!ret[0] || !ret[1]) {
         console.log('retry comeModuleEditor');
         setTimeout(comeModuleEditor, 1000);
         return;
@@ -5708,7 +5682,17 @@ function comeModuleEditor() {
         console.log('setOptionHead comeModuleEditor');
         setOptionHead();
     }
-
+}
+function comeModuleEditorFocused(){
+    // コメ入力欄フォーカス時にTwitterボタンを含む要素を取得し処理
+    if (EXcometwmodule && document.body.contains(EXcometwmodule)) return;
+    var ret = getComeModuleElements();
+    if (!ret[2]) {
+        console.log('retry comeModuleEditorFocused');
+        setTimeout(comeModuleEditorFocused, 1000);
+        return;
+    }
+    EXcometwmodule = ret[2];
     var twitterWrapper = $(ret[2]);
     if (settings.mastodonInstance && settings.mastodonToken) {
         isTootEnabled = localStorage.getItem('isTootEnabled') == 'true';
@@ -5790,8 +5774,19 @@ function setOptionEvent() {
     if(EXcomesend&&EXcomesend.getAttribute('data-ext-event-added')!=='true'){
         $(EXcomesend).on('click', function(e) {
             console.log('excomesend clicked',e.target);
+            let twBtnFlag = false;
+            // コメ欄入力欄をフォーカスする前に入力欄枠をクリックしてTwitterボタンのdivが反応した時に対応
+            if (e.target.tagName.toLowerCase() === 'div' && e.target.innerText.includes('連携')　&& e.target.getBoundingClientRect().width <= 100 && EXcomesendinp){
+                // Twitter連携ボタンが押された
+                // console.log('twbtn')
+                const inprect = EXcomesendinp.getBoundingClientRect();
+                if(e.target.getBoundingClientRect().top < (inprect.top + inprect.height)){
+                    twBtnFlag = true;
+                }
+                // console.log(e.target.getBoundingClientRect().top,inprect.top , inprect.height)
+            }
             if (
-                e.target.tagName.toLowerCase() === 'form' &&
+                (e.target.tagName.toLowerCase() === 'form' || twBtnFlag) &&
                 EXcomesendinp
             ) {
                 // コメント常時表示オフ時にコメント入力欄のクリックが誤爆することがあるのでフォームの周囲であるか座標判定する
@@ -5826,7 +5821,7 @@ function setOptionEvent() {
         //投稿ボタンを押した時
         $(EXcomesendinp).on('keydown keyup', usereventSendInpKeyinput);
         //コメ入力欄がフォーカスされた時
-        $(EXcomesendinp).on('focus', comeModuleEditor);
+        $(EXcomesendinp).on('focus', comeModuleEditorFocused);
 
         EXcomesendinp.setAttribute('data-ext-event-added', 'true');
     }
@@ -6844,6 +6839,8 @@ function onairBasefunc() {
     //console.time('onairbasefunc');
     try {
         //console.time('obf_1');
+        let isResetHead = false;
+        let isResetEvent = false;
         if (getInfo.determineUrl() !== getInfo.URL_ONAIR) {
             clearInterval(onairRunning);
             onairRunning = false;
@@ -6855,42 +6852,23 @@ function onairBasefunc() {
             EXfoot = getElm.getFooterElement();
             if (EXfoot) {
                 dl.addExtClass(EXfoot, 'foot');
-                setOptionHead();
-                setOptionEvent();
+                isResetHead = true;
+                isResetEvent = true;
             }
         }
-        if(!EXcome || !document.body.contains(EXcome)){
-            EXcome = getComeFormElement(2);
-            if (EXcome) {
-                dl.addExtClass(EXcome, 'come');
-                setOptionHead();
-                setOptionEvent();
-            }
-        }
-        if (
-            EXcome &&
-            document.getElementsByClassName('ext_abm-come').length == 0
-        ) {
-            dl.addExtClass(EXcome, 'come');
-        }
-        if (
-            EXcomelist &&
-            document.getElementsByClassName('ext_abm-comelist').length == 0
-        ) {
-            dl.addExtClass(EXcomelist, 'comelist');
-        }
+        
         if(!EXfootcome || !document.body.contains(EXfootcome)){
             EXfootcome = getFootcomeElement();
             if (EXfootcome) {
                 dl.addExtClass(EXfootcome, 'footcome');
-                setOptionHead();
+                isResetHead = true;
             }
         }
         if(!EXfootcountcome || !document.body.contains(EXfootcountcome)){
             EXfootcountcome = getFootcomeBtnElement();
             if (EXfootcountcome) {
                 dl.addExtClass(EXfootcountcome, 'footcountcome');
-                setOptionHead();
+                isResetHead = true;
             }
         }
         if (
@@ -6910,17 +6888,58 @@ function onairBasefunc() {
                 setTimeout(onresize, 1000);
             }
         }
+        
+        // コメント周りの要素について存在チェック&再取得
+        // EXcomesendとEXcomeの取得はEXcomesendinpに、EXcomelistの取得はEXcomeに依存しているためcomesendinp->comesend,come->comelistの順に取得する
+        if (!EXcomesendinp || !document.body.contains(EXcomesendinp)) {
+            EXcomesendinp = getComeFormElement(0);
+            if(EXcomesendinp){
+                dl.addExtClass(EXcomesendinp, 'comesendinp');
+                isResetHead = true;
+                isResetEvent = true;
+            }
+        }
+        if (!EXcomesend || !document.body.contains(EXcomesend)) {
+            EXcomesend = getComeFormElement(1);
+            if(EXcomesend){
+                dl.addExtClass(EXcomesend, 'comesend');
+                isResetHead = true;
+                isResetEvent = true;
+                comeModuleEditor();
+            }
+        }
+        if(!EXcome || !document.body.contains(EXcome)){
+            EXcome = getComeFormElement(2);
+            if (EXcome) {
+                dl.addExtClass(EXcome, 'come');
+                isResetHead = true;
+                isResetEvent = true;
+            }
+        }
+        if (
+            EXcome &&
+            document.getElementsByClassName('ext_abm-come').length == 0
+        ) {
+            dl.addExtClass(EXcome, 'come');
+        }
         if (!EXcomelist || !document.body.contains(EXcomelist)) {
             EXcomelist = getComeListElement();
             if (EXcomelist) {
                 // console.log('ecl', EXcomelist, $('body').has(EXcomelist).length==0)
                 dl.addExtClass(EXcomelist, 'comelist');
-                setOptionHead();
+                isResetHead = true;
                 window.dispatchEvent(comelistReadyEvent);
                 commentObserver.disconnect();
                 commentObserver.observe(EXcomelist, { childList: true });
             }
         }
+        if (
+            EXcomelist &&
+            document.getElementsByClassName('ext_abm-comelist').length == 0
+        ) {
+            dl.addExtClass(EXcomelist, 'comelist');
+        }
+
         if (!EXinfo || !document.body.contains(EXinfo)) {
             EXinfo = getInfoElement();
             if (EXinfo) {
@@ -6929,9 +6948,12 @@ function onairBasefunc() {
                 EXcomesend = null;
                 EXcomesendinp = null;
                 EXchli = null;
-                setOptionHead();
+                isResetHead = true;
             }
         }
+
+        if(isResetHead)setOptionHead();
+        if(isResetEvent)setOptionEvent();
 
         //        //映像のtopが変更したらonresize()実行
         //        if(settings.isResizeScreen && $("object,video").size()>0 && $("object,video").parent().offset().top !== newtop) {
