@@ -274,7 +274,11 @@ export function getElementSingleSelector(
     const id = element.id.trim();
     if (id !== '') return tagName + '#' + id;
     let rs = /\s/;
-    const className = (element.className || '').trim();
+    // console.log(277, element.className, (element.className || ''))
+    const className =
+        element.className && typeof element.className === 'string'
+            ? element.className.trim()
+            : '';
     if (className === '') return null;
     // let jr: JQuery<HTMLElement> = $([]);
     const removeElements: HTMLElement[] = [];

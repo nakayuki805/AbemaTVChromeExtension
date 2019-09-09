@@ -7016,6 +7016,10 @@ function onairBasefunc() {
                 isResetHead = true;
             }
         }
+        if (!EXvolume || !document.body.contains(EXvolume)) {
+            EXvolume = getElm.getVolElement();
+            dl.addExtClass(EXvolume, 'volume');
+        }
 
         if (isResetHead) setOptionHead();
         if (isResetEvent) setOptionEvent();
@@ -7357,6 +7361,12 @@ function onairBasefunc() {
                             .trigger('click');
                     });
                 }
+            }
+        }else if(proEnd.getTime()-Date.now()<0){
+            // 取得済み番組終了時刻を過ぎている
+            proTitle = '';
+            if (settings.isProtitleVisible) {
+                $('#tProtitle').text('未取得(番組詳細パネルを開いて取得)');
             }
         }
 
