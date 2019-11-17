@@ -16,7 +16,9 @@ const extId = (window as AnyPropertyWindow).abema_ext_info.id as string;
 let inj_currentLocation = '';
 let inj_EXcomelist: HTMLElement;
 let inj_EXcome: HTMLElement;
-let inj_commentObserver = new MutationObserver(function(mutations) {
+let inj_commentObserver = new MutationObserver(function(
+    mutations: MutationRecord[]
+) {
     inj_onCommentChange(mutations);
 }); // コメント欄DOM監視
 
@@ -216,11 +218,13 @@ function setExtFunction(moduleName: string, moduleObj: any) {
     //     }
     // }
 }
-[['getElem', getElm], ['getInfo', getInfo], ['dl', dl]].forEach(
-    (m: [string, any]) => {
-        setExtFunction(m[0], m[1]);
-    }
-);
+[
+    ['getElem', getElm],
+    ['getInfo', getInfo],
+    ['dl', dl]
+].forEach((m: [string, any]) => {
+    setExtFunction(m[0], m[1]);
+});
 if (process.env.NODE_ENV === 'development') {
     (<AnyPropertyWindow>window).logCSEval = function(evalString: string) {
         chrome.runtime.sendMessage(extId, {

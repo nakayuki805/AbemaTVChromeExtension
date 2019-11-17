@@ -36,7 +36,7 @@ function removeIs(str: string) {
 export function getStorage(keyObj?: string | StorageItems | string[] | null) {
     return new Promise(resolve => {
         if (keyObj === undefined) keyObj = null;
-        chrome.storage.local.get(keyObj, item => resolve(item));
+        chrome.storage.local.get(keyObj, item => resolve(item as StorageItems));
     });
 }
 export function setStorage(obj: StorageItems) {
@@ -134,7 +134,7 @@ export async function getSettings() {
     });
     return retval;
 }
-export function resetSettings(callback?: (() => void)) {
+export function resetSettings(callback?: () => void) {
     chrome.storage.local.get(function(value) {
         let keys = [];
         for (let key in value) {
@@ -146,7 +146,7 @@ export function resetSettings(callback?: (() => void)) {
         chrome.storage.local.remove(keys, callback);
     });
 }
-export function resetCMSettings(callback?: (() => void)) {
+export function resetCMSettings(callback?: () => void) {
     let keys = [];
     for (let i = 0; i < CMSettingList.length; i++) {
         keys.push(CMSettingList[i].name);

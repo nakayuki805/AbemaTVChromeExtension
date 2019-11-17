@@ -25,7 +25,9 @@ let delaysetConsoleRepeated = false;
 let isDelaysetRunning = false;
 let interval: number | null = null;
 let isResizeEventAdded = false;
-const commentObserver = new MutationObserver(function(mutations) {
+const commentObserver = new MutationObserver(function(
+    mutations: MutationRecord[]
+) {
     setTimeout(
         function(mutations: MutationRecord[]) {
             onCommentChange(mutations);

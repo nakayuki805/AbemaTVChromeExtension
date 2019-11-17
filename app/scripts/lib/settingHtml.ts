@@ -180,7 +180,7 @@ export function generateOptionHTML(isPermanent: boolean) {
         )
             continue;
         htmlstr +=
-            '<fieldset style=\'border: 1px solid silver;margin: 0 2px;padding: .35em .625em .75em;\'><legend>' +
+            '<fieldset style="border: 1px solid silver;margin: 0 2px;padding: .35em .625em .75em;"><legend>' +
             settingsList[i].description +
             '</legend><div class="settingWrapper' +
             (settingsList[i].isShowImage && isPermanent ? ' showimage' : '') +
@@ -361,7 +361,7 @@ export function setRangeNumberDisplayer() {
     Array.from(document.getElementsByClassName('setting-range')).forEach(
         range => {
             setTimeout(displayNum, 100, range as HTMLInputElement);
-            range.addEventListener('change', e => {
+            range.addEventListener('change', (e: Event) => {
                 displayNum(e.target as HTMLInputElement);
             });
         }

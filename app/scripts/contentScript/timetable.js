@@ -709,15 +709,16 @@ export function waitforloadtimetable(url) {
             // console.log('EXTTbody clicked',e,timetableGrabbing.scrolled)
         });
         timetableCss();
+        //↓謎のz-index:-1指定　番組表ページでヘッダが触れなくなるのでコメントアウト
         // $('div')を取ってきてあるのでここで使う 拡張のtoastとTimetableViewerスクリプトは除外する
-        dd.map(function(i, e) {
-            if (
-                $(e).css('z-index') > 10 &&
-                e.className.indexOf('ext-toast') < 0 &&
-                e.id.indexOf('TimetableViewer') < 0
-            )
-                return e;
-        }).css('z-index', '-1');
+        // dd.map(function(i, e) {
+        //     if (
+        //         $(e).css('z-index') > 10 &&
+        //         e.className.indexOf('ext-toast') < 0 &&
+        //         e.id.indexOf('TimetableViewer') < 0
+        //     )
+        //         return e;
+        // }).css('z-index', '-1');
 
         // 番組表を掴んでドラッグする
         timetableGrabbing.test = false;

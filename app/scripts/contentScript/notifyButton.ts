@@ -56,9 +56,9 @@ function putNotifyButtonElement(
     const jnotifyButParent = $(notifyButParent);
     if (notifyTime > now.getTime()) {
         const progNotifyName = 'progNotify_' + channel + '_' + programID;
-        Array.from(notifyButParent.getElementsByClassName('addNotify')).forEach(
-            e => e.remove()
-        );
+        Array.from(
+            notifyButParent.getElementsByClassName('addNotify')
+        ).forEach(e => e.remove());
         const notifyButton = dl.createElement('div', {
             class: 'addNotify',
             'data-registered': 'false',
@@ -170,9 +170,9 @@ function putNotifyButtonElement(
             }
         });
     } else {
-        Array.from(notifyButParent.getElementsByClassName('addNotify')).forEach(
-            e => e.remove()
-        );
+        Array.from(
+            notifyButParent.getElementsByClassName('addNotify')
+        ).forEach(e => e.remove());
     }
 }
 function programTimeStrToTime(programTimeStr: string) {
@@ -290,7 +290,7 @@ export function putNotifyButton(notifySeconds: number, url: string) {
         butParent[0],
         notifySeconds
     );
-    const observer = new MutationObserver(r => {
+    const observer = new MutationObserver((r: MutationRecord[]) => {
         // console.log(r);
         observer.disconnect();
         let butParent = $(
@@ -380,15 +380,15 @@ export function putSerachNotifyButtons(notifySeconds: number) {
         );
     });
     // もっとみるボタンに対応
-    let moreBtn = listWrapper.next('button');
+    let moreBtn = listWrapper.parent().next('button');
     moreBtn.click(function() {
         setTimeout(putSerachNotifyButtons, 500, notifySeconds);
     });
 }
 export function putReminderNotifyButtons(notifySeconds: number) {
     if (getInfo.determineUrl() !== getInfo.URL_RESERVATION) return;
-    let listWrapper = $('div[role=list]');
-    let listItems = $('a[role=listitem]');
+    let listWrapper = $('a[href^="/channels/"]').parents('ul');
+    let listItems = $('a[href^="/channels/"]');
     let featureText = '見たい番組を見逃さないためには'; // 公式通知登録一覧で何も登録してないときの機能紹介文
     let featureMessage = $('p').filter(function(i, e) {
         return (e.textContent || '').includes(featureText);
@@ -402,10 +402,10 @@ export function putReminderNotifyButtons(notifySeconds: number) {
     }
     listItems.each(function(i, elem) {
         let linkArea = $(elem);
-        let spans = linkArea
+        let p = linkArea
             .children()
-            .eq(1)
-            .find('span');
+            .eq(0)
+            .find('p');
         let butParent;
         if (linkArea.next().is('.listAddNotifyWrapper')) {
             butParent = linkArea.next();
@@ -417,13 +417,13 @@ export function putReminderNotifyButtons(notifySeconds: number) {
         }
         let progUrl = linkArea.attr('href') || '';
         let urlarray = progUrl.substring(1).split('/');
-        // console.log(urlarray, spans);
+        console.log(urlarray, ,linkArea);
         let channel = urlarray[1];
-        let titleElem = spans.eq(0);
-        let channelName = channel; // spans.eq(1).text();
+        let titleElem = p.eq(0);
+        let channelName = p.eq(1).text();
         let programID = urlarray[3];
-        let programTitle = spans.eq(0).text();
-        let programTime = programTimeStrToTime(spans.eq(1).text());
+        let programTitle = p.eq(0).text();
+        let programTime = programTimeStrToTime(p.eq(2).text());
         putNotifyButtonElement(
             channel,
             channelName,
@@ -543,15 +543,17 @@ setInterval(() => {
     }
     watchdogCount = 0;
 }, 1000);
-const TTVSPanelObserver = new MutationObserver(mutations => {
-    if (process.env.NODE_ENV === 'development') {
-        console.log(mutations);
+const TTVSPanelObserver = new MutationObserver(
+    (mutations: MutationRecord[]) => {
+        if (process.env.NODE_ENV === 'development') {
+            console.log(mutations);
+        }
+        if (watchdogCount <= 100) {
+            putTTVSNotifyButton();
+            watchdogCount++;
+        }
     }
-    if (watchdogCount <= 100) {
-        putTTVSNotifyButton();
-        watchdogCount++;
-    }
-});
+);
 
 export function TTViewerScriptPrepare(SettingNotifySeconds: number) {
     notifySeconds = SettingNotifySeconds;
@@ -561,10 +563,12 @@ export function TTViewerScriptPrepare(SettingNotifySeconds: number) {
     console.log('found AbemaTV Timetable Viewer'); // , panelsTop, panelsTop.innerHTML);
     if (panelsTop.childElementCount === 0) {
         // まだ中身がない
-        const TTVSReadyObserver = new MutationObserver(mutations => {
-            TTVSPanelReady();
-            TTVSReadyObserver.disconnect();
-        });
+        const TTVSReadyObserver = new MutationObserver(
+            (mutations: MutationRecord[]) => {
+                TTVSPanelReady();
+                TTVSReadyObserver.disconnect();
+            }
+        );
         TTVSReadyObserver.observe(panelsTop, { childList: true });
     } else {
         TTVSPanelReady();
