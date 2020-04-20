@@ -99,80 +99,43 @@ var currentVersion = manifest.version;
 var urlChangeEvent = new Event('urlChange');
 
 function delaysetNotOA() {
-    const menuElement = getMenuObject();
-    var hoverContents = $(menuElement);
-    if (menuElement === null) hoverContents = $('.zC_zJ'); //todo
-    if (hoverContents.children().length == 0) {
+    const mypageMenuS = document.getElementsByClassName('com-application-MypageMenu');
+    if (mypageMenuS.length===0) {
         console.log('delaysetNotOA retry');
         setTimeout(delaysetNotOA, 1000);
         return;
     }
-
-    hoverContents.css({
-        'max-height': 'calc(100vh - ' + onair.headerHeight + 'px)',
-        'overflow-y': 'auto'
-    });
-    //拡張機能の設定と通知番組一覧をその他メニューに追加
-    var hoverLinkClass = hoverContents.children('a')[0].className;
-    var hoverSpanClass = hoverContents.children('a').children('span')[0]
-        .className;
-    //console.log(hoverContents,hoverContents.children(),hoverLinkClass)
-    if (hoverContents.children('#extSettingLink').length == 0) {
-        hoverContents.children(':last').css({
-            'border-bottom': '1px solid #333',
-            'margin-bottom': '8px',
-            'padding-bottom': '12px'
-        });
-        hoverContents
-            .append(
-                '<a class="' +
-                    hoverLinkClass +
-                    '" id="extSettingLink" href="' +
-                    chrome.extension.getURL('/pages/option.html') +
-                    '" target="_blank"><span class="' +
-                    hoverSpanClass +
-                    '">拡張設定</span></a>'
-            )
-            .append(
-                '<a class="' +
-                    hoverLinkClass +
-                    '" id="extProgNotifiesLink" href="' +
-                    chrome.extension.getURL('/pages/notifylist.html') +
-                    '" target="_blank"><span class="' +
-                    hoverSpanClass +
-                    '">拡張通知登録一覧</span></a>'
-            );
+    const mypageMenu = mypageMenuS[0];
+    // メニュー追加
+    const settingMenuHtml = `
+<li class="com-application-SideNavigationItem ext-menu-item" id="ext-menu-settings"><a href=${chrome.extension.getURL('/pages/option.html')}" target="_blank" class="com-a-Link com-a-Link--block">
+    <div class="com-application-SideNavigationItemContent">
+        <div class="com-application-SideNavigationItemContent__text">拡張機能設定</div>
+    </div>
+</a></li>`;
+    const notifyMenuHtml = `<li class="com-application-SideNavigationItem ext-menu-item" id="ext-menu-notifylist">
+    <div class="com-application-CollapsibleWrapper">
+        <div class="com-application-CollapsibleWrapper__inner"><a href="${chrome.extension.getURL('/pages/notifylist.html')}" target="_blank" 
+                class="com-a-Link com-a-Link--block">
+                <div class="com-application-SideNavigationItemContent">
+                    <div class="com-application-SideNavigationItemContent__icon"><span
+                            class="c-application-SideNavigation__footer-icon"><svg aria-label="" class="com-a-Symbol"
+                                width="100%" height="100%" role="img" focusable="false">
+                                <use xlink:href="/images/icons/mylist.svg?version=20200413#svg-body"></use>
+                            </svg></span></div>
+                    <div class="com-application-SideNavigationItemContent__text">拡張通知一覧</div>
+                </div>
+                <!--<div class="com-application-SideNavigationItemContent__sub-text">_bem_tv ext</div>-->
+            </a></div>
+    </div>
+</li>
+`;
+    if(document.getElementsByClassName("ext-menu-item").length==0){
+        mypageMenu.insertAdjacentHTML("beforebegin",notifyMenuHtml);
+        mypageMenu.getElementsByTagName("ul")[0].insertAdjacentHTML("beforeend",settingMenuHtml);
     }
 }
 
-function getMenuObject() {
-    //1番目に多くリンクを子にもつ親をMenuとする(子の数は6以上15以下)
-    const minLinkParentChildren = 6;
-    const maxLinkParentChildren = 10;
-    const linkParentMap = new Map();
-    const links = document.links;
-    Array.from(links).forEach(l => {
-        if (!linkParentMap.has(l.parentElement)) {
-            linkParentMap.set(l.parentElement, [l]);
-        } else {
-            linkParentMap.get(l.parentElement).push(l);
-        }
-    });
-    const linkParentRanking = Array.from(linkParentMap.entries()).sort(
-        (a, b) => b[1].length - a[1].length
-    );
-    const filteredLinkParentRankingTop = linkParentRanking.filter(
-        lp =>
-            lp[1].length >= minLinkParentChildren &&
-            lp[1].length <= maxLinkParentChildren
-    )[0];
-    if (!filteredLinkParentRankingTop) {
-        console.log('?menu', filteredLinkParentRankingTop);
-        return null;
-    } else {
-        return filteredLinkParentRankingTop[0];
-    }
-}
 
 gl.getStorage(['disableExtVersion', 'maxResolution', 'minResolution'], function(
     val

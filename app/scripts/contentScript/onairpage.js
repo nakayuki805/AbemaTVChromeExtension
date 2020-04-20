@@ -57,6 +57,7 @@ var overlapSelector; // = '#main div.'+$('div').map(function(i,e){var b=e.getBou
 
 var EXmain;
 var EXhead;
+let EXleftMenu;
 var EXmenu; //元hover-contents
 var EXfoot;
 var EXfootcome;
@@ -208,6 +209,7 @@ export function onairCleaner() {
     EXcometwmodule = null;
     //放送画面のEX*をクリアする、一旦非放送画面に移った後放送画面に戻ると再利用できないため再度setEXsで取得する必要がある
     EXhead = null;
+    EXleftMenu = null;
     EXmenu = null;
     EXfoot = null;
     EXfootcome = null;
@@ -2803,9 +2805,11 @@ function setEXs() {
         !(EXhead = getElm.getHeaderElement()) /*&& ($('.P_R'  ).length == 0 || !( EXhead          = $('.P_R'  )[0] ))*/
     )
         b = false; // console.log("head"); }//AppContainer__header-container___
+    if(!EXleftMenu && !(EXleftMenu = getElm.getLeftMenuElement()))
+        b = false;
     if (
         !EXmenu &&
-        !(EXmenu = getMenuElement()) /*&& ($('.Fb_Fi').length == 0 || !( EXmenu          = $('.Fb_Fi')[0] ))*/
+        !(EXmenu = getSettingMenuElement()) /*&& ($('.Fb_Fi').length == 0 || !( EXmenu          = $('.Fb_Fi')[0] ))*/
     )
         b = false;
     if (
@@ -2872,6 +2876,7 @@ function setEXs() {
     if (b == true) {
         // class付与
         dl.addExtClass(EXhead, 'header');
+        dl.addExtClass(EXleftMenu, 'leftMenu');
         dl.addExtClass(EXmenu, 'menu');
         dl.addExtClass(EXfoot, 'footer');
         dl.addExtClass(EXfootcome, 'footcome');
@@ -2902,6 +2907,7 @@ function setEXs() {
         const cstr =
             'setEXs retry ' +
             (EXhead ? '.' : 'H') +
+            (EXleftMenu ? '.' : 'L') +
             (EXmenu ? '.' : 'M') +
             (EXfoot ? '.' : 'F') +
             (EXfootcome ? '..' : 'Fc') +
@@ -3356,27 +3362,12 @@ function getVideoRouteClasses() {
             .getAttribute('class')
     ];
 }
-function getMenuElement() {
-    //header内にあること前提でリンクを多く子に持つ親を選ぶ
-    const linkParentMap = new Map();
-    const links = document.querySelectorAll('header a');
-    Array.from(links).forEach(l => {
-        if (!linkParentMap.has(l.parentElement)) {
-            linkParentMap.set(l.parentElement, [l]);
-        } else {
-            linkParentMap.get(l.parentElement).push(l);
-        }
-    });
-    const linkParentRanking = Array.from(linkParentMap.entries()).sort(
-        (a, b) => b[1].length - a[1].length
-    );
-    const linkParentRankingTop = linkParentRanking[0];
-    if (!linkParentRankingTop) {
-        console.log('?menu', linkParentRankingTop);
+function getSettingMenuElement() {
+    const mypageMenuS = document.getElementsByClassName('com-application-MypageMenu');
+    if (mypageMenuS.length===0) {
         return null;
-    } else {
-        return linkParentRankingTop[0];
     }
+    return mypageMenuS[0];
 }
 
 function hasNotTransformed(jo) {
@@ -5258,38 +5249,65 @@ function setOptionElement() {
             .children('#viewcounticon,#viewcountcont,br,#comecountcont')
             .remove();
 
-    var hoverLinkClass = $(EXmenu).children('a')[0].className;
-    var hoverSpanClass = $(EXmenu)
-        .children('a')
-        .children('span')[0].className;
-    if ($(EXmenu).children('#extSettingLink').length == 0) {
-        $(EXmenu)
-            .children(':last')
-            .css({
-                'border-bottom': '1px solid #333',
-                'margin-bottom': '8px',
-                'padding-bottom': '12px'
-            });
-        $(EXmenu)
-            .append(
-                '<a class="' +
-                    hoverLinkClass +
-                    '" id="extSettingLink" href="' +
-                    chrome.extension.getURL('/pages/option.html') +
-                    '" target="_blank"><span class="' +
-                    hoverSpanClass +
-                    '">拡張設定</span></a>'
-            )
-            .append(
-                '<a class="' +
-                    hoverLinkClass +
-                    '" id="extProgNotifiesLink" href="' +
-                    chrome.extension.getURL('/pages/notifylist.html') +
-                    '" target="_blank"><span class="' +
-                    hoverSpanClass +
-                    '">拡張通知登録一覧</span></a>'
-            );
-    }
+    // var hoverLinkClass = $(EXmenu).children('a')[0].className;
+    // var hoverSpanClass = $(EXmenu)
+    //     .children('a')
+    //     .children('span')[0].className;
+    // if ($(EXmenu).children('#extSettingLink').length == 0) {
+    //     $(EXmenu)
+    //         .children(':last')
+    //         .css({
+    //             'border-bottom': '1px solid #333',
+    //             'margin-bottom': '8px',
+    //             'padding-bottom': '12px'
+    //         });
+    //     $(EXmenu)
+    //         .append(
+    //             '<a class="' +
+    //                 hoverLinkClass +
+    //                 '" id="extSettingLink" href="' +
+    //                 chrome.extension.getURL('/pages/option.html') +
+    //                 '" target="_blank"><span class="' +
+    //                 hoverSpanClass +
+    //                 '">拡張設定</span></a>'
+    //         )
+    //         .append(
+    //             '<a class="' +
+    //                 hoverLinkClass +
+    //                 '" id="extProgNotifiesLink" href="' +
+    //                 chrome.extension.getURL('/pages/notifylist.html') +
+    //                 '" target="_blank"><span class="' +
+    //                 hoverSpanClass +
+    //                 '">拡張通知登録一覧</span></a>'
+    //         );
+    // }
+    const settingMenuHtml = `
+    <li class="com-application-SideNavigationItem ext-menu-item" id="ext-menu-settings"><a href=${chrome.extension.getURL('/pages/option.html')}" target="_blank" class="com-a-Link com-a-Link--block">
+        <div class="com-application-SideNavigationItemContent">
+            <div class="com-application-SideNavigationItemContent__text">拡張機能設定</div>
+        </div>
+    </a></li>`;
+        const notifyMenuHtml = `<li class="com-application-SideNavigationItem ext-menu-item" id="ext-menu-notifylist">
+        <div class="com-application-CollapsibleWrapper">
+            <div class="com-application-CollapsibleWrapper__inner"><a href="${chrome.extension.getURL('/pages/notifylist.html')}" target="_blank" 
+                    class="com-a-Link com-a-Link--block">
+                    <div class="com-application-SideNavigationItemContent">
+                        <div class="com-application-SideNavigationItemContent__icon"><span
+                                class="c-application-SideNavigation__footer-icon"><svg aria-label="" class="com-a-Symbol"
+                                    width="100%" height="100%" role="img" focusable="false">
+                                    <use xlink:href="/images/icons/mylist.svg?version=20200413#svg-body"></use>
+                                </svg></span></div>
+                        <div class="com-application-SideNavigationItemContent__text"  style="opacity:0;">拡張通知一覧</div>
+                    </div>
+                    <!--<div class="com-application-SideNavigationItemContent__sub-text">_bem_tv ext</div>-->
+                </a></div>
+        </div>
+    </li>
+    `;
+        if(document.getElementsByClassName("ext-menu-item").length==0){
+            EXmenu.insertAdjacentHTML("beforebegin",notifyMenuHtml);
+            EXmenu.getElementsByTagName("ul")[0].insertAdjacentHTML("beforeend",settingMenuHtml);
+        }
 
     console.log('setOptionElement ok');
 }
@@ -5770,6 +5788,21 @@ function setOptionEvent() {
     if (getInfo.determineUrl() !== getInfo.URL_ONAIR) return;
     //自作要素のイベントは自作部分で対応
     console.log('setOptionEvent() eventAdded:', eventAdded);
+
+    // 左メニューにマウスオーバー時のみ拡張メニューのテキスト表示
+    if(EXleftMenu.getAttribute('data-ext-event-added') != 'true'){
+        EXleftMenu.addEventListener("mouseover",()=>{
+            Array.from(document.querySelectorAll(".ext-menu-item .com-application-CollapsibleWrapper")).forEach(e=>e.style.width='188');
+            Array.from(document.querySelectorAll(".ext-menu-item .com-application-SideNavigationItemContent__text")).forEach(e=>e.style.opacity='1');
+        });
+        EXleftMenu.addEventListener("mouseout",()=>{
+            Array.from(document.querySelectorAll(".ext-menu-item .com-application-CollapsibleWrapper")).forEach(e=>e.style.width='64');
+            Array.from(document.querySelectorAll(".ext-menu-item .com-application-SideNavigationItemContent__text")).forEach(e=>e.style.opacity='0');
+        });
+        EXleftMenu.setAttribute('data-ext-event-added', 'true');
+    }
+    // Array.from(document.querySelectorAll(".ext-menu-item .com-application-SideNavigationItemContent__text")).forEach(e=>e.style.opacity='0')
+
     var butfs;
     var pwaku;
     if (

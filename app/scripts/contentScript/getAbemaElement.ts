@@ -43,7 +43,7 @@ export function getVideoAreaElement() {
     // 映像領域を内包する要素(旧obliの子に相当)
     const videoElement = getVideo();
     if (!videoElement) return null;
-    return dl.parentsFilterLast(videoElement, {
+    const parents = dl.filter(dl.parents(videoElement), {
         notBodyParent: true,
         filters: [
             e => {
@@ -53,12 +53,12 @@ export function getVideoAreaElement() {
                 for (let i = 0; i < children.length; i++) {
                     const tag = children[i].tagName.toUpperCase();
                     if (tag === 'BUTTON') btnFlag = true;
-                    if (tag === 'IMG') imgFlag = true;
                 }
-                return btnFlag && imgFlag;
+                return btnFlag;
             }
         ]
     });
+    return parents && parents[0];
 }
 export function getHeaderElement() {
     return document.getElementsByTagName('header')[0];
@@ -68,6 +68,10 @@ export function getHeaderElement() {
     //     ),
     //     { bottom14u: true, notBodyParent: true }
     // );
+}
+export function getLeftMenuElement(){
+    const es = dl.filter(document.getElementsByTagName('nav'),{left14l:true,filter:e=>!document.getElementsByTagName('header')[0].contains(e)});
+    return es && es[0];
 }
 export function getViewCounterElement() {
     const svg = document.querySelectorAll(
