@@ -18,10 +18,10 @@
     "permissions": [
         "storage",
         "alarms",
+
         "notifications",
-        "tabs",
         "contextMenus",
-        "webNavigation"
+        "https://abema.tv/*"
     ],
     "content_scripts": [
         {

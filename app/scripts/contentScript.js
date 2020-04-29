@@ -307,7 +307,7 @@ function URLPatternSwitch() {
     }
 }
 
-chrome.runtime.onMessage.addListener(function(r) {
+chrome.runtime.onMessage.addListener(function(r,sender,response) {
     //console.log(r);
     if (r.name === 'bgsend' || r.name === 'mediaUrlMatch') {
         onair.bgUpdate(r.type, r.value);
@@ -320,6 +320,8 @@ chrome.runtime.onMessage.addListener(function(r) {
         TT.toggleChannel(r.url);
     } else if (r.name == 'historyStateUpdated') {
         chkurl();
+    } else if (r.name == 'getTabURL') {
+        response({type: 'tabURL',url:location.href});
     } else if (r.name == 'contentScriptEval') {
         // 開発時のみevalを実行 抜け道がないように注意
         if (process.env.NODE_ENV === 'development') {
@@ -328,6 +330,6 @@ chrome.runtime.onMessage.addListener(function(r) {
             console.log(evalResult);
         }
     } else {
-        console.warn('message not match');
+        console.warn('message not match',r);
     }
 });

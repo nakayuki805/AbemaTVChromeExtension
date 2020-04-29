@@ -5791,13 +5791,18 @@ function setOptionEvent() {
 
     // 左メニューにマウスオーバー時のみ拡張メニューのテキスト表示
     if(EXleftMenu.getAttribute('data-ext-event-added') != 'true'){
+        const delay = 200;
         EXleftMenu.addEventListener("mouseover",()=>{
-            Array.from(document.querySelectorAll(".ext-menu-item .com-application-CollapsibleWrapper")).forEach(e=>e.style.width='188');
-            Array.from(document.querySelectorAll(".ext-menu-item .com-application-SideNavigationItemContent__text")).forEach(e=>e.style.opacity='1');
+            setTimeout(()=>{
+                Array.from(document.querySelectorAll(".ext-menu-item .com-application-CollapsibleWrapper")).forEach(e=>e.style.width='188px');
+                Array.from(document.querySelectorAll(".ext-menu-item .com-application-SideNavigationItemContent__text")).forEach(e=>e.style.opacity='1');    
+            },delay);
         });
         EXleftMenu.addEventListener("mouseout",()=>{
-            Array.from(document.querySelectorAll(".ext-menu-item .com-application-CollapsibleWrapper")).forEach(e=>e.style.width='64');
-            Array.from(document.querySelectorAll(".ext-menu-item .com-application-SideNavigationItemContent__text")).forEach(e=>e.style.opacity='0');
+            setTimeout(()=>{
+                Array.from(document.querySelectorAll(".ext-menu-item .com-application-CollapsibleWrapper")).forEach(e=>e.style.width='64px');
+                Array.from(document.querySelectorAll(".ext-menu-item .com-application-SideNavigationItemContent__text")).forEach(e=>e.style.opacity='0');    
+            },delay);
         });
         EXleftMenu.setAttribute('data-ext-event-added', 'true');
     }

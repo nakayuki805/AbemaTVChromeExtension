@@ -747,13 +747,18 @@ if (isFirefox) {
 }
 
 //ページ推移
-chrome.webNavigation.onHistoryStateUpdated.addListener(
-    detail => {
-        //console.log(detail);
-        chrome.tabs.sendMessage(detail.tabId, { name: 'historyStateUpdated' });
-    },
-    { url: [{ hostContains: 'abema.tv' }] }
-);
+// chrome.webNavigation.onHistoryStateUpdated.addListener(
+//     detail => {
+//         console.log(detail);
+//         chrome.tabs.sendMessage(detail.tabId, { name: 'historyStateUpdated' });
+//     },
+//     { url: [{ hostContains: 'abema.tv' }] }
+// );
+chrome.tabs.onUpdated.addListener((tabId,changeInfo)=>{
+    if(changeInfo.url && changeInfo.url.startsWith("https://abema.tv")){
+        chrome.tabs.sendMessage(tabId, { name: 'historyStateUpdated' });
+    }
+});
 chrome.runtime.onInstalled.addListener(() => {
     console.log('oninstalled');
     //現在開かれているAbemaTVのタブを取得
@@ -807,6 +812,15 @@ function reRegistAlarms() {
                     } //else{console.log('already have',key)}
                 }
             }
+        });
+    });
+}
+function getAbemaTabs(){
+    chrome.tabs.query({},tabs=>{
+        tabs.forEach(tabs=>{
+            chrome.tabs.sendMessage(tabs.id,{"name":"getTabURL"}, res=>{
+                console.log(res);
+            });
         });
     });
 }
