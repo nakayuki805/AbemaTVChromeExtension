@@ -108,7 +108,7 @@ function delaysetNotOA() {
     const mypageMenu = mypageMenuS[0];
     // メニュー追加
     const settingMenuHtml = `
-<li class="com-application-SideNavigationItem ext-menu-item" id="ext-menu-settings"><a href=${chrome.extension.getURL('/pages/option.html')}" target="_blank" class="com-a-Link com-a-Link--block">
+<li class="com-application-SideNavigationItem ext-menu-item" id="ext-menu-settings"><a href="${chrome.extension.getURL('/pages/option.html')}" target="_blank" class="com-a-Link com-a-Link--block">
     <div class="com-application-SideNavigationItemContent">
         <div class="com-application-SideNavigationItemContent__text">拡張機能設定</div>
     </div>

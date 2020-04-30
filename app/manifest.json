@@ -56,10 +56,7 @@
     "__chrome__externally_connectable": {
         "ids": ["*"],
         "matches": [
-            "https://abema.tv/*",
-            "https://abemagraph.info/*",
-            "https://appsweets.net/abeani/",
-            "https://abema.nakayuki.net/*"
+            "https://abema.tv/*"
         ]
     }
 }

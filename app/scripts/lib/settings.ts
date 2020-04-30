@@ -34,7 +34,7 @@ function removeIs(str: string) {
     return firtsLetter + afteris.slice(1);
 }
 export function getStorage(keyObj?: string | StorageItems | string[] | null) {
-    return new Promise(resolve => {
+    return new Promise<StorageItems>(resolve => {
         if (keyObj === undefined) keyObj = null;
         chrome.storage.local.get(keyObj, item => resolve(item as StorageItems));
     });

@@ -310,23 +310,24 @@ export function putNotifyButton(notifySeconds: number, url: string) {
 }
 export function putSerachNotifyButtons(notifySeconds: number) {
     if (getInfo.determineUrl() !== getInfo.URL_SEARCH) return;
-    const h1 = Array.from(document.getElementsByTagName('h1')).filter(e =>
+    const h2 = Array.from(document.getElementsByTagName('h2')).filter(e =>
         e.innerText.includes('放送予定')
     )[0];
-    if (!h1 || !h1.nextElementSibling) {
+    const notFoundH2 = Array.from(document.getElementsByTagName('h2')).filter(e =>
+        e.innerText.includes('該当する番組はありませんでした')
+    )[0];
+    if(notFoundH2) return;
+    else if (!h2 || !h2.nextElementSibling) {
         setTimeout(putSerachNotifyButtons, 500, notifySeconds);
-        console.log('putSerachNotifyButtons wait: h1');
+        console.log('putSerachNotifyButtons wait: h2');
         return;
     }
     let listWrapper = $(
-        h1.nextElementSibling.querySelector('div[role=list]') || []
+        h2.nextElementSibling.querySelector('div[role=list]') || []
     );
-    let listItems = listWrapper.find('a[role=listitem]');
-    let noContentText = '該当する放送予定の番組はありませんでした';
-    let noContentMessage = $('p').filter(function(i, e) {
-        return (e.textContent || '').includes(noContentText);
-    });
-    if (listItems.length === 0 && noContentMessage.length === 0) {
+    let listItems = listWrapper.find('div[role=listitem]');
+    // console.log(h2,listWrapper,listItems)
+    if (listItems.length === 0) {
         setTimeout(function() {
             putSerachNotifyButtons(notifySeconds);
         }, 1000);
@@ -334,15 +335,15 @@ export function putSerachNotifyButtons(notifySeconds: number) {
         return;
     }
     listItems.each(function(i: number, elem: HTMLElement) {
-        let linkArea = $(elem);
-        let spans = linkArea
+        let linkArea = $(elem).children('a');
+        let ps = linkArea
             .children()
             .eq(0)
             .children()
             .eq(1)
-            .children('span');
-        console.log(spans);
-        if (spans.length < 2) return;
+            .children('p');
+        console.log(ps);
+        if (ps.length < 2) return;
         console.log(elem);
         if ($(elem).next('.listAddNotifyWrapper').length > 0) {
             return;
@@ -358,8 +359,8 @@ export function putSerachNotifyButtons(notifySeconds: number) {
         // let channelNameElem = spans.eq(1);
         let channelName = channel; // channelNameElem.text();
         let programID = urlarray[3];
-        let programTitle = spans.eq(0).text();
-        let programTime = programTimeStrToTime(spans.eq(1).text());
+        let programTitle = ps.eq(0).text();
+        let programTime = programTimeStrToTime(ps.eq(1).text());
         // console.log(
         //     linkArea,
         //     channel,
@@ -388,7 +389,7 @@ export function putSerachNotifyButtons(notifySeconds: number) {
 export function putReminderNotifyButtons(notifySeconds: number) {
     if (getInfo.determineUrl() !== getInfo.URL_RESERVATION) return;
     let listWrapper = $('a[href^="/channels/"]').parents('ul');
-    let listItems = $('a[href^="/channels/"]');
+    let listItems = listWrapper.children('li');
     let featureText = '見たい番組を見逃さないためには'; // 公式通知登録一覧で何も登録してないときの機能紹介文
     let featureMessage = $('p').filter(function(i, e) {
         return (e.textContent || '').includes(featureText);
@@ -401,10 +402,9 @@ export function putReminderNotifyButtons(notifySeconds: number) {
         return;
     }
     listItems.each(function(i, elem) {
-        let linkArea = $(elem);
+        let linkArea = $(elem).children('a');
         let p = linkArea
             .children()
-            .eq(0)
             .find('p');
         let butParent;
         if (linkArea.next().is('.listAddNotifyWrapper')) {
@@ -412,18 +412,19 @@ export function putReminderNotifyButtons(notifySeconds: number) {
         } else {
             butParent = $(
                 '<span class="listAddNotifyWrapper"></span>'
-            ).insertAfter(elem);
+            ).insertAfter(linkArea);
+            elem.style.flexDirection = "column";
             // linkArea.css('border-bottom', 'none');
         }
         let progUrl = linkArea.attr('href') || '';
         let urlarray = progUrl.substring(1).split('/');
-        console.log(urlarray, ,linkArea);
+        console.log(urlarray ,linkArea);
         let channel = urlarray[1];
         let titleElem = p.eq(0);
-        let channelName = p.eq(1).text();
+        let channelName = channel;
         let programID = urlarray[3];
         let programTitle = p.eq(0).text();
-        let programTime = programTimeStrToTime(p.eq(2).text());
+        let programTime = programTimeStrToTime(p.eq(1).text());
         putNotifyButtonElement(
             channel,
             channelName,
@@ -486,15 +487,15 @@ export function putSideDetailNotifyButton(
         progTitle = fp.eq(1).text();
         progTime = programTimeStrToTime(fp.eq(2).text());
     } else {
-        progTitle = $('zo_bq').text();
-        progTime = programTimeStrToTime($('.zo_hs').text()); // todo
+        progTitle = sideDetailWrapper.find('.com-timetable-SideSlotDetail__title').text();
+        progTime = programTimeStrToTime(sideDetailWrapper.find('.com-timetable-SideSlotDetail__date').text()); // todo
     }
     let fa = sideDetailWrapper.find('a').filter(function(i, e) {
         return (e.textContent || '').indexOf('詳細') === 0;
     }); // 放送中なら放送画面リンク,詳細をもっとみる
     let progLinkArr;
     if (fa.length > 0) progLinkArr = (fa.first().attr('href') || '').split('/');
-    else progLinkArr = ($('.zo_zu').attr('href') || '').split('/'); // todo
+    else progLinkArr = (sideDetailWrapper.find('.com-timetable-SideSlotDetail__link-detail a').attr('href') || '').split('/'); // todo
     //    let channel = progLinkArr[2];
     let urlchan = progLinkArr.indexOf('channels');
     // console.log(fa,progLinkArr)
@@ -510,16 +511,14 @@ export function putSideDetailNotifyButton(
         fa.length > 0 &&
         fp
             .eq(2)
-            .next('div')
-            .is(fa.first().prev('div'))
+            .nextAll('div').eq(0)
+            .is(fa.last().parent().prev('div'))
     )
-        // fp2のすぐ下かつfa0のすぐ上のやつ
+        // fp2の弟で最初のdivかつfa1の親のすぐ上のやつ
         notifyButParent = fp
             .eq(2)
-            .next('div')
-            .children('div')
-            .first();
-    else notifyButParent = sideDetailWrapper.find('.zo_zw>div'); // todo
+            .nextAll('div').eq(0);
+    else notifyButParent = sideDetailWrapper.find('.com-timetable-SideSlotDetail__slot-detail-buttons'); // todo
     // console.log(progTitle,progTime,channel,channelName,progID,notifyButParent);
     putNotifyButtonElement(
         channel,
