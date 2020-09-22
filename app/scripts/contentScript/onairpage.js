@@ -39,7 +39,7 @@ var panelopenset = [[1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]]; //head,foot,sid
 
 export const headerHeight = 68;
 
-const footerHeight = 72;
+const footerHeight = 64;
 const commentListWidth = 310;
 const volumeRight = 20;
 const fullscrRight = 72;
@@ -2373,14 +2373,23 @@ function pophideElement(inp) {
             EXhead.style.visibility = 'visible';
             EXhead.style.opacity = '1';
             EXhead.style.transform = 'translate(0)';
+            EXleftMenu.style.visibility = 'visible';
+            EXleftMenu.style.opacity = '1';
+            EXleftMenu.style.transform = 'translate(0)';
         } else if (inp.head == -1) {
             EXhead.style.visibility = 'hidden';
             EXhead.style.opacity = '0';
             EXhead.style.transform = 'translateY(-100%)';
+            EXleftMenu.style.visibility = 'hidden';
+            EXleftMenu.style.opacity = '0';
+            EXleftMenu.style.transform = 'translateY(-100%)';
         } else if (inp.head == 0) {
             EXhead.style.visibility = '';
             EXhead.style.opacity = '';
             EXhead.style.transform = '';
+            EXleftMenu.style.visibility = '';
+            EXleftMenu.style.opacity = '';
+            EXleftMenu.style.transform = '';
         }
     }
     if (inp.foot !== undefined) {
@@ -2389,14 +2398,18 @@ function pophideElement(inp) {
             EXfoot.style.visibility = 'visible';
             EXfoot.style.opacity = '1';
             EXfoot.style.transform = 'translate(0)';
+            EXleftMenu.children[0].style.height = `calc( 100vh  - ${headerHeight}px - ${footerHeight}px )`; //フッター表示時に左メニューがかぶらないように
+            console.log('foot visible',EXleftMenu.children[0])
         } else if (inp.foot == -1) {
             EXfoot.style.visibility = 'hidden';
             EXfoot.style.opacity = '0';
             EXfoot.style.transform = 'translateY(100%)';
+            EXleftMenu.style.height = '';
         } else if (inp.foot == 0) {
             EXfoot.style.visibility = '';
             EXfoot.style.opacity = '';
             EXfoot.style.transform = '';
+            EXleftMenu.style.height = '';
         }
     }
     if (inp.side == 1) {
@@ -4562,13 +4575,14 @@ function setOptionHead() {
     var jo, jp;
     var eo;
     var to = '';
-    var selCome,
+    let selCome,
         selComesend,
         selComesendinpp,
         selComesendinp,
         selComelist,
         selComelistp,
         selHead,
+        selLeftMenu,
         selFoot,
         selSide,
         selChli,
@@ -4926,6 +4940,15 @@ function setOptionHead() {
         t += selFoot + '{visibility:visible;opacity:1;transform:translate(0);}';
     }
 
+    selLeftMenu = dl.getElementSingleSelector(EXleftMenu);
+    if ($(selLeftMenu).length != 1) {
+        console.log('?EXleftMenu ' + selLeftMenu);
+        selLeftMenu = alt ? '.c-application-SideNavigation__wrapper' : '';
+    }
+    if (selFoot) {
+        t += selFoot + '{visibility:visible;opacity:1;transform:translate(0);}';
+    }
+
     selSide = dl.getElementSingleSelector(EXsidebtn);
     if ($(selSide).length != 1) {
         console.log('?EXsidebtn ' + selSide);
@@ -5181,7 +5204,7 @@ function setOptionHead() {
             selFoot +
             '>div>div:nth-child(2),' +
             selHead +
-            '>nav{background:rgba(0,0,0,' +
+            '>nav,'+selLeftMenu+'>nav{background:rgba(0,0,0,' +
             settings.panelOpacity / 255 +
             ')}';
 
@@ -5189,7 +5212,7 @@ function setOptionHead() {
             selFoot +
             '>div>div:nth-child(2)>*,' +
             selHead +
-            '>*{opacity:' +
+            '>*,'+selLeftMenu+'>*{opacity:' +
             (settings.panelOpacity / 255 < 0.7
                 ? 0.7
                 : settings.panelOpacity / 255) +
@@ -5282,7 +5305,7 @@ function setOptionElement() {
     //         );
     // }
     const settingMenuHtml = `
-    <li class="com-application-SideNavigationItem ext-menu-item" id="ext-menu-settings"><a href=${chrome.extension.getURL('/pages/option.html')}" target="_blank" class="com-a-Link com-a-Link--block">
+    <li class="com-application-SideNavigationItem ext-menu-item" id="ext-menu-settings"><a href="${chrome.extension.getURL('/pages/option.html')}" target="_blank" class="com-a-Link com-a-Link--block">
         <div class="com-application-SideNavigationItemContent">
             <div class="com-application-SideNavigationItemContent__text">拡張機能設定</div>
         </div>

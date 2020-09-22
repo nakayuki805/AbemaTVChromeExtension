@@ -61,7 +61,7 @@ export function getVideoAreaElement() {
     return parents && parents[0];
 }
 export function getHeaderElement() {
-    return document.getElementsByTagName('header')[0];
+    return document.getElementsByTagName('header')[0]?.parentElement;
     // return dl.parentsFilterLastByArray(
     //     document.querySelectorAll(
     //         '[*|href*="/logo.svg"][*|href$="#svg-body"]:not([href])'
@@ -71,7 +71,7 @@ export function getHeaderElement() {
 }
 export function getLeftMenuElement(){
     const es = dl.filter(document.getElementsByTagName('nav'),{left14l:true,filter:e=>!document.getElementsByTagName('header')[0].contains(e)});
-    return es && es[0];
+    return es?.[0]?.parentElement;
 }
 export function getViewCounterElement() {
     const svg = document.querySelectorAll(
