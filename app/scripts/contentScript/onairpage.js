@@ -3125,39 +3125,55 @@ function getFootcomeBtnElement(returnSingleSelector) {
     if (!ret) return null;
     return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
 }
+// function getSideBtnElement(returnSingleSelector) {
+//     //console.log("?sidebtn");
+//     //リストアイコンを孫にもち右方にあるものをsidebtnとする
+//     var listIcon = $('[*|href*="/list.svg"][*|href$="#svg-body"]:not([href])');
+//     //フッターにあるものを除外
+//     if (!EXfoot) {
+//         return null;
+//     }
+//     var ret = null;
+//     for (var i = 0; i < listIcon.length; i++) {
+//         if ($(EXfoot).has(listIcon.get(i)).length == 0) {
+//             ret = listIcon.get(i);
+//         }
+//     }
+//     if (!ret) {
+//         console.log('?sidebtn');
+//         return null;
+//     }
+//     var rep = ret.parentElement;
+//     var b = rep.getBoundingClientRect();
+//     while (
+//         rep.tagName.toUpperCase() != 'BODY' &&
+//         b.left > (window.innerWidth * 3) / 4
+//     ) {
+//         ret = rep;
+//         rep = ret.parentElement;
+//         b = rep.getBoundingClientRect();
+//     }
+//     if (rep.tagName.toUpperCase() == 'BODY') {
+//         console.log('?sidebtn');
+//         return null;
+//     }
+//     return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
+// }
 function getSideBtnElement(returnSingleSelector) {
-    //console.log("?sidebtn");
-    //リストアイコンを孫にもち右方にあるものをsidebtnとする
-    var listIcon = $('[*|href*="/list.svg"][*|href$="#svg-body"]:not([href])');
-    //フッターにあるものを除外
-    if (!EXfoot) {
+    // 右チャンネル切り替えボタン
+    // 上矢印と下矢印の両方を内包する要素
+    const arrowUp=document.querySelector('[*|href*="/arrow_up.svg"]');
+    const arrowDown=document.querySelector('[*|href*="/arrow_down.svg"]');
+    if(!arrowUp){
+        console.log('?sidebtn (!arrowUp)');
         return null;
     }
-    var ret = null;
-    for (var i = 0; i < listIcon.length; i++) {
-        if ($(EXfoot).has(listIcon.get(i)).length == 0) {
-            ret = listIcon.get(i);
-        }
-    }
-    if (!ret) {
-        console.log('?sidebtn');
+    if(!arrowDown){
+        console.log('?sidebtn (!arrowDown)');
         return null;
     }
-    var rep = ret.parentElement;
-    var b = rep.getBoundingClientRect();
-    while (
-        rep.tagName.toUpperCase() != 'BODY' &&
-        b.left > (window.innerWidth * 3) / 4
-    ) {
-        ret = rep;
-        rep = ret.parentElement;
-        b = rep.getBoundingClientRect();
-    }
-    if (rep.tagName.toUpperCase() == 'BODY') {
-        console.log('?sidebtn');
-        return null;
-    }
-    return returnSingleSelector ? dl.getElementSingleSelector(ret) : ret;
+    const bothParent = dl.filter(dl.parents(arrowUp),{containElement:arrowDown})[0];
+    return returnSingleSelector ? dl.getElementSingleSelector(bothParent) : bothParent;
 }
 function getInfoElement(returnSingleSelector) {
     //console.log("?info");
@@ -4710,6 +4726,7 @@ function setOptionHead() {
         selLeftMenu,
         selFoot,
         selSide,
+        selSideWrapper,
         selChli,
         selInfo,
         selVideoarea,
@@ -5082,6 +5099,9 @@ function setOptionHead() {
     if (selSide) {
         t += selSide + '{transform:translateY(-50%);opacity:0.5}';
     }
+    // 右ボタンのz-indexを変える(元4)
+    selSideWrapper = ".c-tv-NowOnAirContainer__remote-controller";
+    t += selSideWrapper + '{z-index:20;}';
 
     selChli = dl.getElementSingleSelector(EXchli);
     if ($(selChli).length != 1) {
@@ -5187,6 +5207,8 @@ function setOptionHead() {
     //8 overlap 映像クリック受付(クリックイベントは常時無効) 元3
     //7 #moveContainer 流れるコメント(クリックイベントは常時無効)
     //6 #ComeMukouMask 画面装飾、映像クリック受付(クリックはここで受ける)
+
+    //z-indexを変更しなくて済むようにしたい　//TODO
 
     let fullscrSlector = dl.getElementSingleSelector(EXfullscr);
     if ($(fullscrSlector).length != 1) {
@@ -7527,25 +7549,33 @@ function onairBasefunc() {
                         .not('#copyinfo')
                         .first()
                         .addClass('originalinfo')
-                        .clone()
+                        .attr('id','originalinfo')
+                        .clone() //複製
                         .removeClass()
                         .addClass('usermade')
+                        .addClass($('#originalinfo').attr("class").split(" ").filter(c=>c&&c!="originalinfo"))
                         .prop('id', 'copyinfo')
                         .appendTo($(EXinfo));
                     //番組情報のSNSボタンのイベント設定
-                    $('#copyinfo ul>li button').click(function(e) {
-                        $(EXinfo)
-                            .children()
-                            .not('#copyinfo')
-                            .first()
-                            .find('ul>li button')
-                            .eq(
-                                $(e.target)
-                                    .parent()
-                                    .index()
-                            )
-                            .trigger('click');
-                    });
+                    // $('#copyinfo ul>li button').on('click',function(e) {
+                    //     $(EXinfo)
+                    //         .children()
+                    //         .not('#copyinfo')
+                    //         .first()
+                    //         .find('ul>li button')
+                    //         .eq(
+                    //             $(e.target)
+                    //                 .parent()
+                    //                 .index()
+                    //         )
+                    //         .trigger('click');
+                    // });
+                    //番組情報のボタンイベント設定
+                    const origBtns = document.getElementById('originalinfo').getElementsByTagName('button');
+                    const copyBtns = document.getElementById('copyinfo').getElementsByTagName('button');
+                    Array.from(copyBtns).forEach((btn,i)=>{
+                        btn.addEventListener("click",()=>origBtns[i].click());
+                    })
                 }
             }
         }else if(proEnd.getTime()-Date.now()<0){
