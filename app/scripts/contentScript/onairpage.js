@@ -232,7 +232,132 @@ export function onairCleaner() {
     commentObserver.disconnect();
     resizeObserver.disconnect();
 }
-function onresize(isAgain) {
+function onresize(isAgain){
+    console.log("onresize")
+    const video = getElm.getVideo();
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR || !EXvideoarea || !video)
+        return;
+    const playerContainer = EXvideoarea.parentElement; // 映像を内包する映像と同じ大きさで一番祖先の要素 (videoと大きさ同じ)
+    const tvScreen = playerContainer.parentElement; // 映像が表示されうる領域の要素 (標準状態でコメ欄除く全画面)
+    const playerContainerRect = playerContainer.getBoundingClientRect();
+    let tvScreenRect = tvScreen.getBoundingClientRect();
+
+    if (resizeAgainTimer > 0) clearTimeout(resizeAgainTimer);
+    const settingWindow = document.getElementById('settcont');
+    const isSettingOpen =
+        settingWindow && settingWindow.style.display !== 'none';
+    const isResizeScreen = isSettingOpen
+        ? document.getElementById('isResizeScreen').checked
+        : settings.isResizeScreen;
+    const isMovieSpacingZeroTop = isSettingOpen
+        ? document.getElementById('isMovieSpacingZeroTop').checked
+        : settings.isMovieSpacingZeroTop;
+    const isResizeSpacing = isSettingOpen
+        ? document.getElementById('isResizeSpacing').checked
+        : settings.isResizeSpacing;
+    const isDAR43 = isSettingOpen
+        ? document.getElementById('isDAR43').checked
+        : settings.isDAR43;
+    const isMovieSpacingZeroLeft = isSettingOpen
+        ? document.getElementById('isMovieSpacingZeroLeft').checked
+        : settings.isMovieSpacingZeroLeft;
+    const isVideoResizeNeeded =
+        isDAR43 ||
+        isMovieSpacingZeroTop ||
+        isResizeSpacing ||
+        isMovieSpacingZeroLeft ||
+        isResizeScreen;
+    
+    //映像が表示可能な領域について:
+    // 映像をウィンドウに合わせてリサイズ有効時に横幅いっぱい広げる
+    if (isResizeScreen) {
+        // console.log(EXvideoarea, window.innerWidth)
+        tvScreen.style.width = window.innerWidth + 'px';
+        // EXvideoarea.style.height = window.innerHeight + 'px';
+    }else{
+        tvScreen.style.width = '';
+    }
+    // 上下位置をメニューの分だけ少し開ける有効時に黒帯の分だけマージン取る
+    if (isResizeSpacing) {
+        if(isAgain){
+            EXvideoarea.style.height = window.innerHeight - headerHeight + 'px';//EXvideoareaのheight変更は後からやらないとフリーズする
+        }
+        tvScreen.style.height = window.innerHeight - headerHeight + 'px';
+        tvScreen.style.marginTop = headerHeight + 'px';
+    } else {
+        tvScreen.style.height = '';
+        tvScreen.style.marginTop = '';
+    }
+    
+    // 映像の大きさ調整
+    tvScreenRect = tvScreen.getBoundingClientRect();
+    if(isVideoResizeNeeded){
+        let newHeight = tvScreenRect.height;
+        if(tvScreenRect.height>tvScreenRect.width*3/4){// 4:3モードであっても縦が長い場合横いっぱいに表示
+            playerContainer.style.width = tvScreenRect.width+"px";
+            newHeight = tvScreenRect.width*9/16;
+            playerContainer.style.height = newHeight+"px";
+            // TODO:  4:3モード時ズームして左を見切れさせる(margin-left:マイナス)
+        }else if(tvScreenRect.height>tvScreenRect.width*9/16){// 4:3モードなら縦が短いがそうでないなら縦が長い場合
+            if(isDAR43){//縦いっぱいに表示
+                playerContainer.style.width = tvScreenRect.height*16/9+"px";
+                playerContainer.style.height = newHeight+"px";
+                // TODO: ↓の見切れ処理がうまくいかない
+                playerContainer.style.marginLeft = (tvScreenRect.width-tvScreenRect.height*16/9)/2+'px';
+            }else{ //横いっぱいに表示
+                playerContainer.style.width = tvScreenRect.width+"px";
+                newHeight = tvScreenRect.width*9/16;
+                playerContainer.style.height = newHeight+"px";
+            }
+        }else{//縦いっぱいに表示
+            playerContainer.style.width = tvScreenRect.height*16/9+"px";
+            playerContainer.style.height = newHeight+"px";
+            playerContainer.style.marginLeft = '';
+        }
+        if(isAgain){
+            EXvideoarea.style.height = newHeight+"px";//EXvideoareaのheight変更は後からやらないとフリーズする
+        }
+    }else{
+        playerContainer.style.width = "";
+        playerContainer.style.height =  "";
+        playerContainer.style.marginLeft = '';
+    }
+
+    // 設定に応じて映像位置を詰める:
+    //縦に詰める
+    if (isMovieSpacingZeroTop || isResizeSpacing) {
+        const currentTop = parseInt(playerContainer.style.top||0);
+        playerContainer.style.top = (currentTop+tvScreenRect.top-playerContainerRect.top)+'px';
+    }else{
+        playerContainer.style.top = '';
+    }
+    // 横に詰める
+    const currentLeft = parseInt(playerContainer.style.left||0);
+    if (isMovieSpacingZeroLeft) {
+        const videoContainerRect = playerContainer.getBoundingClientRect();
+        // const left = isDAR43
+        //     ? (-1 *
+        //           (videoContainerRect.width -
+        //               videoContainerRect.height * (4 / 3))) /
+        //       2
+        //     : 0;
+        // videoContainer.style.left = `-${offset}px`;
+        //console.log(left)
+        playerContainer.style.left = (currentLeft+tvScreenRect.left-playerContainerRect.left )+ 'px';
+        // video.style.width = '';
+    } else {
+        if(isVideoResizeNeeded){
+            const playerContainerLeftTarget = (tvScreenRect.width-playerContainerRect.width)/2;
+            playerContainer.style.left = (currentLeft+tvScreenRect.left+playerContainerLeftTarget-playerContainerRect.left )+ 'px';
+        }else{
+            playerContainer.style.left = '';
+        }
+    }
+    //TODO 4:3対応
+
+    if (!isAgain) resizeAgainTimer = setTimeout(onresize, 1000, true);
+}
+function onresize_old(isAgain) {
     const video = getElm.getVideo();
     if (getInfo.determineUrl() !== getInfo.URL_ONAIR || !EXvideoarea || !video)
         return;
@@ -5365,7 +5490,7 @@ function pophideSelector(sv, sw) {
 }
 function isFootcomeClickable() {
     //コメント数ボタンがクリックできるかどうか
-    return !EXfootcountcome.disabled;
+    return EXfootcountcome&&!EXfootcountcome.disabled;
 }
 function usereventMouseover() {
     if (forElementClose < 4) {

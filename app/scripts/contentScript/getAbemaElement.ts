@@ -103,7 +103,7 @@ export function getFooterElement() {
         document.querySelectorAll(
             'img[src*="/channels/logo/' + channelName + '"]'
         ),
-        { top34d: true, right14l: true }
+        { top34d: true, left14l: true }
     )[0];
     if (!footerLogo) {
         console.log('?footer(!footerLogo)');
