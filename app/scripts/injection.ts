@@ -94,8 +94,8 @@ function inj_delaysetComment() {
     let comelistInstance = null;
     const comelist = document.getElementsByClassName('ext_abm-comelist')[0];
     const come = document.getElementsByClassName('ext_abm-come')[0];
-    if (come) {
-        comelistInstance = inj_findReact(comelist as HTMLElement);
+    if (comelist) {
+        comelistInstance = inj_findReact(comelist.parentElement as HTMLElement);
     }
     if (comelistInstance !== null) {
         // console.log('comelistInstance:', comelistInstance);

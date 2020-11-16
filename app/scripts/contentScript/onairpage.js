@@ -895,8 +895,6 @@ function delayset(
         EXcomesendinp = null;
         EXcomelist = null;
         EXinfo = null;
-        const ci = document.getElementById('copyinfo');
-        if (ci) ci.remove();
         isCome = false;
         isComesend = false;
         isComesendinp = false;
@@ -954,8 +952,6 @@ function delayset(
         isCome = true;
 
         EXinfo = null;
-        const ci = document.getElementById('copyinfo');
-        if (ci) ci.remove();
         EXchli = null;
         isInfo = false;
         isChli = false;
@@ -1313,7 +1309,7 @@ function createSettingWindow() {
         settcont +=
             'width:670px;position:absolute;right:40px;top:' +
             headerHeight +
-            'px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:16;flex-flow:column;'; //head11より上の残り時間12,13,14より上の番組情報等15より上
+            'px;background-color:white;opacity:0.8;padding:20px;display:none;z-index:20;flex-flow:column;'; //head11より上の残り時間12,13,14より上の番組情報等15より上の右チャンネルボタン16より上
         //ピッタリの658pxから少し余裕を見る
         settcont += '">';
         //設定ウィンドウの中身
@@ -3178,14 +3174,12 @@ function getSideBtnElement(returnSingleSelector) {
 function getInfoElement(returnSingleSelector) {
     //console.log("?info");
     //ズバリ番組概要と書かれた要素を孫にもち右方にあるものをinfoとする
-    //copyinfo後だとinfoのdisplay:noneでclientrectが取れない
+    //copyinfo後だとinfoのdisplay:noneでclientrectが取れない →copyinfo廃止済み
     let ret = null;
     let h3a = document.getElementsByTagName('h3');
-    let copyinfo = document.getElementById('copyinfo');
     const h3 = Array.from(h3a).filter(e => {
         return (
-            e.textContent.indexOf('詳細情報') >= 0 &&
-            (!copyinfo || !copyinfo.contains(e))
+            e.textContent.indexOf('詳細情報') >= 0 
         );
     })[0];
     if (!h3) {
@@ -5101,7 +5095,7 @@ function setOptionHead() {
     }
     // 右ボタンのz-indexを変える(元4)
     selSideWrapper = ".c-tv-NowOnAirContainer__remote-controller";
-    t += selSideWrapper + '{z-index:20;}';
+    t += selSideWrapper + '{z-index:16;}';
 
     selChli = dl.getElementSingleSelector(EXchli);
     if ($(selChli).length != 1) {
@@ -5189,8 +5183,8 @@ function setOptionHead() {
     }
     t += '}';
     //変更後のz-index(これを書いてる時点)
-    //20 side 右のボタン
-    //16 #settcont 一時設定画面
+    //20 #settcont 一時設定画面
+    //16 side 右のボタン
     //15 right-slide 番組情報
     //15 right-list-slide 放送中一覧
     //14 #forProEndTxt 残り時間
@@ -5208,7 +5202,7 @@ function setOptionHead() {
     //7 #moveContainer 流れるコメント(クリックイベントは常時無効)
     //6 #ComeMukouMask 画面装飾、映像クリック受付(クリックはここで受ける)
 
-    //z-indexを変更しなくて済むようにしたい　//TODO
+    //z-indexを変更しなくて済むようにしたい //TODO
 
     let fullscrSlector = dl.getElementSingleSelector(EXfullscr);
     if ($(fullscrSlector).length != 1) {
@@ -5379,11 +5373,6 @@ function setOptionHead() {
         t += selChLogoDiv + '{background-color:transparent !important;}';
     }
 
-    //番組情報のコピー置換
-    if (selInfo) {
-        t += selInfo + '>.originalinfo{display:none;}';
-        t += selInfo + '>#copyinfo{width:100%;padding:15px;}';
-    }
 
     let styleLink = $('head>link#extstyle');
     let dataUri = 'data:text/css,' + encodeURIComponent(t);
@@ -7379,7 +7368,7 @@ function onairBasefunc() {
         //残り時間取得
         if (EXinfo) {
             var eProTime = $(EXinfo)
-                .children('div:not(#copyinfo)')
+                .children('div')
                 .find('h2')
                 .nextAll()
                 .eq(1);
@@ -7526,13 +7515,11 @@ function onairBasefunc() {
         if (EXinfo) {
             let jo = $(EXinfo)
                 .children()
-                .not('#copyinfo')
                 .find('h2');
             if (jo.length > 0) {
                 var tp = jo.first().text();
                 if (
-                    (tp && proTitle != tp) ||
-                    !document.getElementById('copyinfo')
+                    (tp && proTitle != tp) 
                 ) {
                     //if (proTitle != jo.first().text()) {//if ($('#tProtitle').text() != jo.first().text()) {
                     proTitle = tp;
@@ -7540,42 +7527,6 @@ function onairBasefunc() {
                         $('#tProtitle').text(proTitle);
                     }
                     setTimeout(applyCommentListNG, 300);
-                    //番組情報(コピー)を更新
-                    $(EXinfo)
-                        .children('#copyinfo')
-                        .remove();
-                    $(EXinfo)
-                        .children()
-                        .not('#copyinfo')
-                        .first()
-                        .addClass('originalinfo')
-                        .attr('id','originalinfo')
-                        .clone() //複製
-                        .removeClass()
-                        .addClass('usermade')
-                        .addClass($('#originalinfo').attr("class").split(" ").filter(c=>c&&c!="originalinfo"))
-                        .prop('id', 'copyinfo')
-                        .appendTo($(EXinfo));
-                    //番組情報のSNSボタンのイベント設定
-                    // $('#copyinfo ul>li button').on('click',function(e) {
-                    //     $(EXinfo)
-                    //         .children()
-                    //         .not('#copyinfo')
-                    //         .first()
-                    //         .find('ul>li button')
-                    //         .eq(
-                    //             $(e.target)
-                    //                 .parent()
-                    //                 .index()
-                    //         )
-                    //         .trigger('click');
-                    // });
-                    //番組情報のボタンイベント設定
-                    const origBtns = document.getElementById('originalinfo').getElementsByTagName('button');
-                    const copyBtns = document.getElementById('copyinfo').getElementsByTagName('button');
-                    Array.from(copyBtns).forEach((btn,i)=>{
-                        btn.addEventListener("click",()=>origBtns[i].click());
-                    })
                 }
             }
         }else if(proEnd.getTime()-Date.now()<0){
