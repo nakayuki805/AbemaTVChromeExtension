@@ -426,15 +426,6 @@ export const settings: SettingList[] = [
                 hasDescImage: true
             },
             {
-                name: 'isComeTriming',
-                description:
-                    '↑常にコメント欄を表示するような場合にコメント欄が上下に縮まないように上下黒帯を横に縮める',
-                type: 'boolean',
-                isInstantChangable: true,
-                default: false,
-                hasDescImage: true
-            },
-            {
                 name: 'isCommentPadZero',
                 description: 'コメントの縦の隙間を詰める',
                 instantDescription: 'コメントの縦の隙間を詰める',
@@ -962,6 +953,15 @@ export const settings: SettingList[] = [
                 isInstantChangable: true,
                 default: 500,
                 range: [101],
+                hasDescImage: true
+            },
+            {
+                name: 'isComeTriming',
+                description:
+                    '公式で黒帯が縮まるので廃止<s>常にコメント欄を表示するような場合にコメント欄が上下に縮まないように上下黒帯を横に縮める</s>',
+                type: 'boolean',
+                isInstantChangable: true,
+                default: false,
                 hasDescImage: true
             }
         ]

@@ -40,7 +40,7 @@ var panelopenset = [[1, 1, 1], [0, 0, 0], [0, 0, 0], [0, 0, 0]]; //head,foot,sid
 export const headerHeight = 68;
 
 const footerHeight = 64;
-const commentListWidth = 310;
+const commentListWidth = 320;
 const volumeRight = 20;
 const fullscrRight = 72;
 
@@ -2026,7 +2026,7 @@ function epcountchange() {
         } else {
             $('#proTimeEpNum')
                 .css('right', 0)
-                .css('width', '310px')
+                .css('width', 310+'px')
                 .css('border-right', '');
         }
         if (proLength > 0) {
@@ -2488,6 +2488,7 @@ function pophideElement(inp) {
         inp.commentlist = 0;
     }
     var comefix = false;
+    const isShowRightPanel = isSlideOpen();
     if (inp.head !== undefined) {
         comefix = true;
         if (inp.head == 1) {
@@ -2532,6 +2533,11 @@ function pophideElement(inp) {
             EXfoot.style.transform = '';
             EXleftMenu.style.height = '';
         }
+    }
+    if(isShowRightPanel && !settings.isSureReadComment){ // コメ欄常に表示じゃない時はここで右パネル開いたときにフッタ縮める
+        EXfoot.style.width = `calc(100% - ${commentListWidth}px)`;
+    }else{
+        EXfoot.style.width = "";
     }
     if (inp.side == 1) {
         EXsidebtn.style.transform = 'translateY(-50%)';
@@ -2635,10 +2641,11 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     var psame = inpsame !== undefined ? inpsame : settings.proSamePosition;
     //画面上部の設定
     if (
-        !(settings.isComeTriming && settings.isSureReadComment) &&
+        // !(settings.isComeTriming && settings.isSureReadComment) &&
         $(EXhead).css('visibility') == 'visible'
     ) {
         //ヘッダ表示時
+        //ヘッダーは公式で短くなる(コメ欄にかからない)ようになったのでコメ欄のtopは触らないように変更
         if (settings.isInpWinBottom) {
             //入力欄が下＝コメ欄が上＝対象はjcomeのtopmargin
             if (
@@ -2646,9 +2653,10 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
                 ptitle == 'windowtopright' &&
                 psame == 'vertical'
             ) {
-                jcmtop = Math.max(htime + htitle - 8, headerHeight);
+                // jcmtop = Math.max(htime + htitle - 8, headerHeight);
+                jcmtop = htime + htitle - 8;
             } else {
-                jcmtop = headerHeight;
+                // jcmtop = headerHeight;
             }
             jcct = jcmtop;
             jcchd += jcmtop;
@@ -2659,9 +2667,10 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
                 ptitle == 'windowtopright' &&
                 psame == 'vertical'
             ) {
-                jfmtop = Math.max(htime + htitle - 8, headerHeight);
+                // jfmtop = Math.max(htime + htitle - 8, headerHeight);
+                jfmtop = htime + htitle - 8;
             } else {
-                jfmtop = headerHeight;
+                // jfmtop = headerHeight;
             }
             if (
                 ptime == 'commentinputtop' &&
@@ -2750,7 +2759,7 @@ function comemarginfix(repeatcount, inptime, inptitle, inpsame, inpbig) {
     $(EXfullscr).css('bottom', '');
 
     if (
-        !(settings.isComeTriming && settings.isSureReadComment) &&
+        // !(settings.isComeTriming && settings.isSureReadComment) &&
         $(EXfoot).css('visibility') == 'visible'
     ) {
         //フッタ表示時
@@ -4129,17 +4138,17 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
     if (timeshown == 'windowtop' && titleshown == 'windowtopright') {
         switch (inpsame) {
             case 'over':
-                tpro.css('right', '310px').css('transform', 'translateX(100%)');
+                tpro.css('right', commentListWidth+'px').css('transform', 'translateX(100%)');
                 break;
             case 'vertical':
                 forpros.css('top', tproh - 4 + 'px');
                 if (tprow <= 320) {
                     prehoverContents
                         .css(
-                            'margin-right',
+                            'margin-right',/*
                             settings.isComeTriming && settings.isSureReadComment
                                 ? ''
-                                : '310px'
+                                : */commentListWidth+'px'
                         )
                         .css('margin-top', '')
                         .css('margin-left', '12px')
@@ -4152,10 +4161,10 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
                 } else {
                     prehoverContents
                         .css(
-                            'margin-right',
+                            'margin-right',/*
                             settings.isComeTriming && settings.isSureReadComment
                                 ? ''
-                                : '310px'
+                                : */commentListWidth+'px'
                         )
                         .css('margin-left', '12px')
                         .prev()
@@ -4166,7 +4175,7 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
                 }
                 break;
             case 'horizontal':
-                tpro.css('right', '310px');
+                tpro.css('right', commentListWidth+'px');
                 break;
             case 'horizshort':
                 tpro.css('right', fprow + 8 + 'px');
@@ -4179,11 +4188,11 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
     ) {
         switch (inpsame) {
             case 'over':
-                tpro.css('right', '310px').css('transform', 'translateX(100%)');
+                tpro.css('right', commentListWidth+'px').css('transform', 'translateX(100%)');
                 break;
             case 'vertical':
                 tpro.css('bottom', fproh - 4 + 'px');
-                $(EXfootcome).css('margin-right', '310px');
+                $(EXfootcome).css('margin-right', commentListWidth+'px');
                 if (tprow <= 320) {
                     parexfootcount.css('margin-bottom', '');
                     $(EXfootcome)
@@ -4198,7 +4207,7 @@ function proSamePositionFix(inptime, inptitle, inpsame, inpbig) {
                 }
                 break;
             case 'horizontal':
-                tpro.css('right', '310px');
+                tpro.css('right', commentListWidth+'px');
                 break;
             case 'horizshort':
                 tpro.css('right', fprow + 8 + 'px');
@@ -4350,8 +4359,8 @@ function setProtitlePosition(timepar, titlepar, samepar, bigpar) {
         case 'windowtopright':
         case 'headerright':
             if (
-                settings.isComeTriming &&
-                settings.isSureReadComment &&
+                // settings.isComeTriming &&
+                // settings.isSureReadComment &&
                 tprow <= 320
             )
                 break;
@@ -4492,7 +4501,7 @@ function createTime(sw, bt) {
             eForProEndBk +=
                 'font-size:' +
                 fsize +
-                ';position:absolute;top:0px;right:0;width:310px;';
+                `;position:absolute;top:0px;right:0;width:310px;`;
             eForProEndBk += '"></span>';
             //            EXcome.insertBefore(eForProEndBk,EXcome.firstChild);
             $(eForProEndBk).prependTo(document.body);
@@ -4603,7 +4612,7 @@ function setTimePosition(timepar, titlepar, samepar, bigpar) {
     switch (par) {
         case 'windowtop':
         case 'header':
-            if (settings.isComeTriming && settings.isSureReadComment) break;
+            // if (settings.isComeTriming && settings.isSureReadComment) break;
             var hmt = fproh - 12 + Math.floor((headh - fproh - 12) / 2);
             prehoverContents
                 .css('margin-top', hmt + 'px')
@@ -5224,7 +5233,7 @@ function setOptionHead() {
         }
     }
     //常にコメ欄表示時、全画面・音量ボタンをずらす
-    if (settings.isSureReadComment && !settings.isComeTriming) {
+    if (settings.isSureReadComment/* && !settings.isComeTriming*/) {
         if (fullscrSlector) {
             t +=
                 fullscrSlector +
@@ -5331,13 +5340,18 @@ function setOptionHead() {
                 ' button>span:not(#viewcountcont):not(#comecountcont){display:none;}';
         }
     }
-    //コメ欄常時表示時に伸張する
-    if (settings.isComeTriming && settings.isSureReadComment) {
-        // フッターは公式で縮むようなのでコメントアウト
-        if (selHead /* && selFoot*/)
-            t += selHead + /*',' + selFoot*/ +'{width:calc(100% - 310px);}';
-        if (selHead) t += selHead + '>*{min-width:unset;}';
+    //コメ欄常時表示時に伸張する →ヘッダーは伸縮するがフッターは伸縮しない(正確にはフッターは映像表示域と同じ幅なので拡張で映像位置サイズ変えると重なってしまう)
+    if (/*settings.isComeTriming &&*/ settings.isSureReadComment) {
+        if (/*selHead  &&*/ selFoot)
+            t += /*selHead + ',' + */selFoot +`{width:calc(100% - ${commentListWidth}px);}`;
+        // if (selHead) t += selHead + '>*{min-width:unset;}';
+        // if (selHead) t += selHead + ' nav{width:100% !important;}'; //ここでヘッダー全体を縮めているので公式がnavを縮めているのは無視する
         //
+    }
+    if(selHead){
+        // ヘッダーが伸縮する際、公式は子の要素しか伸縮せず、トップの要素が伸縮しないためコメ欄にかぶるから、コメ欄が押せるようイベントを透過させる
+        t += selHead + '{pointer-events:none;}';
+        t += selHead +'>*{pointer-events:auto;}';
     }
     //黒帯パネルの透過
     if (selHead && selFoot) {
@@ -5835,10 +5849,10 @@ function usereventFCclick() {
             }, 500); // コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
         }
         // コメ欄が開かれるので全画面・音量ボタンずらす(黒帯トリミングの場合は不要)
-        if (!(settings.isComeTriming && settings.isSureReadComment)) {
+        // if (!(settings.isComeTriming && settings.isSureReadComment)) {
             EXfullscr.style.right = commentListWidth + fullscrRight + 'px';
             EXvolume.style.right = commentListWidth + volumeRight + 'px';
-        }
+        // }
     }
     var jo = $(getElm.getVideo());
     if (jo.length !== 0 && !waitingforResize) {
