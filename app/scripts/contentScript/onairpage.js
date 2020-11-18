@@ -2498,6 +2498,7 @@ function pophideElement(inp) {
             EXleftMenu.style.visibility = 'visible';
             EXleftMenu.style.opacity = '1';
             EXleftMenu.style.transform = 'translate(0)';
+            EXfoot.style.paddingLeft = '64px'; // 左メニュー表示時はフッタの左端を開ける
         } else if (inp.head == -1) {
             EXhead.style.visibility = 'hidden';
             EXhead.style.opacity = '0';
@@ -2505,6 +2506,7 @@ function pophideElement(inp) {
             EXleftMenu.style.visibility = 'hidden';
             EXleftMenu.style.opacity = '0';
             EXleftMenu.style.transform = 'translateY(-100%)';
+            EXfoot.style.paddingLeft = ''; 
         } else if (inp.head == 0) {
             EXhead.style.visibility = '';
             EXhead.style.opacity = '';
@@ -2512,6 +2514,7 @@ function pophideElement(inp) {
             EXleftMenu.style.visibility = '';
             EXleftMenu.style.opacity = '';
             EXleftMenu.style.transform = '';
+            EXfoot.style.paddingLeft = ''; 
         }
     }
     if (inp.foot !== undefined) {
@@ -2520,8 +2523,8 @@ function pophideElement(inp) {
             EXfoot.style.visibility = 'visible';
             EXfoot.style.opacity = '1';
             EXfoot.style.transform = 'translate(0)';
-            EXleftMenu.children[0].style.height = `calc( 100vh  - ${headerHeight}px - ${footerHeight}px )`; //フッター表示時に左メニューがかぶらないように
-            console.log('foot visible',EXleftMenu.children[0])
+            // EXleftMenu.children[0].style.height = `calc( 100vh  - ${headerHeight}px - ${footerHeight}px )`; //フッター表示時に左メニューがかぶらないように
+            // console.log('foot visible',EXleftMenu.children[0])
         } else if (inp.foot == -1) {
             EXfoot.style.visibility = 'hidden';
             EXfoot.style.opacity = '0';
@@ -2534,7 +2537,7 @@ function pophideElement(inp) {
             EXleftMenu.style.height = '';
         }
     }
-    if(isShowRightPanel && !settings.isSureReadComment){ // コメ欄常に表示じゃない時はここで右パネル開いたときにフッタ縮める
+    if(isShowRightPanel && !settings.isSureReadComment && settings.isResizeScreen){ // コメ欄常に表示じゃない時はここで右パネル開いたときにフッタ縮める
         EXfoot.style.width = `calc(100% - ${commentListWidth}px)`;
     }else{
         EXfoot.style.width = "";
@@ -3960,13 +3963,15 @@ function waitforOpenCome(retrycount) {
         comeFastOpen = false;
     }
 }
-let lastFootcomeTriggeredTime = 0;
+let lastFootcomeTriggeredTime = 0; 
+let isFirstComeOpenedWithSlide =false; // 放送画面毎(onairfunc)でリセットする
 function waitforOpenableCome(retrycount) {
     // console.log("waitforOpenableCome#"+retrycount);
     const nowTime = new Date().getTime();
     // コメ欄自動開閉が暴走しないようトリガーは最低3秒は開ける
+    // 放送画面開いたら公式で番組詳細が勝手に開くので初回だけコメ欄以外の右パネルが開いててもfootcomeトリガーする
     if (
-        !isSlideOpen() &&
+        (!isSlideOpen() || (!isFirstComeOpenedWithSlide && !isComeOpen())) &&
         isFootcomeClickable() &&
         nowTime - lastFootcomeTriggeredTime >= 3000
     ) {
@@ -3976,6 +3981,12 @@ function waitforOpenableCome(retrycount) {
         // console.log("comeopen waitforopenable");
         waitforOpenCome(5);
         lastFootcomeTriggeredTime = nowTime;
+        if(!isFirstComeOpenedWithSlide){ // この変数はコメ欄が開けたらtrueにする
+            setTimeout(()=>{
+                if(isComeOpen()){isFirstComeOpenedWithSlide=true;}
+            },1000);
+        }
+
     } else if (retrycount > 0) {
         setTimeout(waitforOpenableCome, 10, retrycount - 1);
     } else {
@@ -5341,7 +5352,7 @@ function setOptionHead() {
         }
     }
     //コメ欄常時表示時に伸張する →ヘッダーは伸縮するがフッターは伸縮しない(正確にはフッターは映像表示域と同じ幅なので拡張で映像位置サイズ変えると重なってしまう)
-    if (/*settings.isComeTriming &&*/ settings.isSureReadComment) {
+    if (/*settings.isComeTriming &&*/ settings.isSureReadComment && settings.isResizeScreen) {
         if (/*selHead  &&*/ selFoot)
             t += /*selHead + ',' + */selFoot +`{width:calc(100% - ${commentListWidth}px);}`;
         // if (selHead) t += selHead + '>*{min-width:unset;}';
@@ -5354,29 +5365,29 @@ function setOptionHead() {
         t += selHead +'>*{pointer-events:auto;}';
     }
     //黒帯パネルの透過
+    //フッターは公式がグラデーションになった
     if (selHead && selFoot) {
+        const transblack = 'rgba(0,0,0,' + settings.panelOpacity / 255 + ')';
         t +=
-            selFoot +
-            '>div>div:nth-child(2),' +
             selHead +
-            '>nav,'+selLeftMenu+'>nav{background:rgba(0,0,0,' +
-            settings.panelOpacity / 255 +
-            ')}';
-
+            '>nav,'+selLeftMenu+'>nav{background:' +
+            transblack +
+            '}';
+        t += selFoot + `>div{background-image: linear-gradient(180deg,transparent,${transblack});}`;
         t +=
             selFoot +
-            '>div>div:nth-child(2)>*,' +
+            '>*,' +
             selHead +
             '>*,'+selLeftMenu+'>*{opacity:' +
             (settings.panelOpacity / 255 < 0.7
                 ? 0.7
                 : settings.panelOpacity / 255) +
             '}';
-        t +=
-            selFoot +
-            '>div>div:nth-child(2)>div:nth-child(1):hover{background:rgba(32,32,32,' +
-            settings.panelOpacity / 255 +
-            ')}';
+        // t +=
+        //     selFoot +
+        //     '>div>div:nth-child(2)>div:nth-child(1):hover{background:rgba(32,32,32,' +
+        //     settings.panelOpacity / 255 +
+        //     ')}';
         //フッターチャンネルアイコンの背景を透過
         var selChLogoDiv = dl.getElementSingleSelector(
             $(EXfoot)
@@ -5555,8 +5566,7 @@ function usereventWakuclick() {
         }
     }
     if (settings.isSureReadComment) {
-        if (!isFootcomeClickable()) {
-        } else {
+        if (isFootcomeClickable()) {
             //overlapのclickにより閉じられるので早く開き直す
             if (!comeFastOpen && !comeRefreshing) {
                 comeFastOpen = true;
@@ -7088,6 +7098,7 @@ export function onairfunc() {
     //変数リセット
     isFirstComeAnimated = false;
     isBottomScrolled = false;
+    isFirstComeOpenedWithSlide = false;
     //要素チェック
     setEXs();
     delayset();
@@ -7383,9 +7394,8 @@ function onairBasefunc() {
         if (EXinfo) {
             var eProTime = $(EXinfo)
                 .children('div')
-                .find('h2')
-                .nextAll()
-                .eq(1);
+                .find('h2').eq(0)
+                .next();
             //            var reProTime = /(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?[　 ]*\~[　 ]*(?:(\d{1,2})[　 ]*[月\/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（\(][月火水木金土日][）\)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?/;
             var reProTime = /(?:(\d{1,2})[　 ]*[月/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（(][月火水木金土日][）)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?[　 ]*[~～〜\-－][　 ]*(?:(\d{1,2})[　 ]*[月/][　 ]*(\d{1,2})[　 ]*日?)?[　 ]*(?:[（(][月火水木金土日][）)])?[　 ]*(\d{1,2})[　 ]*[時:：][　 ]*(\d{1,2})[　 ]*分?/;
             var arProTime;
