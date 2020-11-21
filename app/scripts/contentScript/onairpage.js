@@ -233,6 +233,126 @@ export function onairCleaner() {
     resizeObserver.disconnect();
 }
 function onresize(isAgain){
+    console.log("onresize");
+    if (getInfo.determineUrl() !== getInfo.URL_ONAIR || !EXvideoarea) return;
+    if (resizeAgainTimer > 0) clearTimeout(resizeAgainTimer);
+    const settingWindow = document.getElementById('settcont');
+    const isSettingOpen =
+        settingWindow && settingWindow.style.display !== 'none';
+    const isResizeScreen = isSettingOpen
+        ? document.getElementById('isResizeScreen').checked
+        : settings.isResizeScreen;
+    const isMovieSpacingZeroTop = isSettingOpen
+        ? document.getElementById('isMovieSpacingZeroTop').checked
+        : settings.isMovieSpacingZeroTop;
+    const isResizeSpacing = isSettingOpen
+        ? document.getElementById('isResizeSpacing').checked
+        : settings.isResizeSpacing;
+    const isDAR43 = isSettingOpen
+        ? document.getElementById('isDAR43').checked
+        : settings.isDAR43;
+    const isMovieSpacingZeroLeft = isSettingOpen
+        ? document.getElementById('isMovieSpacingZeroLeft').checked
+        : settings.isMovieSpacingZeroLeft;
+    const isVideoResizeNeeded =
+        isDAR43 ||
+        isMovieSpacingZeroTop ||
+        isResizeSpacing ||
+        isMovieSpacingZeroLeft ||
+        isResizeScreen;
+    const isZeroTop = isMovieSpacingZeroTop || isResizeSpacing;
+
+    const playerContainer = EXvideoarea.parentElement; // 映像を内包する映像と同じ大きさで一番祖先の要素 (videoと大きさ同じ)
+    const tvScreen = playerContainer.parentElement; // 映像が表示されうる領域の要素 (標準状態でコメ欄除く全画面)
+
+    const top = isResizeSpacing ? headerHeight : 0;
+    const playableHeight = window.innerHeight-top;
+    const playableWidth = isResizeScreen ? window.innerWidth : tvScreen.getBoundingClientRect().width;
+
+    let videoAreaNewHeight = null;
+    let videoAreaNewWidth = null;
+    let videoAreaNewLRmargin = null;
+    // 映像が表示されうる領域を画面いっぱいにする
+    if(isResizeScreen){
+        if(top!==0){
+            tvScreen.style.height = window.innerHeight+'px';
+        }else{
+            tvScreen.style.height = '';
+        }
+        tvScreen.style.width = window.innerWidth+'px';
+        if(isAgain){
+            videoAreaNewHeight = playableHeight;//EXvideoareaのheight変更は後からやらないとフリーズすることがあった
+        }
+    }else{
+        tvScreen.style.height = '';
+        tvScreen.style.width = '';
+    }
+    // 上を開ける
+    if(top!==0){
+        tvScreen.style.paddingTop = top+'px';
+        if(isAgain && !isResizeScreen){ //上を開けた場合に公式の映像高さがオーバーする場合は高さ変更
+            const currentHeight = parseInt(EXvideoarea.style.height);
+            const newHeight = Math.min(currentHeight,playableHeight);
+            if(currentHeight!==newHeight) videoAreaNewHeight = newHeight;
+        }
+    }else{
+        tvScreen.style.paddingTop = '';
+    }
+
+    // videoareaのサイズを映像の実際に大きさに合わせる
+    let videoHeight = playableHeight;
+    let videoWidth = playableWidth;
+    if(isZeroTop || isMovieSpacingZeroLeft || isDAR43){
+        let lrmargin = 0;
+        if(!isDAR43){
+            if(playableWidth >= playableHeight*16/9){
+                videoWidth =  playableHeight*16/9;
+            }else{
+                videoHeight = playableWidth*9/16;
+            }
+        }else{ //4:3モード
+            if(playableWidth >= playableHeight*4/3){
+                videoWidth =  playableHeight*16/9; // 映像は16:9とする
+                // lrmargin = Math.min(0,playableWidth-videoWidth)/2;
+            }else{
+                videoHeight = playableWidth*3/4;
+                videoWidth = playableWidth*4/3;
+                // lrmargin = Math.min(0,videoWidth*3/4-videoWidth)/2;
+            }
+            lrmargin = Math.min(0,playableWidth-videoWidth)/2;
+            videoAreaNewLRmargin = lrmargin;
+        }
+        videoAreaNewHeight = videoHeight;
+        videoAreaNewWidth = videoWidth;
+    }
+
+    // つめる
+    let centeringFlexDirection = null;
+    let justifyContent = null;
+    if(isZeroTop){//上もしくは両方つめる
+        justifyContent = "start";
+        if(!isMovieSpacingZeroLeft){//左につめない (上だけ詰める)
+            videoAreaNewLRmargin += Math.max(0,(playableWidth-videoWidth)/2);
+        }
+    }else if(isMovieSpacingZeroLeft){//左だけ詰める
+        centeringFlexDirection = "column";
+    }
+    if(centeringFlexDirection) tvScreen.style.flexDirection = centeringFlexDirection;
+    else tvScreen.style.flexDirection = '';
+    if(justifyContent) tvScreen.style.justifyContent = justifyContent;
+    else tvScreen.style.justifyContent = '';
+
+    if(isAgain){
+        console.log(343,videoAreaNewLRmargin)
+        if(videoAreaNewHeight)EXvideoarea.style.height = videoAreaNewHeight+'px';
+        if(videoAreaNewWidth)EXvideoarea.style.width = videoAreaNewWidth+'px';
+        else EXvideoarea.style.width = '';
+        if(videoAreaNewLRmargin)EXvideoarea.style.margin = `0 ${videoAreaNewLRmargin}px`;
+        else EXvideoarea.style.margin = '';
+    }
+    if (!isAgain) resizeAgainTimer = setTimeout(onresize, 200, true);
+}
+function onresize_old2(isAgain){
     console.log("onresize")
     const video = getElm.getVideo();
     if (getInfo.determineUrl() !== getInfo.URL_ONAIR || !EXvideoarea || !video)
@@ -2435,7 +2555,7 @@ function putPopacti() {
         $('#popacti').css('display', 'block');
     }
 }
-function setComeColorChanged() {
+function setComeColorChanged() { // need fix
     //console.log("setComeColorChanged");
     var p = [];
     var jo = $('#CommentColorSettings input[type="range"]');
@@ -4865,6 +4985,8 @@ function setOptionHead() {
     if (selCome) {
         t += selCome + '{background-color:transparent;}';
         t += selCome + '>*{background-color:transparent;}';
+        t += selCome + ' .com-tv-CommentArea{background-color:transparent;}';
+        t += selCome + ` .com-tv-FeedSidePanel__header{background-color:${bc}}`;
     }
 
     selComesend = dl.getElementSingleSelector(EXcomesend);
@@ -5851,13 +5973,14 @@ function usereventFCclick() {
         if (!comeRefreshing) {
             pophideSelector(3, 0);
         }
-        if (settings.isResizeScreen) {
-            setTimeout(function() {
-                $(EXvideoarea)
-                    .width(window.innerWidth)
-                    .height(window.innerHeight);
-            }, 500); // コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
-        }
+        // if (settings.isResizeScreen) {
+        //     setTimeout(function() {
+        //         $(EXvideoarea)
+        //             .width(window.innerWidth)
+        //             .height(window.innerHeight);
+        //     }, 500); // コメ欄を開くと公式が映像サイズを縮めてしまうので広げ直す
+        // }
+        onresize();
         // コメ欄が開かれるので全画面・音量ボタンずらす(黒帯トリミングの場合は不要)
         // if (!(settings.isComeTriming && settings.isSureReadComment)) {
             EXfullscr.style.right = commentListWidth + fullscrRight + 'px';
