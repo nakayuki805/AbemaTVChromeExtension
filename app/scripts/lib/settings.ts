@@ -42,7 +42,7 @@ export function getStorage(keyObj?: string | StorageItems | string[] | null) {
 export function setStorage(obj: StorageItems) {
     return new Promise(resolve => {
         chrome.storage.local.set(obj, () => {
-            resolve();
+            resolve(true);
         });
     });
 }

@@ -2581,15 +2581,18 @@ function toggleCommentList() {
     console.log('comevisiset toggleCommentList');
     //    var jo=$(EXcomelist).parent();
     var jo = $(EXcomelist).parent();
+    var jhead = $('.com-tv-FeedSidePanel__header')
     //display:noneだと崩れるので変更
     //重なっていて下にあるfooterの音量ボタン等を使用できるようにpointer-eventsを利用
     var jv = jo.css('visibility');
     if (jv != 'hidden') {
         jo.css('visibility', 'hidden').css('opacity', 0);
+        jhead.css('visibility', 'hidden').css('opacity', 0);
         $(EXcome).css('pointer-events', 'none');
         $(EXcomesend).css('pointer-events', 'auto');
     } else {
         jo.css('visibility', '').css('opacity', '');
+        jhead.css('visibility', '').css('opacity', '');
         $(EXcome).css('pointer-events', '');
         $(EXcomesend).css('pointer-events', '');
     }
@@ -2663,8 +2666,9 @@ function pophideElement(inp) {
         EXfoot.style.width = "";
     }
     if (inp.side == 1) {
-        EXsidebtn.style.transform = 'translateY(-50%)';
-        EXsidebtn.style.visibility = 'visible';
+        // EXsidebtn.style.transform = 'translateY(-50%)';
+        // EXsidebtn.style.visibility = 'visible';
+        EXsidebtn.style.visibility = '';
         if (
             settings.isSureReadComment &&
             settings.isCommentFormWithSide &&
@@ -2674,15 +2678,17 @@ function pophideElement(inp) {
             if (isComeInpFocus) EXcomesendinp.focus();
         }
     } else if (inp.side == -1) {
-        EXsidebtn.style.transform = 'translate(100%, -50%)';
-        EXsidebtn.style.visibility = 'hidden';
+        // EXsidebtn.style.transform = 'translate(100%, -50%)';
+        // EXsidebtn.style.visibility = 'hidden';
+        EXsidebtn.style.visibility = 'none';
         if (settings.isSureReadComment && settings.isCommentFormWithSide) {
             $(EXcomesend).hide();
             isComeInpFocus =
                 EXcomesendinp == document.activeElement ? true : false;
         }
     } else if (inp.side == 0) {
-        EXsidebtn.style.transform = '';
+        // EXsidebtn.style.transform = '';
+        // EXsidebtn.style.visibility = '';
         EXsidebtn.style.visibility = '';
     }
     if (inp.programinfo == 1) {
@@ -3300,7 +3306,13 @@ function getSideBtnElement(returnSingleSelector) {
         console.log('?sidebtn (!arrowDown)');
         return null;
     }
-    const bothParent = dl.filter(dl.parents(arrowUp),{containElement:arrowDown})[0];
+    const bothParents = dl.filter(dl.parents(arrowUp),{containElement:arrowDown});
+    console.log(arrowUp,arrowDown,bothParents)
+    if(bothParents.length < 6){
+        console.log("?sidebtn (bothParents.length<6)");
+        return null;
+    }
+    const bothParent = bothParents[0];
     return returnSingleSelector ? dl.getElementSingleSelector(bothParent) : bothParent;
 }
 function getInfoElement(returnSingleSelector) {
@@ -3363,12 +3375,13 @@ function getComeFormElement(sw, returnSingleSelector) {
         let p = e.parentElement;
         let b = p.getBoundingClientRect();
         while (
-            p.tagName.toUpperCase() != 'BODY' &&
+            (p.tagName.toUpperCase() != 'BODY' &&
             b.left >=
                 Math.min(
                     (window.innerWidth * 2) / 3,
                     window.innerWidth - (320 + 10)
-                )
+                )) ||
+                (b.height==0&&b.width==0)
         ) {
             e = p;
             p = e.parentElement;
@@ -5233,11 +5246,12 @@ function setOptionHead() {
         selSide = alt ? '.v3_v5' : '';
     }
     if (selSide) {
-        t += selSide + '{transform:translateY(-50%);opacity:0.5}';
+        // t += selSide + '{transform:translateY(-50%);opacity:0.5}';
+        t += selSide + '{opacity:0.5}';
     }
     // 右ボタンのz-indexを変える(元4)
     selSideWrapper = ".c-tv-NowOnAirContainer__remote-controller";
-    t += selSideWrapper + '{z-index:16;}';
+    t += selSideWrapper + '{z-index:16;height: calc( 100% - 110px );}'; // 音量アイコンと被らないよう高さ縮める
 
     selChli = dl.getElementSingleSelector(EXchli);
     if ($(selChli).length != 1) {
@@ -5736,11 +5750,13 @@ function waitforResize(retrycount, jo, w) {
 }
 function usereventVolMousemove() {
     if (!EXsidebtn) return;
-    $(EXsidebtn).css('transform', 'translate(50%,-50%)');
+    // $(EXsidebtn).css('transform', 'translate(50%,-50%)');
+    EXsidebtn.style.visibility = '';
 }
 function usereventVolMouseout() {
     if (!EXsidebtn) return;
-    $(EXsidebtn).css('transform', 'translate(0px,-50%)');
+    // $(EXsidebtn).css('transform', 'translate(0px,-50%)');
+    EXsidebtn.style.visibility = 'none';
 }
 function usereventVolClick() {
     setTimeout(function() {

@@ -152,7 +152,8 @@ export function getVolElement() {
     return dl.parentsFilterLast(svg, {
         left23r: true,
         top23d: true,
-        notBodyParent: true
+        notBodyParent: true,
+        filter: e=>{const svgs=e.getElementsByTagName('svg');return svgs?.length==1;}
     });
 }
 

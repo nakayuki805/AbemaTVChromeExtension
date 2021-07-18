@@ -3,10 +3,12 @@ import gulpif from 'gulp-if'
 import gutil from 'gulp-util'
 import sourcemaps from 'gulp-sourcemaps'
 import less from 'gulp-less'
-import sass from 'gulp-sass'
+import gulpSass from 'gulp-sass'
 import cleanCSS from 'gulp-clean-css'
 import livereload from 'gulp-livereload'
 import args from './lib/args'
+
+var sass = gulpSass(require('sass'));
 
 gulp.task('styles:css', function () {
   return gulp.src('app/styles/*.css')

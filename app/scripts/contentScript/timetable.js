@@ -290,7 +290,7 @@ function getTTProgramTimeClasses() {
     return ret;
 }
 function allowChannelNumMaker() {
-    // console.log("allowChannelNumMaker");
+    console.log("allowChannelNumMaker",allowChannelNames);
     if (allowChannelNames.length === 0) return 2;
     let u = 'https://abema.tv/timetable/channels/';
     let eaHead = $(EXTThead).children('a');
@@ -554,13 +554,13 @@ export function waitforloadtimetable(url) {
             b.left - 226 < window.innerWidth / 4 &&
             b.height > window.innerHeight / 2 &&
             $(e).children('div').length > 5 &&
-            $(e).find('div>div>article').length > 0
+            $(e).find('div>div>button').length > 0
         )
             return e;
     });
     if (j.length >= 0) EXTTbody = j[0];
     else if (alt) {
-        j = $('.pi_pk');
+        j = $('.com-timetable-TimeTableListTimeTable-wrapper');
         if (j.length > 0) EXTTbody = j[0];
     }
     if (!EXTTbody) {
@@ -1023,7 +1023,7 @@ function PlaybuttonEditor() {
     // 一つのチャンネルの一日分番組divを取得しそのarticle>button>divのclass名が仲間はずれのものが放送中のclass
     for (let i = 0, cls, flg = true; i < fisrtChDivs.length; i++) {
         cls = $(fisrtChDivs[i])
-            .find('article>button>div')
+            .find('button')
             .attr('class');
         flg = true;
         for (let j = 0; j < clsArr.length; j++) {
@@ -1036,6 +1036,7 @@ function PlaybuttonEditor() {
             clsArr.push([cls, 1]);
         }
     }
+    // console.log(clsArr);
     if (clsArr.length === 3 && clsArr[1][1] === 1) {
         presentClass = clsArr[1][0];
     } else if (clsArr.length === 2) {
@@ -1046,13 +1047,15 @@ function PlaybuttonEditor() {
         console.warn('?presentClass failed');
         return;
     }
+    // console.log(presentClass)
     let presentSelector = '.' + presentClass.split(' ').join('.');
     // 放送中の緑枠の移動に合わせて再生ボタンを削除、設置する
     let p = $(presentSelector); // 放送中の緑色枠
+    // console.log(p,presentSelector)
     let b = $('.playbutton');
     let c = $(EXTThead).children(); // channel link
     let cr = /^https:\/\/abema\.tv\/timetable\/channels\/(.+)$/;
-    let dr = /^https:\/\/abema\.tv\/timetable(?:\/dates\/.+)?$/;
+    let dr = /^https:\/\/abema\.tv\/timetable(?:\?.+|\/dates\/.+)?$/;
     let umc = location.href.match(cr);
     let umd = location.href.match(dr);
     let titleClass = getTTProgramTitleClass();
@@ -1068,7 +1071,8 @@ function PlaybuttonEditor() {
         }
     }
     for (let i = 0, j, q, a, u, iumc; i < p.length; i++) {
-        q = p.eq(i);
+        q = p.eq(i);// 放送中番組button要素
+        const ttcolRect = Array.from(EXTTbody.children).filter(e=>e.contains(q[0]))[0].getBoundingClientRect();
         if (umc && umc.length > 1 && umc[1].length > 0) {
             // チャンネル別番組表ならボタンのリンク先はURLから取得
             u = '/now-on-air/' + umc[1];
@@ -1098,17 +1102,20 @@ function PlaybuttonEditor() {
                 .is('.playbutton')
         ) {
             // 緑枠にボタンがなければ設置
-            q.find('.' + titleClass)
-                .parents('p')
-                .css('width', '86px');
+            const presentRect = q[0].getBoundingClientRect();
+            const pbTop = presentRect.top-ttcolRect.top+4;
+            const pbLeft = presentRect.left-ttcolRect.left+presentRect.width-24-4;
+            // console.log(presentRect.left,pbLeft,q[0])
+            q.children('div').children('div').children('div')
+                .css('width', 'calc(100% - 24px)');
             a =
                 '<a href="javascript:location.href=\'https://abema.tv' +
                 u +
                 '\';" title="放送中画面へ移動">';
             a +=
-                '<div class="playbutton" style="position:absolute;right:30px;top:4px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">';
+                `<div class="playbutton" style="position:absolute;left:${pbLeft}px;top:${pbTop}px;width:24px;height:24px;border:1px solid #6fb900;border-radius:50%;">`;
             a +=
-                '<svg width="10" height="14" style="fill:#6fb900;transform:translate(1px,3px)">'; // 以前は7px,3px
+                '<svg width="20" height="14" style="fill:#6fb900;transform:translate(1px,3px)">'; // 以前は7px,3px
             a += '<use xlink:href="/images/icons/playback.svg#svg-body">';
             a += '</use></svg></div>';
             a += '</a>';
@@ -1126,9 +1133,10 @@ function PlaybuttonEditor() {
                     e.stopImmediatePropagation();
                     // 再生ボタンのある番組をクリックして右詳細の番組画像をクリック
                     // console.log(e.currentTarget);
+                    console.log(e.currentTarget,e);
                     dl.clickElement(
                         $(e.currentTarget)
-                            .parents('button')
+                            .parents('a').siblings('button')
                             .get(0)
                     );
                     setTimeout(

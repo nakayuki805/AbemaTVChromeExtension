@@ -295,6 +295,12 @@ body {
     opacity: 0.8;
     cursor: pointer;
     margin-top: 1px;
+    top: calc(50% + 104px);
+    right: 12px;
+    border-radius: 4px;
+}
+.ext-sideButton-pip {
+    top: calc(50% + 124px);
 }
 .ext-sideButton-icon {
     margin: auto;

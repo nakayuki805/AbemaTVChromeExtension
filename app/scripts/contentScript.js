@@ -231,6 +231,7 @@ function URLPatternSwitch() {
 
     switch (urlType) {
         case getInfo.URL_SLOTPAGE:
+            console.log("URL_SLOTPAGE");
             //番組個別ページ
             notifyButton.putNotifyButton(settings.notifySeconds, url);
             onair.onairCleaner();
@@ -238,6 +239,7 @@ function URLPatternSwitch() {
             replayComment.prepare();
             break;
         case getInfo.URL_DATETABLE:
+            console.log("URL_DATETABLE");
             //日付別番組表
             //番組表(チャンネル個別ではない)のとき
             //番組表に再生ボタンを追加する機能があるため、ここにあった放送画面へのリンクは廃止
@@ -246,6 +248,7 @@ function URLPatternSwitch() {
             TT.waitforloadtimetable(url);
             break;
         case getInfo.URL_CHANNELTABLE:
+            console.log("URL_CHANNELTABLE");
             //チャンネル別番組表
             onair.onairCleaner();
             delaysetNotOA();
@@ -256,12 +259,14 @@ function URLPatternSwitch() {
             onair.onairfunc();
             break;
         case getInfo.URL_SEARCH:
+            console.log("URL_SEARCH");
             //番組検索結果(放送予定の番組)
             onair.onairCleaner();
             delaysetNotOA();
             notifyButton.putSerachNotifyButtons(settings.notifySeconds);
             break;
         case getInfo.URL_RESERVATION:
+            console.log("URL_RESERVATION");
             //公式の視聴予約一覧
             onair.onairCleaner();
             delaysetNotOA();
@@ -273,7 +278,7 @@ function URLPatternSwitch() {
                     clearInterval(checkListInterval);
                     return;
                 }
-                var count = $('a[role=listitem]').length;
+                var count = $('ul>li>a button').length; // 通知リストのアイテム数を削除ボタンの数で取得
                 if (itemCount < count) {
                     notifyButton.putReminderNotifyButtons(
                         settings.notifySeconds

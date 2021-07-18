@@ -1,7 +1,7 @@
 import * as getElm from './getAbemaElement';
 import * as gdl from '../lib/generic-dom-lib';
 
-export function createPIPbutton(EXside) {
+export function createPIPbutton(EXsidebtn) {
     const PIPvideoObserver = new MutationObserver(mutations => {
         //console.log(mutations)
         if (
@@ -41,7 +41,10 @@ export function createPIPbutton(EXside) {
         }
     });
     if (!document.pictureInPictureEnabled) return;
-    if (!EXside) {
+    if(!EXsidebtn){
+        EXsidebtn = document.getElementsByClassName("ext_abm-sideButton")?.[0];
+    }
+    if (!EXsidebtn) {
         console.log('createPIPbutton retry');
         setTimeout(createPIPbutton, 1000);
         return;
@@ -51,6 +54,7 @@ export function createPIPbutton(EXside) {
         var PIPbutton = document.createElement('div');
         PIPbutton.id = 'PIPbutton';
         PIPbutton.classList.add('ext-sideButton');
+        PIPbutton.classList.add('ext-sideButton-pip');
         PIPbutton.setAttribute(
             'title',
             'ピクチャーインピクチャーモードの切り替え(拡張機能)'
@@ -61,7 +65,7 @@ export function createPIPbutton(EXside) {
                 chrome.extension.getURL('/images/pip.svg') +
                 "' alt='PIP' class='ext-sideButton-icon'>"
         );
-        EXside.appendChild(PIPbutton);
+        EXsidebtn.appendChild(PIPbutton);
         document
             .getElementById('PIPbutton')
             .addEventListener('click', function() {

@@ -90,15 +90,14 @@ function injection_urlChanged() {
 // }
 
 function inj_delaysetComment() {
-    console.log('inj_delayset');
-    let comelistInstance = null;
+    let comelistProps = null;
     const comelist = document.getElementsByClassName('ext_abm-comelist')[0];
     const come = document.getElementsByClassName('ext_abm-come')[0];
     if (comelist) {
-        comelistInstance = inj_findReact(comelist.parentElement as HTMLElement);
+        comelistProps = inj_findReact(comelist.parentElement as HTMLElement);
     }
-    if (comelistInstance !== null) {
-        // console.log('comelistInstance:', comelistInstance);
+    if (comelistProps !== null) {
+        // console.log('comelistProps:', comelistProps);
         inj_EXcomelist = comelist as HTMLElement;
         inj_EXcome = come as HTMLElement;
         inj_commentObserver.disconnect();
@@ -108,23 +107,27 @@ function inj_delaysetComment() {
             // なぜか存在しないrefs.animatableに対してremoveEventListenerしようとするのでダミーの要素いれておく
             // inj_findReact(inj_EXcomelist.parentElement).refs.animatable = document.createElement('div');
         }, 1000);
+        console.log('inj_delayset ok');
     } else {
         console.log('waitng inj_delaysetComment()');
         setTimeout(inj_delaysetComment, 1000);
     }
 }
 function inj_onCommentChange(mutations: MutationRecord[]) {
+    setTimeout(inj_onCommentChangeDelay,100,mutations);
+}
+function inj_onCommentChangeDelay(mutations: MutationRecord[]) {
     // 新着animationは廃止されたようなので無いものとしてコメントアウトされている(今後復活したときのために残しておく)
     const instanceElement = inj_EXcomelist.parentElement;
     if (!instanceElement || !instanceElement.parentElement) {
         console.warn('inj_occ !instanceElement');
         return;
     }
-    const comelistInstance = inj_findReact(instanceElement);
-    // console.log('inj_occ comelistInstance:', comelistInstance);
-    const newCommentCount = 0; // comelistInstance.props.newCommentCount; // animationのコメ数
-    let hasCommentAnimation = false; // comelistInstance.props.hasCommentAnimation;
-    const comments = comelistInstance.props.comments;
+    const comelistProps = inj_findReact(instanceElement);
+    // console.log('inj_occ comelistProps:', comelistProps);
+    const newCommentCount = 0; // comelistProps.props.newCommentCount; // animationのコメ数
+    let hasCommentAnimation = false; // comelistProps.props.hasCommentAnimation;
+    const comments = comelistProps.comments;
     // console.log(
     //     'inj_occ newComeC,hasComeAni,comeli[0]',
     //     newCommentCount,
@@ -161,12 +164,18 @@ function inj_onCommentChange(mutations: MutationRecord[]) {
     // }
     for (let i = hasCommentAnimation ? 1 : 0; i < commentElements.length; i++) {
         if (!commentElements[i].getAttribute('data-ext-id')) {
+            const commentElement = commentElements[i];
             const comment =
                 comments[i + newCommentCount - (hasCommentAnimation ? 1 : 0)];
+            const htmlCommentText = commentElement.getElementsByTagName("span")[0].innerText;
             if (!comment) {
+                // commentElement.setAttribute('data-ext-comment-data', "false");
                 continue;
             }
-            const commentElement = commentElements[i];
+            if(comment.message!==htmlCommentText){
+                console.log("comment text not match. comment[]:"+comment.message+" html:"+htmlCommentText);
+                continue;
+            }
             commentElement.setAttribute('data-ext-message', comment.message);
             commentElement.setAttribute(
                 'data-ext-createdatms',
@@ -175,15 +184,16 @@ function inj_onCommentChange(mutations: MutationRecord[]) {
             commentElement.setAttribute('data-ext-id', comment.id);
             commentElement.setAttribute('data-ext-userid', comment.userId);
             commentElement.setAttribute('data-ext-isowner', comment.isOwner);
+            // commentElement.setAttribute('data-ext-comment-data', "true");
         }
     }
 }
 
 function inj_findReact(comelist: AnyPropertyElement) {
     for (let key in comelist) {
-        if (key.startsWith('__reactInternalInstance$')) {
-            if (comelist[key].child && comelist[key].child.stateNode) {
-                return comelist[key].child.stateNode;
+        if (key.startsWith('__reactFiber$')) {
+            if (comelist[key].child && comelist[key].child.pendingProps) {
+                return comelist[key].child.pendingProps;
             }
         }
     }
